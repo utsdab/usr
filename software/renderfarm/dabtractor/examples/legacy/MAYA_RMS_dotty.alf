@@ -1,0 +1,29 @@
+##AlfredToDo 3.0
+
+Job -title {MAYA_RMS_dotty} -comment {#RenderMan for Maya } -dirmaps {
+
+    { {mayabatch} {maya} NFS } \
+    { {/Users/Shared/UTS_Jobs} {/dabrender/mattg_testing_farm/mattg} NFS}
+
+    } -envkey {rms-19.0-maya-2015} \
+      -pbias 1 \
+      -crews {} \
+      -tags {} \
+      -service {} \
+      -whendone {} \
+      -whenerror {} \
+      -serialsubtasks 1 -subtasks {
+        Task -title { Job } -serialsubtasks 1 -subtasks {
+	    Task -title { Frames 1-100 } -serialsubtasks 0 -subtasks {
+	        Task -title { Render Frames 1-100 } -cmds {
+		    RemoteCmd {printenv} -service {RfMRender}
+		    RemoteCmd {{%D(mayabatch)} {-batch} {-command} {renderManBatchRenderScript(1,1,100,1,0)} \
+                        {-file} {%D(/Users/Shared/UTS_Jobs/TESTING_renderfarm/light_mattg/maya/scenes/dottyRMS_AOVtest.0042.ma)} \
+                        {-proj} {%D(/Users/Shared/UTS_Jobs/TESTING_renderfarm/light_mattg/maya)}} -service {RfMRender}
+                }
+	    }
+        }
+        Task -title { ffmpeg make proxy } -cmds {
+	    RemoteCmd {ffmpeg -help} -service {RfMRender}	
+        }
+    }

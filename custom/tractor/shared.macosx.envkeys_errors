@@ -1,0 +1,93 @@
+[
+    {
+        "keys": ["default"],
+        "environment": {
+                "RMS_SCRIPT_PATHS": "/Volumes/dabrender/usr/pixar/configs",
+                "RDIR": "/Volumes/dabrender/usr/pixar/configs",
+		"PATH": "/usr/local/bin:/Volumes/dabrender/usr/bin:/usr/local/dabanim/bin:$PATH",
+                "PIXAR_LICENSE_FILE":"/Volumes/dabrender/usr/pixar/pixar.license",
+                "MAYA_DISABLE_CIP" :"1",
+                "DEBUG_EnvKey_default_osx"  : "from_shared.macosx.envkeys"
+        },
+       "envhandler": "default"
+    },
+    {
+        "keys": ["rms-*-maya-*"], 
+        "environment": {
+            "DEBUG_EnvKey_rms_maya" : "from_shared.macosx.envkeys",
+            "RMSTREE":             "/Applications/Pixar/RenderManStudio-$TR_ENV_RMSVER-maya$TR_ENV_MAYAVER",
+            "RMANTREE":            "/Applications/Pixar/RenderManProServer-$TR_ENV_RMSVER",
+            "MAYA_LOCATION":       "$TR_ENV_MAYALOCATION/Maya.app/Contents",
+            "MAYA_MODULE_PATH":    "$DABRENDERPATH/usr/custom/maya/modules_central:$MAYA_MODULE_PATH",
+            "MAYA_MODULE_PATH":    "$RMSTREE/etc:$MAYA_MODULE_PATH",
+            "MAYA_PLUG_IN_PATH":   "$TR_ENV_MAYALOCATION/plug-ins:$MAYA_PLUG_IN_PATH",
+            "MAYA_PLUG_IN_PATH":   "$RMSTREE/plug-ins:$MAYA_PLUG_IN_PATH",
+            "MAYA_SCRIPT_PATH":    "$TR_ENV_MAYALOCATION/scripts:$MAYA_SCRIPT_PATH",
+            "MAYA_SCRIPT_PATH":    "$DABRENDERPATH/usr/custom/maya/scripts_central:$MAYA_SCRIPT_PATH",
+            "MAYA_SCRIPT_PATH":    "$RMSTREE/scripts:$MAYA_SCRIPT_PATH",
+            "MAYA_DISABLE_CIP" :   "1",
+            "PATH":                "$RMSTREE/bin:$PATH",
+            "PATH":                "$MAYA_LOCATION/bin:$PATH",
+            "PATH":                "/usr/aw/COM/bin:$PATH",
+            "PATH":                "/usr/aw/COM/etc:$PATH",
+            "PATH":                "$RMANTREE/bin:$PATH",
+            "PYTHONPATH":          "$RMSTREE/scripts:$PYTHONPATH",
+            "PYTHONPATH":          "$RMANTREE/bin:$PYTHONPATH",
+            "PYTHONPATH":          "$DABRENDERPATH/usr/lib/python:$PYTHONPATH",
+            "DYLD_LIBRARY_PATH":   "$RMANTREE/lib:$DYLD_LIBRARY_PATH",
+            "DYLD_LIBRARY_PATH":   "$MAYA_LOCATION/MacOS:$DYLD_LIBRARY_PATH",
+            "TMPDIR":              "/var/tmp"
+        },
+        "envhandler": "rmshandler"
+
+    },
+    {
+        "keys": ["prman-*"],
+        "environment": {
+            "APPBASEDIR":          "/Applications/Pixar:/Applications/Pixar/RenderMan.app/Versions",
+            "RMANTREE":            "$TR_ENV_RMANTREE",
+            "PATH":                "$RMANTREE/bin:$PATH"
+        },
+        "envhandler": "rmanhandler"
+    },
+    {
+        "keys": ["rmantree=*"],
+        "environment": {
+            "RMANTREE":            "$TR_ENV_RMANTREE",
+            "PATH":                "$RMANTREE/bin:$PATH",
+       },
+       "envhandler": "rmantreehandler",
+       "rewritedict": {}
+    },
+    {
+        "keys": ["rmstree=*"],
+        "environment": {
+            "RMSTREE":             "$TR_ENV_RMSTREE",
+            "PATH":                "$RMSTREE/bin:$PATH",
+        },
+        "envhandler": "rmstreehandler",
+        "rewritedict": {}
+    },
+    {
+        "keys": ["maya*"], 
+        "environment": {
+            "DEBUG_EnvKey_maya":   "from_shared.macosx.envkeys",            
+            "MAYA_LOCATION":       "$TR_ENV_MAYALOCATION/Maya.app/Contents",
+	    "DYLD_LIBRARY_PATH":   "$MAYA_LOCATION/MacOS:$DYLD_LIBRARY_PATH", 
+	    "DYLD_FRAMEWORK_PATH": "$MAYA_LOCATION/Frameworks", 
+            "MAYA_PLUG_IN_PATH":   "$MAYA_LOCATION/plug-ins:$MAYA_PLUG_IN_PATH",
+            "MAYA_MODULE_PATH":    "$RMSTREE/etc:$MAYA_MODULE_PATH",
+            "MAYA_SCRIPT_PATH":    "$DABRENDERPATH/usr/custom/maya/scripts_central:$MAYA_SCRIPT_PATH",
+            "MAYA_SCRIPT_PATH":    "$MAYA_LOCATION/scripts:$MAYA_SCRIPT_PATH",
+            "PATH":                "$MAYA_LOCATION/bin:$PATH",
+            "PATH":                "$DABRENDERPATH/usr/bin:$PATH",
+"MAYA_DISABLE_CIP" :"1",
+            "TMPDIR":"/var/tmp"
+        },
+        "envhandler": "mayahandler"
+    },
+    {
+        "keys": ["setenv *"],
+        "envhandler": "setenvhandler"
+    }
+]

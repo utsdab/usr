@@ -1,0 +1,406 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Reference &mdash; Bokeh v1.4 Documentationrtd</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  
+  
+
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:'./',
+        VERSION:'1.4.2',
+        COLLAPSE_INDEX:false,
+        FILE_SUFFIX:'.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+    <link rel="top" title="Bokeh v1.4 Documentationrtd" href="index.html"/>
+        <link rel="next" title="Change Log" href="changelog.html"/>
+        <link rel="prev" title="Quick Start" href="quickstart.html"/> 
+
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="icon icon-home">
+			Bokeh v1.4
+		</a>
+        <form id ="rtd-search-form" class="wy-form" action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search docs" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix">
+        
+        
+            <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="preamble.html">Preamble</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="preamble.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preamble.html#copyright">Copyright</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#system-requirements">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#plugin-installation">Plugin Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#environment-variables">Environment Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="licensing.html">Licensing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="licensing.html#requesting-a-license">Requesting A License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="licensing.html#node-locked-licenses">Node Locked Licenses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="licensing.html#floating-licenses">Floating Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#example-workflow">Example Workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#inputs">Inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bokeh-tab">Bokeh Tab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lens-tab">Lens Tab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optical-artifacts-tab">Optical Artifacts Tab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#kernel-tab">Kernel Tab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#corrective-slices-tab">Corrective Slices Tab</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Change Log</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id1">1.4.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id2">1.4.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id3">1.4.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id4">1.3.7</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id5">1.3.6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id6">1.3.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id7">1.3.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id8">1.3.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id9">1.3.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id10">1.3.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id11">1.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id12">1.2.11</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id13">1.2.10</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id14">1.2.7</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id15">1.2.6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id16">1.2.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id17">1.2.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id18">1.2.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id19">1.2.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id20">1.2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id21">1.1.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id22">1.1.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id23">1.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id24">1.0.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id25">1.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id26">0.9.10</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id27">0.9.9</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id28">0.9.8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id29">0.9.7</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id30">0.9.6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id31">0.9.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id32">0.9.4</a></li>
+</ul>
+</li>
+</ul>
+
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top">
+        <i data-toggle="wy-nav-top" class="icon icon-reorder"></i>
+        <a href="index.html">Bokeh v1.4</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <ul class="wy-breadcrumbs">
+  <li><a href="index.html">Docs</a> &raquo;</li>
+  <li><a href="">Reference</a></li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+</ul>
+<hr/>
+
+          
+  <div class="section" id="reference">
+<h1>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="inputs">
+<h2>Inputs<a class="headerlink" href="#inputs" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="input">
+<span id="index-0"></span><h3>Input<a class="headerlink" href="#input" title="Permalink to this headline">¶</a></h3>
+<p>The input image, this can include any number of channels and layers - if true Z defocus is required one of the channels should contain the Z depth information.</p>
+</div>
+<div class="section" id="kernel">
+<span id="index-1"></span><h3>Kernel<a class="headerlink" href="#kernel" title="Permalink to this headline">¶</a></h3>
+<p>An optional input image that represents the shape of the defocus kernel.  Although any image can be used it is most effective when reference stills have been created for the lens in question.  This is usually achieved by rolling a few frames of
+a pin light shining directly into the lens in question.</p>
+</div>
+<div class="section" id="camera">
+<span id="index-2"></span><h3>Camera<a class="headerlink" href="#camera" title="Permalink to this headline">¶</a></h3>
+<p>An optional Nuke 3d camera that is used to override the focal plane, aperture etc. of the Bokeh node.</p>
+</div>
+<div class="section" id="deep-input">
+<span id="index-3"></span><h3>Deep Input<a class="headerlink" href="#deep-input" title="Permalink to this headline">¶</a></h3>
+<p>An optional Deep Data input, this can be just deep opacity values or full RGBA data.  Although you&#8217;ve attached a deep input the plug-in still requires a main input, if you have just deep data it&#8217;s recommended that you use a DeepToImage and use the output of that.</p>
+</div>
+<div class="section" id="mattes">
+<span id="index-4"></span><h3>Mattes<a class="headerlink" href="#mattes" title="Permalink to this headline">¶</a></h3>
+<p>An optional input that can be used to control various parameters with an image matte.</p>
+</div>
+</div>
+<div class="section" id="bokeh-tab">
+<h2>Bokeh Tab<a class="headerlink" href="#bokeh-tab" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/bokehtab.png" src="_images/bokehtab.png" />
+<div class="section" id="bokeh-channels">
+<span id="index-5"></span><h3>Bokeh Channels<a class="headerlink" href="#bokeh-channels" title="Permalink to this headline">¶</a></h3>
+<p>Used to select the desired channels/layers to apply the defocus effect too.</p>
+</div>
+<div class="section" id="depth-channel">
+<span id="index-6"></span><h3>Depth Channel<a class="headerlink" href="#depth-channel" title="Permalink to this headline">¶</a></h3>
+<p>Used to select the desired Z channel, by default this is depth but any can be used.</p>
+</div>
+<div class="section" id="output-type">
+<span id="index-7"></span><h3>Output Type<a class="headerlink" href="#output-type" title="Permalink to this headline">¶</a></h3>
+<p>Varying output types:</p>
+<ul class="simple">
+<li><strong>Defocused Image</strong> - the defocused image</li>
+<li><strong>Lens Bloom</strong> - just the lens bloom, lens blooming has to be on</li>
+<li><strong>Focal Distance Visualization</strong> - preview the actual focus distance and in/out of focus areas</li>
+<li><strong>Filter Shape</strong> - a preview of the shape used for the kernel</li>
+<li><strong>Focus Matte</strong> - mattes for the in/out of focus areas</li>
+</ul>
+</div>
+<div class="section" id="focus-region-output">
+<span id="index-8"></span><h3>Focus Region Output<a class="headerlink" href="#focus-region-output" title="Permalink to this headline">¶</a></h3>
+<p>Used to limit the rendered output to all, front or back focus.</p>
+</div>
+<div class="section" id="multiplier-front-multiplier-back-multiplier">
+<span id="index-9"></span><h3>Multiplier, Front Multiplier, Back Multiplier<a class="headerlink" href="#multiplier-front-multiplier-back-multiplier" title="Permalink to this headline">¶</a></h3>
+<p>Used to control the scale of the defocus effect, multiplier is ignored when real world lens has been selected but both front and back are utilized.</p>
+</div>
+<div class="section" id="depth-style">
+<span id="index-10"></span><h3>Depth Style<a class="headerlink" href="#depth-style" title="Permalink to this headline">¶</a></h3>
+<p>Depth values are stored in a variety of ways, this lets you select how Bokeh interporates z values of the input image ( this is not relevant for deep inputs ).</p>
+<ul class="simple">
+<li><strong>Real</strong> - real world values, leave them as they are</li>
+<li><strong>1/z</strong> - inverted values, Bokeh will use the reciprocal</li>
+</ul>
+</div>
+<div class="section" id="focal-plane">
+<span id="index-11"></span><h3>Focal Plane<a class="headerlink" href="#focal-plane" title="Permalink to this headline">¶</a></h3>
+<p>The plane in focus.</p>
+</div>
+<div class="section" id="focus-region-size">
+<span id="index-12"></span><h3>Focus Region Size<a class="headerlink" href="#focus-region-size" title="Permalink to this headline">¶</a></h3>
+<p>Only available when real world lens is turned off, this expands the region in focus.</p>
+</div>
+<div class="section" id="focus-region-falloff">
+<span id="index-13"></span><h3>Focus Region Falloff<a class="headerlink" href="#focus-region-falloff" title="Permalink to this headline">¶</a></h3>
+<p>Controls how the effect falls off over the depth.</p>
+</div>
+<div class="section" id="defocus-matte-channel">
+<span id="index-14"></span><h3>Defocus Matte Channel<a class="headerlink" href="#defocus-matte-channel" title="Permalink to this headline">¶</a></h3>
+<p>An optional matte channel ( supplied via the Mattes input ) to modulate the defocus amount</p>
+</div>
+<div class="section" id="normalize-visualization">
+<span id="index-15"></span><h3>Normalize Visualization<a class="headerlink" href="#normalize-visualization" title="Permalink to this headline">¶</a></h3>
+<p>Used to normalize the output values when Visualize Depth is used</p>
+</div>
+<div class="section" id="integrate-deep-front-and-back-separately">
+<h3>Integrate Deep Front and Back Separately<a class="headerlink" href="#integrate-deep-front-and-back-separately" title="Permalink to this headline">¶</a></h3>
+<p>In some cases artifacts can arise from integrating all the slices together, this will separate the front and back focus areas and integrate them separate to help avoid these.</p>
+</div>
+</div>
+<div class="section" id="lens-tab">
+<h2>Lens Tab<a class="headerlink" href="#lens-tab" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/lenstab.png" src="_images/lenstab.png" />
+<div class="section" id="real-world-lens-simulation">
+<span id="index-16"></span><h3>Real World Lens Simulation<a class="headerlink" href="#real-world-lens-simulation" title="Permalink to this headline">¶</a></h3>
+<p>Turning on Real World Lens Simulation gives you control over the focal length, f-stop and other parameters required to match physical lens characteristics.</p>
+</div>
+<div class="section" id="focal-length">
+<span id="index-17"></span><h3>Focal Length<a class="headerlink" href="#focal-length" title="Permalink to this headline">¶</a></h3>
+<p>Focal length of the lens.</p>
+</div>
+<div class="section" id="aperture">
+<span id="index-18"></span><h3>Aperture<a class="headerlink" href="#aperture" title="Permalink to this headline">¶</a></h3>
+<p>Aperture or f-stop of the lens.</p>
+</div>
+<div class="section" id="world-scale">
+<span id="index-19"></span><h3>World Scale<a class="headerlink" href="#world-scale" title="Permalink to this headline">¶</a></h3>
+<p>The scale of the world units, you should set this to the scale provided by CG renders - Maya generally defaults to cm.</p>
+</div>
+<div class="section" id="world-scale-multiplier">
+<span id="index-20"></span><h3>World Scale Multiplier<a class="headerlink" href="#world-scale-multiplier" title="Permalink to this headline">¶</a></h3>
+<p>This is used as a multiplier on top of the world scale, as an example - if your scene units are based on 10cms then you can set the World Scale to centimeters and this parameter to 10.</p>
+</div>
+<div class="section" id="film-format">
+<span id="index-21"></span><h3>Film Format<a class="headerlink" href="#film-format" title="Permalink to this headline">¶</a></h3>
+<p>Presents used to set the desired filmback, this will set the correct aperture width and height for the selected format.  Custom can be used to enter your own values.</p>
+</div>
+<div class="section" id="aperture-width-and-height">
+<span id="index-22"></span><h3>Aperture Width and Height<a class="headerlink" href="#aperture-width-and-height" title="Permalink to this headline">¶</a></h3>
+<p>Automatically set by the Film Format selected above, it&#8217;s possible to override via Custom if a desired format isn&#8217;t available.</p>
+</div>
+</div>
+<div class="section" id="optical-artifacts-tab">
+<h2>Optical Artifacts Tab<a class="headerlink" href="#optical-artifacts-tab" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/opticalartifactstab.png" src="_images/opticalartifactstab.png" />
+<span class="target" id="index-23"></span><div class="section" id="bloom">
+<span id="index-24"></span><h3>Bloom<a class="headerlink" href="#bloom" title="Permalink to this headline">¶</a></h3>
+<p>Will cause bright values in the input image ( defined by the bloom threshold ) to create a brighter lens bloom.</p>
+</div>
+<div class="section" id="curvature">
+<span id="index-25"></span><h3>Curvature<a class="headerlink" href="#curvature" title="Permalink to this headline">¶</a></h3>
+<p>Used to define how much lens curvature there is, this will modulate the Bloom based on where in the lens the light is entering the lens.</p>
+</div>
+<div class="section" id="bloom-threshold">
+<span id="index-26"></span><h3>Bloom Threshold<a class="headerlink" href="#bloom-threshold" title="Permalink to this headline">¶</a></h3>
+<p>Determines how bright the input must before before blooming is applied, by default this is 0.7 which means any input values above that will cause a blooming effect.</p>
+</div>
+<div class="section" id="bloom-matte-channel">
+<span id="index-27"></span><h3>Bloom Matte Channel<a class="headerlink" href="#bloom-matte-channel" title="Permalink to this headline">¶</a></h3>
+<p>An optional matte channel ( supplied via the Mattes input ) to modulate the level of lens Bloom.</p>
+</div>
+<div class="section" id="spherical-aberration">
+<span id="index-28"></span><h3>Spherical Aberration<a class="headerlink" href="#spherical-aberration" title="Permalink to this headline">¶</a></h3>
+<p>Control the spherical aberration of the lens.</p>
+</div>
+<div class="section" id="chromic-aberration">
+<span id="index-29"></span><h3>Chromic Aberration<a class="headerlink" href="#chromic-aberration" title="Permalink to this headline">¶</a></h3>
+<p>Introduce chromic aberration artifact into the defocused image.</p>
+</div>
+<div class="section" id="chromic-aberration-offset">
+<span id="index-30"></span><h3>Chromic Aberration Offset<a class="headerlink" href="#chromic-aberration-offset" title="Permalink to this headline">¶</a></h3>
+<p>Used to adjust the refraction offset of each colour for the chromic abberation.</p>
+</div>
+<div class="section" id="chromic-aberration-matte-channel">
+<h3>Chromic Aberration Matte Channel<a class="headerlink" href="#chromic-aberration-matte-channel" title="Permalink to this headline">¶</a></h3>
+<p>An optional matte channel ( supplied via the Mattes input ) to modulate the level of Chromic Aberration</p>
+</div>
+</div>
+<div class="section" id="kernel-tab">
+<h2>Kernel Tab<a class="headerlink" href="#kernel-tab" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/kerneltab.png" src="_images/kerneltab.png" />
+<div class="section" id="kernel-type">
+<span id="index-31"></span><h3>Kernel Type<a class="headerlink" href="#kernel-type" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><strong>Input</strong> - use the supplied input image as the kernel</li>
+<li><strong>Aperture Blades</strong> - render a kernel that mimics the blades of an aperture</li>
+<li><strong>Circular</strong> - render a circular/disc shaped kernel</li>
+</ul>
+</div>
+<div class="section" id="maximum-kernel-size">
+<span id="index-32"></span><h3>Maximum Kernel Size<a class="headerlink" href="#maximum-kernel-size" title="Permalink to this headline">¶</a></h3>
+<p>The maximum size a kernel is allowed to be, this can be used to optimize renders if need be at the expense of clamping the defocus effect.  It&#8217;s rare that you would actually need this.</p>
+</div>
+<div class="section" id="aspect-ratio">
+<span id="index-33"></span><h3>Aspect Ratio<a class="headerlink" href="#aspect-ratio" title="Permalink to this headline">¶</a></h3>
+<p>Provides the means of controlling the aspect ratio of the Bokeh, this is useful for matching anamorphic effects</p>
+</div>
+<div class="section" id="softness">
+<span id="index-34"></span><h3>Softness<a class="headerlink" href="#softness" title="Permalink to this headline">¶</a></h3>
+<p>How soft the generated kernel will be.</p>
+</div>
+<div class="section" id="sides">
+<span id="index-35"></span><h3>Sides<a class="headerlink" href="#sides" title="Permalink to this headline">¶</a></h3>
+<p>The number of actual aperture blades, or &#8220;sides&#8221; of the shape.</p>
+</div>
+<div class="section" id="rotation">
+<span id="index-36"></span><h3>Rotation<a class="headerlink" href="#rotation" title="Permalink to this headline">¶</a></h3>
+<p>Rotation of the polygonal kernel.</p>
+</div>
+</div>
+<div class="section" id="corrective-slices-tab">
+<h2>Corrective Slices Tab<a class="headerlink" href="#corrective-slices-tab" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/correctiveslicestab.png" src="_images/correctiveslicestab.png" />
+<span class="target" id="index-37"></span><div class="section" id="corrective-slices">
+<span id="index-38"></span><h3>Corrective Slices<a class="headerlink" href="#corrective-slices" title="Permalink to this headline">¶</a></h3>
+<p>Artifacts are common in post processing effects that rely on depth due to the difference in fidelity and filtering between the Z depth and RGB images generated by most rendering applications.  One of these artifacts is how a final image is composited due to varying depth values - as you can see in the image provided below it appears that the second sphere eats into the first.</p>
+<p>Bokeh provides a means of correcting this by managing how the images depth values are composited - the volume that is sliced is defined by the focal plane and the focus region size.</p>
+<p>By adjusting the Corrective Slices value it’s possible to remove most signs of the artifacts.</p>
+<p>Be aware that due to the nature of this corrective stage the over all Bokeh level may need to be increased to return to the desired effect.</p>
+</div>
+<div class="section" id="override-near-far">
+<span id="index-39"></span><h3>Override Near/Far<a class="headerlink" href="#override-near-far" title="Permalink to this headline">¶</a></h3>
+<p>If selected the parameter below can be used to define the exact volume to be sliced vs. inferring it from the focal plane and region size.</p>
+</div>
+</div>
+</div>
+
+
+          <footer>
+  
+    <div class="rst-footer-buttons">
+      
+        <a href="changelog.html" class="btn btn-neutral float-right" title="Change Log"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="quickstart.html" class="btn btn-neutral" title="Quick Start"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <p>
+      &copy; Copyright 2010 - Present by Pregrine Labs, a division of Peregrine Visual Storytelling Ltd..
+  </p>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+</body>
+</html>

@@ -1,0 +1,120 @@
+#! /Applications/Nuke9.0v6/Nuke9.0v6.app/Contents/MacOS//libnuke-9.0.6.dylib -nx
+#write_info Write1 file:"/var/tmp/out2.mov" format:"1280 720 1" chans:":rgba.red:rgba.green:rgba.blue:" framerange:"1 720" fps:"0" colorspace:"default (Gamma2.2)" datatype:"unknown" transfer:"unknown" views:"main"
+version 9.0 v6
+define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
+<layout version="1.0">
+    <window x="129" y="183" w="1219" h="775" screen="0">
+        <splitter orientation="1">
+            <split size="40"/>
+            <dock id="" hideTitles="1" activePageId="Toolbar.1">
+                <page id="Toolbar.1"/>
+            </dock>
+            <split size="556" stretch="1"/>
+            <splitter orientation="2">
+                <split size="440"/>
+                <dock id="" activePageId="Viewer.1">
+                    <page id="Viewer.1"/>
+                </dock>
+                <split size="309"/>
+                <dock id="" activePageId="DAG.1">
+                    <page id="DAG.1"/>
+                    <page id="Curve Editor.1"/>
+                    <page id="DopeSheet.1"/>
+                </dock>
+            </splitter>
+            <split size="615"/>
+            <dock id="" activePageId="Properties.1">
+                <page id="Properties.1"/>
+                <page id="uk.co.thefoundry.scripteditor.1"/>
+            </dock>
+        </splitter>
+    </window>
+</layout>
+}
+Root {
+ inputs 0
+ name /Volumes/dabrender/usr/custom/nuke/proxy_script_templates/simpleexample.nk
+ frame 304
+ last_frame 720
+ lock_range true
+ format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+ proxy_type scale
+ proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+}
+Blur {
+ inputs 0
+ name Blur1
+ xpos -260
+ ypos 11
+}
+Read {
+ inputs 0
+ file /Volumes/dabrender-1/work/olivertabbott/3D_Project_2.5/renderman/set.0058_animaticv5_clean/images/set.0058_animaticv5_clean_###.exr
+ format "1280 720 0 0 1280 720 1 HD_720"
+ last 720
+ origlast 720
+ origset true
+ name Read1
+ xpos -446
+ ypos -172
+}
+Text2 {
+ font_size_toolbar 100
+ font_width_toolbar 100
+ font_height_toolbar 100
+ message khkjhkj
+ old_message {{107 104 107 106 104 107 106}
+   }
+ box {450.5 307.5 785.5 408.5}
+ xjustify center
+ yjustify center
+ transforms {{0 2}
+   }
+ cursor_position 7
+ center {640 360}
+ cursor_initialised true
+ initial_cursor_position {{618 358}
+   }
+ group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+ animation_layers {{1 11 640 360 0 0 1 1 0 0 0 0}
+   }
+ name Text1
+ selected true
+ xpos -446
+ ypos -84
+}
+Write {
+ file /var/tmp/out2.mov
+ file_type mov
+ meta_codec apco
+ mov32_codec apco
+ mov32_fps 25
+ mov32_pixel_format {{0} "default (YCbCrA 32-bit 444 Float (r4fl))" "RGBA  8-bit" "RGBA  16-bit (b64a)" "YCbCrA 8-bit 444 Biased (r408)" "YCbCr  8-bit 422 (2vuy)" "YCbCrA 32-bit 444 Float (r4fl)" "YCbCr  16-bit 444 (y416)" "YCbCr  10-bit 422 (v210)"}
+ mov64_codec apco
+ mov64_fps 25
+ mov64_bitrate 20000
+ mov64_bitrate_tolerance 40000000
+ mov64_quality_min 2
+ mov64_quality_max 31
+ mov64_gop_size 12
+ mov64_b_frames 0
+ checkHashOnRead false
+ version 1
+ name Write1
+ xpos -446
+ ypos -13
+}
+Viewer {
+ frame 304
+ frame_range 1-720
+ name Viewer1
+ xpos -40
+ ypos -9
+}
+Text {
+ inputs 0
+ message khkjhkj
+ name Text2
+ xpos -260
+ ypos -107
+}

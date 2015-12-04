@@ -1,0 +1,48 @@
+#! /Applications/Nuke9.0v7/Nuke9.0v7.app/Contents/MacOS//libnuke-9.0.7.dylib -nx
+#write_info Write1 file:"/Users/120988/Desktop/out_3.mov" format:"1280 720 1" chans:":rgba.red:rgba.green:rgba.blue:" framerange:"1 100" fps:"0" colorspace:"default (Gamma2.2)" datatype:"unknown" transfer:"unknown" views:"main"
+version 9.0 v7
+Root {
+ inputs 0
+ frame 0
+ format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+ proxy_type scale
+ proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+}
+Read {
+ inputs 0
+ file /Volumes/dabrender/work/matthewgidney/testFarm/images/mr_dotty_test/mr_dotty_test/mr_dotty_test.%04d.exr
+ last 100
+ name Read1
+}
+Reformat {
+ format "1280 720 0 0 1280 720 1 HD_720"
+ name Reformat1
+}
+Text2 {
+ font_size_toolbar 100
+ font_width_toolbar 100
+ font_height_toolbar 100
+ transforms {{0 2}
+   }
+ group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+ animation_layers {{1 11 1024 778 0 0 1 1 0 0 0 0}
+   }
+ name Text1
+}
+Write {
+ file /Users/120988/Desktop/out_3.mov
+ file_type mov
+ meta_codec apco
+ mov32_codec apco
+ mov32_pixel_format {{0} "default (YCbCrA 32-bit 444 Float (r4fl))" "RGBA  8-bit" "RGBA  16-bit (b64a)" "YCbCrA 8-bit 444 Biased (r408)" "YCbCr  8-bit 422 (2vuy)" "YCbCrA 32-bit 444 Float (r4fl)" "YCbCr  16-bit 444 (y416)" "YCbCr  10-bit 422 (v210)"}
+ mov64_codec apco
+ mov64_bitrate 20000
+ mov64_bitrate_tolerance 40000000
+ mov64_quality_min 2
+ mov64_quality_max 31
+ mov64_gop_size 12
+ mov64_b_frames 0
+ checkHashOnRead false
+ version 1
+ name Write1
+}

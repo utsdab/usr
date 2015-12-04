@@ -1,0 +1,80 @@
+[
+    {
+        "keys": ["default"],
+        "environment": {
+                "RMS_SCRIPT_PATHS"  : "/Volumes/dabrender/usr/custom/pixar/configs",
+                "RDIR"              : "/Volumes/dabrender/usr/custom/pixar/configs",
+		"PATH"              : "/Volumes/dabrender/usr/renderfarm/bin:/usr/local/bin:/Volumes/dabrender/usr/bin:/usr/local/dabanim/bin:$PATH",
+                "PIXAR_LICENSE_FILE":"/Volumes/dabrender/usr/pixar/pixar.license",
+                "MAYA_DISABLE_CIP"  :"1",
+                "DEBUG_EnvKey_default_osx"  : "from_shared.macosx.envkeys",
+                "PYTHONPATH"        : "/Volumes/dabrender/usr/renderfarm"
+        },
+       "envhandler": "default"
+    },
+    {
+        "keys": ["rms-*-maya-*"], 
+        "environment": {
+            "DEBUG_EnvKey_rms_maya" : "from_shared.macosx.envkeys",
+            "RMSTREE":             "/Applications/Pixar/RenderManStudio-$TR_ENV_RMSVER-maya$TR_ENV_MAYAVER",
+            "RMANTREE":            "$RMSTREE/rmantree",
+            "MAYA_LOCATION":       "$TR_ENV_MAYALOCATION/Maya.app/Contents",
+            "MAYA_MODULE_PATH":    "/Volumes/dabrender/usr/custom/maya/modules_central:$RMSTREE/etc",
+            "MAYA_PLUG_IN_PATH":   "$TR_ENV_MAYALOCATION/plug-ins:$TR_ENV_MAYALOCATION/scripts:$RMSTREE/plug-ins",
+            "MAYA_SCRIPT_PATH":    "$TR_ENV_MAYALOCATION/scripts:/Volumes/dabrender/usr/custom/maya/scripts_central:$RMSTREE/scripts",
+            "PATH":                "$RMSTREE/bin:$MAYA_LOCATION/bin:/usr/aw/COM/bin:/usr/aw/COM/etc:$RMANTREE/bin:$PATH",
+            "PYTHONPATH":          "$RMSTREE/scripts:$RMANTREE/bin:/Volumes/dabrender/usr/lib/python",
+            "DYLD_LIBRARY_PATH":   "$RMANTREE/lib:$TR_ENV_MAYALOCATION/MacOS:$DYLD_LIBRARY_PATH",
+            "TMPDIR":              "/var/tmp"
+        },
+        "envhandler": "rmshandler"
+
+    },
+    {
+        "keys": ["prman-*"],
+        "environment": {
+            "APPBASEDIR":          "/Applications/Pixar:/Applications/Pixar/RenderMan.app/Versions",
+            "RMANTREE":            "$TR_ENV_RMANTREE",
+            "PATH":                "$RMANTREE/bin:$PATH"
+        },
+        "envhandler": "rmanhandler"
+    },
+    {
+        "keys": ["rmantree=*"],
+        "environment": {
+            "RMANTREE":            "$TR_ENV_RMANTREE",
+            "PATH":                "$RMANTREE/bin:$PATH",
+       },
+       "envhandler": "rmantreehandler",
+       "rewritedict": {}
+    },
+    {
+        "keys": ["rmstree=*"],
+        "environment": {
+            "RMSTREE":             "$TR_ENV_RMSTREE",
+            "PATH":                "$RMSTREE/bin:$PATH",
+        },
+        "envhandler": "rmstreehandler",
+        "rewritedict": {}
+    },
+    {
+        "keys": ["maya*"], 
+        "environment": {
+            "DEBUG_EnvKey_maya":   "from_shared.macosx.envkeys",            
+            "MAYA_LOCATION":       "$TR_ENV_MAYALOCATION/Maya.app/Contents",
+	    "DYLD_LIBRARY_PATH":   "$MAYA_LOCATION/MacOS", 
+	    "DYLD_FRAMEWORK_PATH": "$MAYA_LOCATION/Frameworks", 
+            "MAYA_PLUG_IN_PATH":   "$MAYA_LOCATION/plug-ins:$MAYA_PLUG_IN_PATH",
+            "MAYA_MODULE_PATH":   "/Volumes/dabrender/usr/custom/maya/modules_central",
+            "MAYA_SCRIPT_PATH":    "/Volumes/dabrender/usr/custom/maya/scripts_central:$MAYA_LOCATION/scripts",
+            "PATH":                "$MAYA_LOCATION/bin:/Volumes/dabrender/usr/bin:$PATH",
+            "MAYA_DISABLE_CIP" :   "1",
+            "TMPDIR":"/var/tmp"
+        },
+        "envhandler": "mayahandler"
+    },
+    {
+        "keys": ["setenv *"],
+        "envhandler": "setenvhandler"
+    }
+]

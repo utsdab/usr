@@ -1,0 +1,529 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Index &mdash; Bokeh v1.4 Documentationrtd</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  
+  
+
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:'./',
+        VERSION:'1.4.2',
+        COLLAPSE_INDEX:false,
+        FILE_SUFFIX:'.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+    <link rel="top" title="Bokeh v1.4 Documentationrtd" href="index.html"/> 
+
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="icon icon-home">
+			Bokeh v1.4
+		</a>
+        <form id ="rtd-search-form" class="wy-form" action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search docs" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix">
+        
+        
+            <ul>
+<li class="toctree-l1"><a class="reference internal" href="preamble.html">Preamble</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="preamble.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preamble.html#copyright">Copyright</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#system-requirements">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#plugin-installation">Plugin Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#environment-variables">Environment Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="licensing.html">Licensing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="licensing.html#requesting-a-license">Requesting A License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="licensing.html#node-locked-licenses">Node Locked Licenses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="licensing.html#floating-licenses">Floating Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#example-workflow">Example Workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="paramref.html">Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="paramref.html#inputs">Inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="paramref.html#bokeh-tab">Bokeh Tab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="paramref.html#lens-tab">Lens Tab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="paramref.html#optical-artifacts-tab">Optical Artifacts Tab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="paramref.html#kernel-tab">Kernel Tab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="paramref.html#corrective-slices-tab">Corrective Slices Tab</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Change Log</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id1">1.4.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id2">1.4.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id3">1.4.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id4">1.3.7</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id5">1.3.6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id6">1.3.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id7">1.3.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id8">1.3.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id9">1.3.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id10">1.3.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id11">1.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id12">1.2.11</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id13">1.2.10</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id14">1.2.7</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id15">1.2.6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id16">1.2.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id17">1.2.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id18">1.2.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id19">1.2.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id20">1.2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id21">1.1.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id22">1.1.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id23">1.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id24">1.0.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id25">1.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id26">0.9.10</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id27">0.9.9</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id28">0.9.8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id29">0.9.7</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id30">0.9.6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id31">0.9.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id32">0.9.4</a></li>
+</ul>
+</li>
+</ul>
+
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top">
+        <i data-toggle="wy-nav-top" class="icon icon-reorder"></i>
+        <a href="index.html">Bokeh v1.4</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <ul class="wy-breadcrumbs">
+  <li><a href="index.html">Docs</a> &raquo;</li>
+  <li><a href=""></a></li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+</ul>
+<hr/>
+
+          
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#F"><strong>F</strong></a>
+ | <a href="#I"><strong>I</strong></a>
+ | <a href="#K"><strong>K</strong></a>
+ | <a href="#L"><strong>L</strong></a>
+ | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
+ | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
+ | <a href="#W"><strong>W</strong></a>
+ 
+</div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-18">aperture</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-22">aperture height</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-22">aperture width</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-33">aspect ratio</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-9">back multiplier</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-24">bloom</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-27">bloom matte channel</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-26">bloom threshold</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-5">bokeh channels</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-2">camera</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-5">channels</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-29">chromic aberration</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-30">chromic aberration offset</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-37">corrective slices</a>, <a href="paramref.html#index-38">[1]</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-25">curvature</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-3">deep input</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-14">defocus matte channel</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-6">depth channel</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-10">depth style</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-21">film format</a>
+  </dt>
+
+      
+  <dt><a href="licensing.html#index-1">floating license</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-11">focal plane</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-13">focus region falloff</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-8">focus region output</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-12">focus region size</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-9">front multiplier</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-0">input</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-0">inputs</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-1">kernel input</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-23">kernel type</a>, <a href="paramref.html#index-31">[1]</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-16">lens</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-17">lens style</a>
+  </dt>
+
+      
+  <dt><a href="licensing.html#index-1">license server</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="licensing.html#index-0">licensing</a>
+  </dt>
+
+      
+  <dt><a href="licensing.html#index-3">linux service</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-4">Mattes</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-32">maximum kernel size</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="licensing.html#index-6">multiple rlm isv</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-9">multiplier</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-15">normalize visualization</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="licensing.html#index-4">osx service</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-7">output type</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-39">override near far</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-16">real world lens simulation</a>
+  </dt>
+
+      
+  <dt><a href="licensing.html#index-5">rlm web server</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-36">rotation</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-35">sides</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-34">softness</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-28">spherical aberration</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="licensing.html#index-2">windows service</a>
+  </dt>
+
+      
+  <dt><a href="paramref.html#index-19">world scale</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="paramref.html#index-20">world scale multiplier</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+
+
+          <footer>
+  
+
+  <hr/>
+
+  <p>
+      &copy; Copyright 2010 - Present by Pregrine Labs, a division of Peregrine Visual Storytelling Ltd..
+  </p>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+</body>
+</html>

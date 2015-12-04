@@ -1,0 +1,115 @@
+// $Revision:$ $Date:$
+//
+// Copyright (c) 2006 PIXAR.  All rights reserved.  This program or
+// documentation contains proprietary confidential information and trade
+// secrets of PIXAR.  Reverse engineering of object code is prohibited.
+// Use of copyright notice is precautionary and does not imply
+// publication.
+//
+//                      RESTRICTED RIGHTS NOTICE
+//
+// Use, duplication, or disclosure by the Government is subject to the
+// following restrictions:  For civilian agencies, subparagraphs (a) through
+// (d) of the Commercial Computer Software--Restricted Rights clause at
+// 52.227-19 of the FAR; and, for units of the Department of Defense, DoD
+// Supplement to the FAR, clause 52.227-7013 (c)(1)(ii), Rights in
+// Technical Data and Computer Software.
+//
+// Pixar Animation Studios
+// 1200 Park Avenue
+// Emeryville, CA  94608
+//
+// This is a wrapper for the actual launch of the batch render.
+// It sets up the image file prefix in the tmp file.
+
+global proc renderManBatchGenRibForLayer(int $layerid, int $start, int $end,
+					 int $jpf)
+{
+    if(!`pluginInfo -q -l RenderMan_for_Maya`) 
+    {
+	loadPlugin "RenderMan_for_Maya";
+    }
+
+    if(rmanIsRMS())
+    {
+        // we assume this proc is executed after the file has been opened
+        // 1. detect if slim is needed (signaled by presence of mtorPartitions)
+        string $r[] = `ls "*mtorPartition*"`;
+        if(size($r))
+        {
+            int $compile = 1;
+            if( $jpf >= 2 ) {
+                $compile = 0;
+            }
+            rmanInfo("Launching slim");
+            rman slim start -gui 0 -edit 0 -compile $compile;
+        }
+    }
+
+    string $layer = "";
+
+    if( $layerid == 0 ) {
+        // don't care about default layers from referenced files
+        $layer = "defaultRenderLayer";
+    } else {
+        string $rls[] = `listConnections renderLayerManager.renderLayerId`;
+        int $i = 0;
+        for( $i = 0; $i<size($rls); $i++ ) {
+            int $curid = `getAttr ($rls[$i]+".rlid")`;
+            if( $curid == $layerid ) {
+                $layer = $rls[$i];
+                break;
+            }
+        }
+    }
+
+    if( $layer == "" )
+	$layer = "defaultRenderLayer";
+
+    editRenderLayerGlobals -currentRenderLayer $layer;
+
+    // Execute pre (job) mel script.
+    // Why execute the pre/post mel scripts in renderManBatchGenRibForLayer?
+    // This script is called by deferred or remote maya batch processes doing
+    // ribgen.  If preMel were only called by the maya process which spooled
+    // the job, it'd be of limited usefulness; user may want to set up state in
+    // the maya process actually doing the ribgen.
+    string $melScript = `getAttr defaultRenderGlobals.preMel`;
+    if( $melScript != "" ) 
+	eval $melScript;
+
+    // execute pre render layer mel script
+    $melScript = `getAttr defaultRenderGlobals.preRenderLayerMel`;
+    if( $melScript != "" ) 
+	eval $melScript;
+
+    // dynamics runup
+    dynRunupForBatchRender();		
+    
+    string $jobPhaseFilter ="none";
+    if( $jpf == 1 ) {
+	$jobPhaseFilter = "preflight";
+    } else if( $jpf == 2 ) {
+	$jobPhaseFilter = "frames";
+    } else if( $jpf == 3 ) {
+	$jobPhaseFilter = "cleanup";
+    }
+
+    string $cmd = "rman genrib -layer ";
+    $cmd += $layer;
+    $cmd += (" -s " + $start + " -e " + $end );
+    $cmd += (" -jobphasefilter " + $jobPhaseFilter);
+    eval($cmd);
+
+    // execute post render layer mel script
+    $melScript = `getAttr defaultRenderGlobals.postRenderLayerMel`;
+    if( $melScript != "" ) 
+	eval $melScript;
+
+    // execute post (job) mel script
+    $melScript = `getAttr defaultRenderGlobals.postMel`;
+    if( $melScript != "" ) 
+	eval $melScript;
+}
+
+

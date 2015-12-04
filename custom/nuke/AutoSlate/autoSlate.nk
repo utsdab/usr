@@ -1,0 +1,292 @@
+set cut_paste_input [stack 0]
+version 6.3 v8
+push $cut_paste_input
+Group {
+ name SLATE
+ help "To save defaults for a particular show, choose your settings, highlight the SLATE node and 'Export nodes as script' and save it under a new name ie: 'slate_myshow.nk'. "
+ selected true
+ xpos -203
+ ypos -389
+ addUserKnob {20 User l Slate}
+ addUserKnob {26 Slate l "" +STARTLINE T "<h1>Auto Slate</h1>"}
+ addUserKnob {26 ""}
+ addUserKnob {1 Company}
+ Company "MY VFX COMPANY"
+ addUserKnob {1 Show}
+ Show "My project title"
+ addUserKnob {26 ""}
+ addUserKnob {26 ShotInfo l "" +STARTLINE T "<h3>Shot info</h3>"}
+ addUserKnob {4 mode l Mode t "\"Script based\" takes information from the script, so it's better suited for artists who are rendering the slate as part of their comp. \"File input based\" is for editorial to add slates to existing renders by bringing them in as read nodes." M {"Script based" "File input based" Manual ""}}
+ mode "File input based"
+ addUserKnob {1 Notes}
+ Notes "This is where the artist would add some brief notes about the shot. Perhaps saying which version of CG was used."
+ addUserKnob {26 ""}
+ addUserKnob {26 auto l "" +STARTLINE T "<h3>Automatic data</h3>"}
+ addUserKnob {4 thumbChoice l "Thumb frame" M {"First frame" "Middle frame" "Last frame"}}
+ thumbChoice "Middle frame"
+ addUserKnob {26 shotHelp l "" +STARTLINE T "Enter the position of the shot sub folder\nFor example: \"/jobs/myShow/shotName/comp/renders/...\"\nThe shot name would be at level 3"}
+ addUserKnob {3 shotPosition l "" +STARTLINE}
+ shotPosition 3
+ addUserKnob {26 ""}
+ addUserKnob {26 manual l "" +STARTLINE T "<h3>Manual data entry</h3>"}
+ addUserKnob {1 Shot}
+ Shot 001_010
+ addUserKnob {1 Version}
+ Version v001
+ addUserKnob {1 Frames}
+ Frames 1-100
+ addUserKnob {1 Date}
+ Date "15th December 2012"
+ addUserKnob {3 thumbFrame l "Thumb frame"}
+ thumbFrame 1
+ addUserKnob {26 ""}
+ addUserKnob {26 Settings l "" +STARTLINE T "<h3>Settings</h3>\n"}
+ addUserKnob {3 slateFrame l "Slate on frame: "}
+ addUserKnob {7 Brightness l "BG brightness"}
+ Brightness 0.18
+ addUserKnob {2 fontFile l Font t "To find the default font for your system, create a Text node and copy the path from there."}
+ fontFile /usr/share/fonts/bitstream-vera/Vera.ttf
+ addUserKnob {7 fontSize l "Font size" t "The font size for HD. Other resolutions will be relative to HD." R 30 60}
+ fontSize 45
+ addUserKnob {2 cfontFile l "Company font"}
+ cfontFile /usr/share/fonts/bitstream-vera/Vera.ttf
+ addUserKnob {7 cfontSize l "Company font size" R 30 100}
+ cfontSize 67
+ addUserKnob {26 by l "" +STARTLINE T "<br />\n<h5>David Emeny 2013</h5>"}
+}
+ BackdropNode {
+  inputs 0
+  name BackdropNode1
+  tile_color 0x786483ff
+  label Background
+  note_font_size 20
+  xpos -783
+  ypos 21
+  bdwidth 168
+  bdheight 206
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode3
+  tile_color 0x93a078ff
+  label Thumbnail
+  note_font_size 20
+  xpos -431
+  ypos 13
+  bdwidth 201
+  bdheight 268
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode4
+  tile_color 0x6a8689ff
+  label "Only shows slate on or \nbefore chosen frame"
+  note_font_size 20
+  xpos -210
+  ypos 542
+  bdwidth 215
+  bdheight 147
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode2
+  tile_color 0x896695ff
+  label Text
+  note_font_size 20
+  xpos -957
+  ypos 248
+  bdwidth 475
+  bdheight 375
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos -147
+  ypos -65
+ }
+ Dot {
+  name Dot2
+  xpos -113
+  ypos 99
+ }
+set N83c4b20 [stack 0]
+ FrameHold {
+  first_frame {{"\[if \{\[value mode] == \"Script based\"\} \{return \[value s]\} elseif \{\[value mode] == \"File input based\"\} \{return \[value f]\} else \{return \[value thumbFrame]\}]" i}}
+  name FrameHold1
+  xpos -374
+  ypos 89
+  addUserKnob {20 User}
+  addUserKnob {3 s}
+  s {{"\[if \{\[value thumbChoice] == \"First frame\"\} \{return \[value root.first_frame]\} elseif \{\[value thumbChoice] == \"Middle frame\"\} \{return \[expr (\[value root.first_frame] + (\[value root.last_frame]-\[value root.first_frame]) / 2)]\} else \{return \[value root.last_frame]\}]" i}}
+  addUserKnob {3 f}
+  f {{"\[if \{\[value thumbChoice] == \"First frame\"\} \{return \[value Input1.first_frame]\} elseif \{\[value thumbChoice] == \"Middle frame\"\} \{return \[expr (\[value Input1.first_frame] + (\[value Input1.last_frame]-\[value Input1.first_frame]) / 2)]\} else \{return \[value Input1.last_frame]\}]" i}}
+ }
+set N83c9010 [stack 0]
+ Shuffle {
+  alpha white
+  name Shuffle1
+  xpos -374
+  ypos 147
+ }
+ Crop {
+  box {0 0 {input.width i} {input.height i}}
+  name Crop1
+  xpos -374
+  ypos 182
+ }
+ Transform {
+  translate {{input.width/24 i} 0}
+  scale 0.46
+  center {0 {input.height/2 i}}
+  name Transform1
+  xpos -374
+  ypos 221
+ }
+push $N83c9010
+ Grade {
+  white {{"\[value Brightness]" i}}
+  name Grade1
+  xpos -740
+  ypos 95
+ }
+ Blur {
+  channels rgba
+  size {80 30}
+  name Blur1
+  xpos -740
+  ypos 121
+ }
+ Saturation {
+  saturation 0.2
+  name Saturation1
+  xpos -740
+  ypos 147
+ }
+ Rectangle {
+  opacity 0.75
+  area {{Input1.width-Input1.width*1.08 i} 0 {input.width*1.08 i} {input.height i}}
+  softness 200
+  color {0 0 0 1}
+  name Rectangle1
+  xpos -740
+  ypos 173
+ }
+ Text {
+  message "\[value Company]"
+  font "\[value cfontFile]"
+  size {{(Data_script.size/fontSize)*cfontSize i}}
+  yjustify bottom
+  Transform 1
+  box {0 0 {input.width-translate.x-(Input1.width/24) i} 80}
+  translate {{input.width/24 i} {input.height/1.32 i}}
+  center {1024 778}
+  color {0.4033333361 0.4033333361 0.4699999988 1}
+  name Company
+  xpos -740
+  ypos 296
+ }
+ Text {
+  message "Show:\n\nShot:\n\nVersion:\n\nFrames:\n\nDate:\n\nNotes:"
+  font "\[value fontFile]"
+  size {{Data_script.size i}}
+  xjustify right
+  yjustify top
+  Transform 1
+  box {0 0 {"240 * (Input1.width/1920)" i} {"(Input1.height/2) + ((Input1.height*Transform1.scale)/2)" i}}
+  translate {{Input1.width/2 i} 0}
+  center {0 647}
+  color {0.2666666806 0.2666666806 0.2666666806 1}
+  name Titles
+  xpos -740
+  ypos 345
+ }
+set N8426a70 [stack 0]
+ Text {
+  message "\[knob Show]\n\n\[value Shot]\n\n\[value Version]\n\n\[value Frames]\n\n\[value Date]\n\n\[knob Notes]"
+  font "\[value fontFile]"
+  size {{fontSize*(box.r/615.384) i}}
+  yjustify top
+  Transform 1
+  box {0 0 {"Input1.width - (Input1.width/24)-translate.x" i} {"(Input1.height/2) + ((Input1.height*Transform1.scale)/2)" i}}
+  translate {{"Titles.box.r + Input1.width/1.95" i} 0}
+  scale {1 1}
+  center {0 {box.t i}}
+  name Data_manual
+  xpos -619
+  ypos 424
+  addUserKnob {20 User}
+ }
+push $N8426a70
+push $N8426a70
+ Text {
+  message "\[knob Show]\n\n\[lindex \[split \[value theFile] \"/\"] \[value shotPosition]]\n\n\[regexp -inline \"v\\\[0-9]\{3\}\" \[value theFile]]\n\n\[value Input1.first_frame]-\[value Input1.last_frame]\n\n\[clock format \[file mtime \[value theFile]] -format \{%a %d %B %Y \}]\n\n\[knob Notes]"
+  font "\[value fontFile]"
+  size {{fontSize*(box.r/615.384) i}}
+  yjustify top
+  Transform 1
+  box {0 0 {"Input1.width - (Input1.width/24)-translate.x" i} {"(Input1.height/2) + ((Input1.height*Transform1.scale)/2)" i}}
+  translate {{"Titles.box.r + Input1.width/1.95" i} 0}
+  scale {1 1}
+  center {0 {box.t i}}
+  name Data_file
+  xpos -807
+  ypos 424
+  addUserKnob {20 User}
+  addUserKnob {1 theFile l file}
+  theFile "\[metadata input/filename]"
+ }
+ Switch {
+  inputs 2
+  which {{"\[string length \[metadata input/filename]] > 0 ? 0 : 1" i}}
+  name Switch3
+  xpos -740
+  ypos 487
+ }
+push $N8426a70
+ Text {
+  message "\[knob Show]\n\n\[lindex \[split \[value root.name] \"/\"] \[value shotPosition]]\n\n\[regexp -inline \"v\\\[0-9]\{3\}\" \[value root.name]]\n\n\[value root.first_frame]-\[value root.last_frame]\n\n\[clock format \[clock seconds] -format \{%a %d %B %Y \}]\n\n\[knob Notes]"
+  font "\[value fontFile]"
+  size {{fontSize*(box.r/615.384) i}}
+  yjustify top
+  Transform 1
+  box {0 0 {"Input1.width - (Input1.width/24)-translate.x" i} {"(Input1.height/2) + ((Input1.height*Transform1.scale)/2)" i}}
+  translate {{"Titles.box.r + Input1.width/1.95" i} 0}
+  scale {1 1}
+  center {0 {box.t i}}
+  name Data_script
+  xpos -932
+  ypos 425
+  addUserKnob {20 User}
+ }
+ Switch {
+  inputs 3
+  which {{"\[if \{\[value mode] == \"Script based\"\} \{return 0\} elseif \{\[value mode] == \"File input based\"\} \{return 1\} else \{return 2\}]" i}}
+  name Switch2
+  xpos -740
+  ypos 584
+ }
+ Dot {
+  name Dot3
+  xpos -706
+  ypos 641
+ }
+ Merge2 {
+  inputs 2
+  name Merge1
+  xpos -374
+  ypos 637
+ }
+push $N83c4b20
+ Switch {
+  inputs 2
+  which {{"frame <= \[value slateFrame] ? 1 : 0" i}}
+  name Switch1
+  xpos -147
+  ypos 637
+ }
+ Output {
+  name Output1
+  xpos -147
+  ypos 875
+ }
+end_group

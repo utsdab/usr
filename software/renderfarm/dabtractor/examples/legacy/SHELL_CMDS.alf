@@ -1,0 +1,27 @@
+#eAlfredToDo 3.0
+Job -title {Shell_Cmds linux} -subtasks {
+
+  Task -title {test task 1} -cmds {
+    RemoteCmd {{printenv}} -service {pixarRender}
+    RemoteCmd {{whoami}} -service {pixarRender}
+    RemoteCmd {{pwd}} -service {pixarRender}
+    RemoteCmd {{sleep} {2000}} -service {pixarRender}
+  }
+
+  Task -title {test task 2} -cmds {
+    RemoteCmd {{hostname}} -service {pixarRender}
+    RemoteCmd {{printenv}} -service {pixarRender}
+    RemoteCmd {{date}} -service {pixarRender}
+    RemoteCmd {{echo} {hello there going to sleep for 2000....}} -service {pixarRender}
+    RemoteCmd {{sleep} {2000}} -service {pixarRender}
+    RemoteCmd {{echo} {...waking up - hello there}} -service {pixarRender}
+  }
+
+  Task -title {test task 3} -cmds {
+    RemoteCmd {{printenv}} -service {pixarRender}
+    RemoteCmd {{sleep} {2000}} -service {pixarRender}
+    RemoteCmd {{printenv}} -service {pixarRender}
+    RemoteCmd {{whoami}} -service {pixarRender}
+  }
+
+}

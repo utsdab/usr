@@ -1,0 +1,327 @@
+#! /Applications/Nuke9.0v4/Nuke9.0v4.app/Contents/MacOS//libnuke-9.0.4.dylib -nx
+#write_info output file:"[join [lrange [split [value [topnode].file] .] 0 end-2] .].mov" format:"1280 720 1" chans:":rgba.red:rgba.green:rgba.blue:" framerange:"1 41" fps:"0" colorspace:"default (Gamma2.2)" datatype:"unknown" transfer:"unknown" views:"main"
+version 9.0 v4
+define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
+<layout version="1.0">
+    <window x="205" y="91" w="1553" h="905" screen="0">
+        <splitter orientation="1">
+            <split size="40"/>
+            <dock id="" hideTitles="1" activePageId="Toolbar.1">
+                <page id="Toolbar.1"/>
+            </dock>
+            <split size="890" stretch="1"/>
+            <splitter orientation="2">
+                <split size="603"/>
+                <dock id="" activePageId="Viewer.1">
+                    <page id="Viewer.1"/>
+                </dock>
+                <split size="276"/>
+                <dock id="" activePageId="DAG.1">
+                    <page id="DAG.1"/>
+                    <page id="Curve Editor.1"/>
+                    <page id="DopeSheet.1"/>
+                </dock>
+            </splitter>
+            <split size="615"/>
+            <dock id="" activePageId="Properties.1" focus="true">
+                <page id="Properties.1"/>
+            </dock>
+        </splitter>
+    </window>
+</layout>
+}
+Root {
+ inputs 0
+ name /Users/120988/Desktop/proxy2.nk
+ frame 27
+ last_frame 41
+ lock_range true
+ format "1280 720 0 0 1280 720 1 HD_720"
+ proxy_type scale
+ proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ addUserKnob {20 User}
+ addUserKnob {1 input l Input}
+ input "\[argv 0]"
+ addUserKnob {3 start l Start}
+ start 1
+ addUserKnob {3 end l End}
+ end 30
+ addUserKnob {1 Input}
+ Input /Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/flame_001_0806200736/images/flame_001.####.exr
+}
+Read {
+ inputs 0
+ file "\[value root.input]"
+ format "1024 1024 0 0 1024 1024 1 square_1K"
+ last 41
+ origlast 41
+ origset true
+ name Read1
+ xpos -229
+ ypos -244
+}
+Grade {
+ add 0.045
+ name Grade1
+ xpos -135
+ ypos -216
+}
+Reformat {
+ format "1280 535 0 0 1280 535 1 1280239"
+ resize height
+ name tohd
+ xpos -14
+ ypos -220
+}
+set N5fd3f6d0 [stack 0]
+Text2 {
+ font_size_toolbar 30
+ font_width_toolbar 100
+ font_height_toolbar 100
+ message "\[basename \[value root.input]]\n\[format %04d \[value root.start]] \[format %04d \[frame]]  \n\[basename \[value root.name]]\n\[join \[lrange \[file split \[value \[topnode].file]] 0 9] /]\n\[basename \[value \[topnode].file ]]\n\[join \[lrange \[split \[value \[topnode].file] .] 0 end-2] .].mov"
+ old_message {{102 108 97 109 101 95 48 48 49 46 35 35 35 35 46 101 120 114 10 48 48 48 49 32 48 48 49 50 32 32 10 112 114 111 120 121 49 46 110 107 10 47 47 85 115 101 114 115 47 83 104 97 114 101 100 47 85 84 83 95 74 111 98 115 47 84 69 65 67 72 73 78 71 95 114 101 110 100 101 114 109 97 110 47 112 114 111 106 101 99 116 47 114 101 110 100 101 114 109 97 110 47 102 108 97 109 101 95 48 48 49 95 48 56 48 54 50 48 48 55 51 54 47 105 109 97 103 101 115 47 102 108 97 109 101 95 48 48 49 46 48 48 49 50 46 101 120 114 10 102 108 97 109 101 95 48 48 49 46 48 48 49 50 46 101 120 114 10 47 85 115 101 114 115 47 83 104 97 114 101 100 47 85 84 83 95 74 111 98 115 47 84 69 65 67 72 73 78 71 95 114 101 110 100 101 114 109 97 110 47 112 114 111 106 101 99 116 47 114 101 110 100 101 114 109 97 110 47 102 108 97 109 101 95 48 48 49 95 48 56 48 54 50 48 48 55 51 54 47 105 109 97 103 101 115 47 102 108 97 109 101 95 48 48 49 102 46 109 111 118 102 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 102 102}
+   }
+ old_expression_markers {{0 17 19 22 24 27 31 39 41 147 149 166 168 264}
+   }
+ box {8.5 207 775.5 717}
+ transforms {{0 2}
+   }
+ font_size_values {{0 30 1 30 2 30 3 30 4 30 5 30 6 30 7 30 8 30 9 30 10 30 11 30 12 30 13 30 14 30 15 30 16 30 17 30 18 30 19 30 20 30 21 30 22 30 23 30 24 30 25 30 26 30 27 30 28 30 29 30 30 30 31 30 32 30 33 30 34 30 35 30 36 30 37 30 38 30 39 30 40 30 41 30 42 30 43 30 44 30 45 30 46 30 47 30 48 30 49 30 50 30 51 30 52 30 53 30 54 30 55 30 56 30 57 30 58 30 59 30 60 30 61 30 62 30 63 30 64 30 65 30 66 30 67 30 68 30 69 30 70 30 71 30 72 30 73 30 74 30 75 30 76 30 77 30 78 30 79 30 80 30 81 30 82 30 83 30 84 30 85 30 86 30 87 30 88 30 89 30 90 30 91 30 92 30 93 30 94 30 95 30 96 30 97 30 98 30 99 30 100 30 101 30 102 30 103 30 104 30 105 30 106 30 107 30 108 30 109 30 110 30 111 30 112 30 113 30 114 30 115 30 116 30 117 30 118 30 119 30 120 30 121 30 122 30 123 30 124 30 125 30 126 30 127 30 128 30 129 30 130 30 131 30 132 30 133 30 134 30 135 30 136 30 137 30 138 30 139 30 140 30 141 30 142 30 143 30 144 30 145 30 146 30 147 30 148 30 149 30 150 30 151 30 152 30 153 30 154 30 155 30 156 30 157 30 158 30 159 30 160 30 161 30 162 30 163 30 164 30 165 30 166 30 167 30 168 30 169 30 170 30 171 30 172 30 173 30 174 30 175 30 176 30 177 30 178 30 179 30 180 30 181 30 182 30 183 30 184 30 185 30 186 30 187 30 188 30 189 30 190 30 191 30 192 30 193 30 194 30 195 30 196 30 197 30 198 30 199 30 200 30 201 30 202 30 203 30 204 30 205 30 206 30 207 30 208 30 209 30 210 30 211 30 212 30 213 30 214 30 215 30 216 30 217 30 218 30 219 30 220 30 221 30 222 30 223 30 224 30 225 30 226 30 227 30 228 30 229 30 230 30 231 30 232 30 233 30 234 30 235 30 236 30 237 30 238 30 239 30 240 30 241 30 242 30 243 30 244 30 245 30 246 30 247 30 248 30 249 30 250 30 251 30 252 30 253 30 254 30 255 30 256 30 257 30 258 30 259 30 260 30 261 30 262 30 263 30 264 30 265 30 266 30 267 30 268 30 269 30 270 30 271 30 272 30 273 30 274 30 275 30 276 30 277 30 278 30 279 30 280 30 281 30 282 30 283 30 284 30 285 30 286 30 287 30 288 30 289 30 290 30 0 92 1 92 2 92 3 92 4 92 5 92 6 92 7 92 8 92 9 92 10 92 11 92 12 92 13 92 14 92 15 92 16 92 17 92 18 92 30 92 31 92 32 92 33 92 34 92 35 92 36 92 37 92 38 92 39 92}
+   }
+ cursor_position 291
+ font {{ Courier 10 Pitch : Regular : Courier10Pitch.pfb : 0 }}
+ font_size 30
+ scale {1 1}
+ cursor_initialised true
+ autofit_bbox false
+ initial_cursor_position {{0 720}
+   }
+ group_animations {{0} imported: 0 selected: items: "root transform/"}
+ animation_layers {{1 11 640 360 0 0 1 1 0 0 0 0}
+   }
+ name Text1
+ xpos -125
+ ypos -93
+}
+Text2 {
+ font_size_toolbar 30
+ font_width_toolbar 100
+ font_height_toolbar 100
+ message "\[basename \[value root.input]]f\n\[format %04d \[value root.start]]  \[format %04d \[value root.end]]\n\[basename \[value root.name]]\n\[basename \[value \[topnode].file ]]\n\[basename\[file rootname \[value \[topnode].file]]]\nf\[regexp -inline \"_v\\\[0-9]\{3\}\" \[value \[topnode].file]] "
+ old_message {{102 108 97 109 101 95 48 48 49 46 35 35 35 35 46 101 120 114 102 10 48 48 48 49 32 32 48 48 52 49 10 112 114 111 120 121 49 46 110 107 10 102 108 97 109 101 95 48 48 49 46 48 48 49 50 46 101 120 114 10 91 98 97 115 101 110 97 109 101 47 85 115 101 114 115 47 83 104 97 114 101 100 47 85 84 83 95 74 111 98 115 47 84 69 65 67 72 73 78 71 95 114 101 110 100 101 114 109 97 110 47 112 114 111 106 101 99 116 47 114 101 110 100 101 114 109 97 110 47 102 108 97 109 101 95 48 48 49 95 48 56 48 54 50 48 48 55 51 54 47 105 109 97 103 101 115 47 102 108 97 109 101 95 48 48 49 46 48 48 49 50 93 10 102 32}
+   }
+ old_expression_markers {{0 17 20 23 26 29 31 39 41 58 69 170 174 173}
+   }
+ box {1.25 -2.5 1278.75 266}
+ yjustify bottom
+ transforms {{0 2}
+   }
+ font_size_values {{0 30 1 30 2 30 3 30 4 30 5 30 6 30 7 30 0 92 5 92 6 92 7 92 9 30 10 30 11 30 12 30 13 30 14 30 15 30 16 30 17 30 18 30 19 30 20 30 21 30 22 30 23 30 24 30 25 30 26 30 27 30 28 30 29 30 30 30 31 30 32 30 33 30 34 30 35 30 36 30 37 30 38 30 39 30 40 30 41 30 42 30 43 30 44 30 45 30 46 30 47 30 48 30 49 30 50 30 51 30 52 30 53 30 54 30 55 30 56 30 57 30 58 30 59 30 60 30 61 30 62 30 63 30 64 30 65 30 66 30 67 30 68 30 69 30 70 30 71 30 72 30 73 30 74 30 75 30 76 30 77 30 78 30 79 30 80 30 81 30 82 30 83 30 84 30 85 30 86 30 87 30 88 30 89 30 90 30 91 30 92 30 93 30 94 30 95 30 96 30 97 30 98 30 99 30 100 30 101 30 102 30 103 30 104 30 105 30 106 30 107 30 108 30 109 30 110 30 111 30 112 30 113 30 114 30 115 30 116 30 117 30 118 30 119 30 120 30 121 30 122 30 123 30 124 30 125 30 126 30 127 30 128 30 129 30 130 30 131 30 132 30 133 30 134 30 135 30 136 30 137 30 138 30 139 30 140 30 141 30 142 30 143 30 144 30 145 30 146 30 147 30 148 30 149 30 150 30 151 30 152 30 153 30 154 30 155 30 156 30 157 30 158 30 159 30 160 30 161 30 162 30 163 30 164 30 165 30 166 30 167 30 168 30 169 30 170 30 171 30 172 30 173 30 174 30 8 30}
+   }
+ cursor_position 19
+ font {{ Courier 10 Pitch : Regular : Courier10Pitch.pfb : 0 }}
+ font_size 30
+ scale {1 1}
+ cursor_initialised true
+ autofit_bbox false
+ initial_cursor_position {{0.5 96.5}
+   }
+ group_animations {{0} imported: 0 selected: items: "root transform/"}
+ animation_layers {{1 11 640 360 0 0 1 1 0 0 0 0}
+   }
+ name Text2
+ xpos -125
+ ypos -57
+}
+push $N5fd3f6d0
+Reformat {
+ format "1280 720 0 0 1280 720 1 HD_720"
+ black_outside true
+ name tohd1
+ xpos 151
+ ypos -220
+}
+Text2 {
+ font_size_toolbar 40
+ font_width_toolbar 100
+ font_height_toolbar 100
+ message "\[basename \[value root.input]]\n"
+ old_message {{77 105 115 115 105 110 103 32 99 111 109 109 97 110 100 45 108 105 110 101 32 97 114 103 117 109 101 110 116 32 35 49 32 102 111 114 32 105 110 112 117 116 10}
+   }
+ old_expression_markers {{0 41}
+   }
+ box {1 396 1280 717}
+ transforms {{0 2}
+   }
+ font_size_values {{0 40 1 40 2 40 3 40 4 40 5 40 6 40 7 40 8 40 9 40 10 40 11 40 12 40 13 40 14 40 15 40 16 40 17 40 18 40 19 40 20 40 21 40 22 40 23 40 24 40 25 40 26 40 27 40 28 40 29 40 30 40 31 40 32 40 33 40 34 40 35 40 36 40 37 40 38 40 39 40 40 40 41 40 42 30 0 92 1 92 2 92 3 92 4 92 5 92 6 92 7 92 8 92 9 92 10 92 11 92 12 92 13 92 14 92 15 92 16 92 17 92 42 92}
+   }
+ cursor_position 18
+ font {{ Courier 10 Pitch : Regular : Courier10Pitch.pfb : 0 }}
+ font_size 40
+ scale {1 1}
+ cursor_initialised true
+ autofit_bbox false
+ initial_cursor_position {{0 720}
+   }
+ group_animations {{0} imported: 0 selected: items: "root transform/"}
+ animation_layers {{1 11 640 360 0 0 1 1 0 0 0 0}
+   }
+ name Text3
+ xpos 151
+ ypos -170
+}
+Text2 {
+ font_size_toolbar 40
+ font_width_toolbar 100
+ font_height_toolbar 100
+ message "\[date %d]-[date %m]-[date %y]"
+ old_message {{70 114 105 32 65 117 103 32 48 55 32 50 51 58 49 48 58 50 50 32 65 69 83 84 32 50 48 49 53 10}
+   }
+ old_expression_markers {{0 28}
+   }
+ box {8.5 396 1280 717}
+ xjustify right
+ transforms {{0 2}
+   }
+ font_size_values {{29 30 29 92 0 40 1 40 2 40 3 40 4 40 5 40 6 40 7 40 8 40 9 40 10 40 11 40 12 40 13 40 14 40 15 40 16 40 17 40 18 40 19 40 20 40 21 40 22 40 23 40 24 40 25 40 26 40 27 40 28 40}
+   }
+ font {{ Courier 10 Pitch : Regular : Courier10Pitch.pfb : 0 }}
+ font_size 40
+ scale {1 1}
+ cursor_initialised true
+ autofit_bbox false
+ initial_cursor_position {{0 720}
+   }
+ group_animations {{0} imported: 0 selected: items: "root transform/"}
+ animation_layers {{1 11 640 360 0 0 1 1 0 0 0 0}
+   }
+ name Text4
+ xpos 151
+ ypos -146
+}
+Text2 {
+ font_size_toolbar 50
+ font_width_toolbar 100
+ font_height_toolbar 100
+ message "\[format %04d \[value root.start]] "
+ old_message {{48 48 48 49 32}
+   }
+ old_expression_markers {{0 3}
+   }
+ box {1.25 -2.5 1278.75 266}
+ yjustify bottom
+ transforms {{0 2}
+   }
+ font_size_values {{0 50 1 50 2 50 3 50 4 50}
+   }
+ cursor_position 5
+ font {{ Courier 10 Pitch : Regular : Courier10Pitch.pfb : 0 }}
+ font_size 50
+ scale {1 1}
+ cursor_initialised true
+ autofit_bbox false
+ initial_cursor_position {{0.5 96.5}
+   }
+ group_animations {{0} imported: 0 selected: items: "root transform/"}
+ animation_layers {{1 11 640 360 0 0 1 1 0 0 0 0}
+   }
+ name frames
+ xpos 151
+ ypos -105
+}
+Text2 {
+ font_size_toolbar 50
+ font_width_toolbar 100
+ font_height_toolbar 100
+ message "\[format %04d \[frame]] "
+ old_message {{48 48 49 53 32}
+   }
+ old_expression_markers {{0 3}
+   }
+ box {1.25 -2.5 1278.75 266}
+ xjustify center
+ yjustify bottom
+ transforms {{0 2}
+   }
+ font_size_values {{0 50 1 50 2 50 3 50 4 50}
+   }
+ cursor_position 5
+ font {{ Courier 10 Pitch : Regular : Courier10Pitch.pfb : 0 }}
+ font_size 50
+ scale {1 1}
+ cursor_initialised true
+ autofit_bbox false
+ initial_cursor_position {{0.5 96.5}
+   }
+ group_animations {{0} imported: 0 selected: items: "root transform/"}
+ animation_layers {{1 11 640 360 0 0 1 1 0 0 0 0}
+   }
+ name frames1
+ xpos 151
+ ypos -81
+}
+Text2 {
+ font_size_toolbar 50
+ font_width_toolbar 100
+ font_height_toolbar 100
+ message " \[format %04d \[value root.end]]"
+ old_message {{32 48 48 52 49}
+   }
+ old_expression_markers {{1 4}
+   }
+ box {1.25 -2.5 1278.75 66}
+ xjustify right
+ yjustify bottom
+ transforms {{0 2}
+   }
+ font_size_values {{0 50 1 50 2 50 3 50 4 50}
+   }
+ cursor_position 5
+ font {{ Courier 10 Pitch : Regular : Courier10Pitch.pfb : 0 }}
+ font_size 50
+ scale {1 1}
+ cursor_initialised true
+ autofit_bbox false
+ initial_cursor_position {{0.5 96.5}
+   }
+ group_animations {{0} imported: 0 selected: items: "root transform/"}
+ animation_layers {{1 11 640 360 0 0 1 1 0 0 0 0}
+   }
+ name frames2
+ xpos 151
+ ypos -57
+}
+set N6bc009b0 [stack 0]
+Viewer {
+ frame 27
+ frame_range 1-41
+ name Viewer1
+ xpos 221
+ ypos 39
+}
+push $N6bc009b0
+Write {
+ file "\[join \[lrange \[split \[value \[topnode].file] .] 0 end-2] .].mov"
+ file_type mov
+ meta_codec apco
+ mov32_codec apco
+ mov32_fps 25
+ mov32_units Frames
+ mov32_write_timecode true
+ mov32_pixel_format {{0} "default (YCbCrA 32-bit 444 Float (r4fl))" "RGBA  8-bit" "RGBA  16-bit (b64a)" "YCbCrA 8-bit 444 Biased (r408)" "YCbCr  8-bit 422 (2vuy)" "YCbCrA 32-bit 444 Float (r4fl)" "YCbCr  16-bit 444 (y416)" "YCbCr  10-bit 422 (v210)"}
+ mov64_codec apco
+ mov64_fps 25
+ mov64_units Frames
+ mov64_write_timecode true
+ mov64_bitrate 20000
+ mov64_bitrate_tolerance 40000000
+ mov64_quality_min 2
+ mov64_quality_max 31
+ mov64_gop_size 12
+ mov64_b_frames 0
+ checkHashOnRead false
+ version 1
+ name output
+ xpos 151
+ ypos -13
+}

@@ -1,0 +1,13 @@
+[
+    {
+        "keys": ["ProjectX", "TYPE=*", "SHOW=*", "PROJ=*", "SCENE=*" ],
+        "environment": {
+            "CURRENT_TYPE": "$TYPE",
+            "CURRENT_SHOW": "$SHOW",
+            "CURRENT_PROJ": "$PROJ",
+            "CURRENT_SCENE": "$SCENE",
+            "DEBUG_EnvKey_show_projx"  : "from_show.generic.envkeys"
+        },
+        "envhandler": "projecthandler"
+    }
+]

@@ -1,0 +1,88 @@
+##AlfredToDo 3.0
+
+Job -title {renderlayer_0825200716} -comment {#Created for 120988 by RenderMan for Maya 20.1 (@1509300 Jul 21 2015)} -dirmaps {
+    {{mayabatch} {maya} NFS}
+    {{/dabrender} {/Volumes/dabrender} OSX}
+    {{/Volumes/dabrender} {/dabrender} LINUX}
+    {{/Applications/Autodesk} {/usr/autodesk} LINUX}
+    {{/usr/autodesk} {/Applications/Autodesk} OSX}
+} -envkey {rms-20.1-maya-2016} -pbias 1 -crews {} -tags {} -service {} -whendone {} -whenerror {}  -serialsubtasks 1 -subtasks {
+  Task -title {Job} -serialsubtasks 1 -subtasks {
+
+    Task -title {ris_layer Preflight} -serialsubtasks 1 -subtasks {
+      Task -title {Generate RIB ris_layer Preflight} -cmds {
+        RemoteCmd {%D(mayabatch) -batch -proj "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project)" -command "renderManBatchGenRibForLayer 1 1 3 1" -file "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project//scenes/_renderlayer_pid7508_0825200716.ma)"} -tags {intensive} -service {RfMRibGen}
+      }
+      Task -title {Render ris_layer Preflight } -cmds {
+        RemoteCmd {prman -t:4 -Progress -recover %r -checkpoint 5m -cwd "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project/)" "%D(renderman/renderlayer_0825200716/rib/job/job_ris_layer.rib)"} -service {PixarRender}
+      } -preview {sho "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/ris_layer/renderlayer.job.exr" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_ris_layer_perspShape_Denoise.job" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_ris_layer_rmanFinalDenoisePass.job.exr" }    }
+
+    Task -title {ris_layer Frames 1-3} -serialsubtasks 0 -subtasks {
+
+    Task -title {ris_layer Frames 1-3} -serialsubtasks 1 -subtasks {
+      Task -title {Generate RIB ris_layer 1-3} -cmds {
+        RemoteCmd {%D(mayabatch) -batch -proj "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project)" -command "renderManBatchGenRibForLayer 1 1 3 2" -file "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project//scenes/_renderlayer_pid7508_0825200716.ma)"} -tags {intensive} -service {RfMRibGen}
+      }
+      Task -title {Render ris_layer 1-3} -serialsubtasks 0 -subtasks {
+      Task -title {Render ris_layer Frame 1} -cmds {
+        RemoteCmd {prman -t:4 -Progress -recover %r -checkpoint 5m -cwd "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project/)" "%D(renderman/renderlayer_0825200716/rib/0001/0001_ris_layer.rib)"} -service {PixarRender}
+      } -preview {sho "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/ris_layer/renderlayer.0001.exr" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_ris_layer_perspShape_Denoise.0001" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_ris_layer_rmanFinalDenoisePass.0001.exr" }
+      Task -title {Render ris_layer Frame 2} -cmds {
+        RemoteCmd {prman -t:4 -Progress -recover %r -checkpoint 5m -cwd "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project/)" "%D(renderman/renderlayer_0825200716/rib/0002/0002_ris_layer.rib)"} -service {PixarRender}
+      } -preview {sho "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/ris_layer/renderlayer.0002.exr" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_ris_layer_perspShape_Denoise.0002" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_ris_layer_rmanFinalDenoisePass.0002.exr" }
+      Task -title {Render ris_layer Frame 3} -cmds {
+        RemoteCmd {prman -t:4 -Progress -recover %r -checkpoint 5m -cwd "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project/)" "%D(renderman/renderlayer_0825200716/rib/0003/0003_ris_layer.rib)"} -service {PixarRender}
+      } -preview {sho "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/ris_layer/renderlayer.0003.exr" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_ris_layer_perspShape_Denoise.0003" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_ris_layer_rmanFinalDenoisePass.0003.exr" }
+
+      }
+    }
+    }
+
+    Task -title {ris_layer Postflight} -serialsubtasks 1 -subtasks {
+      Task -title {Generate RIB ris_layer Postflight} -cmds {
+        RemoteCmd {%D(mayabatch) -batch -proj "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project)" -command "renderManBatchGenRibForLayer 1 1 3 3" -file "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project//scenes/_renderlayer_pid7508_0825200716.ma)"} -tags {intensive} -service {RfMRibGen}
+      }
+      Task -title {Render ris_layer Postflight } -cmds {
+        RemoteCmd {prman -t:4 -Progress -recover %r -checkpoint 5m -cwd "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project/)" "%D(renderman/renderlayer_0825200716/rib/job/post_ris_layer.rib)"} -service {PixarRender}
+      }    }
+
+    Task -title {reyes_layer Preflight} -serialsubtasks 1 -subtasks {
+      Task -title {Generate RIB reyes_layer Preflight} -cmds {
+        RemoteCmd {%D(mayabatch) -batch -proj "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project)" -command "renderManBatchGenRibForLayer 2 1 3 1" -file "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project//scenes/_renderlayer_pid7508_0825200716.ma)"} -tags {intensive} -service {RfMRibGen}
+      }
+      Task -title {Render reyes_layer Preflight } -cmds {
+        RemoteCmd {prman -t:4 -Progress -recover %r -checkpoint 5m -cwd "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project/)" "%D(renderman/renderlayer_0825200716/rib/job/job_reyes_layer.rib)"} -service {PixarRender}
+      } -preview {sho "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer.job.exr" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_reyes_layer_perspShape_Denoise.job" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_reyes_layer_rmanFinalDenoisePass.job.exr" }    }
+
+    Task -title {reyes_layer Frames 1-3} -serialsubtasks 0 -subtasks {
+
+    Task -title {reyes_layer Frames 1-3} -serialsubtasks 1 -subtasks {
+      Task -title {Generate RIB reyes_layer 1-3} -cmds {
+        RemoteCmd {%D(mayabatch) -batch -proj "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project)" -command "renderManBatchGenRibForLayer 2 1 3 2" -file "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project//scenes/_renderlayer_pid7508_0825200716.ma)"} -tags {intensive} -service {RfMRibGen}
+      }
+      Task -title {Render reyes_layer 1-3} -serialsubtasks 0 -subtasks {
+      Task -title {Render reyes_layer Frame 1} -cmds {
+        RemoteCmd {prman -t:4 -Progress -recover %r -checkpoint 5m -cwd "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project/)" "%D(renderman/renderlayer_0825200716/rib/0001/0001_reyes_layer.rib)"} -service {PixarRender}
+      } -preview {sho "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer.0001.exr" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_reyes_layer_perspShape_Denoise.0001" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_reyes_layer_rmanFinalDenoisePass.0001.exr" }
+      Task -title {Render reyes_layer Frame 2} -cmds {
+        RemoteCmd {prman -t:4 -Progress -recover %r -checkpoint 5m -cwd "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project/)" "%D(renderman/renderlayer_0825200716/rib/0002/0002_reyes_layer.rib)"} -service {PixarRender}
+      } -preview {sho "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer.0002.exr" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_reyes_layer_perspShape_Denoise.0002" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_reyes_layer_rmanFinalDenoisePass.0002.exr" }
+      Task -title {Render reyes_layer Frame 3} -cmds {
+        RemoteCmd {prman -t:4 -Progress -recover %r -checkpoint 5m -cwd "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project/)" "%D(renderman/renderlayer_0825200716/rib/0003/0003_reyes_layer.rib)"} -service {PixarRender}
+      } -preview {sho "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer.0003.exr" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_reyes_layer_perspShape_Denoise.0003" "/Users/Shared/UTS_Jobs/TEACHING_renderman/project/renderman/renderlayer_0825200716/images/reyes_layer/renderlayer_reyes_layer_rmanFinalDenoisePass.0003.exr" }
+
+      }
+    }
+    }
+
+    Task -title {reyes_layer Postflight} -serialsubtasks 1 -subtasks {
+      Task -title {Generate RIB reyes_layer Postflight} -cmds {
+        RemoteCmd {%D(mayabatch) -batch -proj "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project)" -command "renderManBatchGenRibForLayer 2 1 3 3" -file "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project//scenes/_renderlayer_pid7508_0825200716.ma)"} -tags {intensive} -service {RfMRibGen}
+      }
+      Task -title {Render reyes_layer Postflight } -cmds {
+        RemoteCmd {prman -t:4 -Progress -recover %r -checkpoint 5m -cwd "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project/)" "%D(renderman/renderlayer_0825200716/rib/job/post_reyes_layer.rib)"} -service {PixarRender}
+      }    }
+
+  } -cleanup {
+    RemoteCmd {Alfred} -msg {File delete "%D(/Users/Shared/UTS_Jobs/TEACHING_renderman/project//scenes/_renderlayer_pid7508_0825200716.ma)"} -service {RfMRibGen}   }
+}

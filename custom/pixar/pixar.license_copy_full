@@ -1,0 +1,363 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!DOCTYPE PixarLicense SYSTEM "http://renderman.pixar.com/schema/PixarLicense.dtd">
+<PixarLicense>
+    <LicenseInfo>
+        <SerialNumber>401-1423-18153-0707-517298</SerialNumber>
+        <Created>21-jul-2015 19:23:35</Created>
+        <Licensing>PixarLicense-20.0</Licensing>
+        <CustomerInfo>
+            <CustomerName>mattgidney</CustomerName>
+            <ContactName>mattgidney</ContactName>
+            <Phone></Phone>
+            <Fax></Fax>
+            <Email>matthew.gidney@uts.edu.au</Email>
+        </CustomerInfo>
+        <LicensedHost>
+            <HostIdentifier>70cd604c5082</HostIdentifier>
+            <LicenseAccess type="floating">9010@animation</LicenseAccess>
+        </LicensedHost>
+    </LicenseInfo>
+    <FeatureList>
+        <FeatureInfo>
+            <FeatureName>PhotoRealistic-RenderMan</FeatureName>
+            <FeatureVersion>20.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount>500</FeatureCount>
+            <FeatureCode>2E379B5796190C9750CFD4A561CEEA39</FeatureCode>
+            <ExtraData>
+                375450614 978365370 384269274 456444162 514360606 060495330
+                464950453 154463958 345624344 325574425 275460465 143514126
+                604765574 969404647 355723504 078553718 564923313 665465656
+                355022275 255613833 533229465 063
+            </ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>PRMan-INTEL</FeatureName>
+            <FeatureVersion>20.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount>500</FeatureCount>
+            <FeatureCode>166FBCD47B2A271E9C8BC0F288645FA6</FeatureCode>
+            <ExtraData></ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>PRMan-INTEL-NT</FeatureName>
+            <FeatureVersion>20.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount>500</FeatureCount>
+            <FeatureCode>75FF420BBBFADA2F8B68379125B90A8C</FeatureCode>
+            <ExtraData></ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>PRMan-Linux-x86-64</FeatureName>
+            <FeatureVersion>20.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount>500</FeatureCount>
+            <FeatureCode>9541991847CE12794811CC16EF284FCB</FeatureCode>
+            <ExtraData></ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>PRMan-OSX</FeatureName>
+            <FeatureVersion>20.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount>500</FeatureCount>
+            <FeatureCode>25573617B48FFEA41B9DFDEB7FCE7705</FeatureCode>
+            <ExtraData></ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>RixSubdivAPI</FeatureName>
+            <FeatureVersion>20.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount>500</FeatureCount>
+            <FeatureCode>EBD9BE46A606C84D25675B4DD71E91C8</FeatureCode>
+            <ExtraData></ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>RMSit</FeatureName>
+            <FeatureVersion>20.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount>500</FeatureCount>
+            <FeatureCode>6678E35A4F10F5388995062B501C421A</FeatureCode>
+            <ExtraData></ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>RMSslim</FeatureName>
+            <FeatureVersion>20.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount>500</FeatureCount>
+            <FeatureCode>04507127A940CF1415481995E200FB48</FeatureCode>
+            <ExtraData></ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>Tractor</FeatureName>
+            <FeatureVersion>2.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount>500</FeatureCount>
+            <FeatureCode>5A91430BB59406D474EFF6765140D3DB</FeatureCode>
+            <ExtraData>
+                327064143 451848922 774155764 843436832 684168865 286891981
+                415053798 468831774 563915766 942471757 895465835 534504520
+                203339487 419785467 892332675 446733842 354952348 717505270
+                498575861 656717266 165718573 610325578 655538108 149745356
+                191067187 245108971 702455153 679827147 478442565 251158272
+                563564653 844732084 175646743 676823939 195141783 339772245
+                534177235 666883873 107418715 174833870 417189352 453158589
+                668048685 675732322 187834542 084575014 334267554 814705451
+                154944453 444401554 511880683 282787977 238022171 852663242
+                453937508 538387937 795489734 765733556 484182745 486832041
+                773220884 117164144 525324147 871177986 893287681 019687182
+                878510178 734145715 435235208 286864064 567634503 450684085
+                877921396 952878670 876754514 136723232 2828
+            </ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>Tractor-2.0</FeatureName>
+            <FeatureVersion>1.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount type="uncounted">0</FeatureCount>
+            <FeatureCode>D058503E7271D835A2BC4A676EEAF1F9</FeatureCode>
+            <ExtraData>
+                774450794 882487368 213381712 168887224 751623508 155497373
+                192051534 833454174 425450178 045677023 244442386 845352180
+                435283806 450836883 684133573 733167786 427673554 888464714
+                212037683 683478454 834086716 777671441 876685651 046845082
+                407668446 750815467 783483108 677818480 417755868 765834176
+                774280761 941784818 694817433 710411823 523452823 941173223
+                425036464 275828116 696638868 255788942 678649437 837574177
+                538568223 765577572 106788568 554391514 384736393 353884146
+                515775204 816777843 814737726 768452150 204989343 946484783
+                727977333 718651538 834157484 556328064 503736457 572192145
+                494474431 484492242 725242325 041725322 325040858 719453919
+                461722468 777157972 473780734 179822170 456740751 081703949
+                185547498 575822247 647414105 643724732 2828
+            </ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>RPS-15.0</FeatureName>
+            <FeatureVersion>1.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount type="uncounted">0</FeatureCount>
+            <FeatureCode>18F457D0B9BA23F357414D1EA9E8EF2D</FeatureCode>
+            <ExtraData>
+                764241447 724535379 504485213 837668568 386647333 941351418
+                704373578 440446850 768354471 039545017 364947445 544523770
+                344982148 683104357 143778578 349246424 206535514 715517253
+                543545652 024657234 515332771 084228849 788872496 885523838
+                834135334 752385735 446977716 975326966 863944348 543777750
+                533936144 672525549 237189797 621187851 711641374 148403487
+                143456395 286791868 454336876 754698035 458456203 237467289
+                393216717 341412166 234987847 741476886 421086776 423576645
+                886473818 745165014 173256188 045802366 731732214 219734876
+                738246576 949706847 514622447 448884871 814833221 755643671
+                228067855 174787034 404733387 266647374 237022725 776817814
+                444783204 483676822 767779208 236101435 343685473 934674748
+                842445358 747681935 811618214 678677732 2828
+            </ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>RPS-16.0</FeatureName>
+            <FeatureVersion>1.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount type="uncounted">0</FeatureCount>
+            <FeatureCode>19472C8535EF0B25ADD99F5D2DAE535E</FeatureCode>
+            <ExtraData>
+                505017368 382645188 854653455 178534989 328834101 643858024
+                785317215 067487187 643634387 469721070 478052524 023847166
+                154241576 522431722 708386844 540517281 403337463 418848648
+                568872457 815248320 152234801 952538243 538167245 540356449
+                685251778 140538846 457948386 835662419 232387894 889385164
+                507272814 054848132 368515222 083155017 242477757 678663257
+                475137414 473648121 163250357 373676486 531718703 764693580
+                504464782 321654979 337754401 622422466 734781676 488432420
+                738042738 823683565 774483711 774794036 101416754 538808755
+                848224807 157517357 688819705 039827224 155344525 384577521
+                231672733 939347673 457475444 888564286 222066877 569494542
+                185275818 455375177 425015165 257562153 413765165 068491689
+                878349747 375554456 803384744 771738048 2828
+            </ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>RPS-17.0</FeatureName>
+            <FeatureVersion>1.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount type="uncounted">0</FeatureCount>
+            <FeatureCode>DA6CAB3FAD374E447389FCEBFF2B15E8</FeatureCode>
+            <ExtraData>
+                346534757 744234569 687481322 433416840 101023657 274542234
+                357545878 087221580 868554662 474704782 704035561 576807239
+                793987537 988514851 883584577 885467088 528322755 121426677
+                502464864 569875057 675314154 432348735 397487187 314761879
+                436673518 348404155 438245247 845437415 761639898 623777021
+                392356711 780728388 421777576 945106984 547333371 552661717
+                177879644 917213435 771016802 168484475 495520667 842646970
+                846833447 978211647 533714675 087805681 818169564 340685180
+                567418827 634388281 142371426 775796618 652424654 253481619
+                338057545 180392319 397040551 773395451 773551645 587557234
+                171465145 072437867 788571526 542861052 188476403 374761975
+                895152156 442227936 211519784 446164967 444470346 438863434
+                714850392 064788541 813675224 248664086 2828
+            </ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>RPS-18.0</FeatureName>
+            <FeatureVersion>1.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount type="uncounted">0</FeatureCount>
+            <FeatureCode>B47D41815BF1C6DF06F784D06C534F8F</FeatureCode>
+            <ExtraData>
+                654445338 171526876 671035548 667794535 416457421 670666585
+                208416537 365461648 246965204 423558416 675286802 333202438
+                246870148 222714616 704635176 476821488 721488848 385333279
+                895067183 543108248 354782651 866393476 881868246 638522222
+                195455177 888691086 754815203 353684241 358815811 634367187
+                728881321 574411841 425467243 568571034 334443541 087383517
+                378018348 623194855 181650863 882851981 677524338 448832477
+                335549365 667186878 474543405 014797053 226635551 579204849
+                721637558 485335282 871664725 046747142 778356552 051646841
+                536418657 935518222 422251854 824494064 427139726 486326437
+                835117152 367236610 881465724 569347722 417442877 067184243
+                342045148 178707348 218569844 236662217 748441846 622222275
+                478146192 151392252 856568736 614243886 2828
+            </ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>RPS-19.0</FeatureName>
+            <FeatureVersion>1.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount type="uncounted">0</FeatureCount>
+            <FeatureCode>3C8F97494F22C1BBC0947E9ECB6A3176</FeatureCode>
+            <ExtraData>
+                811633702 048373737 818345691 557507046 455276414 917457335
+                726572895 135498664 373750493 243547581 191785327 752537087
+                723448441 567834166 154872441 835774741 786739867 674564187
+                167675491 476443518 206523718 245185623 496840511 614363955
+                537671438 064752121 347832224 933184969 505155894 785527571
+                896446531 924552147 201870104 681783749 766521407 873778816
+                516973203 564417348 551534327 855788971 478615737 164798468
+                707286575 284235522 878242404 388104055 785171545 756897222
+                893667487 371746686 225724234 388146976 687818238 014567051
+                787070357 281458375 832274424 364748945 833750574 739778983
+                816433388 522851066 401882381 040896510 653749804 781551622
+                233675153 621434174 847780208 174148032 813479168 721764120
+                574753248 547544349 515581774 966207048 2828
+            </ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>RMSrerenderswatch</FeatureName>
+            <FeatureVersion>19.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount type="uncounted">0</FeatureCount>
+            <FeatureCode>2055A5CE4A466385EC034A6ECD7D02F9</FeatureCode>
+            <ExtraData></ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>RMS-19.0</FeatureName>
+            <FeatureVersion>1.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount type="uncounted">0</FeatureCount>
+            <FeatureCode>CE73A8E192DE46203AED4D447D558A08</FeatureCode>
+            <ExtraData>
+                796515703 471661640 647886557 775417668 892140143 767423775
+                248674444 123208139 874432545 552493854 175557693 670774557
+                445074774 254646954 397786575 714408075 766434844 220785732
+                384269345 378525045 764573533 264705774 321877391 866781020
+                233776762 466327741 825122532 323221764 678489334 770808734
+                773476194 680898821 406686745 577371665 183419401 071813283
+                673244178 841767445 358039451 581344083 484668158 452146783
+                338166573 881805732 888372847 152884280 758744398 245474849
+                794675191 855575382 894442207 768864940 243567215 050794417
+                696486741 939848973 415719243 576101836 325150555 580748721
+                521687145 778237910 516942852 415217754 653652141 834683277
+                647818225 678231020 813382327 453727450 397282535 273392372
+                368364538 785823569 238155732 123558632 2828
+            </ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>RPS-20.0</FeatureName>
+            <FeatureVersion>1.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount type="uncounted">0</FeatureCount>
+            <FeatureCode>CABA6ED5C67413D344ACAFFF185AD1C3</FeatureCode>
+            <ExtraData>
+                807944666 772557880 455668786 924755768 823251213 467757243
+                228565193 515744745 853777652 343818921 348966577 069535634
+                527734664 973854065 725568711 589704616 641780534 385357546
+                857338867 441838632 723947873 254878068 723577684 187503775
+                354049531 554355178 517545868 441714420 473935764 068105470
+                772381768 217157571 848667846 748867867 165135654 257541466
+                163410467 752464080 197772545 421343920 885724354 988414316
+                363239887 575713439 692245758 938488272 856654684 655346680
+                515316217 566568334 678669708 757477889 243270738 574401932
+                435455737 647203840 167835173 678554849 371936432 133757566
+                844580192 052823689 343474651 544687117 407918414 515243971
+                511072666 749103840 238382737 218181982 172237741 457191775
+                497438863 573718171 234252805 277377748 2828
+            </ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>RMSrerenderswatch</FeatureName>
+            <FeatureVersion>20.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount type="uncounted">0</FeatureCount>
+            <FeatureCode>F2326BD9C2D06169FE04CB573D265DD0</FeatureCode>
+            <ExtraData></ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>RMS-20.0</FeatureName>
+            <FeatureVersion>1.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount type="uncounted">0</FeatureCount>
+            <FeatureCode>5CF18656F4CEE70853E343F7FAD41045</FeatureCode>
+            <ExtraData>
+                323357518 469675534 853415658 020107652 657669567 740407074
+                341618415 378712269 882264572 476463637 784714708 171667941
+                663570777 473751086 744850193 615643573 817435204 117505666
+                778032181 833801767 395633107 549423341 655643188 452334248
+                781548228 956173951 496589225 122475750 844543454 467413953
+                842318654 935493414 517179336 773144537 798368857 517228922
+                845247237 177464285 744947192 219502238 364432577 078387749
+                748219192 476367745 887272895 379383857 144319177 823107145
+                888019334 376534875 707065814 040361020 537286235 434383940
+                694040512 371565470 801443238 672484179 768340766 582836657
+                328423536 457338821 707784175 068344380 778316718 765227582
+                838049238 149104715 407683533 278692043 158068367 210386874
+                178143394 120491655 447180175 286234286 2828
+            </ExtraData>
+        </FeatureInfo>
+        <FeatureInfo>
+            <FeatureName>RMS-18.0</FeatureName>
+            <FeatureVersion>1.000</FeatureVersion>
+            <ExpirationDate>10-mar-2016</ExpirationDate>
+            <FeatureCount type="uncounted">0</FeatureCount>
+            <FeatureCode>4ABB6D865342EA535F9D7B72EF8D9FF9</FeatureCode>
+            <ExtraData>
+                497045798 132144971 176770478 135844552 808080873 847232277
+                658244167 180793488 757854406 589553716 878082161 015464216
+                454755504 037107810 828435684 824454220 451868484 577445456
+                511652753 947402365 762420887 548754315 341086541 587684368
+                768466695 486825185 642432831 839688470 511520831 868564451
+                142447367 671202144 424434188 187495744 188324247 954247882
+                873580883 917158255 718189577 885684021 465071167 875241486
+                464878814 870387343 567636372 138778775 237250447 824571681
+                892347187 470524384 443524716 474535579 424252546 964651455
+                844910824 241764786 154353862 415245439 857516898 242652480
+                155732421 550503715 805282678 944154610 757987456 936855369
+                778067188 982186665 335445508 954216488 883276837 748771971
+                754039207 032163217 645079856 524761986 2828
+            </ExtraData>
+        </FeatureInfo>
+    </FeatureList>
+    <SummaryData>
+        A16A622C5 E48CCA628 D4753BC53 BE3CC2767 1B6AFFB7C 4BCE4D26D
+        B2378EB4B 949D464AB 1476BD388 B026B329C 42C2452D2 FB2A2FCB6
+        46A9C9320 8D10CFCA2 3BCEFECC0 B0F2A552E 6212F62E8 7C559EE40
+        740029D03 6426C3B72 E777D29D8 333D866AC F5A9534EE 1991FC94C
+        A5AD4B6EF 3A081E3E5 AEEA76412 ECA96908D CAF1695A5 459FBA23D
+        8DC11E883 D9D1752B5 EB7836A92 A4F30DA99 8116582AA 7C8283ED5
+        462558133 11AEBAB81 9F239E8A1 C7293E204 DF69A02F0 E78EA47A0
+        A6340A75E 88EB4151E 6C3B53F9F B5ACDB1EF A4C75AA57 2D3A4BE57
+        7CB515077 63F014DC9 BE603DA30 17728F5F3 D1D336475 77FAEEF57
+        7E1370936 4E8D36DB7 C2F92386
+    </SummaryData>
+</PixarLicense>
+
+
