@@ -20,9 +20,9 @@ import tractor.api.author as author
 import os
 import sys
 import time
-from dabtractor.factories import user_factory as ufac
-from dabtractor.factories import utils_factory as utils
-from dabtractor.factories import configuration_factory as config
+from software.renderfarm.dabtractor.factories import user_factory as ufac
+from software.renderfarm.dabtractor.factories import utils_factory as utils
+from software.renderfarm.dabtractor.factories import configuration_factory as config
 
 
 class RenderBase(object):
@@ -57,51 +57,9 @@ class RenderBase(object):
 
 
 class RenderPrman(RenderBase):
-    """
-        Pixar PhotoRealistic RenderMan 20.2
-          linked Tue Aug 25 13:26:46 2015 PDT @1521997
-          build osxYosemite_x86-64_xcode6icc150_external_release
-          copyright (c) 1988-2015 Pixar.
-
-        Usage: prman [options] [file1 [file2 ...]]
-          -help             : print this usage message
-          -version          : print the version
-          -cwd path         : sets current working directory to 'path'
-          -progress         : print percent complete while rendering
-          -Progress         : same as '-progress' in a different format
-          -recover [0|1]    : resuming rendering partial frames
-          -t:X              : render using 'X' threads
-          -woff msgid,...   : suppress error messages from provided list
-          -catrib file      : write RIB to 'file' without rendering
-          -ascii            : write RIB to ASCII format file
-          -binary           : write RIB to Binary format file
-          -gzip             : compress output file
-          -capture file     : write RIB to 'file' while rendering
-          -nobake           : disallow re-render baking
-          -res x y[:par]    : override RIB Format
-          -crop xmin xmax ymin ymax
-                            : override RIB CropWindow
-          -maxsamples i     : override RIB ray trace hider maxsamples
-          -pixelvariance f  : override RIB PixelVariance
-          -d dispType       : override RIB Display type
-          -statsfile f      : override RIB stats file & level (1)
-          -statslevel i     : override RIB stats level
-          -memorylimit f    : override RIB to set memory limit ratio
-          -checkpoint t[,t] : checkpoint interval and optional exit time
-
-        RI filtering
-        -------------
-        [-rifmarker m1] : adds marker for rif chain edits
-        [-rif plug-in [-rifargs arg arg... -rifend]]: adds rif to chain
-        [more rif marker and plug-in blocks]
-          -allowrifedits [0|1]  : allow rif editing
-
-        File Usage Note:
-           'file' can be a named file or '-' to represent stdin/stdout
-
-        Please consult the documentation for detailed information.
-
-    """
+    '''
+        Renderman job defined using the tractor api
+    '''
 
     def __init__(self,
                  envtype="",

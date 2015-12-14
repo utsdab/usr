@@ -10,14 +10,12 @@
 import os
 import sys
 import json
-import pickle
 import shutil
 import subprocess
 import string
 import platform
-from dabtractor.factories import utils_factory as utils
-from pprint import pprint
-from dabtractor.factories import configuration_factory as config
+from software.renderfarm.dabtractor.factories import utils_factory as utils
+from software.renderfarm.dabtractor.factories import configuration_factory as config
 
 # ##############################################################
 import logging
@@ -35,6 +33,7 @@ class Map(object):
     This class is the mapping of students
     """
     def __init__(self, mapfilepath=config.CurrentConfiguration().usermapfilepath):
+        logger.info("Map File Path {}".format(mapfilepath))
         try:
 
             self.mapfilejson = os.path.join(mapfilepath,"map_file.json")
@@ -70,9 +69,6 @@ class Map(object):
         name="fourthyearstudent"
         c = {number: {'number': number, 'name': name, 'year': 2012}}
         a.update(c)
-
-        # print(json.dumps(a, indent=4))
-
 
         ######## JSON SERIALISATION
         with open(self.mapfilejson, 'w') as outfile:
@@ -168,11 +164,27 @@ class Map(object):
             number=all[usernumber].get("number","ZIP")
             name=all[number].get("name","ZIP")
             year=all[number].get("year","ZIP")
-            print "Found student {} named {} from {}".format(number, name, year)
+            logger.info("Found student {} named {} from {}".format(number, name, year))
             return number,name,year
-        except:
-            print "{} not found".format(usernumber)
+        except Exception, e:
+            logger.info("{} not found {}".format(usernumber,e))
             return None
+
+    def removeuser(self, usernumber):
+        if self.getuser(usernumber):
+            # self.backup()
+            logger.info("Removing user {}".format(usernumber))
+
+            with open(self.mapfilejson) as json_data:
+                all = json.load(json_data)
+
+            # print all.keys()
+            all.pop(usernumber, None)
+            # print all.keys()
+
+            with open(self.mapfilejson, 'w') as outfile:
+                json.dump(all, outfile, sort_keys = True, indent = 4,)
+
 
     def backup(self):
         source=self.mapfilejson
@@ -181,14 +193,15 @@ class Map(object):
             os.mkdir( self.backuppath, 0775 );
         dest=os.path.join(self.backuppath,
                           "{}-{}".format(os.path.basename(self.mapfilejson),now))
-        print source
-        print dest
+        logger.info("Backup: source {}".format(source))
+        logger.info("Backup: dest {}".format(dest))
         shutil.copy2(source, dest)
 
     def adduser(self, number, name, year):
+
         if not self.getuser(number):
-            self.backup()
-            print "No one by that number {}, adding".format(number)
+            # self.backup()
+            logger.info("No one by that number {}, adding".format(number))
 
             with open(self.mapfilejson) as json_data:
                 all = json.load(json_data)
@@ -200,7 +213,42 @@ class Map(object):
                 json.dump(all, outfile, sort_keys = True, indent = 4,)
 
 
+class EnvType(object):
+    # this is the user work area either work/number or projects/projectname
+    def __init__(self,userid=None,projectname=None):
+        self.dabrenderpath=config.CurrentConfiguration().dabrenderpath
 
+        if userid:
+            self.envtype="work"
+            self.userid=userid
+            self.map=Map()
+            (self.usernumber,self.username,self.enrol)=self.map.getuser(self.userid)
+            logger.debug("Usernumber {}, Username {}, Enrolled {}".format (self.usernumber,self.username,self.enrol))
+
+        if projectname:
+            self.envtype="projects"
+            self.projectname=projectname
+
+    def makedirectory(self):
+        #
+        try:
+            if self.envtype == "work":
+                os.mkdir( os.path.join(self.dabrenderpath,self.envtype,self.username))
+                logger.info("Made {} under work".format(self.username))
+            elif self.envtype == "projects":
+                os.mkdir( os.path.join(self.dabrenderpath,self.envtype,self.projectname))
+                logger.info("Made {} under projects".format(self.projectname))
+            else:
+                logger.info("Made no directories")
+        except Exception, e:
+            logger.warn("Made nothing {}".format(e))
+
+
+
+class TractorUserConfig(object):
+    # this is the crew.config for tractor
+    def __init__(self):
+        pass
 
 class FarmUser(object):
     """
@@ -215,9 +263,11 @@ class FarmUser(object):
         self.number = ""
         self.name = ""
         self.dabrendermount = ""
+        self.dabrenderpath=config.CurrentConfiguration().dabrenderpath
+        self.dabusrpath=config.CurrentConfiguration().dabusrpath
         self.renderhome = ""
-        self.mountname = "dabrender"
-        self.work = "work"
+        # self.mountname = "dabrender"
+        # self.work = "work"
         self.mapfilename = "user_map"
         self.queryuser = queryuser
         self.match = False
@@ -232,14 +282,14 @@ class FarmUser(object):
             sys.exit("No $USER available")
 
         try:
-            if platform.system() == "Darwin":
-                self.dabrendermount = "/Volumes/%s" % self.mountname
-            elif platform.system() == "Linux":
-                self.dabrendermount = "/%s" % self.mountname
+            # if platform.system() == "Darwin":
+            #     self.dabrendermount = "/Volumes/%s" % self.mountname
+            # elif platform.system() == "Linux":
+            #     self.dabrendermount = "/%s" % self.mountname
 
-            self.dabrenderwork = os.path.join(self.dabrendermount, self.work)
-            self.usermapfile = os.path.join(self.dabrendermount, "usr", "map", self.mapfilename)
-            logger.debug("Running on %s" % platform.system())
+            self.dabrenderwork = os.path.join(self.dabrenderpath, "work")
+            self.usermapfile = config.CurrentConfiguration.usermapfilepath
+            # logger.debug("Running on %s" % platform.system())
 
         except Exception, error3:
             logger.warn("    Cant figure out the dabrendermount: %s" % error3)
@@ -379,27 +429,27 @@ class FarmUser(object):
 
 
 
-class FarmUser2(FarmUser):
+# class FarmUser2(FarmUser):
+#
+#     def build(self):
+#         pass
+#         map=Map()
+#         map.adduser(number, name, year)
 
-    def build(self):
-        pass
-        map=Map()
-        map.adduser(number, name, year)
 
 
-
-class Student(object):
-    def __init__(self):
-        self.user = os.getenv("USER")
-
-        # get the names of the central render location for the user
-        student = FarmUser(self.user)
-        # student.query()
-
-        self.name = student.getusername()  # "matthewgidney"
-        self.number = student.getusernumber()  # "120988"
-        self.dabrender = student.getrendermountpath()  # "/Volumes/dabrender"
-        self.dabrenderwork = student.getrenderhome()  # "/Volumes/dabrender/work"
+# class Student(object):
+#     def __init__(self):
+#         self.user = os.getenv("USER")
+#
+#         # get the names of the central render location for the user
+#         student = FarmUser(self.user)
+#         # student.query()
+#
+#         self.name = student.getusername()  # "matthewgidney"
+#         self.number = student.getusernumber()  # "120988"
+#         self.dabrender = student.getrendermountpath()  # "/Volumes/dabrender"
+#         self.dabrenderwork = student.getrenderhome()  # "/Volumes/dabrender/work"
 
 class SpoolJob(object):
     # simple command spooled to a tractor job so that pixar user can execute it.
@@ -412,28 +462,26 @@ class SpoolJob(object):
 
 if __name__ == '__main__':
 
-    sh.setLevel(logging.INFO)
-    logger.info("-------- OLD FARM USER MAP ------------")
-    ausers = [os.getenv("USER"), "11724135", "99999999"]
-
-    for i, each in enumerate(ausers):
-        try:
-            student,number = FarmUser(each).query()
-            logger.warn("User {} is {}".format(student,number))
-        except Exception, nouser:
-            logger.warn("No user {}".format(each))
-
-
-    #logger.debug("-------- NEW JSON FARM USER MAP ------------")
-    # m=Map()
-    # # m.test()
-    # m.getuser("120988")
+    logger.info("-------- NEW JSON FARM USER MAP ------------")
+    m=Map()
+    # m.test()
+    m.getuser("120988")
     # m.getallusers()
     # m.backup()
-    # m.adduser("1209880","mattgidney","2020")
-    # m.adduser("0000000","nextyearstudent","2016")
-    # m.getallusers()
-    # # testing here
+    m.adduser("1209880","mattgidney","2020")
+    m.adduser("0000000","nextyearstudent","2016")
+    m.adduser("9999999","neveryearstudent","2016")
+    m.getuser("9999999")
+    m.removeuser("9999999")
+    m.getuser("9999999")
+
+
+    e=EnvType(userid="120988")
+    e.makedirectory()
+    e=EnvType(projectname="albatross")
+    e.makedirectory()
+
+    # testing here
     # me = Student()
     # logger.debug("Testing name={}".format(me.name))
     # logger.debug("Testing number={}".format(me.number))

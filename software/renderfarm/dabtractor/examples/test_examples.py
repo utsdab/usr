@@ -14,7 +14,7 @@ def test_short():
     compTask = job.newTask(title="comp", argv="comp fg.tif bg.tif final.tif")
     fgTask = compTask.newTask(title="render fg", argv="prman foreground.rib")
     bgTask = compTask.newTask(title="render bg", argv="prman foreground.rib")
-    print job
+    print job.asTcl()
 
 
 def test_long():

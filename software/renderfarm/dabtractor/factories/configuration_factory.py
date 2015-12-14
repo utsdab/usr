@@ -7,8 +7,7 @@
            move all this to a json file and have this method look it up.
 """
 import os
-import sys
-
+import software.renderfarm.dabtractor as dabtractor
 
 # ##############################################################
 import logging
@@ -21,9 +20,6 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
-import dabtractor
-import os
-
 class ConfigurationBase(object):
     """Base configurations - these are the possible options installed"""
     def __init__(self):
@@ -35,13 +31,13 @@ class ConfigurationBase(object):
         self.configuration = "base"
         self.projectgroups = ("yr1", "yr2", "yr3", "yr4", "masters", "personal", "admin")
         self.mayarenderers = ("mr", "sw")
-        self.mayarenderers = ("mr",)
-        self.renderfarmbin = os.path.join(os.path.dirname(os.path.dirname(dabtractor.__file__)), "bin")
-        self.renderfarmmodulepath = os.path.dirname(os.path.dirname(dabtractor.__file__))
-        self.renderfarmproxypath = os.path.join(os.path.dirname(dabtractor.__file__), "proxys")
+        self.renderfarmbin = (os.path.join(os.path.dirname(os.path.dirname(dabtractor.__file__)), "bin"),)
+        self.renderfarmmodulepath = (os.path.dirname(os.path.dirname(dabtractor.__file__)),)
+        self.renderfarmproxypath = (os.path.join(os.path.dirname(dabtractor.__file__), "proxys"),)
         self.nukedefaultproxytemplate = ("nuke_proxy_720p_prores_v003.py")
-        self.dabrenderpath = ("/Volumes/dabrender")
-        self.usermapfilepath = (os.path.join(self.dabrenderpath, "usr/map"))
+        self.dabrenderpath = self.getfromenv("DABRENDERPATH","/Volumes/dabrender")
+        self.dabusrpath = self.getfromenv("DABUSR","/Volumes/dabrender")
+        self.usermapfilepath = (os.path.join(self.dabusrpath, "custom/map"))
         self.editproxydumppath = (os.path.join(self.dabrenderpath, "renderproxies"))
         self.renderthreads = ("16","8","4","2")
         self.rendermemorys = ("8000","4000","2000")
@@ -50,8 +46,17 @@ class ConfigurationBase(object):
         self.envshow = ("matthewgidney",)
         self.envproject = ("testFarm",)
         self.envscene = ("rmsTestFile.ma",)
+        self.userid = self.getfromenv("USER")
 
-
+    def getfromenv(self,key,default=None):
+        # try to use an environment variable over the default
+        _value = None
+        try:
+            _value = os.getenv(key, default)
+            logger.info("Found {} to be {}".format(key,_value))
+        except Exception, e:
+            logger.warn("Failed to find anything for {}".format(key))
+        return _value
 
 class CurrentConfiguration(ConfigurationBase):
     def __init__(self):
@@ -82,3 +87,11 @@ if __name__ == "__main__":
     print "renderfarmbin is %s" % AA.renderfarmbin
     print "proxypath is %s" % AA.renderfarmproxypath
     print "usermappath is %s" % AA.usermapfilepath
+
+    _env = os.environ
+    _keys = _env.keys()
+    _keys.sort()
+    print "{:_^80}".format("env")
+    for key in _keys:
+        print key, _env.get(key)
+    print "{:_^80}".format("env")

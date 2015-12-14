@@ -49,7 +49,7 @@ esac
 #  Not entirely sure what the dirrernce between RDIR and RMS_SCRIPT_PATHS is
 export RMS_SCRIPT_PATHS="${DABUSR}/custom/pixar/configs:/usr/local/dabanim/etc/pixar/config"
 export RDIR="${DABUSR}/usr/custom/pixar/configs"
-export PIXAR_LICENSE_FILE="${DABUSR}/custom/pixar/pixar.license"
+#export PIXAR_LICENSE_FILE="${DABUSR}/custom/pixar/pixar.license"
 
 # WORKAROUND for libMC3.so.8 error in Maya2016 (added by Chris Bell 10/9/15
 export MAYA_DISABLE_CIP=1
@@ -68,7 +68,7 @@ if [ -e ${DABUSR}/etc/profile_central_extra ] ; then
 	export CENTRAL=${DABUSR}/custom/maya
 	source ${DABUSR}/etc/profile_central_extra
 else
-	echo  "WARNING: central Configs not found to source"
+	echo  "WARNING: Central Configs not found to source at ${DABUSR}/etc/profile_central_extra"
 fi
 
 #########################  DYNAMIC LIBRARIES
@@ -99,8 +99,13 @@ export PATH=${DABUSR}/custom/tractor:${PATH}
 ##########################  PYTHONPATH settings
 export PYTHONPATH=${RMSTREE}/scripts:${PYTHONPATH}
 export PYTHONPATH=${DABUSR}/lib/python:${PYTHONPATH}
-export PYTHONPATH=${DABUSR}/renderfarm:${PYTHONPATH}
+export PYTHONPATH=${DABUSR}/software/renderfarm:${PYTHONPATH}
 export PYTHONPATH=${DABUSR}/custom/tractor:${PYTHONPATH}
+
+#export DYLD_LIBRARY_PATH=${RMSTREE}/lib/python2.7/site-packages/PySide:${RMSTREE}/lib:${DYLD_LIBRARY_PATH}
+#export PYTHONPATH=/Applications/Pixar/Tractor-2.2/lib/python2.7/site-packages:${PYTHONPATH}
+#export PYTHONPATH=${RMSTREE}/lib/python2.7/site-packages:${PYTHONPATH}
+
 #export PYTHONPATH="${OCIO_EXECROOT}/lib/python2.7/site-packages:${PYTHONPATH}"
 
 ##########################  NUKE settings

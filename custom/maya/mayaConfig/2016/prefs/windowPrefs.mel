@@ -11,9 +11,9 @@ windowPref -topLeftCorner 287 534 -widthHeight 1515 923 -maximized false hyperSh
 windowPref -topLeftCorner 250 200 -widthHeight 700 400 -maximized false dynPaintScriptedPanelWindow;
 windowPref -topLeftCorner 250 200 -widthHeight 550 562 -maximized false blindDataEditor1Window;
 windowPref -topLeftCorner 25 1027 -widthHeight 566 908 -maximized false polyTexturePlacementPanel1Window;
-windowPref -topLeftCorner 271 848 -widthHeight 634 975 -maximized false pluginManagerWindow;
-windowPref -topLeftCorner 23 0 -widthHeight 2238 1339 -maximized false MayaWindow;
-windowPref -topLeftCorner 443 1227 -widthHeight 1333 684 -maximized false scriptEditorPanel1Window;
+windowPref -topLeftCorner 203 848 -widthHeight 634 975 -maximized false pluginManagerWindow;
+windowPref -topLeftCorner 1 4 -widthHeight 2238 1339 -maximized true MayaWindow;
+windowPref -topLeftCorner 361 124 -widthHeight 1333 684 -maximized false scriptEditorPanel1Window;
 windowPref -topLeftCorner 476 853 -widthHeight 358 199 -maximized false LayerEditorQuickEditWindow;
 windowPref -topLeftCorner 559 1652 -widthHeight 778 643 -maximized false RRM_Window;
 windowPref -topLeftCorner 210 390 -widthHeight 665 500 -maximized false PreferencesWindow;
@@ -51,9 +51,10 @@ windowPref -topLeftCorner 476 853 -widthHeight 500 640 -maximized false AddAttrW
 windowPref -topLeftCorner 338 720 -widthHeight 550 500 -maximized false projectWindow;
 windowPref -topLeftCorner 173 480 -widthHeight 1377 700 -maximized false HotkeyEditor;
 windowPref -topLeftCorner 476 853 -widthHeight 620 600 -maximized false expressionEditorWin;
-windowPref -topLeftCorner 688 1878 -widthHeight 772 819 -maximized false inter_w;
+windowPref -topLeftCorner 221 867 -widthHeight 500 600 -maximized false inter_w;
 windowPref -topLeftCorner 410 640 -widthHeight 475 325 -maximized false nodeEditorPanel1Window;
 windowPref -topLeftCorner 476 853 -widthHeight 256 262 -maximized false uvSetEditor;
 windowPref -topLeftCorner 222 1640 -widthHeight 396 347 -maximized false AutoUnwrapWin;
 windowPref -topLeftCorner 476 853 -widthHeight 490 580 -maximized false psdTextureWindow;
 windowPref -topLeftCorner 476 853 -widthHeight 357 275 -maximized false namespaceEditor;
+windowPref -topLeftCorner 415 642 -widthHeight 408 650 -maximized false poses_w;
