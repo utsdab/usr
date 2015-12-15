@@ -36,8 +36,8 @@ extraJobOptionsGrp = ''
 doJobPauseGrp = ''
 otherRendererGrp = ''
 
-tractorEngineName = 'tractor'
-tractorEnginePort = '80'
+tractorEngineName = 'tractor-engine'
+tractorEnginePort = '5600'
 renderer = 'default'
 distribMode = 'Local'
 framesPerServer = 1
@@ -242,7 +242,7 @@ def Spool (argv):
     appProductDate = "TRACTOR_BUILD_DATE"
     appDir = os.path.dirname( os.path.realpath( __file__ ) )
 
-    defaultMtd  = "tractor-engine:80"
+    defaultMtd  = "tractor-engine:5600"
 
     spoolhost = socket.gethostname().split('.')[0] # options can override
     user = getpass.getuser()
@@ -351,7 +351,7 @@ def Spool (argv):
         if options.mtdhost != defaultMtd:
             h,n,p = options.mtdhost.partition(":")
             if not p:
-                options.mtdhost = h + ':80'
+                options.mtdhost = h + ':5600'
 
         # paused starting is represented by a negative priority
         # decremented by one. This allows a zero priority to pause
@@ -637,7 +637,15 @@ def createJobScript():
         jobFile.write('     File delete "' + sceneFile + '"\n')
     jobFile.write('}\n')
     jobFile.write('}\n')
+
+
+    for line in jobFile:
+        print line,
+        # sck.send('PRIVMSG ' + chan + " " + str(lines) + '\r\n')
+
     jobFile.close()
+
+
     return fnm
 
 def tractorEngineNameFunc(args):
@@ -738,6 +746,9 @@ def doJobPauseFunc(args):
     global doJobPause
     global doJobPauseGrp
     doJobPause = cmds.checkBoxGrp(doJobPauseGrp, query=1, v1=True)
+
+def jobFilePrint(args):
+
 
 def spoolJob(args):
     global tractorEngineName

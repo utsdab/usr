@@ -60,7 +60,9 @@ export MAYA_DISABLE_CIP=1
 
 ##########################  generic maya settings
 export MAYA_SCRIPT_PATH="${RMSTREE}/scripts:${MAYA_SCRIPT_PATH}"
+#export MAYA_SCRIPT_PATH="${MAYA_LOCATION}/scripts:${MAYA_SCRIPT_PATH}"
 export MAYA_PLUG_IN_PATH="${RMSTREE}/plug-ins:${MAYA_LOCATION}/plug-ins:${MAYA_PLUG_IN_PATH}"
+#export MAYA_PLUG_IN_PATH="${MAYA_LOCATION}/plug-ins/xgen/plug-ins:${MAYA_PLUG_IN_PATH}"
 export XBMLANGPATH="${RMSTREE}/icons:${XBMLANGPATH}"
 export MAYA_MAC_SET_UMASK=0
 
@@ -80,9 +82,9 @@ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${TRACTOR_LOCATION}/lib
 
 #export DYLD_LIBRARY_PATH=${NUKE_LOCATION}/MacOS:${DYLD_LIBRARY_PATH}
 export DYLD_LIBRARY_PATH=${MAYA_LOCATION}/MacOS:${DYLD_LIBRARY_PATH}
-export DYLD_LIBRARY_PATH=${MAYA_APPLICATION_LOCATION}/plug-ins/xgen/lib:${DYLD_LIBRARY_PATH}
-export DYLD_LIBRARY_PATH=${RMANTREE}/lib:${DYLD_LIBRARY_PATH}
-export DYLD_LIBRARY_PATH=${TRACTOR_LOCATION}/lib:${DYLD_LIBRARY_PATH}
+#export DYLD_LIBRARY_PATH=${MAYA_APPLICATION_LOCATION}/plug-ins/xgen/lib:${DYLD_LIBRARY_PATH}
+#export DYLD_LIBRARY_PATH=${RMANTREE}/lib:${DYLD_LIBRARY_PATH}
+#export DYLD_LIBRARY_PATH=${TRACTOR_LOCATION}/lib:${DYLD_LIBRARY_PATH}
 #export DYLD_LIBRARY_PATH="${OCIO_EXECROOT}/lib:${DYLD_LIBRARY_PATH}"
 
 ##########################  PATH settings
@@ -103,8 +105,11 @@ export PYTHONPATH=${DABUSR}/software/renderfarm:${PYTHONPATH}
 export PYTHONPATH=${DABUSR}/custom/tractor:${PYTHONPATH}
 
 #export DYLD_LIBRARY_PATH=${RMSTREE}/lib/python2.7/site-packages/PySide:${RMSTREE}/lib:${DYLD_LIBRARY_PATH}
-#export PYTHONPATH=/Applications/Pixar/Tractor-2.2/lib/python2.7/site-packages:${PYTHONPATH}
-#export PYTHONPATH=${RMSTREE}/lib/python2.7/site-packages:${PYTHONPATH}
+#export PYTHONPATH=${TRACTOR_LOCATION}/lib/python2.7/site-packages/tractor:${PYTHONPATH}
+########################## copy of tractor package only
+##### need to do this as we dont want all the other site-packages from tractor and rmstree like pyside etc
+export PYTHONPATH=${DABUSR}/lib/site-packages:${PYTHONPATH}
+#export PYTHONPATH=${PYTHONPATH}:${RMSTREE}/lib/python2.7/site-packages
 
 #export PYTHONPATH="${OCIO_EXECROOT}/lib/python2.7/site-packages:${PYTHONPATH}"
 
@@ -114,7 +119,6 @@ export PYTHONPATH=${DABUSR}/custom/tractor:${PYTHONPATH}
 #export NUKE_PATH="${DABUSR}/custom/nuke/tractorNuke:${NUKE_PATH}";
 
 
-export DYLD_LIBRARY_PATH=${MAYA_LOCATION}/MacOS:${DYLD_LIBRARY_PATH}
 ###########################  ALIAS's
 alias nukex='source nuke_env;Nuke${NUKE_VERSION} --nukex'
 alias nukestudio='source nuke_env;Nuke${NUKE_VERSION} --studio'
