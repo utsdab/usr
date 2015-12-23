@@ -24,9 +24,9 @@ import tkFileDialog
 import Tkconstants
 import os
 import sys
-from dabtractor.factories import user_factory as ufac
-from dabtractor.factories import configuration_factory as config
-import dabtractor
+from software.renderfarm.dabtractor.factories import user_factory as ufac
+from software.renderfarm.dabtractor.factories import configuration_factory as config
+import software.renderfarm.dabtractor
 
 
 class WindowBase(object):

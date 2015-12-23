@@ -20,9 +20,9 @@ import tractor.api.author as author
 import os
 import sys
 import time
-from software.renderfarm.dabtractor.factories import user_factory as ufac
-from software.renderfarm.dabtractor.factories import utils_factory as utils
-from software.renderfarm.dabtractor.factories import configuration_factory as config
+from renderfarm.dabtractor.factories import user_factory as ufac
+from renderfarm.dabtractor.factories import utils_factory as utils
+from renderfarm.dabtractor.factories import configuration_factory as config
 
 
 class RenderBase(object):
@@ -37,12 +37,12 @@ class RenderBase(object):
 
         try:
             # get the names of the central render location for the user
-            ru = ufac.Student()
+            ru = ufac.User()
             self.renderusernumber = ru.number
             self.renderusername = ru.name
             self.dabrender = ru.dabrender
-            self.dabrenderworkpath = ru.dabrenderwork
-            self.initialProjectPath = ru.dabrenderwork
+            self.dabrenderworkpath = ru.dabuserworkpath
+            self.initialProjectPath = ru.dabuserworkpath
 
         except Exception, erroruser:
             logger.warn("Cant get the users name and number back %s" % erroruser)

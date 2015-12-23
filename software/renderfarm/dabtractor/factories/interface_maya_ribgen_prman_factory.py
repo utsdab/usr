@@ -24,9 +24,9 @@ import tkFileDialog
 import Tkconstants
 import os
 import sys
-from dabtractor.factories import user_factory as ufac
-from dabtractor.factories import configuration_factory as config
-import dabtractor
+from software.renderfarm.dabtractor.factories import user_factory as ufac
+from software.renderfarm.dabtractor.factories import configuration_factory as config
+import software.renderfarm.dabtractor as dabtractor
 from functools import partial
 
 
@@ -40,33 +40,24 @@ class WindowBase(object):
         self.spooljob = False
         self.validatejob = False
         self.master = tk.Tk()
-
         try:
             # get the names of the central render location for the user
-            ru = ufac.Student()
+            ru = ufac.User()
             self.renderusernumber = ru.number
             self.renderusername = ru.name
             self.dabrender = ru.dabrender
-            self.dabrenderworkpath = ru.dabrenderwork
-            self.initialProjectPath = ru.dabrenderwork  # self.renderuserhomefullpath
+            self.dabrenderworkpath = ru.dabuserworkpath
+            self.initialProjectPath = ru.dabuserworkpath  # self.renderuserhomefullpath
 
         except Exception, erroruser:
             logger.warn("Cant get the users name and number back %s" % erroruser)
             sys.exit("Cant get the users name")
-
-        if os.path.ismount(self.dabrender):
-            logger.info("Found %s" % self.dabrender)
-        else:
-            self.initialProjectPath = None
-            logger.critical("Cant find central filer mounted %s" % self.dabrender)
-            raise Exception, "dabrender not a valid mount point"
 
 
 class WindowPrman(WindowBase):
     """
     Ui Class for render submit
     """
-
     def __init__(self):
         """Construct the main window interface
         """
@@ -75,6 +66,13 @@ class WindowPrman(WindowBase):
         self.filetext = 'Select your maya scene file'
         self.workspacetext = 'Select the workspace.mel file in your project'
         self.workspaceerrortext = 'Warning - no workspace.mel found!'
+        self.envshowtext="Select your show"
+        self.envprojecttext="Select your show's maya project"
+        self.envscenetext="Select your maya scene file"
+        self.envtypetext="Select work or project"
+
+
+
         self.filename = ""
         self.dirname = ""
         self.workspace = ""
@@ -90,7 +88,6 @@ class WindowPrman(WindowBase):
         self.button_opt = {'fill': Tkconstants.BOTH, 'padx': 5, 'pady': 5}
         self.canvas = tk.Canvas(self.master, height=200, width=300)
         self.canvas.pack(expand=True, fill=tk.BOTH)
-
         imagepath = os.path.join(os.path.dirname(dabtractor.__file__),"icons","Pixar_logo.gif")
         imagetk = tk.PhotoImage(file=imagepath)
         # keep a link to the image to stop the image being garbage collected
@@ -100,7 +97,7 @@ class WindowPrman(WindowBase):
         __row = 1
 
         # ###################################################################
-        self.envstructuretext="$DABRENDERPATH/$TYPE/$SHOW/$PROJECT/scenes/$SCENE"
+        self.envstructuretext="$DABRENDERPATH/$TYPE/$SHOW/$PROJECT/...../$SCENE"
         self.labelenv = tk.Label(self.canvas, bg=self.bgcolor3, text="Environment Setup")
         self.labelenv.grid(row=__row,column=0,columnspan=5, sticky=tk.W + tk.E)
         __row += 1
@@ -109,89 +106,69 @@ class WindowPrman(WindowBase):
         __row += 1
 
         # ###################################################################
-        self.labeldab1 = tk.Label(self.canvas, bg=self.bgcolor1,text="DABRENDERPATH")
+        self.labeldab1 = tk.Label(self.canvas, bg=self.bgcolor1,text="$DABRENDERPATH")
         self.labeldab1.grid(row=__row, column=0,  sticky=tk.E)
         self.dabrenderpath = tk.StringVar()
         self.dabrenderpath.set(config.CurrentConfiguration().dabrenderpath)
-        self.cbdabrender = ttk.Combobox(self.canvas, textvariable=self.dabrenderpath)
+        self.cbdabrender = ttk.Combobox(self.canvas,
+                                        textvariable=self.dabrenderpath,
+                                        justify="center",state="readonly")
         self.cbdabrender.config(values=config.CurrentConfiguration().dabrenderpath)
-        self.cbdabrender.grid(row=__row, column=1, sticky=tk.W)
-        self.labeldab2 = tk.Label(self.canvas, bg=self.bgcolor1,text="")
-        self.labeldab2.grid( row=__row,column=2,columnspan=2,sticky=tk.W)
+        self.cbdabrender.grid(row=__row, column=1,columnspan=4, sticky=tk.W + tk.E)
         __row += 1
 
         # ###################################################################
-        # self.envtypeextratext="group project OR solo work"
-        # self.labeltype1 = tk.Label(self.canvas, bg=self.bgcolor1,text="TYPE")
-        # self.labeltype1.grid(row=__row, column=0, sticky=tk.E)
-        # self.envtype = tk.StringVar()
-        # # self.envtype.set(config.CurrentConfiguration().envtype)
-        #
-        # self.cbxenvtype = ttk.Combobox(self.canvas, textvariable=self.envtype, postcommand=self.settype,
-        #                                state="readonly")
-        # self.envtype.set("Select something")
-        # self.cbxenvtype.config(values=config.CurrentConfiguration().envtypes)
-        # self.cbxenvtype.grid(row=__row, column=1, sticky=tk.W)
-        # self.labeltype2 = tk.Label(self.canvas, bg=self.bgcolor1,text=self.envtypeextratext)
-        # self.labeltype2.grid( row=__row, column=2, columnspan=2, sticky=tk.W)
-        # __row += 1
-
-        # ###################################################################
-        self.envtypeextratext="group project OR solo work"
-        self.envtypetext = "Select your type"
-        self.labeltype1 = tk.Label(self.canvas, bg=self.bgcolor1,text="TYPE")
+        self.labeltype1 = tk.Label(self.canvas, bg=self.bgcolor1,text="$TYPE")
         self.labeltype1.grid(row=__row, column=0, sticky=tk.E)
+
         self.envtype = tk.StringVar()
-        self.envtypebut = tk.Button(self.canvas, text=self.envtypetext, bg=self.bgcolor2, fg='black',
-                                    command=self.opentype)
-
-        # button = Tk.Button(master=frame, text='press', command= lambda: action(someNumber))
-
-
-        self.envtypebut.pack(**self.button_opt)  # must pack separately to get the value to dirbut
-        self.envtypebut.grid(row=__row, column=1, sticky=tk.W + tk.E)
-        self.labeltype2 = tk.Label(self.canvas, bg=self.bgcolor1, text="")
-        self.labeltype2.grid(row=__row, column=2, sticky=tk.W)
+        self.envtype.trace('w',self.on_type_change)
+        self.cbxenvtype = ttk.Combobox(self.canvas,textvariable=self.envtype,
+                                       justify="center",state="readonly")
+        self.cbxenvtype.pack()
+        self.envtype.set(self.envtypetext)
+        self.cbxenvtype.config(values=config.CurrentConfiguration().envtypes)
+        self.cbxenvtype.grid(row=__row, column=1,columnspan=4, sticky=tk.W + tk.E)
         __row += 1
 
         # ###################################################################
-        self.envshowtext = "Select your show"
-        self.labelshow1 = tk.Label(self.canvas, bg=self.bgcolor1,text="SHOW")
+        self.labelshow1 = tk.Label(self.canvas, bg=self.bgcolor1,text="$SHOW")
         self.labelshow1.grid(row=__row, column=0, sticky=tk.E)
+
         self.envshow = tk.StringVar()
-        self.envshowbut = tk.Button(self.canvas, text=self.envshowtext, bg=self.bgcolor2, fg='black',
-                                    command=self.openshow)
-        self.envshowbut.pack(**self.button_opt)  # must pack separately to get the value to dirbut
-        self.envshowbut.grid(row=__row, column=1, sticky=tk.W + tk.E)
-        self.labelshow2 = tk.Label(self.canvas, bg=self.bgcolor1,text="")
-        self.labelshow2.grid(row=__row, column=2, sticky=tk.W)
+        self.envshow.trace('w',self.on_show_change)
+        self.cbxenvshow = ttk.Combobox(self.canvas,textvariable=self.envshow,
+                                       justify="center",state="readonly")
+        self.cbxenvshow.pack()
+        self.envshow.set(self.envshowtext)
+        self.cbxenvshow.grid(row=__row, column=1,columnspan=4, sticky=tk.W + tk.E)
         __row += 1
 
         # ###################################################################
-        self.envprojecttext="Select your maya project"
-        self.labelproj1 = tk.Label(self.canvas, bg=self.bgcolor1,text="PROJECT")
+        self.labelproj1 = tk.Label(self.canvas, bg=self.bgcolor1,text="$PROJECT")
         self.labelproj1.grid(row=__row, column=0, sticky=tk.E)
+
         self.envproject = tk.StringVar()
-        self.envprojectbut = tk.Button(self.canvas, text=self.envprojecttext, bg=self.bgcolor2, fg='black',
-                                       command=self.openproj)
-        self.envprojectbut.pack(**self.button_opt)  # must pack separately to get the value to dirbut
-        self.envprojectbut.grid(row=__row, column=1, sticky=tk.W + tk.E)
-        self.labelproj2 = tk.Label(self.canvas, bg=self.bgcolor1, text="")
-        self.labelproj2.grid(row=__row, column=2, sticky=tk.W)
+        self.envproject.trace('w',self.on_project_change)
+        self.cbxenvproject = ttk.Combobox(self.canvas,textvariable=self.envproject,
+                                       justify="center",state="readonly")
+        self.cbxenvproject.pack()
+        self.envproject.set(self.envprojecttext)
+        self.cbxenvproject.grid(row=__row, column=1,columnspan=4, sticky=tk.W + tk.E)
         __row += 1
 
         # ###################################################################
-        self.envscenetext="Select your maya scene file"
         self.envscene = tk.StringVar()
+        # self.envscene.trace('w',self.on_scene_change)
         self.envscenefullpath = ""
-        self.labelscene1 = tk.Label(self.canvas, bg=self.bgcolor1,text="SCENE")
+        self.labelscene1 = tk.Label(self.canvas, bg=self.bgcolor1,text="$SCENE")
         self.labelscene1.grid(row=__row, column=0, sticky=tk.E)
-        self.envscenebut = tk.Button(self.canvas, text=self.envscenetext, bg=self.bgcolor2, fg='black',
-                                     command=self.openscene)
+        self.envscenebut = tk.Button(self.canvas, text=self.envscenetext, bg=self.bgcolor2,
+                                     fg='black',justify="center",
+                                     command=lambda: self.openscene()
+                                     )
         self.envscenebut.pack(**self.button_opt)  # must pack separately to get the value to dirbut
-        self.envscenebut.grid(row=__row, column=1, sticky=tk.W + tk.E)
-        self.labelscene2 = tk.Label(self.canvas, bg=self.bgcolor1,text="")
-        self.labelscene2.grid(row=__row, column=2, sticky=tk.W)
+        self.envscenebut.grid(row=__row, column=1,columnspan=4, sticky=tk.W + tk.E)
         __row += 1
 
         # ###################################################################
@@ -209,7 +186,7 @@ class WindowPrman(WindowBase):
         self.labelmayav.grid(row=__row, column=0, sticky=tk.E)
         self.mayaversion = tk.StringVar()
         self.mayaversion.set(config.CurrentConfiguration().mayaversion)
-        self.cbxmayav = combobox = ttk.Combobox(self.canvas, textvariable=self.mayaversion, state="readonly")
+        self.cbxmayav = ttk.Combobox(self.canvas, textvariable=self.mayaversion, state="readonly")
         self.cbxmayav.config(values=config.CurrentConfiguration().mayaversions)
         self.cbxmayav.grid(row=__row, column=1, sticky=tk.W)
         __row += 1
@@ -218,12 +195,13 @@ class WindowPrman(WindowBase):
         tk.Label(self.canvas, bg=self.bgcolor1,text="Project Group").grid(row=__row, column=0, sticky=tk.E)
         self.projectgroup = tk.StringVar()
         self.projectgroup.set(config.CurrentConfiguration().projectgroup)
-        self.cbxprojgrp = combobox = ttk.Combobox(self.canvas, textvariable=self.projectgroup, state="readonly")
+        self.cbxprojgrp = ttk.Combobox(self.canvas, textvariable=self.projectgroup, state="readonly")
         self.cbxprojgrp.config(values=config.CurrentConfiguration().projectgroups)
         self.cbxprojgrp.grid(row=__row, column=1, sticky=tk.W)
         self.labelprojgrp = tk.Label(self.canvas, bg=self.bgcolor1,text="** type of project")
         self.labelprojgrp.grid(row=__row, column=2, sticky=tk.W)
         __row += 1
+
 
         # ###################################################################
         self.labelstart = tk.Label(self.canvas, bg=self.bgcolor1,text="Frame Start")
@@ -411,15 +389,15 @@ class WindowPrman(WindowBase):
 
         self.master.mainloop()
 
-    # def openfile(self):
+    # def openfile(self,initialpath):
     #     self.filename = tkFileDialog.askopenfilename(parent=self.master,
-    #                                                  initialdir=self.dirname,
+    #                                                  initialdir=initialpath,
     #                                                  title=self.filetext,
     #                                                  filetypes=[('maya ascii', '.ma'),
     #                                                             ('maya binary', '.mb')])
     #                                                             # filename not filehandle
     #     self.filebut["text"] = str(self.filename) if self.filename else self.filetext
-
+    #
     # def opendirectory(self):
     #     self.dirname = tkFileDialog.askdirectory(parent=self.master,
     #                                              initialdir=self.initialProjectPath,
@@ -433,74 +411,103 @@ class WindowPrman(WindowBase):
     #         self.workspacebut["text"] = self.workspaceerrortext
 
 
-    def openshow(self):
+    # def openshow(self):
+    #
+    #     if self.envtype.get() == "project":
+    #         print "work"
+    #
+    #         # self.envshowpick = tkFileDialog.askdirectory(parent=self.master,
+    #         #                                         initialdir=os.path.join(self.dabrenderpath.get(),self.envtype.get()),
+    #         #                                         title=self.envshowtext)
+    #         # self.envshowbut["text"] = os.path.basename(str(self.envshowpick)) if self.envshowbut else self.envshowtext
+    #         # self.envprojectbut["text"] = self.renderusername
 
-        if self.envtype.get() == "work":
-            # print "work"
-            self.envshowpick = tkFileDialog.askdirectory(parent=self.master,
-                                                    initialdir=os.path.join(self.dabrenderpath.get(),
-                                                                            self.envtype.get()),
-                                                    title=self.envshowtext)
-            self.envshowbut["text"] = os.path.basename(str(self.envshowpick)) if self.envshowbut else self.envshowtext
-            self.envprojectbut["text"] = self.renderusername
 
-        elif self.envtype.get() == "project":
-            # print "project"
-            self.envshowpick = tkFileDialog.askdirectory(parent=self.master,
-                                                    initialdir=os.path.join(self.dabrenderpath.get(),
-                                                                            self.envtype.get()),
-                                                    title=self.envshowtext)
+    def on_type_change(self, index, value, op):
+        print "type updated to ", self.cbxenvtype.get()
 
-            self.envshowbut["text"] = os.path.basename(str(self.envshowpick)) if self.envshowbut else self.envshowtext
-
-    def settype(self):
         if self.cbxenvtype.get() == "work":
-            print "fix show"
-            self.envshowbut["text"] = self.renderusername
-        else:
-            print "dont fix show"
-            self.envshowbut["text"] = self.envshowtext
-
-    def opentype(self):
-        print "work"
-        self.envtypepick = tkFileDialog.askdirectory(parent=self.master,
-                                                    initialdir=self.dabrenderpath.get(),
-                                                    title=self.envprojecttext)
-        self.envtypebut["text"] = os.path.basename(str(self.envtypepick)) if self.envtype else self.envtypetext
-        if self.envtypebut["text"] == "work":
-            self.envshowbut["text"] = self.renderusername
+            self.cbxenvshow.config(values=[self.renderusername])
             self.envshow.set(self.renderusername)
+        else:
+            p=os.path.join(self.dabrenderpath.get(),self.envtype.get())
+            if os.path.isdir(p):
+                _dirs=os.listdir(p)
+                # print "d",os.listdir(p)
+            else:
+                _dirs=["Select your show"]
+            try:
+                self.cbxenvshow.config(values=_dirs)
+                self.envshow.set("Select your show")
+            except:
+                pass
 
-    def openproj(self):
-        if self.envtype.get() == "work":
-            print "openproj work"
-            self.envprojectpick = tkFileDialog.askdirectory(parent=self.master,
-                                                        initialdir=os.path.join(self.dabrenderpath.get(),
-                                                                                self.envtype.get(),
-                                                                                self.renderusername),
-                                                        title=self.envprojecttext)
-            self.envprojectbut["text"] = os.path.basename(str(self.envprojectpick)) if self.envprojectbut else \
-                self.envprojecttext
+    def on_show_change(self, index, value, op):
+        print "show updated to ", self.cbxenvshow.get()
+        p=os.path.join(self.dabrenderpath.get(),self.envtype.get(),self.envshow.get())
+        if os.path.isdir(p):
+            _dirs=os.listdir(p)
+        else:
+            _dirs=[self.envprojecttext]
 
-        # _possible = "%s/workspace.mel" % self.envprojectpick
-        # if os.path.exists(_possible):
-        #     print "workspace found"
-        #     self.workspace = _possible
-        #     # self.workspacebut["text"] = str(self.workspace) if self.workspace else self.workspacetext
+        try:
+            self.cbxenvproject.config(values=_dirs)
+            self.envproject.set(self.envprojecttext)
+        except:
+            pass
+
+    def on_project_change(self, index, value, op):
+        print "project updated to ", self.cbxenvproject.get()
+        p=os.path.join(self.dabrenderpath.get(),self.envtype.get(),self.envshow.get())
+        if os.path.isdir(p):
+            _dirs=os.listdir(p)
+        else:
+            _dirs=[self.envprojecttext]
+        try:
+            self.cbxenvproject.config(values=_dirs)
+            # self.envproject.set(self.envprojecttext)
+        except:
+            pass
+
+
+    def on_scene_change(self, index, value, op):
+        print "scene updated to ", self.cbxenvtype.get()
+        # if self.cbxenvtype.get() == "work":
+        #     # print "envtype = work"
+        #     self.envshowbut["text"] = self.renderusername
         # else:
-        #     print "no workspace"
-        #     # self.workspacebut["text"] = self.workspaceerrortext
+        #     # print "envtype = project"
+        #     self.envshowbut["text"] = self.envshowtext
+
+
+    # def openproj(self):
+    #     if self.envtype.get() == "work":
+    #         print "openproj work"
+    #         self.envprojectpick = tkFileDialog.askdirectory(parent=self.master,
+    #                                                     initialdir=os.path.join(self.dabrenderpath.get(),
+    #                                                                             self.envtype.get(),
+    #                                                                             self.renderusername),
+    #                                                     title=self.envprojecttext)
+    #         self.envprojectbut["text"] = os.path.basename(str(self.envprojectpick)) if self.envprojectbut else \
+    #             self.envprojecttext
+    #
+    #     _possible = "%s/workspace.mel" % self.envprojectpick
+    #     if os.path.exists(_possible):
+    #         print "workspace found"
+    #         self.workspace = _possible
+    #         # self.workspacebut["text"] = str(self.workspace) if self.workspace else self.workspacetext
+    #     else:
+    #         print "no workspace"
+    #         # self.workspacebut["text"] = self.workspaceerrortext
 
     def openscene(self):
-        if self.envtype.get() == "work":
-            print "work"
+        _initialpath=os.path.join(self.dabrenderpath.get(),self.envtype.get(),
+                                  self.envshow.get(),self.envproject.get())
+        print "ss",_initialpath
+        if os.path.isdir(_initialpath):
+            print _initialpath
             self.envscenepick = tkFileDialog.askopenfilename(parent=self.master,
-                                                             initialdir=os.path.join(self.dabrenderpath.get(),
-                                                                                  self.envtype.get(),
-                                                                                  # self.renderusername,
-                                                                                  self.envshow.get(),
-                                                                                  self.envproject.get(),
-                                                                                  "scenes"),
+                                                             initialdir=_initialpath,
                                                              title=self.envscenetext,
                                                              filetypes=[('maya ascii', '.ma'),
                                                                         ('maya binary', '.mb')])
@@ -509,7 +516,9 @@ class WindowPrman(WindowBase):
             self.envscenesplit = os.path.splitext(os.path.basename(self.envscenepick))
             self.envscene = self.envscenesplit[0]
             self.envscenebut["text"] = str(self.envscene) if self.envscene else self.envscenetext
-
+        else:
+            print _initialpath
+            # self.envscenebut["text"] = self.envscenetext
 
     def openworkspace(self):
         self.workspace = tkFileDialog.askopenfilename(parent=self.master,

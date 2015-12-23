@@ -15,9 +15,9 @@ import shutil
 import subprocess
 import string
 import platform
-from dabtractor.factories import utils_factory as utils
+from software.renderfarm.dabtractor.factories import utils_factory as utils
 from pprint import pprint
-from dabtractor.factories import configuration_factory as config
+from software.renderfarm.dabtractor.factories import configuration_factory as config
 
 # ##############################################################
 import logging

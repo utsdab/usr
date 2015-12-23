@@ -6,7 +6,7 @@ export PATH="/usr/X11R6/bin:${PATH}"
 
 ##########################
 export MAYA_VERSION=2016
-export RMAN_VERSION=20.5
+export RMAN_VERSION=20.6
 export TRACTOR_VERSION=2.2
 export NUKE_VERSION=9.0v8
 

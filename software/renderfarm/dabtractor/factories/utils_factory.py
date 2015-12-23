@@ -8,7 +8,7 @@ import os
 import string
 import subprocess
 import datetime
-from dabtractor.factories import configuration_factory as config
+from software.renderfarm.dabtractor.factories import configuration_factory as config
 
 ###############################################################
 import logging

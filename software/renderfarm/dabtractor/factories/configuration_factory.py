@@ -24,10 +24,10 @@ class ConfigurationBase(object):
     """Base configurations - these are the possible options installed"""
     def __init__(self):
         self.mayaversions = ("2016",)
-        self.rendermanversions = ("20.2","20.1",)
+        self.rendermanversions = ("20.6","20.2","20.1",)
         self.rendermanrenderers = ("rms-ris", "rms-reyes")
         self.rendermanintegrators = ("pxr", "vcm")
-        self.nukeversions = ("9.0v7","9.0v6")
+        self.nukeversions = ("9.0v8","9.0v7","9.0v6")
         self.configuration = "base"
         self.projectgroups = ("yr1", "yr2", "yr3", "yr4", "masters", "personal", "admin")
         self.mayarenderers = ("mr", "sw")
@@ -53,7 +53,7 @@ class ConfigurationBase(object):
         _value = None
         try:
             _value = os.getenv(key, default)
-            logger.info("Found {} to be {}".format(key,_value))
+            logger.debug("Found {} to be {}".format(key,_value))
         except Exception, e:
             logger.warn("Failed to find anything for {}".format(key))
         return _value

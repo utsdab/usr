@@ -20,9 +20,9 @@ import tractor.api.author as author
 import os
 import sys
 import time
-from dabtractor.factories import user_factory as ufac
-from dabtractor.factories import utils_factory as utils
-from dabtractor.factories import configuration_factory as config
+from software.renderfarm.dabtractor.factories import user_factory as ufac
+from software.renderfarm.dabtractor.factories import utils_factory as utils
+from software.renderfarm.dabtractor.factories import configuration_factory as config
 
 
 class RenderBase(object):

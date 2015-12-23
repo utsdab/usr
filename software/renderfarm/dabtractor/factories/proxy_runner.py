@@ -14,9 +14,9 @@ import glob
 import subprocess
 import time
 import argparse
-from dabtractor.factories import configuration_factory as config
-from dabtractor.factories import utils_factory as utils
-from dabtractor import proxys as pt
+from software.renderfarm.dabtractor.factories import configuration_factory as config
+from software.renderfarm.dabtractor.factories import utils_factory as utils
+from software.renderfarm.dabtractor import proxys as pt
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

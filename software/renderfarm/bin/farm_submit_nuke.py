@@ -20,8 +20,8 @@ import tkMessageBox
 import datetime
 import tkFileDialog, Tkconstants
 import tractor.api.author as author
-from dabtractor.factories import configuration_factory as config
-from dabtractor.factories import utils_factory as utils
+from software.renderfarm.dabtractor.factories import configuration_factory as config
+from software.renderfarm.dabtractor.factories import utils_factory as utils
 
 from dabtractor.factories import user_factory as ufac
 import os, sys

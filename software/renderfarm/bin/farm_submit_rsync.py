@@ -23,10 +23,10 @@ logger.addHandler(sh)
 
 
 import tractor.api.author as author
-from dabtractor.factories import interface_rsync_factory as ifac
-from dabtractor.factories import command_factory as cfac
+from software.renderfarm.dabtractor.factories import interface_rsync_factory as ifac
+from software.renderfarm.dabtractor.factories import command_factory as cfac
 
-from dabtractor.factories import user_factory as ufac
+from software.renderfarm.dabtractor.factories import user_factory as ufac
 import os, sys
 
 ################################

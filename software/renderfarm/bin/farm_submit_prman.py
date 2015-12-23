@@ -21,20 +21,22 @@ logger.addHandler(sh)
 
 import os,sys
 import tractor.api.author as author
-from dabtractor.factories import interface_maya_ribgen_prman_factory as ifac
-from dabtractor.factories import render_prman_factory as rfac
-from dabtractor.factories import user_factory as ufac
+from software.renderfarm.dabtractor.factories import interface_maya_ribgen_prman_factory as ifac
+from software.renderfarm.dabtractor.factories import render_prman_factory as rfac
+from software.renderfarm.dabtractor.factories import user_factory as ufac
 
 
 ################################
 _thisuser = os.getenv("USER")
-(_usernumber,_username) =  ufac.FarmUser(_thisuser).query()
-
-if not _username:
+# (_usernumber,_username) =  ufac.FarmUser(_thisuser).query()
+try:
+    u=ufac.User()
+    _usernumber=u.number
+    _username=u.name
+except:
     sys.exit("Sorry you dont appear to be a registered farm user {}, try running farm_user.py and then contact matt - "
              "matthew.gidney@uts.edu.au".format(_thisuser))
 ################################
-
 
 author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
 
