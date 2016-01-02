@@ -93,11 +93,14 @@ class Map(object):
             all = json.load(json_data)
         try:
             _result=all[usernumber]
-            logger.info("Found in Map: {}".format(_result))
+            logger.debug("Found in Map: {}".format(_result))
             return _result
         except Exception, e:
             logger.warn("{} not found {}".format(usernumber,e))
             return None
+
+    def getusername(self,usernumber):
+        return self.getuser(usernumber).get("name")
 
     def removeuser(self, usernumber):
         # remove a user from the map
@@ -226,6 +229,7 @@ if __name__ == '__main__':
     logger.debug("-------- TEST MAP ------------")
     m=Map()
     m.getuser("120988")
+    print m.getusername("120988")
     # m.getallusers()
     # m.backup()
     m.adduser("1209880","mattgidney","2020")

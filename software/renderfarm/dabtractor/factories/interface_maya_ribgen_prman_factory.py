@@ -34,7 +34,6 @@ class WindowBase(object):
     """
     Base class for all batch jobs
     """
-
     def __init__(self):
         self.user = os.getenv("USER")
         self.spooljob = False
@@ -70,8 +69,6 @@ class WindowPrman(WindowBase):
         self.envprojecttext="Select your show's maya project"
         self.envscenetext="Select your maya scene file"
         self.envtypetext="Select work or project"
-
-
 
         self.filename = ""
         self.dirname = ""
@@ -536,7 +533,7 @@ class WindowPrman(WindowBase):
         logger.info("Type: %s" % self.envtype.get())
         logger.info("Show: %s" % self.envshow.get())
         logger.info("Project: %s" % self.envproject.get())
-        logger.info("Scene: %s" % self.envscene.get())
+        logger.info("Scene: %s" % self.envscene)
         logger.info("SceneFullPath: %s" % self.envscenefullpath)
         logger.info("Start: %s" % self.sf.get())
         logger.info("End: %s" % self.ef.get())
