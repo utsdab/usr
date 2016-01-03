@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 '''
 This is a good temple to learn from
 works just the same in maya
