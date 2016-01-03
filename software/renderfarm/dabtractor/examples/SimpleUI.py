@@ -4,6 +4,10 @@ works just the same in maya
 exactly, but dont need the app line in main()
 '''
 
+import rmanpy
+print dir(rmanpy)
+from PySide import QtCore as qc
+print dir(qc)
 
 import PySide.QtCore as qc
 import PySide.QtGui as qg

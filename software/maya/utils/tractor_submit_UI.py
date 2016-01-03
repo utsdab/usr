@@ -1,11 +1,8 @@
-#!/usr/bin/env python
-
 '''
 This is a good temple to learn from
 works just the same in maya
 exactly, but dont need the app line in main()
 '''
-
 
 import PySide.QtCore as qc
 import PySide.QtGui as qg
@@ -24,6 +21,7 @@ class ProjectWidget(qg.QWidget):
         self.project_splitter = Splitter("JOB ENVIRONMENT")
         self.layout().addWidget(self.project_splitter)
 
+        # ------------------------------------------------------------------------------------ #
         #  $DABRENDER
         self.dabrender_text_layout = qg.QHBoxLayout()
         self.dabrender_text_layout.setContentsMargins(4,0,4,0)
@@ -40,7 +38,7 @@ class ProjectWidget(qg.QWidget):
         
         self.layout().addLayout(self.dabrender_text_layout)
 
-
+        # ------------------------------------------------------------------------------------ #
         #  $TYPE
         self.scene_layout = qg.QHBoxLayout()
         self.scene_layout.setContentsMargins(4,0,4,0)
@@ -57,6 +55,7 @@ class ProjectWidget(qg.QWidget):
         self.scene_layout.addWidget(self.scene_text_lb)
         self.scene_layout.addWidget(self.scene_combo)
 
+        # ------------------------------------------------------------------------------------ #
         #  $SHOW
         self.show_text_layout = qg.QHBoxLayout()
         self.show_text_layout.setContentsMargins(4,0,4,0)
@@ -74,6 +73,7 @@ class ProjectWidget(qg.QWidget):
 
         self.layout().addLayout(self.show_text_layout)
 
+        # ------------------------------------------------------------------------------------ #
         #  $PROJECT
         self.project_text_layout = qg.QHBoxLayout()
         self.project_text_layout.setContentsMargins(4,0,4,0)
@@ -99,15 +99,16 @@ class SceneWidget(qg.QWidget):
         self.layout().setContentsMargins(0,0,0,0)
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
 
-        self.project_splitter = Splitter("JOB MAIN SCENE FILE")
+        self.project_splitter = Splitter("JOB SCENE FILE")
         self.layout().addWidget(self.project_splitter)
-        
+
+        # ------------------------------------------------------------------------------------ #
         #  JOB SCENE FILE
         self.scene_layout = qg.QHBoxLayout()
         self.scene_layout.setContentsMargins(4,0,4,0)
         self.scene_layout.setSpacing(2)
 
-        self.scene_text_lb = qg.QLabel('JOB SCENE FILE:')
+        self.scene_text_lb = qg.QLabel('SCENE FILE:')
         self.scene_combo  = qg.QComboBox()
         # self.scene_combo.setCompleter()
         self.scene_combo.addItem('select from list')
@@ -143,9 +144,25 @@ class RangeWidget(qg.QWidget):
         self.layout().setContentsMargins(0,0,0,0)
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
 
+        self.framerange_splitter = Splitter("JOB FRAME RANGE")
+        self.layout().addWidget(self.framerange_splitter)
 
-        self.project_splitter = Splitter("JOB FRAME RANGE")
-        self.layout().addWidget(self.project_splitter)
+        # ------------------------------------------------------------------------------------ #
+        #  JOB FRAME RANGE
+        self.framerange_layout = qg.QHBoxLayout()
+        self.framerange_layout.setContentsMargins(4,0,4,0)
+        self.framerange_layout.setSpacing(2)
+        self.framerange_start_text_lb = qg.QLabel('START:')
+        self.framerange_end_text_lb = qg.QLabel('END:')
+        self.framerange_by_text_lb = qg.QLabel('BY:')
+
+        self.framerange_layout.addWidget(self.framerange_start_text_lb)
+        self.framerange_layout.addWidget(self.framerange_end_text_lb)
+        self.framerange_layout.addWidget(self.framerange_by_text_lb)
+
+        self.layout().addLayout(self.framerange_layout)
+
+
 
 class MayaWidget(qg.QWidget):
     def __init__(self):
@@ -189,10 +206,10 @@ class TractorSubmit(qg.QDialog):
         self.layout().setSpacing(0)
         self.layout().setAlignment(qc.Qt.AlignTop)
 
+        # ------------------------------------------------------------------------------------ #
         # PROJECT WIDGET
         project_widget = ProjectWidget()
         self.layout().addWidget(project_widget)
-
 
         # SCENE WIDGET
         scene_widget = SceneWidget()
@@ -219,6 +236,7 @@ class TractorSubmit(qg.QDialog):
         # TEST WIDGET
         # test_widget = Test()
 
+        # ------------------------------------------------------------------------------------ #
 
         self.path="/Users/Shared/UTS_Dev/dabrender"
         # d=Directory(startplace=self.path, title="Pick a directory")
