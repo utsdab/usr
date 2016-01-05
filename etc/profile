@@ -103,6 +103,7 @@ export PYTHONPATH=${RMSTREE}/scripts:${PYTHONPATH}
 export PYTHONPATH=${DABUSR}/lib/python:${PYTHONPATH}
 export PYTHONPATH=${DABUSR}/software/renderfarm:${PYTHONPATH}
 export PYTHONPATH=${DABUSR}/custom/tractor:${PYTHONPATH}
+export PYTHONPATH=${DABUSR}:${PYTHONPATH}
 
 #export DYLD_LIBRARY_PATH=${RMSTREE}/lib/python2.7/site-packages/PySide:${RMSTREE}/lib:${DYLD_LIBRARY_PATH}
 #export PYTHONPATH=${TRACTOR_LOCATION}/lib/python2.7/site-packages/tractor:${PYTHONPATH}

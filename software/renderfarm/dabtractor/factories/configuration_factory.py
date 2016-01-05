@@ -7,9 +7,9 @@
            move all this to a json file and have this method look it up.
 """
 import os
-import software.renderfarm.dabtractor as dabtractor
+import software.renderfarm.dabtractor as dt
 import inspect
-# from   software.renderfarm.dabtractor.factories import utils_factory  as utils
+# from   software.renderfarm.dt.factories import utils_factory  as utils
 
 # ##############################################################
 import logging
@@ -26,7 +26,7 @@ class ConfigurationBase(object):
     """Base configurations - these are the possible options installed"""
     def __init__(self):
         self.configpath = inspect.getfile(self.__class__)
-        logger.info("config path = {}".format(self.configpath))
+        # logger.info("config path = {}".format(self.configpath))
         # print os.path.abspath(sys.modules[ConfigurationBase.__module__].__file__)
 
         self.mayaversions = ("2016",)
@@ -37,12 +37,13 @@ class ConfigurationBase(object):
         self.configuration = "base"
         self.projectgroups = ("yr1", "yr2", "yr3", "yr4", "masters", "personal", "admin")
         self.mayarenderers = ("mr", "sw")
-        self.renderfarmbin = (os.path.join(os.path.dirname(os.path.dirname(dabtractor.__file__)), "bin"),)
-        self.renderfarmmodulepath = (os.path.dirname(os.path.dirname(dabtractor.__file__)),)
-        self.renderfarmproxypath = (os.path.join(os.path.dirname(dabtractor.__file__), "proxys"),)
+        self.renderfarmbin = (os.path.join(os.path.dirname(os.path.dirname(dt.__file__)), "bin"),)
+        self.renderfarmmodulepath = (os.path.dirname(os.path.dirname(dt.__file__)),)
+        self.renderfarmproxypath = (os.path.join(os.path.dirname(dt.__file__), "proxys"),)
         self.nukedefaultproxytemplate = ("nuke_proxy_720p_prores_v003.py")
         self.dabrenderpath = self.getfromenv("DABRENDERPATH","/Volumes/dabrender")
-        self.dabusrpath = self.getfromenv("DABUSR", self.getusrinternally())
+        self.dabusrpath = self.getfromenv("DABUSR", "/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr/")
+        # self.dabusrpath = self.getfromenv("DABUSR", self.getusrinternally())
         self.usermapfilepath = (os.path.join(self.dabusrpath, "custom/map"))
         self.editproxydumppath = (os.path.join(self.dabrenderpath, "renderproxies"))
         self.renderthreads = ("16","8","4","2")
@@ -54,9 +55,9 @@ class ConfigurationBase(object):
         self.envscene = ("rmsTestFile.ma",)
         self.userid = self.getfromenv("USER")
 
-    def getusrinternally(self):
-        a= dabtractor.factories.utils_factory.truncatepath(os.path.dirname(self.configpath))
-        return a
+    # def getusrinternally(self):
+    #     a= utils.truncatepath(os.path.dirname(self.configpath))
+    #     return a
 
     def getfromenv(self,key,default=None):
         # try to use an environment variable over the default
