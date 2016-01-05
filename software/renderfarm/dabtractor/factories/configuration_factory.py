@@ -8,6 +8,8 @@
 """
 import os
 import software.renderfarm.dabtractor as dabtractor
+import inspect
+import software.renderfarm.dabtractor.factories.utils_factory  as utils
 
 # ##############################################################
 import logging
@@ -23,6 +25,10 @@ logger.addHandler(sh)
 class ConfigurationBase(object):
     """Base configurations - these are the possible options installed"""
     def __init__(self):
+        self.configpath = inspect.getfile(self.__class__)
+        logger.info("config path = {}".format(self.configpath))
+        # print os.path.abspath(sys.modules[ConfigurationBase.__module__].__file__)
+
         self.mayaversions = ("2016",)
         self.rendermanversions = ("20.6","20.2","20.1",)
         self.rendermanrenderers = ("rms-ris", "rms-reyes")
@@ -36,7 +42,7 @@ class ConfigurationBase(object):
         self.renderfarmproxypath = (os.path.join(os.path.dirname(dabtractor.__file__), "proxys"),)
         self.nukedefaultproxytemplate = ("nuke_proxy_720p_prores_v003.py")
         self.dabrenderpath = self.getfromenv("DABRENDERPATH","/Volumes/dabrender")
-        self.dabusrpath = self.getfromenv("DABUSR","/Volumes/dabrender")
+        self.dabusrpath = self.getfromenv("DABUSR", self.getusrinternally())
         self.usermapfilepath = (os.path.join(self.dabusrpath, "custom/map"))
         self.editproxydumppath = (os.path.join(self.dabrenderpath, "renderproxies"))
         self.renderthreads = ("16","8","4","2")
@@ -47,6 +53,9 @@ class ConfigurationBase(object):
         self.envproject = ("testFarm",)
         self.envscene = ("rmsTestFile.ma",)
         self.userid = self.getfromenv("USER")
+
+    def getusrinternally(self):
+        return utils.truncatepath(os.path.dirname(self.configpath))
 
     def getfromenv(self,key,default=None):
         # try to use an environment variable over the default

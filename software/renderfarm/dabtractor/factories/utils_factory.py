@@ -124,6 +124,30 @@ def getfloat(inputstring):
 def getnow():
     return datetime.datetime.now().strftime("%Y-%m-%d-%H-%M")
 
+def truncatepath(inputpath,truncatebit):
+    if os.path.isdir(inputpath):
+        _pathbits = os.path.abspath(inputpath).split("/")
+        _truncated = []
+        _matched = False
+        for i,bit in enumerate(_pathbits):
+            # print i, bit
+            # _truncated.append(bit)
+            if bit == truncatebit:
+                _matched = True
+                break
+            print i, bit
+            _truncated.append(bit)
+        _truncatedpath="/".join(_truncated)
+        # print inputpath
+        # print bit
+        # print _truncatedpath
+        if os.path.isdir(_truncatedpath):
+            return _truncatedpath
+    else:
+        logger.warn("Not a path when truncating")
+
+
+
 class RenderOutput(object):
     '''
     Class to handle render output from renderman etc
@@ -183,4 +207,6 @@ if __name__ == "__main__":
 
     me = frompathgetuserhome('/Volumes/dabrender/work/matthewgidney/testshite/file.001.exr')
     print "my work directory is",me
+
+    truncatepath("/Users/Shared/UTS_Dev","Shared")
 
