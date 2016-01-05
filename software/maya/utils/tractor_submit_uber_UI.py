@@ -1,9 +1,3 @@
-'''
-This is a good temple to learn from
-works just the same in maya
-exactly, but dont need the app line in main()
-'''
-
 import PySide.QtCore as qc
 import PySide.QtGui as qg
 import sys
