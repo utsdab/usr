@@ -7,11 +7,9 @@
            move all this to a json file and have this method look it up.
 """
 import os
-
-# print os.environ["PYTHONPATH"]
 import software.renderfarm.dabtractor as dabtractor
 import inspect
-from software.renderfarm.dabtractor.factories import utils_factory  as utils
+# from   software.renderfarm.dabtractor.factories import utils_factory  as utils
 
 # ##############################################################
 import logging
@@ -57,7 +55,8 @@ class ConfigurationBase(object):
         self.userid = self.getfromenv("USER")
 
     def getusrinternally(self):
-        return utils.truncatepath(os.path.dirname(self.configpath))
+        a= dabtractor.factories.utils_factory.truncatepath(os.path.dirname(self.configpath))
+        return a
 
     def getfromenv(self,key,default=None):
         # try to use an environment variable over the default
@@ -102,6 +101,7 @@ if __name__ == "__main__":
     _env = os.environ
     _keys = _env.keys()
     _keys.sort()
+
     print "{:_^80}".format("env")
     for key in _keys:
         print key, _env.get(key)
