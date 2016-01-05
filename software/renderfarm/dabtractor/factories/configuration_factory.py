@@ -7,9 +7,11 @@
            move all this to a json file and have this method look it up.
 """
 import os
+
+# print os.environ["PYTHONPATH"]
 import software.renderfarm.dabtractor as dabtractor
 import inspect
-import software.renderfarm.dabtractor.factories.utils_factory  as utils
+from software.renderfarm.dabtractor.factories import utils_factory  as utils
 
 # ##############################################################
 import logging

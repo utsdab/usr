@@ -84,12 +84,9 @@ def frompathgetuserhome(inputpath):
         try:
             # print i, bit, _testbits[i]
             if not bit == _testbits[i]:
-                # print "zzz", i, bit
                 pass
         except:
-            # print "zzz", bit
             return os.path.join(dabrender,"work",bit)
-
 
 
 def getvalues(entries):
