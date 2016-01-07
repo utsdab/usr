@@ -90,7 +90,7 @@ export DYLD_LIBRARY_PATH=${MAYA_LOCATION}/MacOS:${DYLD_LIBRARY_PATH}
 ##########################  PATH settings
 export PATH=/usr/local/dabrender/bin:${PATH}
 export PATH=${DABUSR}/bin:${PATH}
-export PATH=${DABUSR}/renderfarm/bin:${PATH}
+export PATH=${DABUSR}/software/renderfarm/bin:${PATH}
 export PATH=${RMANTREE}/bin:${PATH}
 export PATH=${RMSTREE}/bin:${PATH}
 export PATH=${TRACTOR_LOCATION}/bin:${PATH}

@@ -20,13 +20,13 @@ class ProjectWidget(qg.QWidget):
         # ------------------------------------------------------------------------------------ #
         #  $DABRENDER
         self.dabrender_text_layout = qg.QHBoxLayout()
-        self.dabrender_text_layout.setContentsMargins(4,0,4,0)
+        self.dabrender_text_layout.setContentsMargins(0,0,0,0)
         self.dabrender_text_layout.setSpacing(2)
 
         self.dabrender_text_lb = qg.QLabel('$DABRENDER:')
         self.dabrender_text_le  = qg.QLineEdit()
         self.dabrender_text_le.setPlaceholderText("The dabrender environment variable.....")
-        self.dabrender_text_le.setMinimumWidth(300)
+        self.dabrender_text_le.setMinimumWidth(150)
 
         self.dabrender_text_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
         self.dabrender_text_layout.addWidget(self.dabrender_text_lb)
@@ -37,7 +37,7 @@ class ProjectWidget(qg.QWidget):
         # ------------------------------------------------------------------------------------ #
         #  $TYPE
         self.scene_layout = qg.QHBoxLayout()
-        self.scene_layout.setContentsMargins(4,0,4,0)
+        self.scene_layout.setContentsMargins(0,0,0,0)
         self.scene_layout.setSpacing(2)
         self.layout().addLayout(self.scene_layout)
 
@@ -45,7 +45,7 @@ class ProjectWidget(qg.QWidget):
         self.scene_combo  = qg.QComboBox()
         self.scene_combo.addItem('work')
         self.scene_combo.addItem('projects')
-        self.scene_combo.setMinimumWidth(300)
+        self.scene_combo.setMinimumWidth(150)
 
         self.scene_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
         self.scene_layout.addWidget(self.scene_text_lb)
@@ -54,12 +54,12 @@ class ProjectWidget(qg.QWidget):
         # ------------------------------------------------------------------------------------ #
         #  $SHOW
         self.show_text_layout = qg.QHBoxLayout()
-        self.show_text_layout.setContentsMargins(4,0,4,0)
+        self.show_text_layout.setContentsMargins(0,0,0,0)
         self.show_text_layout.setSpacing(2)
 
         self.show_text_lb = qg.QLabel('$SHOW:')
         self.show_text_le  = qg.QLineEdit()
-        self.show_text_le.setMinimumWidth(300)
+        self.show_text_le.setMinimumWidth(150)
 
         self.show_text_le.setPlaceholderText("The show environment variable.....your show")
 
@@ -72,12 +72,12 @@ class ProjectWidget(qg.QWidget):
         # ------------------------------------------------------------------------------------ #
         #  $PROJECT
         self.project_text_layout = qg.QHBoxLayout()
-        self.project_text_layout.setContentsMargins(4,0,4,0)
+        self.project_text_layout.setContentsMargins(0,0,0,0)
         self.project_text_layout.setSpacing(2)
 
         self.project_text_lb = qg.QLabel('$PROJECT:')
         self.project_text_le  = qg.QLineEdit()
-        self.project_text_le.setMinimumWidth(300)
+        self.project_text_le.setMinimumWidth(150)
         self.project_text_le.setPlaceholderText("The project environment variable..... the project in your show")
 
         self.project_text_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
@@ -101,14 +101,14 @@ class SceneWidget(qg.QWidget):
         # ------------------------------------------------------------------------------------ #
         #  JOB SCENE FILE
         self.scene_layout = qg.QHBoxLayout()
-        self.scene_layout.setContentsMargins(4,0,4,0)
+        self.scene_layout.setContentsMargins(3,0,3,0)
         self.scene_layout.setSpacing(2)
 
         self.scene_text_lb = qg.QLabel('SCENE FILE:')
         self.scene_combo  = qg.QComboBox()
         # self.scene_combo.setCompleter()
         self.scene_combo.addItem('select from list')
-        self.scene_combo.setMinimumWidth(300)
+        self.scene_combo.setMinimumWidth(150)
 
         self.scene_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
         self.scene_layout.addWidget(self.scene_text_lb)
@@ -131,7 +131,7 @@ class RangeWidget(qg.QWidget):
         # ------------------------------------------------------------------------------------ #
         #  JOB FRAME RANGE
         self.framerange_layout = qg.QHBoxLayout()
-        self.framerange_layout.setContentsMargins(4,0,4,0)
+        self.framerange_layout.setContentsMargins(0,0,0,0)
         self.framerange_layout.setSpacing(2)
 
         self.framerange_start_text_lb = qg.QLabel('START:')
@@ -152,7 +152,7 @@ class RangeWidget(qg.QWidget):
         self.framerange_by_text_le.setMinimumWidth(20)
         self.framerange_by_text_le.setPlaceholderText("BY")
 
-        self.framerange_layout.addSpacerItem(qg.QSpacerItem(40,5,qg.QSizePolicy.Expanding))
+        self.framerange_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
         self.framerange_layout.addWidget(self.framerange_start_text_lb)
         self.framerange_layout.addWidget(self.framerange_start_text_le)
         self.framerange_layout.addWidget(self.framerange_end_text_lb)
@@ -181,7 +181,7 @@ class MayaWidget(qg.QWidget):
 
         # ------------------------------------------------------------------------------------ #
         self.version_layout = qg.QHBoxLayout()
-        self.version_layout.setContentsMargins(4,0,4,0)
+        self.version_layout.setContentsMargins(0,0,0,0)
         self.version_layout.setSpacing(2)
         self.layout().addLayout(self.version_layout)
 
@@ -189,7 +189,7 @@ class MayaWidget(qg.QWidget):
         self.version_combo  = qg.QComboBox()
         self.version_combo.addItem('2016')
         self.version_combo.addItem('2017')
-        self.version_combo.setMinimumWidth(300)
+        self.version_combo.setMinimumWidth(150)
 
         self.version_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
         self.version_layout.addWidget(self.version_text_lb)
@@ -217,7 +217,7 @@ class MentalRayWidget(qg.QWidget):
 
         # ------------------------------------------------------------------------------------ #
         self.version_layout = qg.QHBoxLayout()
-        self.version_layout.setContentsMargins(4,0,4,0)
+        self.version_layout.setContentsMargins(0,0,0,0)
         self.version_layout.setSpacing(2)
         self.layout().addLayout(self.version_layout)
 
@@ -225,7 +225,7 @@ class MentalRayWidget(qg.QWidget):
         self.version_combo  = qg.QComboBox()
         self.version_combo.addItem('2016')
         self.version_combo.addItem('2017')
-        self.version_combo.setMinimumWidth(300)
+        self.version_combo.setMinimumWidth(150)
 
         self.version_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
         self.version_layout.addWidget(self.version_text_lb)
@@ -254,7 +254,7 @@ class RendermanWidget(qg.QWidget):
 
         # ------------------------------------------------------------------------------------ #
         self.version_layout = qg.QHBoxLayout()
-        self.version_layout.setContentsMargins(4,0,4,0)
+        self.version_layout.setContentsMargins(3,0,3,0)
         self.version_layout.setSpacing(2)
         self.layout().addLayout(self.version_layout)
 
@@ -262,7 +262,7 @@ class RendermanWidget(qg.QWidget):
         self.version_combo  = qg.QComboBox()
         self.version_combo.addItem('20.5')
         self.version_combo.addItem('20.6')
-        self.version_combo.setMinimumWidth(300)
+        self.version_combo.setMinimumWidth(150)
 
         self.version_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
         self.version_layout.addWidget(self.version_text_lb)
@@ -282,7 +282,7 @@ class BashWidget(qg.QWidget):
 
                 # ------------------------------------------------------------------------------------ #
         self.version_layout = qg.QHBoxLayout()
-        self.version_layout.setContentsMargins(4,0,4,0)
+        self.version_layout.setContentsMargins(0,0,0,0)
         self.version_layout.setSpacing(2)
         self.layout().addLayout(self.version_layout)
 
@@ -290,7 +290,7 @@ class BashWidget(qg.QWidget):
         self.version_combo  = qg.QComboBox()
         self.version_combo.addItem('20.5')
         self.version_combo.addItem('20.6')
-        self.version_combo.setMinimumWidth(300)
+        self.version_combo.setMinimumWidth(150)
 
         self.version_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
         self.version_layout.addWidget(self.version_text_lb)
@@ -310,7 +310,7 @@ class ArchiveWidget(qg.QWidget):
 
                 # ------------------------------------------------------------------------------------ #
         self.version_layout = qg.QHBoxLayout()
-        self.version_layout.setContentsMargins(4,0,4,0)
+        self.version_layout.setContentsMargins(3,0,3,0)
         self.version_layout.setSpacing(2)
         self.layout().addLayout(self.version_layout)
 
@@ -318,7 +318,7 @@ class ArchiveWidget(qg.QWidget):
         self.version_combo  = qg.QComboBox()
         self.version_combo.addItem('20.5')
         self.version_combo.addItem('20.6')
-        self.version_combo.setMinimumWidth(300)
+        self.version_combo.setMinimumWidth(150)
 
         self.version_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
         self.version_layout.addWidget(self.version_text_lb)
@@ -338,7 +338,7 @@ class NukeWidget(qg.QWidget):
 
                 # ------------------------------------------------------------------------------------ #
         self.version_layout = qg.QHBoxLayout()
-        self.version_layout.setContentsMargins(4,0,4,0)
+        self.version_layout.setContentsMargins(3,0,3,0)
         self.version_layout.setSpacing(2)
         self.layout().addLayout(self.version_layout)
 
@@ -346,7 +346,7 @@ class NukeWidget(qg.QWidget):
         self.version_combo  = qg.QComboBox()
         self.version_combo.addItem('9.0v8')
         self.version_combo.addItem('9.0v7')
-        self.version_combo.setMinimumWidth(300)
+        self.version_combo.setMinimumWidth(150)
 
         self.version_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
         self.version_layout.addWidget(self.version_text_lb)
@@ -365,7 +365,7 @@ class TractorWidget(qg.QWidget):
         self.layout().addWidget(self.project_splitter)
         # ------------------------------------------------------------------------------------ #
         self.progect_group_layout = qg.QHBoxLayout()
-        self.progect_group_layout.setContentsMargins(4,0,4,0)
+        self.progect_group_layout.setContentsMargins(3,0,3,0)
         self.progect_group_layout.setSpacing(2)
 
         self.progect_group_text_lb = qg.QLabel('PROJECT GROUP:')
@@ -377,7 +377,7 @@ class TractorWidget(qg.QWidget):
         self.progect_group_combo.addItem('Year 4 Assignment')
         self.progect_group_combo.addItem('Personal Job')
 
-        self.progect_group_combo.setMinimumWidth(300)
+        self.progect_group_combo.setMinimumWidth(150)
 
         self.progect_group_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
         self.progect_group_layout.addWidget(self.progect_group_text_lb)
