@@ -6,6 +6,46 @@ from software.renderfarm.dabtractor.factories import user_factory as ufac
 
 from functools import partial
 
+# -------------------------------------------------------------------------------------------------------------------- #
+class UserWidget(qg.QWidget):
+    def __init__(self):
+        super(UserWidget, self).__init__()
+        self.setLayout(qg.QVBoxLayout())
+        self.layout().setSpacing(2)
+        self.layout().setContentsMargins(0,0,0,0)
+        self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
+
+        self.project_splitter = Splitter("USER DETAILS")
+        self.layout().addWidget(self.project_splitter)
+        self.usernumber_text_layout = qg.QHBoxLayout()
+        self.usernumber_text_layout.setContentsMargins(4,0,4,0)
+        self.usernumber_text_layout.setSpacing(2)
+
+        self.usernumber_text_lb = qg.QLabel('$USER: {}'.format(self._getuser()))
+        self.usernumber_text_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
+        self.usernumber_text_layout.addWidget(self.usernumber_text_lb)
+        self.layout().addLayout(self.usernumber_text_layout)
+
+        self.username_text_layout = qg.QHBoxLayout()
+        self.username_text_layout.setContentsMargins(4,0,4,0)
+        self.username_text_layout.setSpacing(2)
+        self.username_text_lb = qg.QLabel('$USERNAME: {}'.format(self._getusername(self._getuser())))
+        self.username_text_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
+        self.username_text_layout.addWidget(self.username_text_lb)
+
+        self.layout().addLayout(self.username_text_layout)
+
+    # ------------------------------------------------------------------------------------ #
+
+    def _getusername(self,_user):
+        u=ufac.Map()
+        self.username=u.getusername(_user)
+        return self.username
+
+    def _getuser(self):
+        self.usernumber=os.getenv("USER")
+        return self.usernumber
+
 class ProjectWidget(qg.QWidget):
     def __init__(self):
         super(ProjectWidget, self).__init__()

@@ -1,3 +1,16 @@
+'''
+In maya run this at the moment....
+
+import sys
+sys.path.append("/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr")
+
+from software.maya.utils import tractor_submit_maya_UI
+reload(tractor_submit_maya_UI)
+tractor_submit_maya_UI.create()
+
+'''
+
+
 import PySide.QtCore as qc
 import PySide.QtGui as qg
 import sys
@@ -7,52 +20,24 @@ from software.renderfarm.dabtractor.factories import interface_factory as ifac
 
 from functools import partial
 
-# -------------------------------------------------------------------------------------------------------------------- #
-class UserWidget(qg.QWidget):
-    def __init__(self):
-        super(UserWidget, self).__init__()
-        self.setLayout(qg.QVBoxLayout())
-        self.layout().setSpacing(2)
-        self.layout().setContentsMargins(0,0,0,0)
-        self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
+try:
+    import maya.cmds  as mc
+    import pymel.core as pm
+    # from utils.generic import undo
+    # import sip
+    import shiboken
+    import maya.OpenMayaUI as mui
+except Exception,err:
+    print "No maya import {}".format(err)
 
-        self.project_splitter = ifac.Splitter("USER DETAILS")
-        self.layout().addWidget(self.project_splitter)
-        # ------------------------------------------------------------------------------------ #
-        self.usernumber_text_layout = qg.QHBoxLayout()
-        self.usernumber_text_layout.setContentsMargins(4,0,4,0)
-        self.usernumber_text_layout.setSpacing(2)
-
-        self.usernumber_text_lb = qg.QLabel('$USER: {}'.format(self._getuser()))
-        self.usernumber_text_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
-        self.usernumber_text_layout.addWidget(self.usernumber_text_lb)
-        self.layout().addLayout(self.usernumber_text_layout)
-        
-        # ------------------------------------------------------------------------------------ #
-        self.username_text_layout = qg.QHBoxLayout()
-        self.username_text_layout.setContentsMargins(4,0,4,0)
-        self.username_text_layout.setSpacing(2)
-        self.username_text_lb = qg.QLabel('$USERNAME: {}'.format(self._getusername(self._getuser())))
-        self.username_text_layout.addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
-        self.username_text_layout.addWidget(self.username_text_lb)
-
-        self.layout().addLayout(self.username_text_layout)
-
-    def _getusername(self,_user):
-        u=ufac.Map()
-        self.username=u.getusername(_user)
-        return self.username
-
-    def _getuser(self):
-        self.usernumber=os.getenv("USER")
-        return self.usernumber
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class TractorSubmit(qg.QDialog):
     def __init__(self):
         super(TractorSubmit,self).__init__()
-        self.setWindowTitle('UTS FARM SUBMIT')
+        self.setWindowTitle('UTS_FARM_SUBMIT')
+        self.setObjectName('UTS_FARM_SUBMIT')
         self.setWindowFlags(qc.Qt.WindowStaysOnTopHint)
         main_widget = TractorSubmitWidget()
         self.setLayout(qg.QVBoxLayout())
@@ -68,6 +53,21 @@ class TractorSubmit(qg.QDialog):
         self.layout().addWidget(main_widget)
         scroll_area.setWidget(main_widget)
 
+        self._dock_widget = self._dock_name = None
+
+    #------------------------------------------------------------------------------------------#
+
+    def connectDockWidget(self, dock_name, dock_widget):
+        self._dock_widget = dock_widget
+        self._dock_name   = dock_name
+
+
+    def close(self):
+        if self._dock_widget:
+            mc.deleteUI(self._dock_name)
+        else:
+            qg.QDialog.close(self)
+        self._dock_widget = self._dock_name = None
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -76,9 +76,6 @@ class TractorSubmitWidget(qg.QFrame):
         super(TractorSubmitWidget, self).__init__()
 
         self.setFrameStyle(qg.QFrame.Panel | qg.QFrame.Raised)
-
-        # self.setMinimumHeight(250)
-        # self.setMinimumWidth(200)
         self.setSizePolicy(qg.QSizePolicy.Minimum,
                            qg.QSizePolicy.Fixed)
 
@@ -90,13 +87,11 @@ class TractorSubmitWidget(qg.QFrame):
 
         # ------------------------------------------------------------------------------------ #
         # USER WIDGET
-        user_widget = UserWidget()
+        user_widget = ifac.UserWidget()
         self.layout().addWidget(user_widget)
 
         self.stacked_layout = qg.QStackedLayout()
         self.layout().addLayout(self.stacked_layout)
-
-        # button_layout = qg.QGridLayout()
 
         self.mode_splitter = ifac.Splitter("MODE")
         self.layout().addWidget(self.mode_splitter)
@@ -112,7 +107,7 @@ class TractorSubmitWidget(qg.QFrame):
         layout_3_bttn = qg.QPushButton('Renderman')
         layout_4_bttn = qg.QPushButton('Bash Cmd')
         layout_5_bttn = qg.QPushButton('Nuke')
-        layout_6_bttn = qg.QPushButton('Arch')
+        layout_6_bttn = qg.QPushButton('Archive')
 
         grid_widget.layout().addWidget(layout_1_bttn,0,0)
         grid_widget.layout().addWidget(layout_2_bttn,0,1)
@@ -122,8 +117,8 @@ class TractorSubmitWidget(qg.QFrame):
         grid_widget.layout().addWidget(layout_6_bttn,1,2)
 
         self.layout().addWidget(grid_widget)
-        # ------------------------------------------------------------------------------------ #
 
+        # ------------------------------------------------------------------------------------ #
         # SCENE WIDGET
         scene_widget = ifac.SceneWidget()
         # self.layout().addWidget(scene_widget)
@@ -172,8 +167,6 @@ class TractorSubmitWidget(qg.QFrame):
         # ------------------------------------------------------------------------------------ #
 
         self.path="/Users/Shared/UTS_Dev/dabrender"
-        # d=Directory(startplace=self.path, title="Pick a directory")
-        # f=File(startplace=self.path, title="Pick a file")
 
         self.stacked_layout.addWidget(maya_widget)
         self.stacked_layout.addWidget(mentalray_widget)
@@ -190,6 +183,54 @@ class TractorSubmitWidget(qg.QFrame):
         layout_6_bttn.clicked.connect(partial(self.stacked_layout.setCurrentIndex, 5))
 
 
+# -------------------------------------------------------------------------------------------------------------------- #
+dialog = None
+
+def create(docked=True):
+    global dialog
+
+    if dialog is None:
+        dialog = TractorSubmit()
+
+    if docked is True:
+        ptr = mui.MQtUtil.mainWindow()
+        main_window = shiboken.wrapInstance(long(ptr), qg.QWidget)
+
+        dialog.setParent(main_window)
+        size = dialog.size()
+
+        name = mui.MQtUtil.fullName(long(shiboken.getCppPointer(dialog)[0]))
+        dock = mc.dockControl(
+            allowedArea =['right', 'left'],
+            area        = 'right',
+            floating    = False,
+            content     = name,
+            width       = size.width(),
+            height      = size.height(),
+            label       = 'UTS_FARM_SUBMIT')
+
+        widget      = mui.MQtUtil.findControl(dock)
+        dock_widget = shiboken.wrapInstance(long(widget), qg.QWidget)
+        dialog.connectDockWidget(dock, dock_widget)
+
+    else:
+        dialog.show()
+
+
+def delete():
+    global dialog
+    if dialog:
+        dialog.close()
+        dialog = None
+
+def getMayaWindow():
+    """
+    Get the main Maya window as a QtGui.QMainWindow instance
+    @return: QtGui.QMainWindow instance of the top level Maya windows
+    """
+    ptr = apiUI.MQtUtil.mainWindow()
+    if ptr is not None:
+        return shiboken.wrapInstance(long(ptr), qg.QWidget)
 # -------------------------------------------------------------------------------------------------------------------- #
 
 def main():
