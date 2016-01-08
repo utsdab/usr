@@ -20,15 +20,24 @@ from software.renderfarm.dabtractor.factories import interface_factory as ifac
 
 from functools import partial
 
+# ##############################################################
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+sh = logging.StreamHandler()
+sh.setLevel(logging.INFO)
+formatter = logging.Formatter('%(levelname)5.5s \t%(filename)s as %(name)s \t%(message)s')
+sh.setFormatter(formatter)
+logger.addHandler(sh)
+# ##############################################################
+
 try:
     import maya.cmds  as mc
     import pymel.core as pm
-    # from utils.generic import undo
-    # import sip
     import shiboken
     import maya.OpenMayaUI as mui
 except Exception,err:
-    print "No maya import {}".format(err)
+    logger.warn("No maya import {} presuming from a shell".format(err))
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -36,37 +45,41 @@ except Exception,err:
 class TractorSubmit(qg.QDialog):
     def __init__(self):
         super(TractorSubmit,self).__init__()
+        logger.info("TractorSubmit")
         self.setWindowTitle('UTS_FARM_SUBMIT')
         self.setObjectName('UTS_FARM_SUBMIT')
         self.setWindowFlags(qc.Qt.WindowStaysOnTopHint)
         main_widget = TractorSubmitWidget()
         self.setLayout(qg.QVBoxLayout())
         self.setFixedWidth(314)
+        self.setMinimumHeight(700)
 
         scroll_area=qg.QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setFocusPolicy(qc.Qt.NoFocus)
         self.layout().addWidget(scroll_area)
 
+        self.layout().setSpacing(0)
+        self.layout().setContentsMargins(5,5,5,5)
 
-        self.layout().setContentsMargins(3,3,3,3)
         self.layout().addWidget(main_widget)
         scroll_area.setWidget(main_widget)
 
         self._dock_widget = self._dock_name = None
 
-    #------------------------------------------------------------------------------------------#
 
     def connectDockWidget(self, dock_name, dock_widget):
+        logger.info("connect {} {}".format(dock_name,dock_widget))
         self._dock_widget = dock_widget
         self._dock_name   = dock_name
 
-
     def close(self):
+        logger.info("close")
         if self._dock_widget:
             mc.deleteUI(self._dock_name)
         else:
             qg.QDialog.close(self)
+
         self._dock_widget = self._dock_name = None
 
 
@@ -75,14 +88,15 @@ class TractorSubmitWidget(qg.QFrame):
     def __init__(self):
         super(TractorSubmitWidget, self).__init__()
 
+        logger.info("TractorSubmitWidget")
         self.setFrameStyle(qg.QFrame.Panel | qg.QFrame.Raised)
         self.setSizePolicy(qg.QSizePolicy.Minimum,
                            qg.QSizePolicy.Fixed)
 
         self.setLayout(qg.QVBoxLayout())
 
-        self.layout().setContentsMargins(3,3,3,3)
         self.layout().setSpacing(0)
+        self.layout().setContentsMargins(0,0,0,0)
         self.layout().setAlignment(qc.Qt.AlignTop)
 
         # ------------------------------------------------------------------------------------ #
@@ -90,6 +104,8 @@ class TractorSubmitWidget(qg.QFrame):
         user_widget = ifac.UserWidget()
         self.layout().addWidget(user_widget)
 
+        # ------------------------------------------------------------------------------------ #
+        # STACKED WIDGET
         self.stacked_layout = qg.QStackedLayout()
         self.layout().addLayout(self.stacked_layout)
 
@@ -98,10 +114,9 @@ class TractorSubmitWidget(qg.QFrame):
 
         grid_widget = qg.QWidget()
         grid_widget.setLayout(qg.QGridLayout())
-        grid_widget.layout().setContentsMargins(3,3,3,3)
+        grid_widget.layout().setSpacing(0)
+        grid_widget.layout().setContentsMargins(0,0,0,0)
 
-        # button_layout.setLayout(qg.QGridLayout())
-        # button_layout = qg.QGridLayout()
         layout_1_bttn = qg.QPushButton('Maya')
         layout_2_bttn = qg.QPushButton('Mental Ray')
         layout_3_bttn = qg.QPushButton('Renderman')
@@ -118,53 +133,15 @@ class TractorSubmitWidget(qg.QFrame):
 
         self.layout().addWidget(grid_widget)
 
-        # ------------------------------------------------------------------------------------ #
-        # SCENE WIDGET
-        scene_widget = ifac.SceneWidget()
-        # self.layout().addWidget(scene_widget)
+        maya_widget      = ifac.MayaJobWidget()
+        mentalray_widget = ifac.MentalRayJobWidget()
+        renderman_widget = ifac.RendermanJobWidget()
+        bash_widget      = ifac.BashJobWidget()
+        archive_widget   = ifac.ArchiveJobWidget()
+        nuke_widget      = ifac.NukeJobWidget()
+        tractor_widget   = ifac.TractorWidget()
+        farmjob_widget   = ifac.FarmJobExtraWidget()
 
-        # RANGE WIDGET
-        range_widget = ifac.RangeWidget()
-        # self.layout().addWidget(range_widget)
-
-        # MAYA WIDGET
-        maya_widget= ifac.MayaWidget()
-        # self.layout().addWidget(maya_widget)
-
-        # MENTALRAY WIDGET
-        mentalray_widget= ifac.MentalRayWidget()
-        # self.layout().addWidget(maya_widget)
-
-        # RENDERMAN WIDGET
-        renderman_widget= ifac.RendermanWidget()
-        # self.layout().addWidget(renderman_widget)
-
-        # BASH WIDGET
-        bash_widget= ifac.BashWidget()
-        # self.layout().addWidget(bash_widget)
-
-        # ARCHIVE WIDGET
-        archive_widget= ifac.ArchiveWidget()
-        # self.layout().addWidget(bash_widget)
-
-        # NUKE WIDGET
-        nuke_widget= ifac.NukeWidget()
-        # self.layout().addWidget(bash_widget)
-
-        # TRACTOR WIDGET
-        tractor_widget= ifac.TractorWidget()
-        # self.layout().addWidget(tractor_widget)
-
-        # FARM JOB EXTRAS WIDGET
-        # farm_extras_widget = qg.QWidget()
-        # farm_extras_widget.setLayout(qg.QVBoxLayout())
-        # farm_extras_widget.layout().setSpacing(2)
-        # farm_extras_widget.layout().setContentsMargins(0,0,0,0)
-
-        # TEST WIDGET
-        # test_widget = Test()
-
-        # ------------------------------------------------------------------------------------ #
 
         self.path="/Users/Shared/UTS_Dev/dabrender"
 
@@ -182,13 +159,28 @@ class TractorSubmitWidget(qg.QFrame):
         layout_5_bttn.clicked.connect(partial(self.stacked_layout.setCurrentIndex, 4))
         layout_6_bttn.clicked.connect(partial(self.stacked_layout.setCurrentIndex, 5))
 
+        submit_widget= ifac.SubmitWidget()
+        self.layout().addWidget(submit_widget)
 
+        self.layout().addSpacerItem(qg.QSpacerItem(5,50,qg.QSizePolicy.Expanding))
+
+        self.mode_splitter = ifac.Splitter("FEEDBACK")
+        self.layout().addWidget(self.mode_splitter)
+
+        feedback_widget = ifac.FeedbackWidget()
+        feedback_widget.append("This is where the tool talk back to you - especially for validation")
+
+        self.layout().addSpacerItem(qg.QSpacerItem(5,5,qg.QSizePolicy.Expanding))
+        self.layout().addWidget(feedback_widget)
+
+    def closeWidget(self):
+        self.emit(qc.SIGNAL('CLOSE'), self)
 # -------------------------------------------------------------------------------------------------------------------- #
 dialog = None
 
 def create(docked=True):
     global dialog
-
+    logging.info("create dialog {}".format(dialog))
     if dialog is None:
         dialog = TractorSubmit()
 
@@ -212,12 +204,11 @@ def create(docked=True):
         widget      = mui.MQtUtil.findControl(dock)
         dock_widget = shiboken.wrapInstance(long(widget), qg.QWidget)
         dialog.connectDockWidget(dock, dock_widget)
-
     else:
         dialog.show()
 
-
 def delete():
+    logging.info("delete2")
     global dialog
     if dialog:
         dialog.close()
@@ -228,7 +219,7 @@ def getMayaWindow():
     Get the main Maya window as a QtGui.QMainWindow instance
     @return: QtGui.QMainWindow instance of the top level Maya windows
     """
-    ptr = apiUI.MQtUtil.mainWindow()
+    ptr = mui.MQtUtil.mainWindow()
     if ptr is not None:
         return shiboken.wrapInstance(long(ptr), qg.QWidget)
 # -------------------------------------------------------------------------------------------------------------------- #
