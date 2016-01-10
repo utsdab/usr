@@ -32,7 +32,7 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
-class ProjectBase(object):
+class Project(object):
     """
     This class is the project structure base
     $DABRENDER/$TYPE/$SHOW/$PROJECT/scenes/$SCENE
@@ -45,7 +45,7 @@ class ProjectBase(object):
         self.type = self.alreadyset("TYPE","work")
         self.show = self.alreadyset("SHOW","matthewgidney")
         self.project = self.alreadyset("PROJECT","testFarm")
-        self.scene = self.alre adyset("SCENE","tesscenefile")
+        self.scene = self.alreadyset("SCENE","tesscenefile")
         self.shot = ""  # not used at this moment
         self.task = ""
         self.user = self.alreadyset("USER","120988")
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     sh.setLevel(logging.DEBUG)
     logger.info("-------- PROJECT FACTORY TEST ------------")
 
-    p = ProjectBase()
+    p = Project()
     p.setfromscenefile("/Users/Shared/UTS_Dev/dabrender/work/matthewgidney/matt_maya_project2/scenes/empty.ma")
     p.setfromscenefile("/Users/Shared/UTS_Dev/dabrender/project/albatross/3D/scenes/animation/empty.ma")
     logger.debug("ProjectBase: {}".format(p.__dict__))

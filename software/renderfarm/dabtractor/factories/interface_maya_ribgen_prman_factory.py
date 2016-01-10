@@ -500,7 +500,7 @@ class WindowPrman(WindowBase):
     def openscene(self):
         _initialpath=os.path.join(self.dabrenderpath.get(),self.envtype.get(),
                                   self.envshow.get(),self.envproject.get())
-        print "ss",_initialpath
+        # print "ss",_initialpath
         if os.path.isdir(_initialpath):
             print _initialpath
             self.envscenepick = tkFileDialog.askopenfilename(parent=self.master,
@@ -528,24 +528,23 @@ class WindowPrman(WindowBase):
         # self.dirbut["text"] = str(self.dirname) if self.dirname else self.dirtext
 
     def validate(self):
-        # try:
-        logger.info("Validate")
-        logger.info("Type: %s" % self.envtype.get())
-        logger.info("Show: %s" % self.envshow.get())
-        logger.info("Project: %s" % self.envproject.get())
-        logger.info("Scene: %s" % self.envscene)
-        logger.info("SceneFullPath: %s" % self.envscenefullpath)
-        logger.info("Start: %s" % self.sf.get())
-        logger.info("End: %s" % self.ef.get())
-        logger.info("By: %s" % self.bf.get())
-        logger.info("Skip Existing Frames:" % self.skipframes)
-        logger.info("Make Proxy:" % self.makeproxy)
-        self.spooljob = False
-        self.validatejob = True
-        self.master.destroy()
-
-        # except Exception, validateError:
-        #     logger.warn("Problem validating %s" % validateError)
+        try:
+            logger.info("Validate")
+            logger.info("Type: %s" % self.envtype.get())
+            logger.info("Show: %s" % self.envshow.get())
+            logger.info("Project: %s" % self.envproject.get())
+            logger.info("Scene: %s" % self.envscene)
+            logger.info("SceneFullPath: %s" % self.envscenefullpath)
+            logger.info("Start: %s" % self.sf.get())
+            logger.info("End: %s" % self.ef.get())
+            logger.info("By: %s" % self.bf.get())
+            logger.info("Skip Existing Frames:" % self.skipframes)
+            logger.info("Make Proxy:" % self.makeproxy)
+            self.spooljob = False
+            self.validatejob = True
+            self.master.destroy()
+        except Exception, validateError:
+            logger.warn("Problem validating %s" % validateError)
 
     def submit(self):
         try:

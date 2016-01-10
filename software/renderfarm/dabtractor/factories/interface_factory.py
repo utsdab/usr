@@ -3,8 +3,21 @@ import PySide.QtGui as qg
 import sys
 import os
 from software.renderfarm.dabtractor.factories import user_factory as ufac
+from software.renderfarm.dabtractor.factories import utils_factory as utilfac
+from software.renderfarm.dabtractor.factories import project_factory as proj
 
 from functools import partial
+
+# ##############################################################
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+sh = logging.StreamHandler()
+sh.setLevel(logging.INFO)
+formatter = logging.Formatter('%(levelname)5.5s \t%(filename)s as %(name)s \t%(message)s')
+sh.setFormatter(formatter)
+logger.addHandler(sh)
+# ##############################################################
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class UserWidget(qg.QWidget):
@@ -21,7 +34,7 @@ class UserWidget(qg.QWidget):
         self.usernumber_text_layout.setSpacing(0)
         self.usernumber_text_layout.setContentsMargins(0,0,0,0)
         self.usernumber_text_lb = qg.QLabel('$USER: {}'.format(self._getuser()))
-        self.usernumber_text_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        # self.usernumber_text_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
         self.usernumber_text_layout.addWidget(self.usernumber_text_lb)
         self.layout().addLayout(self.usernumber_text_layout)
 
@@ -29,7 +42,7 @@ class UserWidget(qg.QWidget):
         self.username_text_layout.setSpacing(0)
         self.username_text_layout.setContentsMargins(0,0,0,0)
         self.username_text_lb = qg.QLabel('$USERNAME: {}'.format(self._getusername(self._getuser())))
-        self.username_text_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        # self.username_text_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
         self.username_text_layout.addWidget(self.username_text_lb)
 
         self.layout().addLayout(self.username_text_layout)
@@ -53,7 +66,9 @@ class ProjectWidget(qg.QWidget):
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
 
         self.layout().addWidget(Splitter("ENVIRONMENT"))
+        self.p= proj.Project()
 
+        _width=90
         # ------------------------------------------------------------------------------------ #
         #  $DABRENDER
         self.dabrender_text_layout = qg.QHBoxLayout()
@@ -61,67 +76,83 @@ class ProjectWidget(qg.QWidget):
         self.dabrender_text_layout.setContentsMargins(0,0,0,0)
         
         self.dabrender_text_lb = qg.QLabel('$DABRENDER:')
-        self.dabrender_text_le  = qg.QLineEdit()
-        self.dabrender_text_le.setPlaceholderText("The dabrender environment variable.....")
+        self.dabrender_text_lb.setMinimumWidth(_width)
+        self.dabrender_text_le  = qg.QLineEdit(self.p.dabrender)
+
+        # self.dabrender_text_le.setPlaceholderText(self.getdabrender())
         # self.dabrender_text_le.setMinimumWidth(150)
 
-        self.dabrender_text_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        # self.dabrender_text_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
         self.dabrender_text_layout.addWidget(self.dabrender_text_lb)
         self.dabrender_text_layout.addWidget(self.dabrender_text_le)
 
         self.layout().addLayout(self.dabrender_text_layout)
 
-        # ------------------------------------------------------------------------------------ #
-        #  $TYPE
+        #  $TYPE  ---------------------------------------
         self.scene_layout = qg.QHBoxLayout()
         self.scene_layout.setSpacing(0)
         self.scene_layout.setContentsMargins(0,0,0,0)
         self.layout().addLayout(self.scene_layout)
 
         self.scene_text_lb = qg.QLabel('$TYPE:')
+        self.scene_text_lb.setMinimumWidth(_width)
         self.scene_combo  = qg.QComboBox()
         self.scene_combo.addItem('work')
         self.scene_combo.addItem('projects')
         # self.scene_combo.setMinimumWidth(150)
 
-        self.scene_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        # self.scene_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
         self.scene_layout.addWidget(self.scene_text_lb)
         self.scene_layout.addWidget(self.scene_combo)
 
-        # ------------------------------------------------------------------------------------ #
-        #  $SHOW
+        self.scene_combo.connect(self.scene_combo,qc.SIGNAL("currentIndexChanged(int)"), self.typeChanged)
+
+        #  $SHOW  ---------------------------------------
         self.show_text_layout = qg.QHBoxLayout()
         self.show_text_layout.setContentsMargins(0,0,0,0)
         self.show_text_layout.setSpacing(0)
 
         self.show_text_lb = qg.QLabel('$SHOW:')
+        self.show_text_lb.setMinimumWidth(_width)
         self.show_text_le  = qg.QLineEdit()
+        # self.show_text_le.
         # self.show_text_le.setMinimumWidth(150)
 
-        self.show_text_le.setPlaceholderText("The show environment variable.....your show")
+        self.show_text_le.setPlaceholderText(self.p.show)
 
-        self.show_text_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        # self.show_text_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
         self.show_text_layout.addWidget(self.show_text_lb)
         self.show_text_layout.addWidget(self.show_text_le)
 
         self.layout().addLayout(self.show_text_layout)
 
-        # ------------------------------------------------------------------------------------ #
-        #  $PROJECT
+        #  $PROJECT ---------------------------------------
         self.project_text_layout = qg.QHBoxLayout()
         self.project_text_layout.setContentsMargins(0,0,0,0)
         self.project_text_layout.setSpacing(0)
 
         self.project_text_lb = qg.QLabel('$PROJECT:')
+        self.project_text_lb.setMinimumWidth(_width)
         self.project_text_le  = qg.QLineEdit()
         # self.project_text_le.setMinimumWidth(150)
-        self.project_text_le.setPlaceholderText("The project environment variable..... the project in your show")
+        self.project_text_le.setPlaceholderText(self.p.project)
 
-        self.project_text_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        # self.project_text_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
         self.project_text_layout.addWidget(self.project_text_lb)
         self.project_text_layout.addWidget(self.project_text_le)
 
         self.layout().addLayout(self.project_text_layout)
+
+    def typeChanged(self):
+        logger.info("Type changed now {}".format(self.scene_combo.currentText()))
+
+    def getdabrender(self):
+        _dabrender = os.getenv("DABRENDER")
+
+        self.dabrender = _dabrender
+        logger.info("$DABRENDER: {}".format(_dabrender))
+        return _dabrender
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -179,7 +210,18 @@ class SubmitWidget(qg.QWidget):
 
         self.layout().addWidget(self.button_group)
 
+        self.submit_layout_1_bttn.clicked.connect(self.cancel)
+        self.submit_layout_2_bttn.clicked.connect(self.validate)
+        self.submit_layout_3_bttn.clicked.connect(self.submit)
 
+    def cancel(self):
+        logger.info("Cancel Pressed")
+
+    def validate(self):
+        logger.info("Validate Pressed")
+
+    def submit(self):
+        logger.info("Submit Pressed")
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class RangeWidget(qg.QWidget):
