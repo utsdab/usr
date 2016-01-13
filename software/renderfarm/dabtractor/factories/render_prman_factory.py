@@ -96,7 +96,7 @@ class RenderPrman(RenderBase):
         self.startframe = startframe
         self.endframe = endframe
         self.byframe = byframe
-        self.framechunks = 1  # prman jobs are one at a time
+        self.framechunks = 1  # pixar jobs are one at a time
         self.projectgroup = projectgroup
         self.options = options
         self.email = email

@@ -27,7 +27,7 @@ sleeper = 2
 author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
 
 
-# possible tags [ "prman","rms","maya","nuke","theWholeFarm"]
+# possible tags [ "pixar","rms","maya","nuke","theWholeFarm"]
 #  possible projects ["yr4","yr3","yr2","yr1"]
 #  possible tiers ["batch","rush","admin","default"]
 
@@ -70,7 +70,7 @@ job.projects = ["admin"]
 # task.addCleanup(author.Command(argv="/bin/cleanup file%i" % i))
 
 # command = author.Command()
-# command.argv = "prman layer%d.rib" % i
+# command.argv = "pixar layer%d.rib" % i
 # command.msg = "command message"
 # command.service = "cmdservice&&more"
 # command.tags = ["tagA", "tagB"]
@@ -87,7 +87,7 @@ job.projects = ["admin"]
 # command.resumepin = bool(i)
 
 
-#  possible tags [ "prman","rms","maya","nuke","theWholeFarm"]
+#  possible tags [ "pixar","rms","maya","nuke","theWholeFarm"]
 #  possible projects ["yr4","yr3","yr2","yr1"]
 #  possible tiers ["batch","rush","admin","default"]
 
@@ -100,7 +100,7 @@ testtags = ["nuke", "theWholeFarm"]
 testargv1 = ["pwd"]
 testargv2 = ["/Applications/Nuke9.0v7/Nuke9.0v7.app/Contents/MacOS/Nuke9.0v7", "-help"]
 
-#  possible tags [ "prman","rms","maya","nuke","theWholeFarm"]
+#  possible tags [ "pixar","rms","maya","nuke","theWholeFarm"]
 
 parenttask = author.Task(title="Test %s" % testGroupName, service=testservice)
 task = author.Task(title="Iterate %s $frame" % testGroupName)
@@ -136,7 +136,7 @@ testtags = ["maya", "theWholeFarm"]
 testargv1 = ["pwd"]
 testargv2 = ["Render", "-r", "mr", "-help"]
 
-#  possible tags [ "prman","rms","maya","nuke","theWholeFarm"]
+#  possible tags [ "pixar","rms","maya","nuke","theWholeFarm"]
 
 parenttask = author.Task(title="Test %s" % testGroupName, service=testservice)
 task = author.Task(title="Iterate %s $frame" % testGroupName)
@@ -174,7 +174,7 @@ testargv2 = ["maya", "-help"]
 testargv3 = ["pwd"]
 testargv4 = ["prman", "-help"]
 
-#  possible tags [ "prman","rms","maya","nuke","theWholeFarm"]
+#  possible tags [ "pixar","rms","maya","nuke","theWholeFarm"]
 
 parenttask = author.Task(title="Test %s" % testGroupName,
                          # service=testservice
