@@ -12,7 +12,7 @@ import PySide.QtGui as qg
 
 import functools
 
-import pymel.core as pm
+# import pymel.core as pm
 
 # Global variable to store the UI status, if it's open or closed
 prman_projection_ui = None

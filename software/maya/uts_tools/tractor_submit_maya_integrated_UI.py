@@ -38,8 +38,8 @@ from functools import partial
 try:
     import maya.cmds  as mc
     import pymel.core as pm
-    # import shiboken
-    # import maya.OpenMayaUI as mui
+    import shiboken
+    import maya.OpenMayaUI as mui
 except Exception,err:
     logger.warn("No maya import {} presuming from a shell".format(err))
 
@@ -206,70 +206,62 @@ class TractorSubmitWidget(qg.QFrame):
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
-# def create(docked=True):
-#     global tractor_submit_dialog
-#     logging.info("create dialog tractor_submit_dialog")
-#     if tractor_submit_dialog is None:
-#         tractor_submit_dialog = TractorSubmit()
-#
-#     if docked is True:
-#         ptr = mui.MQtUtil.mainWindow()
-#         main_window = shiboken.wrapInstance(long(ptr), qg.QWidget)
-#
-#         tractor_submit_dialog.setParent(main_window)
-#         size = tractor_submit_dialog.size()
-#
-#         name = mui.MQtUtil.fullName(long(shiboken.getCppPointer(tractor_submit_dialog)[0]))
-#         dock = mc.dockControl(
-#             allowedArea =['right', 'left'],
-#             area        = 'right',
-#             floating    = False,
-#             content     = name,
-#             width       = size.width(),
-#             height      = size.height(),
-#             label       = 'UTS_FARM_SUBMIT')
-#
-#         widget      = mui.MQtUtil.findControl(dock)
-#         dock_widget = shiboken.wrapInstance(long(widget), qg.QWidget)
-#         tractor_submit_dialog.connectDockWidget(dock, dock_widget)
-#     else:
-#         tractor_submit_dialog.show()
-#------------------------------------------------------------------------------#
-
-def create():
+def create(docked=True):
     global tractor_submit_dialog
+    logging.info("create dialog tractor_submit_dialog")
     if tractor_submit_dialog is None:
         tractor_submit_dialog = TractorSubmit()
-    tractor_submit_dialog.show()
 
+    if docked is True:
+        ptr = mui.MQtUtil.mainWindow()
+        main_window = shiboken.wrapInstance(long(ptr), qg.QWidget)
 
-def delete():
-    global tractor_submit_dialog
-    if tractor_submit_dialog is None:
-        return
+        tractor_submit_dialog.setParent(main_window)
+        size = tractor_submit_dialog.size()
 
-    tractor_submit_dialog.deleteLater()
-    tractor_submit_dialog = None
+        name = mui.MQtUtil.fullName(long(shiboken.getCppPointer(tractor_submit_dialog)[0]))
+        dock = mc.dockControl(
+            allowedArea =['right', 'left'],
+            area        = 'right',
+            floating    = False,
+            content     = name,
+            width       = size.width(),
+            height      = size.height(),
+            label       = 'UTS_FARM_SUBMIT')
+
+        widget      = mui.MQtUtil.findControl(dock)
+        dock_widget = shiboken.wrapInstance(long(widget), qg.QWidget)
+        tractor_submit_dialog.connectDockWidget(dock, dock_widget)
+    else:
+        tractor_submit_dialog.show()
+
 # -------------------------------------------------------------------------------------------------------------------- #
-# def delete():
-#     logging.info("tractor_submit_dialog delete")
-#     global tractor_submit_dialog
-#     if tractor_submit_dialog:
-#         tractor_submit_dialog.close()
-#         tractor_submit_dialog = None
+def delete():
+    logging.info("tractor_submit_dialog delete")
+    global tractor_submit_dialog
+    if tractor_submit_dialog:
+        tractor_submit_dialog.close()
+        tractor_submit_dialog = None
 
-# def getMayaWindow():
-#     """
-#     Get the main Maya window as a QtGui.QMainWindow instance
-#     @return: QtGui.QMainWindow instance of the top level Maya windows
-#     """
-#     ptr = mui.MQtUtil.mainWindow()
-#     if ptr is not None:
-#         return shiboken.wrapInstance(long(ptr), qg.QWidget)
+def getMayaWindow():
+    """
+    Get the main Maya window as a QtGui.QMainWindow instance
+    @return: QtGui.QMainWindow instance of the top level Maya windows
+    """
+    ptr = mui.MQtUtil.mainWindow()
+    if ptr is not None:
+        return shiboken.wrapInstance(long(ptr), qg.QWidget)
 
 # -------------------------------------------------------------------------------------------------------------------- #
 def main():
-
+    try:
+        maya = getMayaWindow()
+    except Exception,e:
+        print e
+    else:
+        print "else"
+    finally:
+        print "finally"
     app = qg.QApplication(sys.argv)
     tractor_submit_dialog = TractorSubmit()
     tractor_submit_dialog.show()

@@ -20,6 +20,10 @@ logger.addHandler(sh)
 # ##############################################################
 
 # -------------------------------------------------------------------------------------------------------------------- #
+class UTSBase(object):
+    def __init__(self):
+        pass
+
 class UserWidget(qg.QWidget):
     def __init__(self):
         super(UserWidget, self).__init__()
