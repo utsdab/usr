@@ -19,13 +19,15 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
+
+
 # -------------------------------------------------------------------------------------------------------------------- #
 class UTSBase(object):
     def __init__(self):
-        pass
+        self.job="from UTSBase"
 
 class UserWidget(qg.QWidget):
-    def __init__(self):
+    def __init__(self,job):
         super(UserWidget, self).__init__()
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(2)
@@ -55,6 +57,7 @@ class UserWidget(qg.QWidget):
 
         self.layout().addLayout(self.username_text_layout)
 
+
     def _getusername(self,_user):
         u=ufac.Map()
         self.username=u.getusername(_user)
@@ -65,8 +68,8 @@ class UserWidget(qg.QWidget):
         return self.usernumber
 
 # -------------------------------------------------------------------------------------------------------------------- #
-class ProjectWidget(qg.QWidget):
-    def __init__(self):
+class ProjectWidget(qg.QWidget,UTSBase):
+    def __init__(self, job):
         super(ProjectWidget, self).__init__()
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
@@ -142,6 +145,7 @@ class ProjectWidget(qg.QWidget):
         elif _type=="projects":
             logger.info("i am projects")
             self.p.scene="projects"
+        job.type=self.p.scene
 
     def getdabrender(self):
         _dabrender = os.getenv("DABRENDER")
@@ -257,7 +261,7 @@ class RangeWidget(qg.QWidget):
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class MayaJobWidget(qg.QWidget):
-    def __init__(self):
+    def __init__(self,job):
         super(MayaJobWidget, self).__init__()
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
@@ -265,7 +269,7 @@ class MayaJobWidget(qg.QWidget):
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
 
         # PROJECT WIDGET
-        self.project_widget = ProjectWidget()
+        self.project_widget = ProjectWidget(job)
         self.layout().addWidget(self.project_widget)
 
         # RANGE WIDGET
@@ -306,8 +310,8 @@ class MayaWidget(qg.QWidget):
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
-class MentalRayJobWidget(qg.QWidget):
-    def __init__(self):
+class MentalRayJobWidget(qg.QWidget,UTSBase):
+    def __init__(self,job):
         super(MentalRayJobWidget, self).__init__()
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
@@ -315,7 +319,7 @@ class MentalRayJobWidget(qg.QWidget):
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
 
         # PROJECT WIDGET
-        self.project_widget = ProjectWidget()
+        self.project_widget = ProjectWidget(job)
         self.layout().addWidget(self.project_widget)
 
         # RANGE WIDGET

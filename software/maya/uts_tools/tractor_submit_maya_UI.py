@@ -5,12 +5,27 @@ By Matt Gidney - mgidney@gmail.com
 
 In maya run this at the moment....
 
+
+
+
 import sys
 sys.path.append("/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr")
 
-from software.maya.utils import tractor_submit_maya_UI
-reload(tractor_submit_maya_UI)
+from software.maya.uts_tools import tractor_submit_maya_UI
+
+
+tractor_submit_maya_UI.TractorSubmit().show()
 tractor_submit_maya_UI.create()
+tractor_submit_maya_UI.main()
+tractor_submit_maya_UI.delete()
+
+reload(tractor_submit_maya_UI)
+reload(tractor_submit_maya_UI.ifac)
+
+
+########  set up rms camera projector
+from software.maya.uts_tools.prman import cam_proj_setup_ui
+cam_proj_setup_ui.create_ui()
 
 """
 
@@ -47,16 +62,17 @@ except Exception,err:
 
 # Global variable to store the UI status, if it's open or closed
 tractor_submit_dialog = None
+job = None
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmit(qg.QDialog):
-    def __init__(self):
+    def __init__(self,job):
         super(TractorSubmit,self).__init__()
         logger.info("TractorSubmit")
         self.setWindowTitle('UTS_FARM_SUBMIT')
         self.setObjectName('UTS_FARM_SUBMIT')
         self.setWindowFlags(qc.Qt.WindowStaysOnTopHint)
-        self.main_widget = TractorSubmitWidget()
+        self.main_widget = TractorSubmitWidget(job)
         self.setLayout(qg.QVBoxLayout())
         self.setFixedWidth(330)
         # self.setFixedWidth(314)
@@ -69,44 +85,30 @@ class TractorSubmit(qg.QDialog):
         self.layout().setContentsMargins(5,5,5,5)
         self.layout().addWidget(self.main_widget)
         self.scroll_area.setWidget(self.main_widget)
-        self._dock_widget = self._dock_name = None
+        # print job.printme()
 
-    def connectDockWidget(self, dock_name, dock_widget):
-        logger.info("connect {} {}".format(dock_name,dock_widget))
-        self._dock_widget = dock_widget
-        self._dock_name   = dock_name
 
-    def close(self):
-        logger.info("close")
-        if self._dock_widget:
-            mc.deleteUI(self._dock_name)
-        else:
-            qg.QDialog.close(self)
-
-        self._dock_widget = self._dock_name = None
 
 # -------------------------------------------------------------------------------------------------------------------- #
-class FeedbackWidget(qg.QWidget):
+class Job:
     def __init__(self):
-        super(FeedbackWidget, self).__init__()
-        logger.info("FeedbacktWidget")
-        self.setLayout(qg.QVBoxLayout())
-        self.splitter = ifac.Splitter("FEEDBACK")
-        self.layout().addWidget(self.splitter)
-        self.widget = ifac.FeedbackWidget()
-        self.widget.append("Farm Submit Interface")
-        self.layout().addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
-        self.layout().setSpacing(0)
-        self.layout().setContentsMargins(0,0,0,0)
-        self.layout().addWidget(self.splitter)
-        self.layout().addWidget(self.widget)
+        self.usernumber="123456"
+        self.username="johndoe"
+        self.jobtitle="dummyjob"
+        self.envtype="work"
+        self.envshow="dummyshow"
+        self.envscene="scene/dummyscene"
+        self.startframe="1"
+        self.endframe="12"
+        self.byframe="1"
 
-    def append(self,_text):
-        self.widget.append(_text)
+    def printme(self):
+        for i,key in enumerate(self.__dict__.keys()):
+            logger.info("Job Attribute {} : {}={}".format( i, key, self.__dict__[key]))
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmitWidget(qg.QFrame):
-    def __init__(self):
+    def __init__(self,job):
         super(TractorSubmitWidget, self).__init__()
 
         logger.info("TractorSubmitWidget")
@@ -120,11 +122,11 @@ class TractorSubmitWidget(qg.QFrame):
         self.layout().setContentsMargins(0,0,0,0)
         self.layout().setAlignment(qc.Qt.AlignTop)
 
-        self.feedback_widget = FeedbackWidget()
+        self.feedback_widget = ifac.FeedbackWidget()
 
         # ------------------------------------------------------------------------------------ #
         # USER WIDGET
-        self.user_widget = ifac.UserWidget()
+        self.user_widget = ifac.UserWidget(job)
         self.layout().addWidget(self.user_widget)
 
         # ------------------------------------------------------------------------------------ #
@@ -156,8 +158,8 @@ class TractorSubmitWidget(qg.QFrame):
 
         self.layout().addWidget(self.grid_widget)
 
-        self.maya_widget      = ifac.MayaJobWidget()
-        self.mentalray_widget = ifac.MentalRayJobWidget()
+        self.maya_widget      = ifac.MayaJobWidget(job)
+        self.mentalray_widget = ifac.MentalRayJobWidget(job)
         self.renderman_widget = ifac.RendermanJobWidget()
         self.bash_widget      = ifac.BashJobWidget()
         self.archive_widget   = ifac.ArchiveJobWidget()
@@ -181,7 +183,6 @@ class TractorSubmitWidget(qg.QFrame):
 
         # ------------------------------------------------------------------------------------ #
         # TRACTOR WIDGET
-
         self.tractor_widget= ifac.TractorWidget()
         self.layout().addWidget(self.tractor_widget)
 
@@ -198,46 +199,16 @@ class TractorSubmitWidget(qg.QFrame):
         # ------------------------------------------------------------------------------------ #
         # FEEDBACK WIDGET
         # self.layout().addSpacerItem(qg.QSpacerItem(5,20,qg.QSizePolicy.Expanding))
-
         self.layout().addWidget(self.feedback_widget)
 
     def closeWidget(self):
         self.emit(qc.SIGNAL('CLOSE'), self)
 
 
-# -------------------------------------------------------------------------------------------------------------------- #
-# def create(docked=True):
-#     global tractor_submit_dialog
-#     logging.info("create dialog tractor_submit_dialog")
-#     if tractor_submit_dialog is None:
-#         tractor_submit_dialog = TractorSubmit()
-#
-#     if docked is True:
-#         ptr = mui.MQtUtil.mainWindow()
-#         main_window = shiboken.wrapInstance(long(ptr), qg.QWidget)
-#
-#         tractor_submit_dialog.setParent(main_window)
-#         size = tractor_submit_dialog.size()
-#
-#         name = mui.MQtUtil.fullName(long(shiboken.getCppPointer(tractor_submit_dialog)[0]))
-#         dock = mc.dockControl(
-#             allowedArea =['right', 'left'],
-#             area        = 'right',
-#             floating    = False,
-#             content     = name,
-#             width       = size.width(),
-#             height      = size.height(),
-#             label       = 'UTS_FARM_SUBMIT')
-#
-#         widget      = mui.MQtUtil.findControl(dock)
-#         dock_widget = shiboken.wrapInstance(long(widget), qg.QWidget)
-#         tractor_submit_dialog.connectDockWidget(dock, dock_widget)
-#     else:
-#         tractor_submit_dialog.show()
-#------------------------------------------------------------------------------#
 
 def create():
     global tractor_submit_dialog
+    global job
     if tractor_submit_dialog is None:
         tractor_submit_dialog = TractorSubmit()
     tractor_submit_dialog.show()
@@ -245,34 +216,23 @@ def create():
 
 def delete():
     global tractor_submit_dialog
+    global job
     if tractor_submit_dialog is None:
         return
 
     tractor_submit_dialog.deleteLater()
     tractor_submit_dialog = None
-# -------------------------------------------------------------------------------------------------------------------- #
-# def delete():
-#     logging.info("tractor_submit_dialog delete")
-#     global tractor_submit_dialog
-#     if tractor_submit_dialog:
-#         tractor_submit_dialog.close()
-#         tractor_submit_dialog = None
 
-# def getMayaWindow():
-#     """
-#     Get the main Maya window as a QtGui.QMainWindow instance
-#     @return: QtGui.QMainWindow instance of the top level Maya windows
-#     """
-#     ptr = mui.MQtUtil.mainWindow()
-#     if ptr is not None:
-#         return shiboken.wrapInstance(long(ptr), qg.QWidget)
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
 def main():
 
     app = qg.QApplication(sys.argv)
-    tractor_submit_dialog = TractorSubmit()
+    job = Job()
+    tractor_submit_dialog = TractorSubmit(job)
     tractor_submit_dialog.show()
+    job.printme()
     sys.exit(app.exec_())
 
 if __name__ == '__main__':
