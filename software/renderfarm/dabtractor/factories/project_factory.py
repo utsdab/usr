@@ -42,7 +42,8 @@ class Project(object):
     def __init__(self):
 
         self.dabrender = self.alreadyset("DABRENDER","/Volumes/dabrender")
-        self.type = self.alreadyset("TYPE","work")
+        self.dabusr = self.alreadyset("DABUSR",self.getsoftwarepackagepath())
+        self.type = self.alreadyset("TYPE","user_work")
         self.show = self.alreadyset("SHOW","matthewgidney")
         self.project = self.alreadyset("PROJECT","testFarm")
         self.scene = self.alreadyset("SCENE","tesscenefile")
@@ -59,7 +60,7 @@ class Project(object):
             logger.debug("{} :: found in environment as {}".format(envar,val))
             return val
         except:
-            logger.debug("{} :: not found in environment, setting to default: {}".format(envar,default))
+            logger.warn("{} :: not found in environment, setting to default: {}".format(envar,default))
             return default
 
     def setfromscenefile(self,mayascenefilefullpath):
@@ -69,7 +70,7 @@ class Project(object):
             _dirbits=os.path.normpath(_dirname).split("/")
             _fullpath=os.path.normpath(mayascenefilefullpath).split("/")
             for i,bit in enumerate(_dirbits):
-                if bit=="project" or bit=="work":
+                if bit=="project_work" or bit=="user_work":
                     logger.debug("")
                     self.dabrender="/".join(_dirbits[0:i])
                     logger.debug("DABRENDERPATH: {}".format(self.dabrender))
@@ -84,7 +85,19 @@ class Project(object):
                     self.scene=_basename
                     logger.debug("SCENE: {}".format(self.scene))
         else:
-            logger.warn("Not a file: {}".format(mayascenefilefullpath))
+            logger.warn("Cant set from file. Not a file: {}".format(mayascenefilefullpath))
+
+    def getsoftwarepackagepath(self):
+        _userfacpath=os.path.dirname(ufac.__file__)
+        directories = os.path.normpath(_userfacpath).split("software")
+        if len(directories)==2:
+            _base = directories[0]
+        else:
+            raise "path is bad"
+
+        return directories[0]
+
+
 
 
 
@@ -97,6 +110,8 @@ if __name__ == '__main__':
     p.setfromscenefile("/Users/Shared/UTS_Dev/dabrender/work/matthewgidney/matt_maya_project2/scenes/empty.ma")
     p.setfromscenefile("/Users/Shared/UTS_Dev/dabrender/project/albatross/3D/scenes/animation/empty.ma")
     logger.debug("ProjectBase: {}".format(p.__dict__))
+
+    # print utils.printdict(p.__dict__)
 
 
 

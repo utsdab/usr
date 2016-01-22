@@ -46,37 +46,31 @@ import sys
 import os
 from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.renderfarm.dabtractor.factories import interface_factory as ifac
+from software.renderfarm.dabtractor.factories import render_prman_factory as rmsfac
+from software.renderfarm.dabtractor.factories import interface_mayarender_mr_factory as mrfac
 from software.renderfarm.dabtractor.factories import project_factory as proj
 
 from functools import partial
-
-try:
-    import maya.cmds  as mc
-    import pymel.core as pm
-    # import shiboken
-    # import maya.OpenMayaUI as mui
-except Exception,err:
-    logger.warn("No maya import {} presuming from a shell".format(err))
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
 # Global variable to store the UI status, if it's open or closed
 tractor_submit_dialog = None
-job = None
+# job = None
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmit(qg.QDialog):
-    def __init__(self,job):
+    def __init__(self):
         super(TractorSubmit,self).__init__()
         logger.info("TractorSubmit")
         self.setWindowTitle('UTS_FARM_SUBMIT')
         self.setObjectName('UTS_FARM_SUBMIT')
         self.setWindowFlags(qc.Qt.WindowStaysOnTopHint)
-        self.main_widget = TractorSubmitWidget(job)
+        self.job=Job()
+        self.main_widget = TractorSubmitWidget(self.job)
         self.setLayout(qg.QVBoxLayout())
         self.setFixedWidth(330)
-        # self.setFixedWidth(314)
-        self.setMinimumHeight(750)
+        self.setMinimumHeight(900)
         self.scroll_area=qg.QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setFocusPolicy(qc.Qt.NoFocus)
@@ -85,26 +79,77 @@ class TractorSubmit(qg.QDialog):
         self.layout().setContentsMargins(5,5,5,5)
         self.layout().addWidget(self.main_widget)
         self.scroll_area.setWidget(self.main_widget)
-        # print job.printme()
-
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class Job:
     def __init__(self):
-        self.usernumber="123456"
-        self.username="johndoe"
-        self.jobtitle="dummyjob"
-        self.envtype="work"
-        self.envshow="dummyshow"
-        self.envscene="scene/dummyscene"
-        self.startframe="1"
-        self.endframe="12"
-        self.byframe="1"
+        self.dabrender=None
+        self.usernumber=None
+        self.username=None
+        self.jobtitle=None
+        self.envtype=None
+        self.envshow=None
+        self.envscene=None
+        self.startframe=None
+        self.endframe=None
+        self.byframe=None
+        self.fb=None
 
     def printme(self):
+        logger.info("\n\n{:_^80}\n".format(" job attributes "))
         for i,key in enumerate(self.__dict__.keys()):
             logger.info("Job Attribute {} : {}={}".format( i, key, self.__dict__[key]))
+        logger.info("\n\n{:_^80}\n".format(" job attributes "))
+
+    def rmsvalidate(self):
+        try:
+            self.tractorjob=rmsfac.RenderPrman(
+                 envtype=self.type,
+                 envshow=self.show,
+                 envproject=self.project,
+                 envscene= os.path.splitext(os.path.basename(self.scenefullpath))[0],
+                 mayaprojectpath=self.projectpath,
+                 mayascenefilefullpath=self.scenefullpath,
+                 mayaversion=self.mayaversion,
+                 rendermanversion=self.rms_version,
+                 startframe=self.startframe,
+                 endframe=self.endframe,
+                 byframe=self.byframe,
+                 projectgroup="",
+                 outformat="",
+                 resolution=self.resolution,
+                 skipframes=0,
+                 makeproxy=0,
+                 options="",
+                 rendermemory=self.rms_memory,
+                 renderthreads=self.rms_threads,
+                 rendermaxsamples=self.rms_maxsamples,
+                 ribgenchunks=self.rms_ribchunks,
+                 email=[]
+            )
+            self.tractorjob.build()
+            self.tractorjob.validate()
+            self.fb.write("Validate OK")
+        except Exception,err:
+            logger.warn("rsmvalidate error: {}".format(err))
+            self.fb.write("Validate Fail: {}".format(err))
+
+
+    def rmsspool(self):
+        try:
+            self.rmsvalidate()
+            self.tractorjob.spool()
+            self.fb.write("Spool OK")
+        except Exception, err:
+            logger.warn("rsmspool error: {}".format(err))
+            self.fb.write("Spool Fail: {}".format(err))
+
+    def mrvalidate(self):
+
+        pass
+    def mrspool(self):
+        pass
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmitWidget(qg.QFrame):
@@ -112,6 +157,7 @@ class TractorSubmitWidget(qg.QFrame):
         super(TractorSubmitWidget, self).__init__()
 
         logger.info("TractorSubmitWidget")
+        self.job=job
         self.setFrameStyle(qg.QFrame.Panel | qg.QFrame.Raised)
         self.setSizePolicy(qg.QSizePolicy.Minimum,
                            qg.QSizePolicy.Fixed)
@@ -123,6 +169,7 @@ class TractorSubmitWidget(qg.QFrame):
         self.layout().setAlignment(qc.Qt.AlignTop)
 
         self.feedback_widget = ifac.FeedbackWidget()
+        self.job.fb=self.feedback_widget
 
         # ------------------------------------------------------------------------------------ #
         # USER WIDGET
@@ -143,11 +190,17 @@ class TractorSubmitWidget(qg.QFrame):
         self.grid_widget.layout().setContentsMargins(0,0,0,0)
 
         self.layout_1_bttn = qg.QPushButton('Maya')
+        # self.layout_1_bttn.setStyleSheet("background-color: Tan")
         self.layout_2_bttn = qg.QPushButton('Mental Ray')
+        # self.layout_2_bttn.setStyleSheet("background-color: Tan")
         self.layout_3_bttn = qg.QPushButton('Renderman')
+        # self.layout_3_bttn.setStyleSheet("background-color: Tan")
         self.layout_4_bttn = qg.QPushButton('Bash Cmd')
+        # self.layout_4_bttn.setStyleSheet("background-color: Tan")
         self.layout_5_bttn = qg.QPushButton('Nuke')
+        # self.layout_5_bttn.setStyleSheet("background-color: Tan")
         self.layout_6_bttn = qg.QPushButton('Archive')
+        # self.layout_6_bttn.setStyleSheet("background-color: Tan")
 
         self.grid_widget.layout().addWidget(self.layout_1_bttn,0,0)
         self.grid_widget.layout().addWidget(self.layout_2_bttn,0,1)
@@ -158,14 +211,14 @@ class TractorSubmitWidget(qg.QFrame):
 
         self.layout().addWidget(self.grid_widget)
 
-        self.maya_widget      = ifac.MayaJobWidget(job)
-        self.mentalray_widget = ifac.MentalRayJobWidget(job)
-        self.renderman_widget = ifac.RendermanJobWidget()
-        self.bash_widget      = ifac.BashJobWidget()
-        self.archive_widget   = ifac.ArchiveJobWidget()
-        self.nuke_widget      = ifac.NukeJobWidget()
-        self.tractor_widget   = ifac.TractorWidget()
-        self.farmjob_widget   = ifac.FarmJobExtraWidget()
+        self.maya_widget      = ifac.MayaJobWidget(self.job)
+        self.mentalray_widget = ifac.MentalRayJobWidget(self.job)
+        self.renderman_widget = ifac.RendermanJobWidget(self.job)
+        self.bash_widget      = ifac.BashJobWidget(self.job)
+        self.archive_widget   = ifac.ArchiveJobWidget(self.job)
+        self.nuke_widget      = ifac.NukeJobWidget(self.job)
+        self.tractor_widget   = ifac.TractorWidget(self.job)
+        self.farmjob_widget   = ifac.FarmJobExtraWidget(self.job)
 
         self.stacked_layout.addWidget(self.maya_widget)
         self.stacked_layout.addWidget(self.mentalray_widget)
@@ -174,26 +227,28 @@ class TractorSubmitWidget(qg.QFrame):
         self.stacked_layout.addWidget(self.nuke_widget)
         self.stacked_layout.addWidget(self.archive_widget)
 
-        self.layout_1_bttn.clicked.connect(partial(self.stacked_layout.setCurrentIndex, 0))
-        self.layout_2_bttn.clicked.connect(partial(self.stacked_layout.setCurrentIndex, 1))
-        self.layout_3_bttn.clicked.connect(partial(self.stacked_layout.setCurrentIndex, 2))
-        self.layout_4_bttn.clicked.connect(partial(self.stacked_layout.setCurrentIndex, 3))
-        self.layout_5_bttn.clicked.connect(partial(self.stacked_layout.setCurrentIndex, 4))
-        self.layout_6_bttn.clicked.connect(partial(self.stacked_layout.setCurrentIndex, 5))
+        self.layout_1_bttn.clicked.connect(partial(self._stackchange, 0))
+        self.layout_2_bttn.clicked.connect(partial(self._stackchange, 1))
+        self.layout_3_bttn.clicked.connect(partial(self._stackchange, 2))
+        self.layout_4_bttn.clicked.connect(partial(self._stackchange, 3))
+        self.layout_5_bttn.clicked.connect(partial(self._stackchange, 4))
+        self.layout_6_bttn.clicked.connect(partial(self._stackchange, 5))
+
+        self.stacked_layout.setCurrentIndex(2)
 
         # ------------------------------------------------------------------------------------ #
         # TRACTOR WIDGET
-        self.tractor_widget= ifac.TractorWidget()
+        self.tractor_widget= ifac.TractorWidget(self.job)
         self.layout().addWidget(self.tractor_widget)
 
         # ------------------------------------------------------------------------------------ #
         # FARM EXTRA WIDGET
-        self.farmjob_widget= ifac.FarmJobExtraWidget()
+        self.farmjob_widget= ifac.FarmJobExtraWidget(self.job)
         self.layout().addWidget(self.farmjob_widget)
 
         # ------------------------------------------------------------------------------------ #
         # SUBMIT WIDGET
-        self.submit_widget= ifac.SubmitWidget()
+        self.submit_widget= ifac.SubmitWidget(self.job,self.feedback_widget)
         self.layout().addWidget(self.submit_widget)
 
         # ------------------------------------------------------------------------------------ #
@@ -204,11 +259,15 @@ class TractorSubmitWidget(qg.QFrame):
     def closeWidget(self):
         self.emit(qc.SIGNAL('CLOSE'), self)
 
+    def _stackchange(self,index):
+        widgets=["maya","mr","rms","bash","nuke","archive"]
+        self.feedback_widget.write("MODE changed to {}".format(widgets[index]))
+        self.job.mode=widgets[index]
+        self.stacked_layout.setCurrentIndex(index)
 
 
 def create():
     global tractor_submit_dialog
-    global job
     if tractor_submit_dialog is None:
         tractor_submit_dialog = TractorSubmit()
     tractor_submit_dialog.show()
@@ -216,7 +275,6 @@ def create():
 
 def delete():
     global tractor_submit_dialog
-    global job
     if tractor_submit_dialog is None:
         return
 
@@ -227,13 +285,25 @@ def delete():
 
 # -------------------------------------------------------------------------------------------------------------------- #
 def main():
+    global tractor_submit_dialog
+    try:
+        import maya.cmds  as mc
+        import pymel.core as pm
+        logger.warn("Maya found")
+        create()
+        tractor_submit_dialog.job.maya=True
 
-    app = qg.QApplication(sys.argv)
-    job = Job()
-    tractor_submit_dialog = TractorSubmit(job)
-    tractor_submit_dialog.show()
-    job.printme()
-    sys.exit(app.exec_())
+    except Exception,err:
+        logger.warn("No maya found {} presuming from a shell".format(err))
+        app = qg.QApplication(sys.argv)
+        tractor_submit_dialog = TractorSubmit()
+        tractor_submit_dialog.job.maya=False
+        tractor_submit_dialog.show()
+        sys.exit(app.exec_())
+
+    finally:
+        tractor_submit_dialog.job.printme()
+
 
 if __name__ == '__main__':
     main()

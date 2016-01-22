@@ -152,28 +152,28 @@ class EnvType(object):
         self.dabrenderpath=config.CurrentConfiguration().dabrenderpath
 
         if userid:
-            self.envtype="work"
+            self.envtype="user_work"
             self.userid=userid
             self.map=Map()
             self.userdict=self.map.getuser(self.userid)
             self.usernumber=self.userdict.get("number")
             self.username=self.userdict.get("name")
-            self.enrol=self.userdict.get("yeay")
+            self.enrol=self.userdict.get("year")
             logger.debug("Usernumber {}, Username {}, Enrolled {}".format (self.usernumber,self.username,self.enrol))
 
         if projectname:
-            self.envtype="projects"
+            self.envtype="project_work"
             self.projectname=projectname
 
     def makedirectory(self):
         #
         try:
-            if self.envtype == "work":
+            if self.envtype == "user_work":
                 os.mkdir( os.path.join(self.dabrenderpath,self.envtype,self.username))
-                logger.info("Made {} under work".format(self.username))
+                logger.info("Made {} under user_work".format(self.username))
             elif self.envtype == "projects":
                 os.mkdir( os.path.join(self.dabrenderpath,self.envtype,self.projectname))
-                logger.info("Made {} under projects".format(self.projectname))
+                logger.info("Made {} under user_projects".format(self.projectname))
             else:
                 logger.debug("Made no directories")
         except Exception, e:
@@ -185,8 +185,6 @@ class TractorUserConfig(object):
     # this is the crew.config for tractor
     def __init__(self):
         pass
-
-
 
 
 

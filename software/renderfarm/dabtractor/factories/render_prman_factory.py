@@ -20,9 +20,9 @@ import tractor.api.author as author
 import os
 import sys
 import time
-from renderfarm.dabtractor.factories import user_factory as ufac
-from renderfarm.dabtractor.factories import utils_factory as utils
-from renderfarm.dabtractor.factories import configuration_factory as config
+from software.renderfarm.dabtractor.factories import user_factory as ufac
+from software.renderfarm.dabtractor.factories import utils_factory as utils
+from software.renderfarm.dabtractor.factories import configuration_factory as config
 
 
 class RenderBase(object):
@@ -48,7 +48,7 @@ class RenderBase(object):
             logger.warn("Cant get the users name and number back %s" % erroruser)
             sys.exit("Cant get the users name")
 
-        if os.path.ismount(self.dabrender):
+        if os.path.isdir(self.dabrender):
             logger.info("Found %s" % self.dabrender)
         else:
             self.initialProjectPath = None
@@ -62,12 +62,13 @@ class RenderPrman(RenderBase):
     '''
 
     def __init__(self,
-                 envtype="",
-                 envshow="",
-                 envproject="",
-                 envscene="",
-                 mayaprojectpath="",
-                 mayascenefilefullpath="",
+                 envtype="",        # user_work
+                 envshow="",        # matthewgidney
+                 envproject="",     # mayaproject
+                 envscene="",       # mayascenename - noextension ### not needed
+                 mayaprojectpath="",    # /Users/Shared/UTS_Dev/dabrender/user_work/matthewgidney/matt_maya_project
+                 mayascenerelpath="", # scene/mayascene.ma
+                 mayascenefilefullpath="", ####### not needed
                  mayaversion="",
                  rendermanversion="",
                  startframe=1,
@@ -89,13 +90,13 @@ class RenderPrman(RenderBase):
         super(RenderPrman, self).__init__()
         self.mayaprojectpath = "$DABRENDERPATH/$TYPE/$SHOW/$PROJECT"
         self.mayaprojectname = "$PROJECT"
-        self.mayascenefilefullpath = "$DABRENDERPATH/$TYPE/$SHOW/$PROJECT/scenes/$SCENE"
+        self.mayascenefilefullpath = "$DABRENDERPATH/$TYPE/$SHOW/$PROJECT/$SCENE"
         self.mayaversion = mayaversion,
         self.rendermanversion = rendermanversion,
         self.envkey_rms = "rms-{}-maya-{}".format(self.rendermanversion[0], self.mayaversion[0])
-        self.startframe = startframe
-        self.endframe = endframe
-        self.byframe = byframe
+        self.startframe = int(startframe)
+        self.endframe = int(endframe)
+        self.byframe = int(byframe)
         self.framechunks = 1  # pixar jobs are one at a time
         self.projectgroup = projectgroup
         self.options = options
@@ -355,6 +356,9 @@ class RenderPrman(RenderBase):
         else:
             message = "Maya scene file non existant %s" % self.mayascenefilefullpath
             logger.critical(message)
+            logger.critical(os.path.normpath(self.mayascenefilefullpath))
+            logger.critical(os.path.expandvars(self.mayascenefilefullpath))
+
             sys.exit(message)
 
 

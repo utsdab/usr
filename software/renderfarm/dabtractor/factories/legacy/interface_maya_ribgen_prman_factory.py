@@ -68,7 +68,7 @@ class WindowPrman(WindowBase):
         self.envshowtext="Select your show"
         self.envprojecttext="Select your show's maya project"
         self.envscenetext="Select your maya scene file"
-        self.envtypetext="Select work or project"
+        self.envtypetext="Select user_work or project_work"
 
         self.filename = ""
         self.dirname = ""
@@ -423,7 +423,7 @@ class WindowPrman(WindowBase):
     def on_type_change(self, index, value, op):
         print "type updated to ", self.cbxenvtype.get()
 
-        if self.cbxenvtype.get() == "work":
+        if self.cbxenvtype.get() == config.CurrentConfiguration().user_work:
             self.cbxenvshow.config(values=[self.renderusername])
             self.envshow.set(self.renderusername)
         else:
@@ -542,7 +542,8 @@ class WindowPrman(WindowBase):
             logger.info("Make Proxy:" % self.makeproxy)
             self.spooljob = False
             self.validatejob = True
-            self.master.destroy()
+
+            # self.master.destroy()
         except Exception, validateError:
             logger.warn("Problem validating %s" % validateError)
 
