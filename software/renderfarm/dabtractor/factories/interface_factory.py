@@ -4,7 +4,7 @@ import sys
 import os
 from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.renderfarm.dabtractor.factories import utils_factory as utilfac
-from software.renderfarm.dabtractor.factories import project_factory as proj
+from software.renderfarm.dabtractor.factories import environment_factory as proj
 from software.renderfarm.dabtractor.factories import configuration_factory as config
 
 from functools import partial
@@ -12,21 +12,16 @@ from functools import partial
 # ##############################################################
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 sh = logging.StreamHandler()
-sh.setLevel(logging.INFO)
+sh.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(levelname)5.5s \t%(filename)s as %(name)s \t%(message)s')
 sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-class UTSBase(object):
-    def __init__(self):
-        self.job="from UTSBase"
-
 
 class UserWidget(qg.QWidget):
     def __init__(self,job):
@@ -57,7 +52,6 @@ class UserWidget(qg.QWidget):
 
         self.layout().addLayout(self.username_text_layout)
 
-
     def _getusername(self,_user):
         u=ufac.Map()
         self.username=u.getusername(_user)
@@ -78,16 +72,14 @@ class ProjectWidget(qg.QWidget):
         self.layout().setSpacing(0)
         self.layout().setContentsMargins(0,0,0,0)
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
-
-        self.layout().addWidget(Splitter("ENVIRONMENT"))
-        self.p = proj.Project()
+        # self.layout().addWidget(Splitter("ENVIRONMENT"))
 
         _width=90
-        # ------------------------------------------------------------------------------------ #
-        #  $DABRENDER
+
+        # $DABRENDER ------------------------------------------------------------------------------------ #
         self.dabrender_text_lb = qg.QLabel('$DABRENDER:')
         self.dabrender_text_lb.setMinimumWidth(_width)
-        self.dabrender_text_le  = qg.QLineEdit(self.p.dabrender)
+        self.dabrender_text_le  = qg.QLineEdit(self.job.dabrender)
         self.dabrender_text_le.setReadOnly(True)
         self.dabrender_text_layout = qg.QHBoxLayout()
         self.dabrender_text_layout.setSpacing(0)
@@ -95,14 +87,9 @@ class ProjectWidget(qg.QWidget):
         self.dabrender_text_layout.addWidget(self.dabrender_text_lb)
         self.dabrender_text_layout.addWidget(self.dabrender_text_le)
         self.layout().addLayout(self.dabrender_text_layout)
-        self.job.dabrenderpath=self.p.dabrender
+        # self.job.dabrenderpath=self.job.dabrender
 
         #  $TYPE  ---------------------------------------
-        '''
-        user_work - username - project
-        project_work - show - project
-        '''
-
         self.type_text_lb = qg.QLabel('$TYPE:')
         self.type_text_lb.setMinimumWidth(_width)
         self.type_combo  = qg.QComboBox()
@@ -159,55 +146,64 @@ class ProjectWidget(qg.QWidget):
 
     def _type_change(self):
         _type=self.type_combo.currentText()
-        logger.debug("Type changed now {}".format(_type))
-        self.job.typepath=os.path.join(self.job.dabrenderpath,_type)
-        if _type=="user_work":
-            self._combo_from_path(self.show_combo,self.job.username)
-            self.job.showpath=os.path.join(self.job.typepath,self.job.username)
-            self._combo_from_path(self.project_combo,self.job.showpath)
-        elif _type=="project_work":
-            self._combo_from_path(self.show_combo,self.job.typepath)
-            self._combo_from_path(self.project_combo,"")
+        self.job.typepath=os.path.join(self.job.dabrender, _type)
 
-        self.job.type=self.p.type=_type
+        if _type=="user_work":
+            self._combo_from_path(self.show_combo, self.job.username)
+            self.job.showpath=os.path.join(self.job.typepath, self.job.username)
+            self._combo_from_path(self.project_combo, self.job.showpath)
+        elif _type=="project_work":
+            self._combo_from_path(self.show_combo, self.job.typepath)
+            self._combo_from_path(self.project_combo,"")
+        logger.debug("Type changed to {}".format(_type))
+
 
     def _show_change(self):
         _show=self.show_combo.currentText()
+        self.job.showpath=os.path.join(self.job.dabrender,self.job.type,_show)
+
+        self._combo_from_path(self.type_combo,self.job.showpath)
         logger.debug("Show changed to {}".format(_show))
-        self.job.show=self.p.show
-        self.job.showpath=os.path.join(self.job.dabrenderpath,self.job.type,_show)
-        self._combo_from_path(self.project_combo,self.job.showpath)
 
     def _project_change(self):
         _project=self.project_combo.currentText()
-        logger.debug("Project changed to {}".format(_project))
-        self.job.project=self.p.project
         self.job.projectpath=os.path.join(self.job.showpath,_project)
+
+        self.job.project=_project
+        logger.debug("Project changed to {}".format(_project))
+
 
     def _get_dabrender(self):
         _dabrender = os.getenv("DABRENDER")
         self.dabrender = _dabrender
         self.job.dabrender = self.dabrender
-        logger.info("$DABRENDER: {}".format(_dabrender))
+        logger.debug("$DABRENDER is {}".format(_dabrender))
         return _dabrender
 
     def _combo_from_path(self,_combobox,_dirpath):
-        #rebuild a combobox list from the contents of a path
+        # rebuild a combobox list from the contents of a path
         # given a path build a list of files and directories
-        _combobox.clear()
-        _files=[]
-        _dirs=[]
-        if os.path.isdir(_dirpath):
-            _items = os.listdir(_dirpath)
-            for i,_item in enumerate(_items):
-                if os.path.isfile(os.path.join(_dirpath,_item)):
-                    _files.append(_item)
-                elif os.path.isdir(os.path.join(_dirpath,_item)):
-                    _dirs.append(_item)
-        else:
-            _dirs=[_dirpath]
-        for i,_item in enumerate(_dirs):
-            _combobox.addItem(_item)
+        try:
+            _combobox.clear()
+            _files=[]
+            _dirs=[]
+            if os.path.isdir(_dirpath):
+                _items = os.listdir(_dirpath)
+                for i,_item in enumerate(_items):
+                    if os.path.isfile(os.path.join(_dirpath,_item)):
+                        _files.append(_item)
+                    elif os.path.isdir(os.path.join(_dirpath,_item)):
+                        _dirs.append(_item)
+            else:
+                # just pass thru the string
+                print"xxxx"
+                _dirs=[_dirpath]
+
+            for i,_item in enumerate(_dirs):
+                _combobox.addItem(_item)
+
+        except Exception, err:
+            logger.warn("combo from path: %s"%err)
 
     def _get_show(self):
         pass
@@ -239,7 +235,11 @@ class SceneWidget(qg.QWidget):
         f=File(startplace=self.job.projectpath)
         self.job.scenefullpath=f.fullpath
         self.job.scenerelpath=f.relpath
+        self.job.scene=f.relpath
         self.scene_file_lb.setText(f.relpath)
+        self.job.putback()
+        logger.debug("Scene changed to {}".format(self.job.scene))
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class SubmitWidget(qg.QWidget):
@@ -272,22 +272,74 @@ class SubmitWidget(qg.QWidget):
         self.submit_layout_3_bttn.clicked.connect(self.submit)
 
     def sanity(self):
-        logger.info("Sanity Checker Pressed")
+        logger.debug("Sanity Checker Pressed")
         self.fb.write("---Sanity Check Start---")
         self.fb.write("Not implemented yet")
         self.fb.write("---Sanity Check Ended---")
 
 
     def validate(self):
-        logger.info("Validate Job Pressed")
+        logger.debug("Validate Job Pressed")
         self.fb.write("Validate Job")
         self.job.printme()
         self.job.rmsvalidate()
 
     def submit(self):
         self.fb.write("Submit Job")
-        logger.info("Submit Job Pressed")
+        logger.debug("Submit Job Pressed")
         self.job.rmsspool()
+
+# -------------------------------------------------------------------------------------------------------------------- #
+class OutputWidget(qg.QWidget):
+    def __init__(self,job):
+        super(OutputWidget, self).__init__()
+        self.job=job
+        self.setLayout(qg.QVBoxLayout())
+        self.layout().setSpacing(0)
+        self.layout().setContentsMargins(0,0,0,0)
+        self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
+        _width1 = 180
+
+        # resolution
+        self.resolution_text_lb = qg.QLabel('RESOLUTION:')
+        self.resolution_combo  = qg.QComboBox()
+        self.resolution_combo.addItems(config.CurrentConfiguration().resolutions)
+        self.resolution_combo.setMinimumWidth(_width1)
+        self.resolution_layout = qg.QHBoxLayout()
+        self.resolution_layout.setContentsMargins(0,0,0,0)
+        self.resolution_layout.setSpacing(0)
+        self.resolution_layout.addWidget(self.resolution_text_lb)
+        self.resolution_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        self.resolution_layout.addWidget(self.resolution_combo)
+        self.layout().addLayout(self.resolution_layout)
+
+        # outformat
+        self.outformat_text_lb = qg.QLabel('OUTPUT:')
+        self.outformat_combo  = qg.QComboBox()
+        self.outformat_combo.addItems(config.CurrentConfiguration().outformats)
+        self.outformat_combo.setMinimumWidth(_width1)
+        self.outformat_layout = qg.QHBoxLayout()
+        self.outformat_layout.setContentsMargins(0,0,0,0)
+        self.outformat_layout.setSpacing(0)
+        self.outformat_layout.addWidget(self.outformat_text_lb)
+        self.outformat_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        self.outformat_layout.addWidget(self.outformat_combo)
+        self.layout().addLayout(self.outformat_layout)
+
+        # set initial
+        self._resolution(self.resolution_combo.currentText())
+        self._outformat(self.outformat_combo.currentText())
+        # connections
+        self.outformat_combo.activated.connect(lambda: self._outformat(self.outformat_combo.currentText()))
+        self.resolution_combo.activated.connect(lambda: self._resolution(self.resolution_combo.currentText()))
+
+    def _outformat(self,_value):
+        self.job.outformat=_value
+        logger.debug("Out Format group changed to {}".format(self.job.outformat))
+
+    def _resolution(self,_value):
+        self.job.resolution=_value
+        logger.debug("Resolution group changed to {}".format(self.job.resolution))
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class RangeWidget(qg.QWidget):
@@ -299,29 +351,27 @@ class RangeWidget(qg.QWidget):
         self.layout().setContentsMargins(0,0,0,0)
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
 
-        # self.layout().addWidget(Splitter("FRAME RANGE"))
-
         self.framerange_layout = qg.QGridLayout()
         self.framerange_layout.setContentsMargins(0,0,0,0)
         self.framerange_layout.setSpacing(0)
 
-        self.framerange_start_text_lb = qg.QLabel('S:')
+        self.framerange_start_text_lb = qg.QLabel('START:')
         self.framerange_start_text_lb.setMinimumWidth(20)
         self.framerange_start_text_le = qg.QLineEdit("1")
-        self.framerange_start_text_le.setMaximumWidth(60)
-        self.framerange_start_text_le.setPlaceholderText("START")
+        self.framerange_start_text_le.setMaximumWidth(50)
+        # self.framerange_start_text_le.setPlaceholderText("START")
 
-        self.framerange_end_text_lb = qg.QLabel('E:')
-        self.framerange_end_text_lb.setMinimumWidth(20)
+        self.framerange_end_text_lb = qg.QLabel('END:')
+        self.framerange_end_text_lb.setMinimumWidth(15)
         self.framerange_end_text_le = qg.QLineEdit("12")
-        self.framerange_end_text_le.setPlaceholderText("END")
-        self.framerange_end_text_le.setMaximumWidth(60)
+        # self.framerange_end_text_le.setPlaceholderText("END")
+        self.framerange_end_text_le.setMaximumWidth(50)
 
-        self.framerange_by_text_lb = qg.QLabel('B:')
-        self.framerange_by_text_lb.setMinimumWidth(20)
+        self.framerange_by_text_lb = qg.QLabel('BY:')
+        self.framerange_by_text_lb.setMinimumWidth(15)
         self.framerange_by_text_le = qg.QLineEdit("1")
-        self.framerange_by_text_le.setMaximumWidth(60)
-        self.framerange_by_text_le.setPlaceholderText("BY")
+        self.framerange_by_text_le.setMaximumWidth(50)
+        # self.framerange_by_text_le.setPlaceholderText("BY")
 
         self.framerange_layout.addItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding),0,0)
         self.framerange_layout.addWidget(self.framerange_start_text_lb,0,1)
@@ -334,6 +384,7 @@ class RangeWidget(qg.QWidget):
         self.framerange_layout.addItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding),0,6)
         self.framerange_layout.addWidget(self.framerange_by_text_lb,0,7)
         self.framerange_layout.addWidget(self.framerange_by_text_le,0,8)
+        self.framerange_layout.addItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding),0,9)
 
         self._start()
         self._end()
@@ -349,19 +400,19 @@ class RangeWidget(qg.QWidget):
         
     def _start(self):
         self.job.startframe=self.framerange_start_text_le.text()
-        # print "start={}".format(self.framerange_start_text_le.text())
+        logger.debug("Start changed to {}".format(self.job.scene))
 
     def _end(self):
         self.job.endframe=self.framerange_end_text_le.text()
-        # print "start={}".format(self.framerange_end_text_le.text())
+        logger.debug("End changed to {}".format(self.job.endframe))
 
     def _by(self):
         self.job.byframe=self.framerange_by_text_le.text()
-        # print "start={}".format(self.framerange_by_text_le.text())
+        logger.debug("By changed to {}".format(self.job.byframe))
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class MayaJobWidget(qg.QWidget):
-    def __init__(self,job):
+    def __init__(self, job):
         super(MayaJobWidget, self).__init__()
         self.job=job
         self.setLayout(qg.QVBoxLayout())
@@ -374,15 +425,18 @@ class MayaJobWidget(qg.QWidget):
         self.project_widget = ProjectWidget(self.job)
         self.layout().addWidget(self.project_widget)
 
-        self.layout().addWidget(Splitter("COMMON RENDER OPTIONS"))
 
+        self.layout().addWidget(Splitter("COMMON RENDER OPTIONS"))
+        # OUTPUT WIDGET
+        self.outformat_widget = OutputWidget(self.job)
+        self.layout().addWidget(self.outformat_widget)
         # RANGE WIDGET
         self.range_widget = RangeWidget(self.job)
         self.layout().addWidget(self.range_widget)
-
         # SCENE WIDGET
         self.scene_widget=SceneWidget(self.job)
         self.layout().addWidget(self.scene_widget)
+
 
         # BUILD MAYA WIDGET BITS
         self.maya_widget = MayaWidget(self.job)
@@ -392,7 +446,7 @@ class MayaJobWidget(qg.QWidget):
 class MayaWidget(qg.QWidget):
     def __init__(self,job):
         super(MayaWidget, self).__init__()
-        _width=170
+        _width=180
         self.job=job
 
         # self.scene_widget=SceneWidget(self.job)
@@ -425,11 +479,13 @@ class MayaWidget(qg.QWidget):
 
     def _maya(self,_value):
         self.job.mayaversion=_value
+        logger.debug("Maya changed to {}".format(self.job.mayaversion))
+
 
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
-class MentalRayJobWidget(qg.QWidget,UTSBase):
+class MentalRayJobWidget(qg.QWidget):
     def __init__(self,job):
         super(MentalRayJobWidget, self).__init__()
         self.job=job
@@ -443,12 +499,14 @@ class MentalRayJobWidget(qg.QWidget,UTSBase):
         self.project_widget = ProjectWidget(self.job)
         self.layout().addWidget(self.project_widget)
 
-        self.layout().addWidget(Splitter("COMMON RENDER OPTIONS"))
 
+        self.layout().addWidget(Splitter("COMMON RENDER OPTIONS"))
+        # OUTPUT WIDGET
+        self.outformat_widget = OutputWidget(self.job)
+        self.layout().addWidget(self.outformat_widget)
         # RANGE WIDGET
         self.range_widget = RangeWidget(self.job)
         self.layout().addWidget(self.range_widget)
-
         # SCENE WIDGET
         self.scene_widget=SceneWidget(self.job)
         self.layout().addWidget(self.scene_widget)
@@ -456,7 +514,6 @@ class MentalRayJobWidget(qg.QWidget,UTSBase):
         # MAYA OPTIONS
         self.maya_widget = MayaWidget(self.job)
         self.layout().addWidget(self.maya_widget)
-
         # MENTAL RAY OPTIONS
         self.mentalray_widget = MentalRayWidget(self.job)
         self.layout().addWidget(self.mentalray_widget)
@@ -476,20 +533,6 @@ class MentalRayWidget(qg.QWidget):
 
         self.project_splitter = Splitter("MENTALRAY OPTIONS")
         self.layout().addWidget(self.project_splitter)
-
-        # resolution
-        self.resolution_text_lb = qg.QLabel('RESOLUTION:')
-        self.resolution_combo  = qg.QComboBox()
-        self.resolution_combo.addItems(config.CurrentConfiguration().resolutions)
-        self.resolution_combo.setMinimumWidth(_width1)
-        self.resolution_layout = qg.QHBoxLayout()
-        self.resolution_layout.setContentsMargins(0,0,0,0)
-        self.resolution_layout.setSpacing(0)
-        self.resolution_layout.addWidget(self.resolution_text_lb)
-        self.resolution_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
-        self.resolution_layout.addWidget(self.resolution_combo)
-        self.layout().addLayout(self.resolution_layout)
-
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -523,20 +566,22 @@ class RendermanJobWidget(qg.QWidget):
         self.project_widget = ProjectWidget(self.job)
         self.layout().addWidget(self.project_widget)
 
-        self.layout().addWidget(Splitter("COMMON RENDER OPTIONS"))
 
+        self.layout().addWidget(Splitter("COMMON RENDER OPTIONS"))
+        # OUTPUT WIDGET
+        self.outformat_widget = OutputWidget(self.job)
+        self.layout().addWidget(self.outformat_widget)
         # RANGE WIDGET
         self.range_widget = RangeWidget(self.job)
         self.layout().addWidget(self.range_widget)
-
         # SCENE WIDGET
         self.scene_widget=SceneWidget(self.job)
         self.layout().addWidget(self.scene_widget)
 
+
         # BUILD MAYA OPTIONS
         self.maya_widget = MayaWidget(self.job)
         self.layout().addWidget(self.maya_widget)
-
         # BUILD RENDERMAN OPTIONS
         self.renderman_widget = RendermanWidget(self.job)
         self.layout().addWidget(self.renderman_widget)
@@ -547,7 +592,7 @@ class RendermanWidget(qg.QWidget):
     def __init__(self,job):
         super(RendermanWidget, self).__init__()
         self.job=job
-        _width1 = 170
+        _width1 = 180
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
         self.layout().setContentsMargins(0,0,0,0)
@@ -604,18 +649,6 @@ class RendermanWidget(qg.QWidget):
         self.integrator_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
         self.integrator_layout.addWidget(self.integrator_combo)
         self.layout().addLayout(self.integrator_layout)
-    
-        self.resolution_text_lb = qg.QLabel('RESOLUTION:')
-        self.resolution_combo  = qg.QComboBox()
-        self.resolution_combo.addItems(config.CurrentConfiguration().resolutions)
-        self.resolution_combo.setMinimumWidth(_width1)
-        self.resolution_layout = qg.QHBoxLayout()
-        self.resolution_layout.setContentsMargins(0,0,0,0)
-        self.resolution_layout.setSpacing(0)
-        self.resolution_layout.addWidget(self.resolution_text_lb)
-        self.resolution_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
-        self.resolution_layout.addWidget(self.resolution_combo)
-        self.layout().addLayout(self.resolution_layout)
                 
         self.maxsamples_text_lb = qg.QLabel('MAX SAMPLES:')
         self.maxsamples_combo  = qg.QComboBox()
@@ -643,7 +676,6 @@ class RendermanWidget(qg.QWidget):
         
         # set initial values
         self._rms_maxsamples(self.maxsamples_combo.currentText())
-        self._rms_resolution(self.resolution_combo.currentText())
         self._rms_integrator(self.integrator_combo.currentText())
         self._rms_memory(self.memory_combo.currentText())
         self._rms_threads(self.threads_combo.currentText())
@@ -652,7 +684,6 @@ class RendermanWidget(qg.QWidget):
         
         # connect vlaues to widget
         self.maxsamples_combo.activated.connect(lambda: self._rms_maxsamples(self.maxsamples_combo.currentText()))
-        self.resolution_combo.activated.connect(lambda: self._rms_resolution(self.resolution_combo.currentText()))
         self.integrator_combo.activated.connect(lambda: self._rms_integrator(self.integrator_combo.currentText()))
         self.memory_combo.activated.connect(lambda: self._rms_memory(self.memory_combo.currentText()))
         self.threads_combo.activated.connect(lambda: self._rms_threads(self.threads_combo.currentText()))
@@ -661,29 +692,33 @@ class RendermanWidget(qg.QWidget):
 
     def _rms_maxsamples(self,_value):
         self.job.rms_maxsamples=_value
-
-    def _rms_resolution(self,_value):
-        self.job.resolution=_value
+        logger.debug("Maya changed to {}".format(self.job.rms_maxsamples))
 
     def _rms_version(self,_value):
         self.job.rms_version=_value
+        logger.debug("RMS Version changed to {}".format(self.job.rms_version))
 
     def _rms_integrator(self,_value):
         self.job.rms_integrator=_value
+        logger.debug("Integrator changed to {}".format(self.job.rms_integrator))
 
     def _rms_memory(self,_value):
         self.job.rms_memory=_value
+        logger.debug("Memory changed to {}".format(self.job.rms_memory))
 
     def _rms_threads(self,_value):
         self.job.rms_threads=_value
+        logger.debug("Threads changed to {}".format(self.job.rms_threads))
         
     def _rms_ribchunks(self,_value):
         self.job.rms_ribchunks=_value
+        logger.debug("Ribchunks changed to {}".format(self.job.rms_ribchunks))
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class BashJobWidget(qg.QWidget):
     def __init__(self,job):
         super(BashJobWidget, self).__init__()
+        self.job=job
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
         self.layout().setContentsMargins(0,0,0,0)
@@ -691,13 +726,14 @@ class BashJobWidget(qg.QWidget):
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
 
         # BASH WIDGET
-        self.bash_widget = BashWidget(job)
+        self.bash_widget = BashWidget(self.job)
         self.layout().addWidget(self.bash_widget)
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class BashWidget(qg.QWidget):
     def __init__(self,job):
         super(BashWidget, self).__init__()
+        self.job=job
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
         self.layout().setContentsMargins(0,0,0,0)
@@ -723,6 +759,7 @@ class BashWidget(qg.QWidget):
 class ArchiveJobWidget(qg.QWidget):
     def __init__(self,job):
         super(ArchiveJobWidget, self).__init__()
+        self.job=job
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
         self.layout().setContentsMargins(0,0,0,0)
@@ -731,7 +768,7 @@ class ArchiveJobWidget(qg.QWidget):
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
 
         # ARCHIVE WIDGET
-        self.archive_widget = ArchiveWidget(job)
+        self.archive_widget = ArchiveWidget(self.job)
         self.layout().addWidget(self.archive_widget)
 
 
@@ -739,6 +776,7 @@ class ArchiveJobWidget(qg.QWidget):
 class ArchiveWidget(qg.QWidget):
     def __init__(self,job):
         super(ArchiveWidget, self).__init__()
+        self.job=job
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
         self.layout().setContentsMargins(0,0,0,0)
@@ -775,13 +813,13 @@ class NukeJobWidget(qg.QWidget):
 
 
         # PROJECT WIDGET
-        self.project_widget = ProjectWidget(job)
+        self.project_widget = ProjectWidget(self.job)
         self.layout().addWidget(self.project_widget)
 
         self.layout().addWidget(Splitter("COMMON RENDER OPTIONS"))
 
         # RANGE WIDGET
-        self.range_widget = RangeWidget(job)
+        self.range_widget = RangeWidget(self.job)
         self.layout().addWidget(self.range_widget)
 
         # SCENE WIDGET
@@ -789,13 +827,14 @@ class NukeJobWidget(qg.QWidget):
         self.layout().addWidget(self.scene_widget)
 
         # NUKE WIDGET
-        self.nuke_widget = NukeWidget(job)
+        self.nuke_widget = NukeWidget(self.job)
         self.layout().addWidget(self.nuke_widget)
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class NukeWidget(qg.QWidget):
     def __init__(self,job):
         super(NukeWidget, self).__init__()
+        self.job=job
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
         self.layout().setContentsMargins(0,0,0,0)
@@ -821,31 +860,39 @@ class NukeWidget(qg.QWidget):
 class TractorWidget(qg.QWidget):
     def __init__(self,job):
         super(TractorWidget, self).__init__()
+        self.job=job
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
         self.layout().setContentsMargins(0,0,0,0)
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
 
-        self.project_splitter = Splitter("JOB TRACTOR OPTIONS")
+        self.tractor_options_splitter = Splitter("JOB TRACTOR OPTIONS")
+        self.layout().addWidget(self.tractor_options_splitter)
 
-        self.layout().addWidget(self.project_splitter)
         self.project_group_layout = qg.QHBoxLayout()
         self.project_group_layout.setContentsMargins(0,0,0,0)
         self.project_group_layout.setSpacing(0)
 
         self.project_group_text_lb = qg.QLabel('PROJECT GROUP:')
         self.project_group_combo  = qg.QComboBox()
-        self.project_group_combo.addItem('Year 1 Assignment')
-        self.project_group_combo.addItem('Year 2 Assignment')
-        self.project_group_combo.addItem('Year 3 Assignment')
-        self.project_group_combo.addItem('Year 4 Assignment')
-        self.project_group_combo.addItem('Personal Job')
+        self.project_group_combo.addItems(config.CurrentConfiguration().projectgroups)
 
         self.project_group_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
         self.project_group_layout.addWidget(self.project_group_text_lb)
         self.project_group_layout.addWidget(self.project_group_combo)
 
         self.layout().addLayout(self.project_group_layout)
+
+        # set initial
+        self._projectgroup(self.project_group_combo.currentText())
+        # connections
+        self.project_group_combo.activated.connect(lambda: self._projectgroup(self.project_group_combo.currentText()))
+
+    def _projectgroup(self,_value):
+        self.job.projectgroup =_value
+        logger.debug("Project group changed to {}".format(self.job.projectgroup))
+
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class Directory(qg.QFileDialog):

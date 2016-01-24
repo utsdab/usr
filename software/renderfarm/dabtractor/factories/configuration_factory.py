@@ -28,28 +28,29 @@ class ConfigurationBase(object):
         self.configpath = inspect.getfile(self.__class__)
         # logger.info("config path = {}".format(self.configpath))
         # print os.path.abspath(sys.modules[ConfigurationBase.__module__].__file__)
-        self.mayaversions = ("2017","2016",)
-        self.rendermanversions = ("20.6","20.5","20.2","20.1",)
+        self.mayaversions = ("2016",)
+        self.rendermanversions = ("20.6","20.5","20.2",)
         self.rendermanrenderers = ("rms-ris", "rms-reyes")
-        self.rendermanintegrators = ("SCENE","pxr", "vcm","visualiser")
+        self.rendermanintegrators = ("FROMFILE","pxr", "vcm","visualiser")
         self.nukeversions = ("9.0v8","9.0v7","9.0v6")
         self.configuration = "base"
         self.projectgroups = ("yr1", "yr2", "yr3", "yr4", "masters", "personal", "admin")
-        self.mayarenderers = ("mr", "sw","SCENE")
+        self.mayarenderers = ("mr", "sw","FROMFILE")
         self.renderfarmbin = (os.path.join(os.path.dirname(os.path.dirname(dt.__file__)), "bin"),)
         self.renderfarmmodulepath = (os.path.dirname(os.path.dirname(dt.__file__)),)
         self.renderfarmproxypath = (os.path.join(os.path.dirname(dt.__file__), "proxys"),)
         self.nukedefaultproxytemplate = ("nuke_proxy_720p_prores_v003.py")
-        self.dabrenderpath = self.getfromenv("DABRENDERPATH","/Volumes/dabrender")
+        self.dabrender = self.getfromenv("DABRENDER", "/Volumes/dabrender")
         self.dabusrpath = self.getfromenv("DABUSR", "/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr/")
         # self.dabusrpath = self.getfromenv("DABUSR", self.getusrinternally())
         self.usermapfilepath = (os.path.join(self.dabusrpath, "custom/map"))
-        self.editproxydumppath = (os.path.join(self.dabrenderpath, "renderproxies"))
-        self.renderthreads = ("16","8","4","2")
+        self.editproxydumppath = (os.path.join(self.dabrender, "renderproxies"))
+        self.renderthreads = ("16","8","4","2","1")
         self.ribgenchunks = ("1","2","4","8","16")
         self.rendermemorys = ("8000","4000","2000")
-        self.rendermaxsamples = ("SCENE","1024","512","256","128","64","32","16")
-        self.resolutions = ("SCENE","1920x1080","1280x720","960x540","720x480")
+        self.rendermaxsamples = ("FROMFILE","1024","512","256","128","64","32","16")
+        self.resolutions = ("FROMFILE","1080p","720p","540p","108p",)
+        self.outformats = ("exr",)
         self.envtypes = ("user_work","project_work",)
         self.envshow = ("matthewgidney",)
         self.envproject = ("testFarm",)
@@ -89,6 +90,7 @@ class CurrentConfiguration(ConfigurationBase):
         self.mayarenderer = self.mayarenderers[0]
         self.projectgroup = self.projectgroups[5]
         self.envtype = self.envtypes[0]
+        self.outformat = self.outformats[0]
 
 
 

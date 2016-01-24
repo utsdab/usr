@@ -24,6 +24,7 @@ from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.renderfarm.dabtractor.factories import utils_factory as utils
 from software.renderfarm.dabtractor.factories import configuration_factory as config
 
+author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
 
 class RenderBase(object):
     """
@@ -33,7 +34,6 @@ class RenderBase(object):
     def __init__(self):
         self.user = os.getenv("USER")
         self.spooljob = False
-        self.job = ""
 
         try:
             # get the names of the central render location for the user
@@ -62,6 +62,7 @@ class RenderPrman(RenderBase):
     '''
 
     def __init__(self,
+                 envdabrender="",
                  envtype="",        # user_work
                  envshow="",        # matthewgidney
                  envproject="",     # mayaproject
@@ -88,9 +89,31 @@ class RenderPrman(RenderBase):
     ):
 
         super(RenderPrman, self).__init__()
-        self.mayaprojectpath = "$DABRENDERPATH/$TYPE/$SHOW/$PROJECT"
-        self.mayaprojectname = "$PROJECT"
-        self.mayascenefilefullpath = "$DABRENDERPATH/$TYPE/$SHOW/$PROJECT/$SCENE"
+        self.envdabrender = envdabrender
+        self.envtype=envtype
+        self.envproject=envproject
+        self.envshow=envshow
+        self.envscene=envscene
+
+        self.mayaprojectpathalias       = "$DABRENDER/$TYPE/$SHOW/$PROJECT"
+        self.mayaprojectpath = os.path.join(self.envdabrender,self.envtype,
+                                            self.envshow,self.envproject)
+        self.mayaprojectnamealias       = "$PROJECT"
+        self.mayaprojectname = envproject
+        self.mayascenefilefullpathalias = "$DABRENDER/$TYPE/$SHOW/$PROJECT/$SCENE"
+        self.mayascenefilefullpath = os.path.join(self.envdabrender,self.envtype,self.envshow,
+                                                  self.envproject,self.envscene)
+        self.scenename = os.path.split(envscene)[-1:][0]
+        self.scenebasename = os.path.splitext(self.scenename)[0]
+
+        self.sceneext = os.path.splitext(self.scenename)[1]
+        self.rendermanpath = os.path.join(self.envdabrender,self.envtype,
+                                          self.envshow,self.envproject,
+                                          "renderman",self.scenebasename)
+        self.rendermanpathalias = "$DABRENDER/$TYPE/$SHOW/$PROJECT/renderman/$SCENENAME"
+        self.renderdirectory = os.path.join(self.rendermanpath,"images")
+        self.renderimagesalias  = "$DABRENDER/$TYPE/$SHOW/$PROJECT/renderman/$SCENENAME/images"
+
         self.mayaversion = mayaversion,
         self.rendermanversion = rendermanversion,
         self.envkey_rms = "rms-{}-maya-{}".format(self.rendermanversion[0], self.mayaversion[0])
@@ -105,33 +128,18 @@ class RenderPrman(RenderBase):
         self.outformat = outformat
         self.makeproxy = makeproxy
         self.skipframes = skipframes
-        self.envtype= envtype
-        self.envshow=envshow
-        self.envproject=envproject
-        self.envscene=envscene
+
         self.rendermaxsamples=rendermaxsamples
         self.renderthreads=renderthreads
         self.rendermemory=rendermemory
-        self.sourcetargetsame = False
         self.mayaprojectname = os.path.basename(self.mayaprojectpath)
-        self.mayascenepath = "$DABRENDERPATH/$TYPE/$SHOW/$PROJECT/scenes/$SCENE"
-        self.mayascenename = "$SCENE"
-        self.mayascenenamebase = os.path.splitext(self.mayascenename)[0]
-        self.mayascenenameext = os.path.splitext(self.mayascenename)[1]
-        self.renderdirectory = "renderman/$SCENE/images"
-        self.imageoutputpath = "$DABRENDERPATH/$TYPE/$SHOW/$PROJECT/renderman/$SCENE/images"
-        self.finaloutputimages = "{finaloutputpath}/{scene}.\\*.{ext}".format(
-            finaloutputpath=self.imageoutputpath,
-            scene=self.mayascenenamebase,
-            ext=self.outformat)
-        self.ribpath = "$DABRENDERPATH/$TYPE/$SHOW/$PROJECT/renderman/$SCENE/rib".format(
-            work=self.dabrenderworkpath,
-            proj=self.mayaprojectname,
-            scene=self.mayascenenamebase)
-        self.finaloutputimagebase = "{finaloutputpath}/{scene}".format(
-            finaloutputpath=self.imageoutputpath,
-            scene=self.mayascenenamebase)
-        self.proxyoutput = "$DABRENDERPATH/$TYPE/$SHOW/$PROJECT/movies/$SCENE_{}.mov".format("datehere")
+        self.finaloutputimages = "{finaloutputpath}/$SCENENAME.\\*.{ext}".format(
+                                    finaloutputpath=self.rendermanpathalias,
+                                    ext=self.outformat)
+        self.renderimages = "{}/{}.\\*.{}".format(self.rendermanpathalias,self.scenebasename,self.outformat)
+        self.ribpath = "{}/rib".format(self.rendermanpathalias)
+        self.finaloutputimagebase = "{}/{}".format(self.rendermanpathalias,self.scenebasename)
+        self.proxyoutput = "$DABRENDER/$TYPE/$SHOW/$PROJECT/movies/$SCENENAME_{}.mov".format("datehere")
 
     def build(self):
         """
@@ -139,24 +147,41 @@ class RenderPrman(RenderBase):
         """
 
         # ################ 0 JOB ################
-        self.job = author.Job(title="Prman Render Job: {} {}".format(self.renderusername,
-                                                                     self.mayascenename),
+        self.job = author.Job(title="Renderman: {} {} {}-{}".format(self.renderusername,
+                                                                     self.scenename,self.startframe,self.endframe),
                               priority=10,
-                              envkey=[self.envkey_rms],
+                              envkey=[self.envkey_rms,"ProjectX",
+                                    "TYPE={}".format(self.envtype),
+                                    "SHOW={}".format(self.envshow),
+                                    "PROJECT={}".format(self.envproject),
+                                    "SCENE={}".format(self.envscene),
+                                    "SCENENAME={}".format(self.scenebasename)],
                               metadata="user={} username={} usernumber={}".format(self.user, self.renderusername,
                                                                                   self.renderusernumber),
                               comment="LocalUser is {} {} {}".format(self.user,
                                                                      self.renderusername,
                                                                      self.renderusernumber),
-                              projects=[self.projectgroup],
+                              projects=[str(self.projectgroup)],
+
                               tier="batch",
-                              tags=["theWholeFarm","ProjectX",
-                                    "TYPE={}".format(self.envtype),
-                                    "SHOW={}".format(self.envshow),
-                                    "PROJECT={}".format(self.envproject),
-                                    "SCENE={}".format(self.envscene),
+                              tags=[
+                                     "theWholeFarm",
                                     ],
                               service="")
+
+        self.job.newDirMap("/dabrender", "/dabrender", "linux")
+        self.job.newDirMap("/dabrender", "/Volumes/dabrender", "osx")
+        self.job.newDirMap("/dabrender", "Z:", "windows")
+        self.job.newDirMap("/Volumes/dabrender", "Z:", "windows")
+        # self.job.newDirMap("Z:","//Volumes/dabrender", "UNC")
+        # self.job.newDirMap("Z:","/Volumes/dabrender", "NFS")
+
+        '''
+         {{mayabatch} {maya} NFS}
+         {{X:/} {//fileserver/projects/} UNC}
+         {{X:/} {/fileserver/projects/} NFS}
+         { { source } { destination } zone }
+        '''
 
 
         # ############## 0 ThisJob #################
@@ -170,27 +195,27 @@ class RenderPrman(RenderBase):
         task_generate_rib_preflight = author.Task(title="Generate RIB Preflight")
         command_ribgen = author.Command(argv=["maya",
                                               "-batch",
-                                              "-proj", self.mayaprojectpath,
+                                              "-proj", utils.usedirmap(self.mayaprojectpath),
                                               "-command",
                                               "renderManBatchGenRibForLayer {layerid} {start} {end} {phase}".format(
                                                   layerid=0, start=self.startframe, end=self.endframe, phase=1),
-                                              "-file", self.mayascenefilefullpath],
+                                              "-file", utils.usedirmap(self.mayascenefilefullpath)],
                                               tags=["maya", "rms", "theWholeFarm"],
-                                              atleast=int(self.renderthreads),
-                                              atmost=int(self.renderthreads),
+                                              # atleast=int(self.renderthreads),
+                                              # atmost=int(self.renderthreads),
                                               service="RfMRibGen")
         task_generate_rib_preflight.addCommand(command_ribgen)
         task_preflight.addChild(task_generate_rib_preflight)
         task_render_preflight = author.Task(title="Render Preflight")
+        _threads=4
         command_render_preflight = author.Command(argv=["prman",
-                                                        "-t:2",
+                                                        "-t:{}".format(_threads),
                                                         "-Progress", "-recover", "%r", "-checkpoint", "5m",
-                                                        "-cwd", "$DABRENDERPATH/$TYPE/$SHOW/$PROJECT",
-                                                        "renderman/{scene}/rib/job/job.rib".format(
-                                                            scene=self.mayascenenamebase)],
+                                                        "-cwd", utils.usedirmap(self.mayaprojectpath),
+                                                        "renderman/{}/rib/job/job.rib".format(self.scenebasename)],
                                                   tags=["prman", "theWholeFarm"],
-                                                  atleast=int(self.renderthreads),
-                                                  atmost=int(self.renderthreads),
+                                                  atleast=_threads,
+                                                  atmost=_threads,
                                                   service="PixarRender")
 
         task_render_preflight.addCommand(command_render_preflight)
@@ -202,13 +227,13 @@ class RenderPrman(RenderBase):
         task_generate_rib = author.Task(title="Generate RIB {}-{}".format(self.startframe, self.endframe))
         command_generate_rib = author.Command(argv=["maya",
                                                     "-batch",
-                                                    "-proj", self.mayaprojectpath, "-command",
+                                                    "-proj", utils.usedirmap(self.mayaprojectpath), "-command",
                                                     "renderManBatchGenRibForLayer {layerid} {start} {end} {phase}".format(
                                                         layerid=0, start=self.startframe, end=self.endframe, phase=2),
-                                                    "-file", self.mayascenefilefullpath],
+                                                    "-file", utils.usedirmap(self.mayascenefilefullpath)],
                                               tags=["maya", "rms", "theWholeFarm"],
-                                              atleast=int(self.renderthreads),
-                                              atmost=int(self.renderthreads),
+                                              # atleast=int(self.renderthreads),
+                                              # atmost=int(self.renderthreads),
                                               service="RfMRibGen")
 
         task_generate_rib.addCommand(command_generate_rib)
@@ -217,21 +242,19 @@ class RenderPrman(RenderBase):
         task_render_frames.serialsubtasks = 0
 
         for frame in range(self.startframe, (self.endframe + 1),self.byframe):
-            _shofile = "{proj}/renderman/{scene}/images/{scene}.{frame:04d}.{ext}".format(
-                proj=self.mayaprojectpath, scene=self.mayascenenamebase, frame=frame, ext=self.outformat)
-            _imgfile = "{proj}/renderman/{scene}/images/{scene}.{frame:04d}.{ext}".format(
-                proj=self.mayaprojectpath, scene=self.mayascenenamebase, frame=frame, ext=self.outformat)
-            _statsfile = "{proj}/renderman/{scene}/rib/{frame:04d}/{frame:04d}.xml".format(
-                proj=self.mayaprojectpath, scene=self.mayascenenamebase, frame=frame)
-            _ribfile = "{proj}/renderman/{scene}/rib/{frame:04d}/{frame:04d}.rib".format(
-                proj="$DABRENDERPATH/$TYPE/$SHOW/$PROJECT", scene=self.mayascenenamebase, frame=frame)
+            _shofile = utils.usedirmap("{proj}/{scenebase}.{frame:04d}.{ext}".format(
+                proj=self.renderimagesalias, scenebase=self.scenebasename, frame=frame, ext=self.outformat))
+            _imgfile = utils.usedirmap("{proj}/{scenebase}.{frame:04d}.{ext}".format(
+                proj=self.finaloutputimagebase,scenebase=self.scenebasename, frame=frame, ext=self.outformat))
+            _statsfile = utils.usedirmap("{proj}/rib/{frame:04d}/{frame:04d}.xml".format(
+                proj=self.rendermanpath, frame=frame))
+            _ribfile = utils.usedirmap("{proj}/rib/{frame:04d}/{frame:04d}.rib".format(
+                proj=self.rendermanpath, frame=frame))
 
             task_render_rib = author.Task(title="Render Frame %s" % frame,
                                           preview="sho {}".format(_shofile),
-
                                           metadata="statsfile={} imgfile={}".format(_statsfile, _imgfile))
-
-            commonargs = ["prman", "-cwd", self.mayaprojectpath]
+            commonargs = ["prman", "-cwd", utils.usedirmap(self.mayaprojectpath)]
 
             rendererspecificargs = []
 
@@ -248,22 +271,31 @@ class RenderPrman(RenderBase):
             elif self.resolution == "108p":
                 self.xres, self.yres = 192, 108
                 rendererspecificargs.extend(["-res", "%s" % self.xres, "%s" % self.yres])
-            else:
-                # dont define the resolutions or aspect - so use what is the file
-                pass
+
+
+            if self.rendermaxsamples != "FROMFILE":
+                rendererspecificargs.extend([ "-maxsamples", "{}".format(self.rendermaxsamples) ])
+            if self.rendermemory != "FROMFILE":
+                rendererspecificargs.extend([ "-memorylimit", "{}".format(self.rendermemory) ])
+            # if self.rendermaxsamples != "FROMFILE":
+            #     rendererspecificargs.extend([ "-maxsamples", "{}".format(self.rendermaxsamples) ])
+            # if self.renderthreads != "FROMFILE":
+            #     rendererspecificargs.extend([ "-maxsamples", "{}".format(self.rendermaxsamples) ])
+
 
             rendererspecificargs.extend([
                 # "-pad", "4",
-                "-memorylimit", self.rendermemory,  # mb
-                "-t:{}".format(self.renderthreads), "-Progress",
+                # "-memorylimit", self.rendermemory,  # mb
+                "-t:{}".format(self.renderthreads),
+                "-Progress",
                 "-recover", "%r",
                 "-checkpoint", "5m",
                 "-statslevel", "2",
-                "-maxsamples", "{}".format(self.rendermaxsamples)  # override RIB ray trace hider maxsamples
+                # "-maxsamples", "{}".format(self.rendermaxsamples)  # override RIB ray trace hider maxsamples
                 # "-pixelvariance","3"      # override RIB PixelVariance
                 # "-d", ""                  # dispType
                 #                 -version          : print the version
-                # -progress         : print percent complete while rendering
+                # "-progress    ",     : print percent complete while rendering
                 # -recover [0|1]    : resuming rendering partial frames
                 # -t:X              : render using 'X' threads
                 # -woff msgid,...   : suppress error messages from provided list
@@ -310,7 +342,7 @@ class RenderPrman(RenderBase):
 
             #### using the proxy_run.py script
             try:
-                _directory = "{p}/renderman/{s}/images".format( p=self.mayaprojectpath, s=self.mayascenenamebase)
+                _directory = "{p}/renderman/{s}/images".format( p=self.mayaprojectpath, s=self.scenebasename)
                 _nuke_envkey = "proxynuke{}".format(config.CurrentConfiguration().nukeversion)
                 _proxy_runner_cmd = ["proxy_run.py","-s",_directory]
 
@@ -339,14 +371,15 @@ class RenderPrman(RenderBase):
 
     def mail(self, level="Level", trigger="Trigger", body="Render Progress Body"):
         bodystring = "Prman Render Progress: \nLevel: {}\nTrigger: {}\n\n{}".format(level, trigger, body)
-        subjectstring = "FARM JOB: %s %s" % (str(self.mayascenenamebase), self.renderusername)
+        subjectstring = "FARM JOB: %s %s" % (str(self.scenebasename), self.renderusername)
         mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
                                        "-b", bodystring, "-s", subjectstring], service="Ffmpeg")
         return mailcmd
 
     def spool(self):
-        if os.path.exists(self.mayascenefilefullpath):
-
+        # double check scene file exists
+        logger.info("Double Checking: {}".format(os.path.expandvars(self.mayascenefilefullpath)))
+        if os.path.exists(os.path.expandvars(self.mayascenefilefullpath)):
             try:
                 logger.info("Spooled correctly")
                 # all jobs owner by pixar user on the farm
@@ -369,6 +402,7 @@ if __name__ == "__main__":
     logger.info("START TESTING")
 
     TEST = RenderPrman(
+                       envdabrender="/Volumes/dabrender",
                        envproject="testFarm",
                        envshow="matthewgidney",
                        envscene="dottyrms.ma",

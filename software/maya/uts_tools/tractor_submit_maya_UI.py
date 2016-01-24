@@ -47,29 +47,38 @@ import os
 from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.renderfarm.dabtractor.factories import interface_factory as ifac
 from software.renderfarm.dabtractor.factories import render_prman_factory as rmsfac
-from software.renderfarm.dabtractor.factories import interface_mayarender_mr_factory as mrfac
-from software.renderfarm.dabtractor.factories import project_factory as proj
+from software.renderfarm.dabtractor.factories import render_mr_factory as mrfac
+from software.renderfarm.dabtractor.factories import environment_factory as env
 
 from functools import partial
+import tractor.api.query as tq
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
 # Global variable to store the UI status, if it's open or closed
 tractor_submit_dialog = None
-# job = None
+maya_present = False
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmit(qg.QDialog):
-    def __init__(self):
+    def __init__(self,mayapresent=False):
         super(TractorSubmit,self).__init__()
+        self.job=Job()
+        self.job.mayapresent=mayapresent
+        self.maya=None
+
         logger.info("TractorSubmit")
+        if self.job.mayapresent:
+            self.maya=Maya()
+        else:
+            logger.info("Maya NOT Present")
+
         self.setWindowTitle('UTS_FARM_SUBMIT')
         self.setObjectName('UTS_FARM_SUBMIT')
         self.setWindowFlags(qc.Qt.WindowStaysOnTopHint)
-        self.job=Job()
-        self.main_widget = TractorSubmitWidget(self.job)
+        self.main_widget = TractorSubmitWidget(self.job,self.maya)
         self.setLayout(qg.QVBoxLayout())
-        self.setFixedWidth(330)
+        self.setFixedWidth(350)
         self.setMinimumHeight(900)
         self.scroll_area=qg.QScrollArea()
         self.scroll_area.setWidgetResizable(True)
@@ -80,17 +89,25 @@ class TractorSubmit(qg.QDialog):
         self.layout().addWidget(self.main_widget)
         self.scroll_area.setWidget(self.main_widget)
 
+class Maya(object):
+    '''
+    This is a sidecar like object that holds and examines data in the maya scene found
+    '''
+    def __init__(self):
+        logger.info("Maya is Found")
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
-class Job:
+class Job(env.Environment):
     def __init__(self):
-        self.dabrender=None
+        super(Job, self).__init__()
+        # self.env=proj.Environment()
+        # self.dabrender=self.env.dabrender
         self.usernumber=None
         self.username=None
+        self.projectgroup=None
+        self.outformat=None
         self.jobtitle=None
-        self.envtype=None
-        self.envshow=None
-        self.envscene=None
         self.startframe=None
         self.endframe=None
         self.byframe=None
@@ -105,10 +122,11 @@ class Job:
     def rmsvalidate(self):
         try:
             self.tractorjob=rmsfac.RenderPrman(
+                 envdabrender=self.dabrender,
                  envtype=self.type,
                  envshow=self.show,
                  envproject=self.project,
-                 envscene= os.path.splitext(os.path.basename(self.scenefullpath))[0],
+                 envscene= self.scene,
                  mayaprojectpath=self.projectpath,
                  mayascenefilefullpath=self.scenefullpath,
                  mayaversion=self.mayaversion,
@@ -116,8 +134,8 @@ class Job:
                  startframe=self.startframe,
                  endframe=self.endframe,
                  byframe=self.byframe,
-                 projectgroup="",
-                 outformat="",
+                 projectgroup=self.projectgroup,
+                 outformat=self.outformat,
                  resolution=self.resolution,
                  skipframes=0,
                  makeproxy=0,
@@ -153,27 +171,27 @@ class Job:
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmitWidget(qg.QFrame):
-    def __init__(self,job):
+    def __init__(self,job,maya=None):
         super(TractorSubmitWidget, self).__init__()
-
         logger.info("TractorSubmitWidget")
         self.job=job
+        self.maya=maya
         self.setFrameStyle(qg.QFrame.Panel | qg.QFrame.Raised)
-        self.setSizePolicy(qg.QSizePolicy.Minimum,
-                           qg.QSizePolicy.Fixed)
-
+        self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
         self.setLayout(qg.QVBoxLayout())
-
         self.layout().setSpacing(0)
         self.layout().setContentsMargins(0,0,0,0)
         self.layout().setAlignment(qc.Qt.AlignTop)
-
         self.feedback_widget = ifac.FeedbackWidget()
-        self.job.fb=self.feedback_widget
+        self.job.fb = self.feedback_widget
+        if self.maya:
+            self.job.fb.write("MAYA PRESENT")
+        else:
+            self.job.fb.write("MAYA NOT AVAILABLE")
 
         # ------------------------------------------------------------------------------------ #
         # USER WIDGET
-        self.user_widget = ifac.UserWidget(job)
+        self.user_widget = ifac.UserWidget(self.job)
         self.layout().addWidget(self.user_widget)
 
         # ------------------------------------------------------------------------------------ #
@@ -236,24 +254,19 @@ class TractorSubmitWidget(qg.QFrame):
 
         self.stacked_layout.setCurrentIndex(2)
 
-        # ------------------------------------------------------------------------------------ #
-        # TRACTOR WIDGET
+        # TRACTOR WIDGET------------------------------------------------------------------------------------ #
         self.tractor_widget= ifac.TractorWidget(self.job)
         self.layout().addWidget(self.tractor_widget)
 
-        # ------------------------------------------------------------------------------------ #
-        # FARM EXTRA WIDGET
+        # FARM EXTRA WIDGET ------------------------------------------------------------------------------------ #
         self.farmjob_widget= ifac.FarmJobExtraWidget(self.job)
         self.layout().addWidget(self.farmjob_widget)
 
-        # ------------------------------------------------------------------------------------ #
-        # SUBMIT WIDGET
+        # SUBMIT WIDGET ------------------------------------------------------------------------------------ #
         self.submit_widget= ifac.SubmitWidget(self.job,self.feedback_widget)
         self.layout().addWidget(self.submit_widget)
 
-        # ------------------------------------------------------------------------------------ #
-        # FEEDBACK WIDGET
-        # self.layout().addSpacerItem(qg.QSpacerItem(5,20,qg.QSizePolicy.Expanding))
+        # FEEDBACK WIDGET------------------------------------------------------------------------------------ #
         self.layout().addWidget(self.feedback_widget)
 
     def closeWidget(self):
@@ -269,8 +282,10 @@ class TractorSubmitWidget(qg.QFrame):
 def create():
     global tractor_submit_dialog
     if tractor_submit_dialog is None:
-        tractor_submit_dialog = TractorSubmit()
+        tractor_submit_dialog = TractorSubmit(mayapresent=True)
     tractor_submit_dialog.show()
+    tractor_submit_dialog.job.maya=True
+
 
 
 def delete():
@@ -282,7 +297,6 @@ def delete():
     tractor_submit_dialog = None
 
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 def main():
     global tractor_submit_dialog
@@ -291,19 +305,20 @@ def main():
         import pymel.core as pm
         logger.warn("Maya found")
         create()
-        tractor_submit_dialog.job.maya=True
 
     except Exception,err:
         logger.warn("No maya found {} presuming from a shell".format(err))
         app = qg.QApplication(sys.argv)
-        tractor_submit_dialog = TractorSubmit()
-        tractor_submit_dialog.job.maya=False
+        tractor_submit_dialog = TractorSubmit(mayapresent=False)
         tractor_submit_dialog.show()
         sys.exit(app.exec_())
 
-    finally:
-        tractor_submit_dialog.job.printme()
+    # finally:
+    #     tractor_submit_dialog.job.printme()
 
 
 if __name__ == '__main__':
     main()
+
+    # j=Job()
+    # j.printme()

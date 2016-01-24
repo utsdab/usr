@@ -8,18 +8,8 @@
     this just need to be in the path some place  dabanim/usr/bin
 """
 import os
-import sys
-import json
-import pickle
-import shutil
-import subprocess
-import string
-import platform
 from software.renderfarm.dabtractor.factories import utils_factory as utils
 from software.renderfarm.dabtractor.factories import user_factory as ufac
-
-from pprint import pprint
-from software.renderfarm.dabtractor.factories import configuration_factory as config
 
 # ##############################################################
 import logging
@@ -32,23 +22,21 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
-class Project(object):
+class Environment(object):
     """
     This class is the project structure base
-    $DABRENDER/$TYPE/$SHOW/$PROJECT/scenes/$SCENE
+    $DABRENDER/$TYPE/$SHOW/$PROJECT/$SCENE
+         $SCENE is possible scenes/mayascene.ma - always relative to the project
     presently $TASK and $SHOT not used
     move this all to a json file template
     """
     def __init__(self):
-
         self.dabrender = self.alreadyset("DABRENDER","/Volumes/dabrender")
         self.dabusr = self.alreadyset("DABUSR",self.getsoftwarepackagepath())
         self.type = self.alreadyset("TYPE","user_work")
         self.show = self.alreadyset("SHOW","matthewgidney")
         self.project = self.alreadyset("PROJECT","testFarm")
-        self.scene = self.alreadyset("SCENE","tesscenefile")
-        self.shot = ""  # not used at this moment
-        self.task = ""
+        self.scene = self.alreadyset("SCENE","scenes/testscenefile.ma")
         self.user = self.alreadyset("USER","120988")
         self.username = self.alreadyset("USERNAME",ufac.Map().getusername(self.user))
 
@@ -57,10 +45,10 @@ class Project(object):
         try:
             env=os.environ
             val = env[envar]
-            logger.debug("{} :: found in environment as {}".format(envar,val))
+            logger.info("{} :: found in environment as {}".format(envar,val))
             return val
         except:
-            logger.warn("{} :: not found in environment, setting to default: {}".format(envar,default))
+            logger.info("{} :: not found in environment, setting to default: {}".format(envar,default))
             return default
 
     def setfromscenefile(self,mayascenefilefullpath):
@@ -80,10 +68,9 @@ class Project(object):
                     logger.debug("SHOW: {}".format( self.show))
                     self.project=_dirbits[i+2]
                     logger.debug("PROJECT: {}".format( self.project))
-                    self.scenerelative="/".join(_fullpath[i+3:])
-                    logger.debug("SCENERELATIVE: {}".format( self.scenerelative))
-                    self.scene=_basename
-                    logger.debug("SCENE: {}".format(self.scene))
+                    self.scene="/".join(_fullpath[i+3:])
+                    logger.debug("SCENE: {}".format( self.scene))
+
         else:
             logger.warn("Cant set from file. Not a file: {}".format(mayascenefilefullpath))
 
@@ -97,6 +84,15 @@ class Project(object):
 
         return directories[0]
 
+    def putback(self):
+        os.environ["DABRENDER"]=self.dabrender
+        os.environ["TYPE"]=self.type
+        os.environ["SHOW"]=self.show
+        os.environ["PROJECT"]=self.project
+        os.environ["SCENE"]=self.scene
+        logger.info("Putback main environment variables")
+
+
 
 
 
@@ -106,12 +102,14 @@ if __name__ == '__main__':
     sh.setLevel(logging.DEBUG)
     logger.info("-------- PROJECT FACTORY TEST ------------")
 
-    p = Project()
-    p.setfromscenefile("/Users/Shared/UTS_Dev/dabrender/work/matthewgidney/matt_maya_project2/scenes/empty.ma")
-    p.setfromscenefile("/Users/Shared/UTS_Dev/dabrender/project/albatross/3D/scenes/animation/empty.ma")
+    p = Environment()
+    p.setfromscenefile("/Volumes/dabrender/user_work/matthewgidney/testFarm/scenes/dottyRMS.0055.ma")
+    print utils.printdict(p.__dict__)
+
+    p.setfromscenefile("/Volumes/dabrender/user_work/matthewgidney/testFarm/dottyRMS.0055.ma")
     logger.debug("ProjectBase: {}".format(p.__dict__))
 
-    # print utils.printdict(p.__dict__)
+    print utils.printdict(p.__dict__)
 
 
 

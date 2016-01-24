@@ -31,7 +31,7 @@ import sys
 import os
 from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.renderfarm.dabtractor.factories import interface_factory as ifac
-from software.renderfarm.dabtractor.factories import project_factory as proj
+from software.renderfarm.dabtractor.factories import environment_factory as proj
 
 from functools import partial
 

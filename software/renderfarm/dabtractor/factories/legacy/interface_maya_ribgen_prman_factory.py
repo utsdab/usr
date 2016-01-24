@@ -106,11 +106,11 @@ class WindowPrman(WindowBase):
         self.labeldab1 = tk.Label(self.canvas, bg=self.bgcolor1,text="$DABRENDERPATH")
         self.labeldab1.grid(row=__row, column=0,  sticky=tk.E)
         self.dabrenderpath = tk.StringVar()
-        self.dabrenderpath.set(config.CurrentConfiguration().dabrenderpath)
+        self.dabrenderpath.set(config.CurrentConfiguration().dabrender)
         self.cbdabrender = ttk.Combobox(self.canvas,
                                         textvariable=self.dabrenderpath,
                                         justify="center",state="readonly")
-        self.cbdabrender.config(values=config.CurrentConfiguration().dabrenderpath)
+        self.cbdabrender.config(values=config.CurrentConfiguration().dabrender)
         self.cbdabrender.grid(row=__row, column=1,columnspan=4, sticky=tk.W + tk.E)
         __row += 1
 
@@ -414,7 +414,7 @@ class WindowPrman(WindowBase):
     #         print "work"
     #
     #         # self.envshowpick = tkFileDialog.askdirectory(parent=self.master,
-    #         #                                         initialdir=os.path.join(self.dabrenderpath.get(),self.envtype.get()),
+    #         #                                         initialdir=os.path.join(self.dabrender.get(),self.envtype.get()),
     #         #                                         title=self.envshowtext)
     #         # self.envshowbut["text"] = os.path.basename(str(self.envshowpick)) if self.envshowbut else self.envshowtext
     #         # self.envprojectbut["text"] = self.renderusername
@@ -481,7 +481,7 @@ class WindowPrman(WindowBase):
     #     if self.envtype.get() == "work":
     #         print "openproj work"
     #         self.envprojectpick = tkFileDialog.askdirectory(parent=self.master,
-    #                                                     initialdir=os.path.join(self.dabrenderpath.get(),
+    #                                                     initialdir=os.path.join(self.dabrender.get(),
     #                                                                             self.envtype.get(),
     #                                                                             self.renderusername),
     #                                                     title=self.envprojecttext)

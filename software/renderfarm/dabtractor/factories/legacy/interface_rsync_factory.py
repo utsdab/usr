@@ -105,7 +105,7 @@ class WindowRsync(WindowBase):
         self.canvas = tk.Canvas(self.master, height=200, width=300)
         self.canvas.pack(expand=True, fill=tk.BOTH)
 
-        # dabrenderpath = os.getenv("DABRENDERPATH")
+        # dabrender = os.getenv("DABRENDERPATH")
         imagepath = os.path.join(os.path.dirname(dabtractor.__file__),"icons","Rsync_logo.gif")
         imagetk = tk.PhotoImage(file=imagepath)
         # keep a link to the image to stop the image being garbage collected

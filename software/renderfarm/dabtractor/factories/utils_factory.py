@@ -70,7 +70,7 @@ def getfrompathlist(filetoget, iconpath="ICONPATH"):
 
 def frompathgetuserhome(inputpath):
     try:
-        dabrender = config.CurrentConfiguration().dabrenderpath
+        dabrender = config.CurrentConfiguration().dabrender
 
     except:
         print "err"

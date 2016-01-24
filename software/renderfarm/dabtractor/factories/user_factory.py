@@ -8,12 +8,8 @@
     this just need to be in the path some place  dabanim/usr/bin
 """
 import os
-import sys
 import json
 import shutil
-import subprocess
-import string
-import platform
 from software.renderfarm.dabtractor.factories import utils_factory as utils
 from software.renderfarm.dabtractor.factories import configuration_factory as config
 
@@ -36,7 +32,7 @@ class Map(object):
         logger.debug("Map File Path {}".format(mapfilepath))
         try:
 
-            self.mapfilejson = os.path.join(mapfilepath,"map_file.json")
+            self.mapfilejson = os.path.join(mapfilepath,"user_map.json")
             self.tractorcrewlist = os.path.join(mapfilepath,"crelist.txt")
             self.oldmaplist = os.path.join(mapfilepath,"oldmaplist.txt")
 
@@ -149,7 +145,7 @@ class Map(object):
 class EnvType(object):
     # this is the user work area either work/number or projects/projectname
     def __init__(self,userid=None,projectname=None):
-        self.dabrenderpath=config.CurrentConfiguration().dabrenderpath
+        self.dabrenderpath=config.CurrentConfiguration().dabrender
 
         if userid:
             self.envtype="user_work"
@@ -200,7 +196,7 @@ class User(object):
         logger.debug("User: {}".format( m.getuser(self.user) ))
         self.username = self.name
         self.usernumber = self.number
-        self.dabrender = config.CurrentConfiguration().dabrenderpath  # "/Volumes/dabrender"
+        self.dabrender = config.CurrentConfiguration().dabrender  # "/Volumes/dabrender"
         self.dabuserworkpath = os.path.join(self.dabrender,"work",self.name)
 
     def getusername(self):

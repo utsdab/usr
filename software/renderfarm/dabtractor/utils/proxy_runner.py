@@ -86,7 +86,7 @@ class ImageSequence(object):
 
     def buildcommand(self, proxytemplate, commandprefixlist=[], commansuffixlist=[]):
         # prepend and post pend more list items to build up a full command to pass to tractor
-        self.dabrender = config.CurrentConfiguration().dabrenderpath
+        self.dabrender = config.CurrentConfiguration().dabrender
 
         _nuke_proxy_template_path = Proxytemplate("nuke_proxy_720p_prores_v003.py").proxytouse
 

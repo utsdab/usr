@@ -7,6 +7,15 @@ To do:
     check and test options
     run farmuser to check is user is valid
 
+
+    from maya script editor.......
+    import sys
+    sys.path.append("/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr")
+    sys.path.append("/Applications/Pixar/Tractor-2.2/lib/python2.7/site-packages")
+    from software.maya.uts_tools import tractor_submit_maya_UI as ts
+    import rmanpy
+    ts.main()
+
 """
 ###############################################################
 import logging
@@ -21,8 +30,6 @@ logger.addHandler(sh)
 
 import os,sys
 import tractor.api.author as author
-from software.renderfarm.dabtractor.factories import interface_maya_ribgen_prman_factory as ifac
-from software.renderfarm.dabtractor.factories import render_prman_factory as rfac
 from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.maya.uts_tools import tractor_submit_maya_UI as ts
 
