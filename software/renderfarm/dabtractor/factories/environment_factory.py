@@ -14,9 +14,9 @@ from software.renderfarm.dabtractor.factories import user_factory as ufac
 # ##############################################################
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 sh = logging.StreamHandler()
-sh.setLevel(logging.INFO)
+sh.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(levelname)5.5s \t%(filename)s as %(name)s \t%(message)s')
 sh.setFormatter(formatter)
 logger.addHandler(sh)
@@ -61,7 +61,7 @@ class Environment(object):
                 if bit=="project_work" or bit=="user_work":
                     logger.debug("")
                     self.dabrender="/".join(_dirbits[0:i])
-                    logger.debug("DABRENDERPATH: {}".format(self.dabrender))
+                    logger.debug("DABRENDER: {}".format(self.dabrender))
                     self.type=bit
                     logger.debug("TYPE: {}".format(self.type))
                     self.show=_dirbits[i+1]

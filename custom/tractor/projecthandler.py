@@ -19,6 +19,7 @@ class projecthandler(TrEnvHandler):
         self.show = None
         self.proj = None
         self.scene = None
+        self.scenename = None
         #self.task = None
 
     def updateEnvironment(self, cmd, env, envkeys):
@@ -39,9 +40,12 @@ class projecthandler(TrEnvHandler):
                     if key == "SCENE":
                         self.scene = val
                         env["SCENE"] = self.scene
-                    if key == "PROJ":
-                        self.proj = val
-                        env["PROJ"] = self.proj
+                    if key == "SCENENAME":
+                        self.scenename = val
+                        env["SCENENAME"] = self.scenename
+                    if key == "PROJECT":
+                        self.project = val
+                        env["PROJECT"] = self.project
                     #elif key == "TASK":
                         #self.task = val
                         #env["TASK"] = self.task
@@ -53,15 +57,15 @@ class projecthandler(TrEnvHandler):
     def remapCmdArgs(self, cmdinfo, launchenv, thisHost):
         self.logger.debug("projecthandler.remapCmdArgs: %s" % self.name)
         argv = TrEnvHandler.remapCmdArgs(self, cmdinfo, launchenv, thisHost)
-        self.logger.info("show: %s, proj: %s, scene: %s" %
-            (self.show, self.proj, self.scene, self.shot ))
+        self.logger.info("type: %s, show: %s, proj: %s, scene: %s, scenename: %s" %
+            (self.type, self.show, self.project, self.scene, self.scenename ))
 
         # indicate command was launched by tractor
         launchenv["TRACTOR"] = "1"
 
         if argv[0] == "render" and "RMANTREE" in launchenv:
             argv[0] = os.path.join(launchenv["RMANTREE"],"bin","prman")
-            argv[1:1] = ["-statsfile", "%s-%s-%s-%s" % (self.type,self.show, self.proj, self.scene)]
+            argv[1:1] = ["-statsfile", "%s-%s-%s-%s" % (self.type,self.show, self.project, self.scene)]
 
         # on windows for add the Visual Studio default libs and includes
         p = platform.platform()

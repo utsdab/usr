@@ -33,7 +33,7 @@ class Map(object):
         try:
 
             self.mapfilejson = os.path.join(mapfilepath,"user_map.json")
-            self.tractorcrewlist = os.path.join(mapfilepath,"crelist.txt")
+            self.tractorcrewlist = os.path.join(mapfilepath,"crewlist.txt")
             self.oldmaplist = os.path.join(mapfilepath,"oldmaplist.txt")
 
             # self.mapfilepickle= os.path.join(mapfilepath,"map_file.pickle")

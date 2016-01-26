@@ -73,6 +73,13 @@ class TractorSubmit(qg.QDialog):
         else:
             logger.info("Maya NOT Present")
 
+        ###########
+        try:
+            if not os.path.isdir(env.Environment().dabrender):
+                raise("Cant find dabrender")
+        except Exception,err:
+            sys.exit(err)
+
         self.setWindowTitle('UTS_FARM_SUBMIT')
         self.setObjectName('UTS_FARM_SUBMIT')
         self.setWindowFlags(qc.Qt.WindowStaysOnTopHint)
@@ -112,6 +119,7 @@ class Job(env.Environment):
         self.endframe=None
         self.byframe=None
         self.fb=None
+        self.options=""
 
     def printme(self):
         logger.info("\n\n{:_^80}\n".format(" job attributes "))
@@ -139,7 +147,7 @@ class Job(env.Environment):
                  resolution=self.resolution,
                  skipframes=0,
                  makeproxy=0,
-                 options="",
+                 options=self.options,
                  rendermemory=self.rms_memory,
                  renderthreads=self.rms_threads,
                  rendermaxsamples=self.rms_maxsamples,

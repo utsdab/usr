@@ -3,6 +3,12 @@
 To do:
     find commonality in render jobs and put it in base class
 
+    implement ribchunks
+    implement option args and examples - rms.ini
+
+    implement previews???
+    implement stats to browswer
+
 """
 # ##############################################################
 import logging
@@ -75,20 +81,21 @@ class RenderPrman(RenderBase):
                  startframe=1,
                  endframe=10,
                  byframe=1,
-                 projectgroup="",
+                 projectgroup="yr1",
                  outformat="",
-                 resolution="",
+                 resolution="720p",
                  skipframes=0,
                  makeproxy=0,
                  options="",
-                 rendermemory="",
-                 renderthreads="",
-                 rendermaxsamples="",
-                 ribgenchunks="",
+                 rendermemory=4000,
+                 renderthreads=4,
+                 rendermaxsamples=64,
+                 ribgenchunks=1,
                  email=[]
     ):
 
         super(RenderPrman, self).__init__()
+        self.testing=True
         self.envdabrender = envdabrender
         self.envtype=envtype
         self.envproject=envproject
@@ -120,7 +127,7 @@ class RenderPrman(RenderBase):
         self.startframe = int(startframe)
         self.endframe = int(endframe)
         self.byframe = int(byframe)
-        self.framechunks = 1  # pixar jobs are one at a time
+        self.ribgenchunks = ribgenchunks  # pixar jobs are one at a time
         self.projectgroup = projectgroup
         self.options = options
         self.email = email
@@ -145,6 +152,28 @@ class RenderPrman(RenderBase):
         """
         Main method to build the job
         """
+        ########### TESTING ##############
+        # _threadsM=4
+        _threadsPixarRender=4
+        _threads_RfMRibGen=4
+        _threadsMaya=4
+        _servicePixarRender=_service_RfMRibGen=_serviceMaya=None
+
+        if self.testing:
+            _service_Testing="Testing"
+            _tier="admin"
+
+        else:
+            _service_Testing=""
+            _tier="batch"
+
+        _servicePixarRender="PixarRender"
+        _serviceMaya="PixarRender"
+        _service_RfMRibGen="RfMRibGen"
+        _service_NukeRender="NukeRender"
+
+        #############################
+
 
         # ################ 0 JOB ################
         self.job = author.Job(title="Renderman: {} {} {}-{}".format(self.renderusername,
@@ -163,11 +192,11 @@ class RenderPrman(RenderBase):
                                                                      self.renderusernumber),
                               projects=[str(self.projectgroup)],
 
-                              tier="batch",
+                              tier=_tier,
                               tags=[
                                      "theWholeFarm",
                                     ],
-                              service="")
+                              service=_service_Testing)
 
         self.job.newDirMap("/dabrender", "/dabrender", "linux")
         self.job.newDirMap("/dabrender", "/Volumes/dabrender", "osx")
@@ -203,42 +232,70 @@ class RenderPrman(RenderBase):
                                               tags=["maya", "rms", "theWholeFarm"],
                                               # atleast=int(self.renderthreads),
                                               # atmost=int(self.renderthreads),
-                                              service="RfMRibGen")
+                                              service=_service_RfMRibGen)
         task_generate_rib_preflight.addCommand(command_ribgen)
         task_preflight.addChild(task_generate_rib_preflight)
         task_render_preflight = author.Task(title="Render Preflight")
-        _threads=4
+
         command_render_preflight = author.Command(argv=["prman",
-                                                        "-t:{}".format(_threads),
+                                                        "-t:{}".format(_threadsPixarRender),
                                                         "-Progress", "-recover", "%r", "-checkpoint", "5m",
                                                         "-cwd", utils.usedirmap(self.mayaprojectpath),
                                                         "renderman/{}/rib/job/job.rib".format(self.scenebasename)],
                                                   tags=["prman", "theWholeFarm"],
-                                                  atleast=_threads,
-                                                  atmost=_threads,
-                                                  service="PixarRender")
+                                                  atleast=_threadsPixarRender,
+                                                  atmost=_threadsPixarRender,
+                                                  service=_servicePixarRender)
 
         task_render_preflight.addCommand(command_render_preflight)
         task_preflight.addChild(task_render_preflight)
 
-        # ############## 3 RENDER ##############
-        task_render_allframes = author.Task(title="Frames {}-{}".format(self.startframe, self.endframe))
+        # ############## 3 RIBGEN ##############
+        task_render_allframes = author.Task(title="ALL FRAMES {}-{}".format(self.startframe, self.endframe))
         task_render_allframes.serialsubtasks = 1
-        task_generate_rib = author.Task(title="Generate RIB {}-{}".format(self.startframe, self.endframe))
-        command_generate_rib = author.Command(argv=["maya",
-                                                    "-batch",
-                                                    "-proj", utils.usedirmap(self.mayaprojectpath), "-command",
-                                                    "renderManBatchGenRibForLayer {layerid} {start} {end} {phase}".format(
-                                                        layerid=0, start=self.startframe, end=self.endframe, phase=2),
-                                                    "-file", utils.usedirmap(self.mayascenefilefullpath)],
-                                              tags=["maya", "rms", "theWholeFarm"],
-                                              # atleast=int(self.renderthreads),
-                                              # atmost=int(self.renderthreads),
-                                              service="RfMRibGen")
 
-        task_generate_rib.addCommand(command_generate_rib)
-        task_render_allframes.addChild(task_generate_rib)
-        task_render_frames = author.Task(title="Render Frames {}-{}".format(self.startframe, self.endframe))
+        task_ribgen_allframes = author.Task(title="RIB GEN {}-{}".format(self.startframe, self.endframe))
+
+        # divide the frame range up into chunks
+        _totalframes=int(self.endframe-self.startframe+1)
+        _chunks = int(self.ribgenchunks)
+        _framesperchunk=_totalframes
+
+        if _chunks < _totalframes:
+            _framesperchunk=int(_totalframes/_chunks)
+        else:
+            _chunks=1
+
+        for i,chunk in enumerate(range(1,_chunks+1)):
+            _offset=i*_framesperchunk
+            _chunkstart=(self.startframe+_offset)
+            _chunkend=(_offset+_framesperchunk)
+            logger.info("Chunk {} is frames {}-{}".format(chunk,_chunkstart,_chunkend))
+
+            if chunk ==_chunks:
+                _chunkend = self.endframe
+
+            task_generate_rib = author.Task(title="RIB GEN chunk {} frames {}-{}".format(chunk,_chunkstart,
+                                                                                          _chunkend ))
+            command_generate_rib = author.Command(argv=["maya",
+                                                        "-batch",
+                                                        "-proj", utils.usedirmap(self.mayaprojectpath), "-command",
+                                                        "renderManBatchGenRibForLayer {layerid} {start} {end} {phase}".format(
+                                                            layerid=0, start=_chunkstart, end=_chunkend, phase=2),
+                                                        "-file", utils.usedirmap(self.mayascenefilefullpath)],
+                                                  tags=["maya", "rms", "theWholeFarm"],
+                                                  atleast=int(_threads_RfMRibGen),
+                                                  atmost=int(_threads_RfMRibGen),
+                                                  service=_service_RfMRibGen)
+
+            task_generate_rib.addCommand(command_generate_rib)
+            task_ribgen_allframes.addChild(task_generate_rib)
+
+        task_render_allframes.addChild(task_ribgen_allframes)
+
+
+        # ############### 4 RENDER ##############
+        task_render_frames = author.Task(title="RENDER Frames {}-{}".format(self.startframe, self.endframe))
         task_render_frames.serialsubtasks = 0
 
         for frame in range(self.startframe, (self.endframe + 1),self.byframe):
@@ -251,7 +308,7 @@ class RenderPrman(RenderBase):
             _ribfile = utils.usedirmap("{proj}/rib/{frame:04d}/{frame:04d}.rib".format(
                 proj=self.rendermanpath, frame=frame))
 
-            task_render_rib = author.Task(title="Render Frame %s" % frame,
+            task_render_rib = author.Task(title="RENDER Frame %s" % frame,
                                           preview="sho {}".format(_shofile),
                                           metadata="statsfile={} imgfile={}".format(_statsfile, _imgfile))
             commonargs = ["prman", "-cwd", utils.usedirmap(self.mayaprojectpath)]
@@ -326,7 +383,7 @@ class RenderPrman(RenderBase):
                                             tags=["prman", "theWholeFarm"],
                                             atleast=int(self.renderthreads),
                                             atmost=int(self.renderthreads),
-                                            service="PixarRender")
+                                            service=_servicePixarRender)
 
             task_render_rib.addCommand(command_render)
             task_render_frames.addChild(task_render_rib)
@@ -335,7 +392,7 @@ class RenderPrman(RenderBase):
         task_thisjob.addChild(task_render_allframes)
 
 
-        # ############## 4 PROXY ###############
+        # ############## 5 PROXY ###############
         # using nuke as exr colour is handled correctly
 
         if self.makeproxy:
@@ -346,7 +403,7 @@ class RenderPrman(RenderBase):
                 _nuke_envkey = "proxynuke{}".format(config.CurrentConfiguration().nukeversion)
                 _proxy_runner_cmd = ["proxy_run.py","-s",_directory]
 
-                task_proxy = author.Task(title="Proxy Generation", service="NukeRender")
+                task_proxy = author.Task(title="Proxy Generation", service=_service_NukeRender)
                 nukecommand = author.Command(argv=_proxy_runner_cmd,
                                       service="NukeRender",
                                       tags=["nuke", "theWholeFarm"],
@@ -406,13 +463,13 @@ if __name__ == "__main__":
                        envproject="testFarm",
                        envshow="matthewgidney",
                        envscene="dottyrms.ma",
-                       envtype="work",
+                       envtype="user_work",
                        mayascenefilefullpath="/usr/local/tmp/scene/file.ma",
                        mayaprojectpath="/usr/local/tmp/",
                        mayaversion="2016",
                        rendermanversion="20.2",
                        startframe=1,
-                       endframe=1,
+                       endframe=12,
                        byframe=1,
                        outformat="exr",
                        resolution="540p",
@@ -422,6 +479,7 @@ if __name__ == "__main__":
                        rendermemory="4000",
                        rendermaxsamples="128",
                        renderthreads="8",
+                       ribgenchunks=3,
                        email=[1, 0, 0, 0, 1, 0]
     )
     TEST.build()

@@ -162,7 +162,7 @@ class ProjectWidget(qg.QWidget):
         _show=self.show_combo.currentText()
         self.job.showpath=os.path.join(self.job.dabrender,self.job.type,_show)
 
-        self._combo_from_path(self.type_combo,self.job.showpath)
+        self._combo_from_path(self.project_combo,self.job.showpath)
         logger.debug("Show changed to {}".format(_show))
 
     def _project_change(self):
@@ -306,6 +306,7 @@ class OutputWidget(qg.QWidget):
         self.resolution_combo.addItems(config.CurrentConfiguration().resolutions)
         self.resolution_combo.setMinimumWidth(_width1)
         self.resolution_layout = qg.QHBoxLayout()
+        self.resolution_combo.setCurrentIndex(2)
         self.resolution_layout.setContentsMargins(0,0,0,0)
         self.resolution_layout.setSpacing(0)
         self.resolution_layout.addWidget(self.resolution_text_lb)
@@ -673,6 +674,19 @@ class RendermanWidget(qg.QWidget):
         self.ribchunks_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
         self.ribchunks_layout.addWidget(self.ribchunks_combo)
         self.layout().addLayout(self.ribchunks_layout)
+ 
+        self.options_text_lb = qg.QLabel('OPTIONS:')
+        self.options_combo  = qg.QComboBox()
+        self.options_combo.addItem("option args here")
+        self.options_combo.setEditable(True)
+        self.options_combo.setMinimumWidth(220)
+        self.options_layout = qg.QHBoxLayout()
+        self.options_layout.setContentsMargins(0,0,0,0)
+        self.options_layout.setSpacing(0)
+        self.options_layout.addWidget(self.options_text_lb)
+        self.options_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        self.options_layout.addWidget(self.options_combo)
+        self.layout().addLayout(self.options_layout)
         
         # set initial values
         self._rms_maxsamples(self.maxsamples_combo.currentText())
@@ -681,6 +695,7 @@ class RendermanWidget(qg.QWidget):
         self._rms_threads(self.threads_combo.currentText())
         self._rms_version(self.version_combo.currentText())
         self._rms_ribchunks(self.ribchunks_combo.currentText())
+        self._rms_options(self.options_combo.currentText())
         
         # connect vlaues to widget
         self.maxsamples_combo.activated.connect(lambda: self._rms_maxsamples(self.maxsamples_combo.currentText()))
@@ -689,6 +704,7 @@ class RendermanWidget(qg.QWidget):
         self.threads_combo.activated.connect(lambda: self._rms_threads(self.threads_combo.currentText()))
         self.version_combo.activated.connect(lambda: self._rms_version(self.version_combo.currentText()))
         self.ribchunks_combo.activated.connect(lambda: self._rms_ribchunks(self.ribchunks_combo.currentText()))
+        self.options_combo.editTextChanged.connect(lambda: self._rms_options(self.options_combo.currentText()))
 
     def _rms_maxsamples(self,_value):
         self.job.rms_maxsamples=_value
@@ -713,6 +729,10 @@ class RendermanWidget(qg.QWidget):
     def _rms_ribchunks(self,_value):
         self.job.rms_ribchunks=_value
         logger.debug("Ribchunks changed to {}".format(self.job.rms_ribchunks))
+
+    def _rms_options(self,_value):
+        self.job.rms_options=_value
+        logger.debug("Options changed to {}".format(self.job.rms_options))
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class BashJobWidget(qg.QWidget):
