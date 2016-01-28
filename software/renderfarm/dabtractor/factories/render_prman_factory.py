@@ -3,7 +3,7 @@
 To do:
     find commonality in render jobs and put it in base class
 
-    implement ribchunks
+    implement ribchunks - DONE
     implement option args and examples - rms.ini
 
     implement previews???
@@ -76,8 +76,10 @@ class RenderPrman(RenderBase):
                  mayaprojectpath="",    # /Users/Shared/UTS_Dev/dabrender/user_work/matthewgidney/matt_maya_project
                  mayascenerelpath="", # scene/mayascene.ma
                  mayascenefilefullpath="", ####### not needed
+
                  mayaversion="",
                  rendermanversion="",
+
                  startframe=1,
                  endframe=10,
                  byframe=1,
@@ -87,8 +89,8 @@ class RenderPrman(RenderBase):
                  skipframes=0,
                  makeproxy=0,
                  options="",
-                 rendermemory=4000,
-                 renderthreads=4,
+                 threadmemory=4000,
+                 threads=4,
                  rendermaxsamples=64,
                  ribgenchunks=1,
                  email=[]
@@ -124,10 +126,12 @@ class RenderPrman(RenderBase):
         self.mayaversion = mayaversion,
         self.rendermanversion = rendermanversion,
         self.envkey_rms = "rms-{}-maya-{}".format(self.rendermanversion[0], self.mayaversion[0])
+
         self.startframe = int(startframe)
         self.endframe = int(endframe)
         self.byframe = int(byframe)
-        self.ribgenchunks = ribgenchunks  # pixar jobs are one at a time
+
+        self.ribgenchunks = int(ribgenchunks)  # pixar jobs are one at a time
         self.projectgroup = projectgroup
         self.options = options
         self.email = email
@@ -137,8 +141,8 @@ class RenderPrman(RenderBase):
         self.skipframes = skipframes
 
         self.rendermaxsamples=rendermaxsamples
-        self.renderthreads=renderthreads
-        self.rendermemory=rendermemory
+        self.threads=threads
+        self.threadmemory=threadmemory
         self.mayaprojectname = os.path.basename(self.mayaprojectpath)
         self.finaloutputimages = "{finaloutputpath}/$SCENENAME.\\*.{ext}".format(
                                     finaloutputpath=self.rendermanpathalias,
@@ -155,7 +159,7 @@ class RenderPrman(RenderBase):
         ########### TESTING ##############
         # _threadsM=4
         _threadsPixarRender=4
-        _threads_RfMRibGen=4
+        _threads_RfMRibGen=1
         _threadsMaya=4
         _servicePixarRender=_service_RfMRibGen=_serviceMaya=None
 
@@ -230,8 +234,8 @@ class RenderPrman(RenderBase):
                                                   layerid=0, start=self.startframe, end=self.endframe, phase=1),
                                               "-file", utils.usedirmap(self.mayascenefilefullpath)],
                                               tags=["maya", "rms", "theWholeFarm"],
-                                              # atleast=int(self.renderthreads),
-                                              # atmost=int(self.renderthreads),
+                                              # atleast=int(self.threads),
+                                              # atmost=int(self.threads),
                                               service=_service_RfMRibGen)
         task_generate_rib_preflight.addCommand(command_ribgen)
         task_preflight.addChild(task_generate_rib_preflight)
@@ -332,18 +336,18 @@ class RenderPrman(RenderBase):
 
             if self.rendermaxsamples != "FROMFILE":
                 rendererspecificargs.extend([ "-maxsamples", "{}".format(self.rendermaxsamples) ])
-            if self.rendermemory != "FROMFILE":
-                rendererspecificargs.extend([ "-memorylimit", "{}".format(self.rendermemory) ])
+            if self.threadmemory != "FROMFILE":
+                rendererspecificargs.extend([ "-memorylimit", "{}".format(self.threadmemory) ])
             # if self.rendermaxsamples != "FROMFILE":
             #     rendererspecificargs.extend([ "-maxsamples", "{}".format(self.rendermaxsamples) ])
-            # if self.renderthreads != "FROMFILE":
+            # if self.threads != "FROMFILE":
             #     rendererspecificargs.extend([ "-maxsamples", "{}".format(self.rendermaxsamples) ])
 
 
             rendererspecificargs.extend([
                 # "-pad", "4",
-                # "-memorylimit", self.rendermemory,  # mb
-                "-t:{}".format(self.renderthreads),
+                # "-memorylimit", self.threadmemory,  # mb
+                "-t:{}".format(self.threads),
                 "-Progress",
                 "-recover", "%r",
                 "-checkpoint", "5m",
@@ -381,8 +385,8 @@ class RenderPrman(RenderBase):
             command_render = author.Command(argv=finalargs,
                                             #envkey=[self.envkey_prman],
                                             tags=["prman", "theWholeFarm"],
-                                            atleast=int(self.renderthreads),
-                                            atmost=int(self.renderthreads),
+                                            atleast=int(self.threads),
+                                            atmost=int(self.threads),
                                             service=_servicePixarRender)
 
             task_render_rib.addCommand(command_render)
@@ -476,9 +480,9 @@ if __name__ == "__main__":
                        options="",
                        skipframes=1,
                        makeproxy=1,
-                       rendermemory="4000",
+                       threadmemory="4000",
                        rendermaxsamples="128",
-                       renderthreads="8",
+                       threads="8",
                        ribgenchunks=3,
                        email=[1, 0, 0, 0, 1, 0]
     )

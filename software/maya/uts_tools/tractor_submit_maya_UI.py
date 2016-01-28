@@ -148,8 +148,8 @@ class Job(env.Environment):
                  skipframes=0,
                  makeproxy=0,
                  options=self.options,
-                 rendermemory=self.rms_memory,
-                 renderthreads=self.rms_threads,
+                 threadmemory=self.threadmemory,
+                 threads=self.threads,
                  rendermaxsamples=self.rms_maxsamples,
                  ribgenchunks=self.rms_ribchunks,
                  email=[]
@@ -172,10 +172,46 @@ class Job(env.Environment):
             self.fb.write("Spool Fail: {}".format(err))
 
     def mrvalidate(self):
-
+        try:
+            self.tractorjob=mrfac.RenderMentalray(
+                 envdabrender=self.dabrender,
+                 envtype=self.type,
+                 envshow=self.show,
+                 envproject=self.project,
+                 envscene= self.scene,
+                 mayaprojectpath=self.projectpath,
+                 mayascenefilefullpath=self.scenefullpath,
+                 mayaversion=self.mayaversion,
+                 startframe=self.startframe,
+                 endframe=self.endframe,
+                 byframe=self.byframe,
+                 framechunks=5,
+                 projectgroup=self.projectgroup,
+                 renderer="mr",
+                 outformat="exr",
+                 resolution=self.resolution,
+                 skipframes=0,
+                 makeproxy=0,
+                 options="",
+                 threads=self.threads,
+                 threadmemory=self.threadmemory,
+                 email=[1,0,0,0,1,0]
+            )
+            self.tractorjob.build()
+            self.tractorjob.validate()
+            self.fb.write("Validate OK")
+        except Exception,err:
+            logger.warn("mrvalidate error: {}".format(err))
+            self.fb.write("Validate Fail: {}".format(err))
         pass
     def mrspool(self):
-        pass
+        try:
+            self.mrvalidate()
+            self.tractorjob.spool()
+            self.fb.write("Spool OK")
+        except Exception, err:
+            logger.warn("mrspool error: {}".format(err))
+            self.fb.write("Spool Fail: {}".format(err))
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmitWidget(qg.QFrame):
@@ -222,11 +258,9 @@ class TractorSubmitWidget(qg.QFrame):
         self.layout_3_bttn = qg.QPushButton('Renderman')
         # self.layout_3_bttn.setStyleSheet("background-color: Tan")
         self.layout_4_bttn = qg.QPushButton('Bash Cmd')
-        # self.layout_4_bttn.setStyleSheet("background-color: Tan")
         self.layout_5_bttn = qg.QPushButton('Nuke')
-        # self.layout_5_bttn.setStyleSheet("background-color: Tan")
         self.layout_6_bttn = qg.QPushButton('Archive')
-        # self.layout_6_bttn.setStyleSheet("background-color: Tan")
+        self.layout_7_bttn = qg.QPushButton('Bug Report')
 
         self.grid_widget.layout().addWidget(self.layout_1_bttn,0,0)
         self.grid_widget.layout().addWidget(self.layout_2_bttn,0,1)
@@ -234,6 +268,7 @@ class TractorSubmitWidget(qg.QFrame):
         self.grid_widget.layout().addWidget(self.layout_4_bttn,1,0)
         self.grid_widget.layout().addWidget(self.layout_5_bttn,1,1)
         self.grid_widget.layout().addWidget(self.layout_6_bttn,1,2)
+        self.grid_widget.layout().addWidget(self.layout_7_bttn,2,0)
 
         self.layout().addWidget(self.grid_widget)
 
@@ -245,6 +280,7 @@ class TractorSubmitWidget(qg.QFrame):
         self.nuke_widget      = ifac.NukeJobWidget(self.job)
         self.tractor_widget   = ifac.TractorWidget(self.job)
         self.farmjob_widget   = ifac.FarmJobExtraWidget(self.job)
+        self.bug_widget       = ifac.BugWidget(self.job)
 
         self.stacked_layout.addWidget(self.maya_widget)
         self.stacked_layout.addWidget(self.mentalray_widget)
@@ -252,6 +288,9 @@ class TractorSubmitWidget(qg.QFrame):
         self.stacked_layout.addWidget(self.bash_widget)
         self.stacked_layout.addWidget(self.nuke_widget)
         self.stacked_layout.addWidget(self.archive_widget)
+        self.stacked_layout.addWidget(self.bug_widget)
+
+        self._stackchange(2)
 
         self.layout_1_bttn.clicked.connect(partial(self._stackchange, 0))
         self.layout_2_bttn.clicked.connect(partial(self._stackchange, 1))
@@ -259,21 +298,20 @@ class TractorSubmitWidget(qg.QFrame):
         self.layout_4_bttn.clicked.connect(partial(self._stackchange, 3))
         self.layout_5_bttn.clicked.connect(partial(self._stackchange, 4))
         self.layout_6_bttn.clicked.connect(partial(self._stackchange, 5))
+        self.layout_7_bttn.clicked.connect(partial(self._stackchange, 6))
+
 
         self.stacked_layout.setCurrentIndex(2)
 
         # TRACTOR WIDGET------------------------------------------------------------------------------------ #
         self.tractor_widget= ifac.TractorWidget(self.job)
         self.layout().addWidget(self.tractor_widget)
-
         # FARM EXTRA WIDGET ------------------------------------------------------------------------------------ #
         self.farmjob_widget= ifac.FarmJobExtraWidget(self.job)
         self.layout().addWidget(self.farmjob_widget)
-
         # SUBMIT WIDGET ------------------------------------------------------------------------------------ #
         self.submit_widget= ifac.SubmitWidget(self.job,self.feedback_widget)
         self.layout().addWidget(self.submit_widget)
-
         # FEEDBACK WIDGET------------------------------------------------------------------------------------ #
         self.layout().addWidget(self.feedback_widget)
 
@@ -281,7 +319,7 @@ class TractorSubmitWidget(qg.QFrame):
         self.emit(qc.SIGNAL('CLOSE'), self)
 
     def _stackchange(self,index):
-        widgets=["maya","mr","rms","bash","nuke","archive"]
+        widgets=["maya","mr","rms","bash","nuke","archive","bug"]
         self.feedback_widget.write("MODE changed to {}".format(widgets[index]))
         self.job.mode=widgets[index]
         self.stacked_layout.setCurrentIndex(index)

@@ -6,6 +6,8 @@ from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.renderfarm.dabtractor.factories import utils_factory as utilfac
 from software.renderfarm.dabtractor.factories import environment_factory as proj
 from software.renderfarm.dabtractor.factories import configuration_factory as config
+from software.renderfarm.dabtractor.factories import adhoc_jobs_factory as adhoc
+from software.renderfarm.dabtractor.utils.sendmail import Mail
 
 from functools import partial
 
@@ -282,12 +284,18 @@ class SubmitWidget(qg.QWidget):
         logger.debug("Validate Job Pressed")
         self.fb.write("Validate Job")
         self.job.printme()
-        self.job.rmsvalidate()
+        if self.job.mode=="rms":
+            self.job.rmsvalidate()
+        elif self.job.mode=="mr":
+            self.job.mrvalidate()
 
     def submit(self):
         self.fb.write("Submit Job")
         logger.debug("Submit Job Pressed")
-        self.job.rmsspool()
+        if self.job.mode == "rms":
+            self.job.rmsspool()
+        elif self.job.mode=="mr":
+            self.job.mrspool()
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class OutputWidget(qg.QWidget):
@@ -428,15 +436,18 @@ class MayaJobWidget(qg.QWidget):
 
 
         self.layout().addWidget(Splitter("COMMON RENDER OPTIONS"))
+        # SCENE WIDGET
+        self.scene_widget=SceneWidget(self.job)
+        self.layout().addWidget(self.scene_widget)
         # OUTPUT WIDGET
         self.outformat_widget = OutputWidget(self.job)
         self.layout().addWidget(self.outformat_widget)
         # RANGE WIDGET
         self.range_widget = RangeWidget(self.job)
         self.layout().addWidget(self.range_widget)
-        # SCENE WIDGET
-        self.scene_widget=SceneWidget(self.job)
-        self.layout().addWidget(self.scene_widget)
+        # THREADS AND MEMORY WIDGET
+        self.threadmem_widget = ThreadMemoryWidget(self.job)
+        self.layout().addWidget(self.threadmem_widget)
 
 
         # BUILD MAYA WIDGET BITS
@@ -467,8 +478,6 @@ class MayaWidget(qg.QWidget):
 
         self.layout().setSpacing(0)
         self.layout().setContentsMargins(0,0,0,0)
-        # self.layout().addWidget(Splitter("MAYA OPTIONS"))
-        # self.layout().addWidget(self.scene_widget)
         self.layout().addLayout(self.version_layout)
 
         self.version_layout.addWidget(self.version_text_lb)
@@ -482,8 +491,58 @@ class MayaWidget(qg.QWidget):
         self.job.mayaversion=_value
         logger.debug("Maya changed to {}".format(self.job.mayaversion))
 
+# -------------------------------------------------------------------------------------------------------------------- #
+class ThreadMemoryWidget(qg.QWidget):
+    def __init__(self,job):
+        super(ThreadMemoryWidget, self).__init__()
+        _width=180
+        self.job=job
 
+        # self.scene_widget=SceneWidget(self.job)
+        # self.layout().addWidget(self.scene_widget)
 
+        self.setLayout(qg.QVBoxLayout())
+        self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
+        self.layout().setSpacing(0)
+        self.layout().setContentsMargins(0,0,0,0)
+
+        self.threads_layout = qg.QHBoxLayout()
+        self.threads_layout.setContentsMargins(0,0,0,0)
+        self.threads_layout.setSpacing(0)
+        self.threads_text_lb = qg.QLabel('THREADS:')
+        self.threads_combo  = qg.QComboBox()
+        self.threads_combo.setMinimumWidth(_width)
+        self.threads_combo.addItems(config.CurrentConfiguration().renderthreads)
+        self.threads_layout.addWidget(self.threads_text_lb)
+        self.threads_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        self.threads_layout.addWidget(self.threads_combo)
+        self._threads(self.threads_combo.currentText())
+        self.threads_combo.activated.connect(lambda: self._threads(self.threads_combo.currentText()))
+        self.layout().addLayout(self.threads_layout)
+
+        self.threadmemory_layout = qg.QHBoxLayout()
+        self.threadmemory_layout.setContentsMargins(0,0,0,0)
+        self.threadmemory_layout.setSpacing(0)
+        self.threadmemory_text_lb = qg.QLabel('THREAD MEMORY MB:')
+        self.threadmemory_combo  = qg.QComboBox()
+        self.threadmemory_combo.setMinimumWidth(_width)
+        self.threadmemory_combo.addItems(config.CurrentConfiguration().rendermemorys)
+        self.threadmemory_layout.addWidget(self.threadmemory_text_lb)
+        self.threadmemory_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        self.threadmemory_layout.addWidget(self.threadmemory_combo)
+        self._memory(self.threadmemory_combo.currentText())
+        self.threadmemory_combo.activated.connect(lambda: self._memory(self.threadmemory_combo.currentText()))
+        self.layout().addLayout(self.threadmemory_layout)
+
+    def _threads(self,_value):
+        self.job.threads=_value
+        logger.debug("Threads changed to {}".format(self.job.threads))
+        
+    def _memory(self,_value):
+        self.job.threadmemory=_value
+        logger.debug("Thread Memory changed to {} mb".format(self.job.threadmemory))
+        
+               
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class MentalRayJobWidget(qg.QWidget):
@@ -502,15 +561,18 @@ class MentalRayJobWidget(qg.QWidget):
 
 
         self.layout().addWidget(Splitter("COMMON RENDER OPTIONS"))
+        # SCENE WIDGET
+        self.scene_widget=SceneWidget(self.job)
+        self.layout().addWidget(self.scene_widget)
         # OUTPUT WIDGET
         self.outformat_widget = OutputWidget(self.job)
         self.layout().addWidget(self.outformat_widget)
         # RANGE WIDGET
         self.range_widget = RangeWidget(self.job)
         self.layout().addWidget(self.range_widget)
-        # SCENE WIDGET
-        self.scene_widget=SceneWidget(self.job)
-        self.layout().addWidget(self.scene_widget)
+        # THREADS AND MEMORY WIDGET
+        self.threadmem_widget = ThreadMemoryWidget(self.job)
+        self.layout().addWidget(self.threadmem_widget)
 
         # MAYA OPTIONS
         self.maya_widget = MayaWidget(self.job)
@@ -518,8 +580,6 @@ class MentalRayJobWidget(qg.QWidget):
         # MENTAL RAY OPTIONS
         self.mentalray_widget = MentalRayWidget(self.job)
         self.layout().addWidget(self.mentalray_widget)
-
-
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class MentalRayWidget(qg.QWidget):
@@ -569,15 +629,18 @@ class RendermanJobWidget(qg.QWidget):
 
 
         self.layout().addWidget(Splitter("COMMON RENDER OPTIONS"))
+        # SCENE WIDGET
+        self.scene_widget=SceneWidget(self.job)
+        self.layout().addWidget(self.scene_widget)
         # OUTPUT WIDGET
         self.outformat_widget = OutputWidget(self.job)
         self.layout().addWidget(self.outformat_widget)
         # RANGE WIDGET
         self.range_widget = RangeWidget(self.job)
         self.layout().addWidget(self.range_widget)
-        # SCENE WIDGET
-        self.scene_widget=SceneWidget(self.job)
-        self.layout().addWidget(self.scene_widget)
+        # THREADS AND MEMORY WIDGET
+        self.threadmem_widget = ThreadMemoryWidget(self.job)
+        self.layout().addWidget(self.threadmem_widget)
 
 
         # BUILD MAYA OPTIONS
@@ -612,32 +675,6 @@ class RendermanWidget(qg.QWidget):
         self.version_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
         self.version_layout.addWidget(self.version_combo)
         self.layout().addLayout(self.version_layout)
-
-        self.threads_text_lb = qg.QLabel('THREADS:')
-        self.threads_combo  = qg.QComboBox()
-        self.threads_combo.addItems(config.CurrentConfiguration().renderthreads)
-        self.threads_combo.setCurrentIndex(2)
-        self.threads_combo.setMinimumWidth(_width1)
-        self.threads_layout = qg.QHBoxLayout()
-        self.threads_layout.setContentsMargins(0,0,0,0)
-        self.threads_layout.setSpacing(0)
-        self.threads_layout.addWidget(self.threads_text_lb)
-        self.threads_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
-        self.threads_layout.addWidget(self.threads_combo)
-        self.layout().addLayout(self.threads_layout)
-        
-        self.memory_text_lb = qg.QLabel('MEMORY MB:')
-        self.memory_combo  = qg.QComboBox()
-        self.memory_combo.addItems(config.CurrentConfiguration().rendermemorys)
-        self.memory_combo.setCurrentIndex(1)
-        self.memory_combo.setMinimumWidth(_width1)
-        self.memory_layout = qg.QHBoxLayout()
-        self.memory_layout.setContentsMargins(0,0,0,0)
-        self.memory_layout.setSpacing(0)
-        self.memory_layout.addWidget(self.memory_text_lb)
-        self.memory_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
-        self.memory_layout.addWidget(self.memory_combo)
-        self.layout().addLayout(self.memory_layout)
         
         self.integrator_text_lb = qg.QLabel('INTEGRATOR:')
         self.integrator_combo  = qg.QComboBox()
@@ -677,7 +714,8 @@ class RendermanWidget(qg.QWidget):
  
         self.options_text_lb = qg.QLabel('OPTIONS:')
         self.options_combo  = qg.QComboBox()
-        self.options_combo.addItem("option args here")
+        self.options_combo.addItem("")
+        self.options_combo.addItem("-binary")
         self.options_combo.setEditable(True)
         self.options_combo.setMinimumWidth(220)
         self.options_layout = qg.QHBoxLayout()
@@ -691,8 +729,8 @@ class RendermanWidget(qg.QWidget):
         # set initial values
         self._rms_maxsamples(self.maxsamples_combo.currentText())
         self._rms_integrator(self.integrator_combo.currentText())
-        self._rms_memory(self.memory_combo.currentText())
-        self._rms_threads(self.threads_combo.currentText())
+        # self._rms_memory(self.memory_combo.currentText())
+        # self._rms_threads(self.threads_combo.currentText())
         self._rms_version(self.version_combo.currentText())
         self._rms_ribchunks(self.ribchunks_combo.currentText())
         self._rms_options(self.options_combo.currentText())
@@ -700,8 +738,8 @@ class RendermanWidget(qg.QWidget):
         # connect vlaues to widget
         self.maxsamples_combo.activated.connect(lambda: self._rms_maxsamples(self.maxsamples_combo.currentText()))
         self.integrator_combo.activated.connect(lambda: self._rms_integrator(self.integrator_combo.currentText()))
-        self.memory_combo.activated.connect(lambda: self._rms_memory(self.memory_combo.currentText()))
-        self.threads_combo.activated.connect(lambda: self._rms_threads(self.threads_combo.currentText()))
+        # self.memory_combo.activated.connect(lambda: self._rms_memory(self.memory_combo.currentText()))
+        # self.threads_combo.activated.connect(lambda: self._rms_threads(self.threads_combo.currentText()))
         self.version_combo.activated.connect(lambda: self._rms_version(self.version_combo.currentText()))
         self.ribchunks_combo.activated.connect(lambda: self._rms_ribchunks(self.ribchunks_combo.currentText()))
         self.options_combo.editTextChanged.connect(lambda: self._rms_options(self.options_combo.currentText()))
@@ -718,21 +756,13 @@ class RendermanWidget(qg.QWidget):
         self.job.rms_integrator=_value
         logger.debug("Integrator changed to {}".format(self.job.rms_integrator))
 
-    def _rms_memory(self,_value):
-        self.job.rms_memory=_value
-        logger.debug("Memory changed to {}".format(self.job.rms_memory))
-
-    def _rms_threads(self,_value):
-        self.job.rms_threads=_value
-        logger.debug("Threads changed to {}".format(self.job.rms_threads))
-        
     def _rms_ribchunks(self,_value):
         self.job.rms_ribchunks=_value
         logger.debug("Ribchunks changed to {}".format(self.job.rms_ribchunks))
 
     def _rms_options(self,_value):
         self.job.rms_options=_value
-        logger.debug("Options changed to {}".format(self.job.rms_options))
+        logger.debug("Options  changed to {}".format(self.job.rms_options))
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class BashJobWidget(qg.QWidget):
@@ -791,6 +821,57 @@ class ArchiveJobWidget(qg.QWidget):
         self.archive_widget = ArchiveWidget(self.job)
         self.layout().addWidget(self.archive_widget)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+class BugWidget(qg.QWidget):
+    def __init__(self,job):
+        super(BugWidget, self).__init__()
+        self.job=job
+        self.setLayout(qg.QVBoxLayout())
+        self.layout().setSpacing(0)
+        self.layout().setContentsMargins(0,0,0,0)
+        self.layout().setAlignment(qc.Qt.AlignTop)
+
+        self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
+
+        # BUG WIDGET
+        # self.layout().addSpacerItem(qg.QSpacerItem(0,50,qg.QSizePolicy.Expanding))
+
+        self.layout().addWidget(Splitter("SEND BUG DETAILS TO MATT"))
+        # self.layout().setAlignment(qc.Qt.AlignTop)
+
+        self.bug_widget = FeedbackWidget()
+        self.bug_widget.setReadOnly(False)
+        self.bug_widget.setMinimumHeight(200)
+        self.layout().addWidget(self.bug_widget)
+
+        self.setLayout(qg.QVBoxLayout())
+        self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
+        self.email_layout_bttn = qg.QPushButton('Email Matt')
+
+        self.layout().addWidget(self.email_layout_bttn)
+        self.layout().addSpacerItem(qg.QSpacerItem(0,50,qg.QSizePolicy.Expanding))
+
+
+        self.email_layout_bttn.clicked.connect(self.mailjob)
+
+    def email(self):
+        logger.info("Sending to matt: {}".format( self.bug_widget.toPlainText()))
+        m=Mail(mailto="120988@uts.edu.au",
+               mailfrom="{}@student.uts.edu.au".format(self.job.usernumber),
+               mailsubject="Bug Report from {}".format(self.job.username),
+               mailbody=self.bug_widget.toPlainText())
+        m.send()
+
+    def mailjob(self):
+        TEST = adhoc.SendMail(mailbody=self.bug_widget.toPlainText(),
+                              mailsubject="mail subject",
+                              mailcc="mail cc",
+                              mailto="120988@uts.edu.au")
+        TEST.build()
+        TEST.validate()
+        TEST.spool()
+
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class ArchiveWidget(qg.QWidget):
@@ -837,14 +918,16 @@ class NukeJobWidget(qg.QWidget):
         self.layout().addWidget(self.project_widget)
 
         self.layout().addWidget(Splitter("COMMON RENDER OPTIONS"))
-
-        # RANGE WIDGET
-        self.range_widget = RangeWidget(self.job)
-        self.layout().addWidget(self.range_widget)
-
         # SCENE WIDGET
         self.scene_widget=SceneWidget(self.job)
         self.layout().addWidget(self.scene_widget)
+        # RANGE WIDGET
+        self.range_widget = RangeWidget(self.job)
+        self.layout().addWidget(self.range_widget)
+        # THREADS AND MEMORY WIDGET
+        self.threadmem_widget = ThreadMemoryWidget(self.job)
+        self.layout().addWidget(self.threadmem_widget)
+
 
         # NUKE WIDGET
         self.nuke_widget = NukeWidget(self.job)

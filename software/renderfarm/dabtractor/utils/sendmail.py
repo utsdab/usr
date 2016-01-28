@@ -17,6 +17,26 @@ import argparse
 import os
 import sys
 
+class Mail(object):
+    def __init__(self,mailto,mailsubject,mailbody,mailfrom):
+        self.mailto=mailto
+        self.mailsubject=mailsubject
+        self.mailbody=mailbody
+        self.mailfrom=mailfrom
+
+    def send(self):
+        sendmail_location = "/usr/sbin/sendmail"  # sendmail location
+        p = os.popen("%s -t" % sendmail_location, "w")
+        p.write("From: %s\n" % self.mailfrom)
+        p.write("To: %s\n" % self.mailto)
+        p.write("Subject: %s\n" % self.mailsubject)
+        p.write("\n")  # blank line separating headers from body
+        p.write("%s" % self.mailbody)
+        status = p.close()
+        if status != 0:
+            print "Sendmail exit status", status
+        return status
+
 
 def sendmail(mailto,
              mailsubject,

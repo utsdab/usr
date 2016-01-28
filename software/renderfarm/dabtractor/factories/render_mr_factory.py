@@ -24,6 +24,7 @@ from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.renderfarm.dabtractor.factories import utils_factory as utils
 from software.renderfarm.dabtractor.factories import configuration_factory as config
 
+author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
 
 class RenderBase(object):
     """
@@ -33,22 +34,21 @@ class RenderBase(object):
     def __init__(self):
         self.user = os.getenv("USER")
         self.spooljob = False
-        self.job = ""
 
         try:
             # get the names of the central render location for the user
-            ru = ufac.Student()
+            ru = ufac.User()
             self.renderusernumber = ru.number
             self.renderusername = ru.name
             self.dabrender = ru.dabrender
-            self.dabrenderworkpath = ru.dabrenderwork
-            self.initialProjectPath = ru.dabrenderwork
+            self.dabrenderworkpath = ru.dabuserworkpath
+            self.initialProjectPath = ru.dabuserworkpath
 
         except Exception, erroruser:
             logger.warn("Cant get the users name and number back %s" % erroruser)
             sys.exit("Cant get the users name")
 
-        if os.path.ismount(self.dabrender):
+        if os.path.isdir(self.dabrender):
             logger.info("Found %s" % self.dabrender)
         else:
             self.initialProjectPath = None
@@ -173,14 +173,22 @@ class RenderMentalray(RenderBase):
     """
 
     def __init__(self,
-                 mayaprojectpath="",
-                 mayascenefilefullpath="",
+                 envdabrender="",
+                 envtype="",        # user_work
+                 envshow="",        # matthewgidney
+                 envproject="",     # mayaproject
+                 envscene="",       # mayascenename - noextension ### not needed
+                 mayaprojectpath="",    # /Users/Shared/UTS_Dev/dabrender/user_work/matthewgidney/matt_maya_project
+                 mayascenerelpath="", # scene/mayascene.ma
+                 mayascenefilefullpath="", ####### not needed
                  mayaversion="2016",
                  startframe=1,
-                 endframe=100,
+                 endframe=10,
                  byframe=1,
                  framechunks=5,
                  projectgroup="yr1",
+                 threads = 4,
+                 threadmemory = 4000,
                  renderer="mr",
                  outformat="exr",
                  resolution="540p",
@@ -191,14 +199,41 @@ class RenderMentalray(RenderBase):
         ):
 
         super(RenderMentalray, self).__init__()
-        self.mayaprojectpath = mayaprojectpath
-        self.mayaprojectname = os.path.basename(self.mayaprojectpath)
-        self.mayascenefilefullpath = mayascenefilefullpath
+
+        self.testing=True
+        self.envdabrender = envdabrender
+        self.envtype=envtype
+        self.envproject=envproject
+        self.envshow=envshow
+        self.envscene=envscene
+
+        self.mayaprojectpathalias       = "$DABRENDER/$TYPE/$SHOW/$PROJECT"
+        self.mayaprojectpath = os.path.join(self.envdabrender,self.envtype,
+                                            self.envshow,self.envproject)
+        self.mayaprojectnamealias       = "$PROJECT"
+        self.mayaprojectname = envproject
+        self.mayascenefilefullpathalias = "$DABRENDER/$TYPE/$SHOW/$PROJECT/$SCENE"
+        self.mayascenefilefullpath = os.path.join(self.envdabrender,self.envtype,self.envshow,
+                                                  self.envproject,self.envscene)
+        self.scenename = os.path.split(envscene)[-1:][0]
+        self.scenebasename = os.path.splitext(self.scenename)[0]
+
+        self.sceneext = os.path.splitext(self.scenename)[1]
+
+
+
+
+
+
+
         self.mayaversion = mayaversion
-        self.startframe = startframe
-        self.endframe = endframe
-        self.byframe = byframe
-        self.framechunks = framechunks
+        self.envkey_maya="maya{}".format(self.mayaversion)
+
+        self.startframe = int(startframe)
+        self.endframe = int(endframe)
+        self.byframe = int(byframe)
+
+        self.framechunks = int(framechunks)
         self.renderer = renderer
         if self.renderer == 'mr':
             self.renderername = 'Mental Ray Render'
@@ -206,27 +241,23 @@ class RenderMentalray(RenderBase):
             self.renderername = 'Maya Render'
         else:
             self.renderername = 'Render'
+
+        self.projectgroup = projectgroup
         self.options = options
         self.email = email
         self.resolution = resolution
-        self.projectgroup = projectgroup
         self.outformat = outformat
         self.makeproxy = makeproxy
         self.skipframes = skipframes
+        self.threads=threads
+        self.threadmemory=threadmemory
         self.sourcetargetsame = False
-        self.mayaprojectname = os.path.basename(self.mayaprojectpath)
         self.mayascenepath = os.path.dirname(self.mayascenefilefullpath)
         self.mayascenename = os.path.basename(self.mayascenefilefullpath)
         self.mayascenenamebase = os.path.splitext(self.mayascenename)[0]
         self.mayascenenameext = os.path.splitext(self.mayascenename)[1]
         self.renderdirectory = "images"
         self.environmentkey = 'maya{}'.format(self.mayaversion)
-
-        logger.info("work %s"%self.dabrenderworkpath)
-        logger.info("mayaprojectname %s"%self.mayaprojectname)
-        logger.info("mayascenenamebase %s"%self.mayascenenamebase)
-        logger.info("renderdirectory %s"%self.renderdirectory)
-
 
         self.finaloutputpath = "{work}/{proj}/{images}/{scene}".format(
             work=self.dabrenderworkpath,
@@ -247,30 +278,58 @@ class RenderMentalray(RenderBase):
         """
         Main method to build the job
         """
+        ########### TESTING ##############
+        # _threadsM=4
+        _threadsPixarRender=4
+        _threads_RfMRibGen=4
+        _threadsMaya=4
+        _servicePixarRender=_service_RfMRibGen=_serviceMaya=None
+
+        if self.testing:
+            _service_Testing="Testing"
+            _tier="admin"
+
+        else:
+            _service_Testing=""
+            _tier="batch"
+
+        _servicePixarRender="PixarRender"
+        _serviceMaya="PixarRender"
+        _service_RfMRibGen="RfMRibGen"
+        _service_NukeRender="NukeRender"
+
+        #############################
+
+
         # ################ 0 JOB ################
-        self.job = author.Job(title="{} Job: {} {}".format(self.renderername,self.renderusername,
-                                                                   self.mayascenename),
-                              priority=100,
-                              envkey=[self.environmentkey],
-                              metadata="user={} realname={}".format(self.user,
-                                                                    self.renderusername),
+        self.job = author.Job(title="MentalRay: {} {} {}-{}".format(self.renderusername,
+                                                                     self.scenename,self.startframe,self.endframe),
+                              priority=10,
+                              envkey=[self.envkey_maya,"ProjectX",
+                                    "TYPE={}".format(self.envtype),
+                                    "SHOW={}".format(self.envshow),
+                                    "PROJECT={}".format(self.envproject),
+                                    "SCENE={}".format(self.envscene),
+                                    "SCENENAME={}".format(self.scenebasename)],
+                              metadata="user={} username={} usernumber={}".format(self.user, self.renderusername,
+                                                                                  self.renderusernumber),
                               comment="LocalUser is {} {} {}".format(self.user,
                                                                      self.renderusername,
                                                                      self.renderusernumber),
-                              projects=[self.projectgroup],
-                              tier="batch",
-                              tags=["theWholeFarm"],
-                              service="")
+                              projects=[str(self.projectgroup)],
 
-        #####  directory mapping and global variables
-        # not longer needed as all filers are mounted as /Volumes/dabrender now
-        # self.job.newDirMap("/Volumes/dabrender", "/dabrender", "linux")
-        # self.job.newDirMap("/dabrender", "/Volumes/dabrender", "osx")
+                              tier=_tier,
+                              tags=[
+                                     "theWholeFarm",
+                                    ],
+                              service=_service_Testing)
 
-        # self.job.newDirMap("mayabatch", "maya", "linux")
-        # self.job.newAssignment("PROJ", self.mayaprojectpath)
-        # self.job.newAssignment("SCNFP", self.mayascenefilefullpath)
-        # self.job.newAssignment("SCN", self.mayascenenamebase)
+        self.job.newDirMap("/dabrender", "/dabrender", "linux")
+        self.job.newDirMap("/dabrender", "/Volumes/dabrender", "osx")
+        self.job.newDirMap("/dabrender", "Z:", "windows")
+        self.job.newDirMap("/Volumes/dabrender", "Z:", "windows")
+        # self.job.newDirMap("Z:","//Volumes/dabrender", "UNC")
+        # self.job.newDirMap("Z:","/Volumes/dabrender", "NFS")
 
 
         # ############## PARENT #################
@@ -310,6 +369,8 @@ class RenderMentalray(RenderBase):
                 "-e", "{}".format(_chunkend),
                 "-b", self.byframe,
                 "-rd", self.finaloutputpath,
+                "-rt", self.threads,
+                "-mem", self.threadmemory,
                 "-im", self.mayascenenamebase,  # this is the name bit of below
                 "-fnc", "3"  # this means name.#.ext
             ]
@@ -356,6 +417,9 @@ class RenderMentalray(RenderBase):
             finalargs = commonargs + rendererspecificargs + userspecificargs
             render = author.Command(argv=finalargs,
                                     service="MayaMentalRay",
+                                    tags=["maya", "theWholeFarm"],
+                                    atmost=int(self.threads),
+                                    atleast=int(self.threads),
                                     envkey=["maya{}".format(self.mayaversion)]
                                     )
             # thischunk.addCommand(env)
@@ -591,6 +655,8 @@ if __name__ == "__main__":
                            renderer="mr",
                            outformat="exr",
                            resolution="540p",
+                           threads=4,
+                           threadmemory=4000,
                            options="",
                            skipframes=0,
                            makeproxy=0,
