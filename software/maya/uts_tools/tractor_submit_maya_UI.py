@@ -48,6 +48,9 @@ from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.renderfarm.dabtractor.factories import interface_factory as ifac
 from software.renderfarm.dabtractor.factories import render_prman_factory as rmsfac
 from software.renderfarm.dabtractor.factories import render_mr_factory as mrfac
+from software.renderfarm.dabtractor.factories import render_mr_factory as mrfac
+from software.renderfarm.dabtractor.factories import render_nuke_factory as nukefac
+
 from software.renderfarm.dabtractor.factories import environment_factory as env
 
 from functools import partial
@@ -118,8 +121,12 @@ class Job(env.Environment):
         self.startframe=None
         self.endframe=None
         self.byframe=None
+        self.threads=None
+        self.threadmemory=None
+        self.email=None
         self.fb=None
-        self.options=""
+        self.email=None
+        self.options=None
 
     def printme(self):
         logger.info("\n\n{:_^80}\n".format(" job attributes "))
@@ -161,41 +168,41 @@ class Job(env.Environment):
             logger.warn("rsmvalidate error: {}".format(err))
             self.fb.write("Validate Fail: {}".format(err))
 
-
-    def rmsspool(self):
+    def spool(self):
         try:
-            self.rmsvalidate()
             self.tractorjob.spool()
             self.fb.write("Spool OK")
         except Exception, err:
-            logger.warn("rsmspool error: {}".format(err))
+            logger.warn("job spool error: {}".format(err))
             self.fb.write("Spool Fail: {}".format(err))
+
 
     def mrvalidate(self):
         try:
             self.tractorjob=mrfac.RenderMentalray(
-                 envdabrender=self.dabrender,
-                 envtype=self.type,
-                 envshow=self.show,
-                 envproject=self.project,
-                 envscene= self.scene,
-                 mayaprojectpath=self.projectpath,
-                 mayascenefilefullpath=self.scenefullpath,
-                 mayaversion=self.mayaversion,
-                 startframe=self.startframe,
-                 endframe=self.endframe,
-                 byframe=self.byframe,
-                 framechunks=5,
-                 projectgroup=self.projectgroup,
-                 renderer="mr",
-                 outformat="exr",
-                 resolution=self.resolution,
-                 skipframes=0,
-                 makeproxy=0,
-                 options="",
-                 threads=self.threads,
-                 threadmemory=self.threadmemory,
-                 email=[1,0,0,0,1,0]
+                envdabrender=self.dabrender,
+                envtype=self.type,
+                envshow=self.show,
+                envproject=self.project,
+                envscene= self.scene,
+                mayaprojectpath=self.projectpath,
+                mayascenefilefullpath=self.scenefullpath,
+                mayaversion=self.mayaversion,
+                startframe=self.startframe,
+                endframe=self.endframe,
+                byframe=self.byframe,
+                framechunks=5,
+                projectgroup=self.projectgroup,
+                renderer="mr",
+                outformat="exr",
+                resolution=self.resolution,
+                skipframes=0,
+                makeproxy=0,
+                options="",
+                threads=self.threads,
+                threadmemory=self.threadmemory,
+                email=self.email
+
             )
             self.tractorjob.build()
             self.tractorjob.validate()
@@ -203,15 +210,34 @@ class Job(env.Environment):
         except Exception,err:
             logger.warn("mrvalidate error: {}".format(err))
             self.fb.write("Validate Fail: {}".format(err))
-        pass
-    def mrspool(self):
+
+    def nukevalidate(self):
         try:
-            self.mrvalidate()
-            self.tractorjob.spool()
-            self.fb.write("Spool OK")
-        except Exception, err:
-            logger.warn("mrspool error: {}".format(err))
-            self.fb.write("Spool Fail: {}".format(err))
+            self.tractorjob=nukefac.NukeJob(
+                envdabrender=self.dabrender,
+                envtype=self.type,
+                envshow=self.show,
+                envproject=self.project,
+                envscene= self.scene,
+                scenefullpath = self.scenefullpath,
+                framechunks = int("3"),
+                startframe = int(self.startframe),
+                endframe = int(self.endframe),
+                byframe = int(self.byframe),
+                options = "-V 2",
+                version = "9,0v8",
+                threads=self.threads,
+                threadmemory=self.threadmemory,
+                email=[1,0,0,0,1,0],
+            )
+            self.tractorjob.build()
+            self.tractorjob.validate()
+            self.fb.write("Validate OK")
+        except Exception,err:
+            logger.warn("nukevalidate error: {}".format(err))
+            self.fb.write("Validate Fail: {}".format(err))
+
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmitWidget(qg.QFrame):
@@ -299,7 +325,6 @@ class TractorSubmitWidget(qg.QFrame):
         self.layout_5_bttn.clicked.connect(partial(self._stackchange, 4))
         self.layout_6_bttn.clicked.connect(partial(self._stackchange, 5))
         self.layout_7_bttn.clicked.connect(partial(self._stackchange, 6))
-
 
         self.stacked_layout.setCurrentIndex(2)
 

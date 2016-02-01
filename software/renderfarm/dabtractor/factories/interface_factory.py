@@ -198,7 +198,6 @@ class ProjectWidget(qg.QWidget):
                         _dirs.append(_item)
             else:
                 # just pass thru the string
-                print"xxxx"
                 _dirs=[_dirpath]
 
             for i,_item in enumerate(_dirs):
@@ -288,14 +287,14 @@ class SubmitWidget(qg.QWidget):
             self.job.rmsvalidate()
         elif self.job.mode=="mr":
             self.job.mrvalidate()
+        elif self.job.mode=="nuke":
+            self.job.nukevalidate()
 
     def submit(self):
         self.fb.write("Submit Job")
         logger.debug("Submit Job Pressed")
-        if self.job.mode == "rms":
-            self.job.rmsspool()
-        elif self.job.mode=="mr":
-            self.job.mrspool()
+        self.job.spool()
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class OutputWidget(qg.QWidget):
@@ -729,8 +728,6 @@ class RendermanWidget(qg.QWidget):
         # set initial values
         self._rms_maxsamples(self.maxsamples_combo.currentText())
         self._rms_integrator(self.integrator_combo.currentText())
-        # self._rms_memory(self.memory_combo.currentText())
-        # self._rms_threads(self.threads_combo.currentText())
         self._rms_version(self.version_combo.currentText())
         self._rms_ribchunks(self.ribchunks_combo.currentText())
         self._rms_options(self.options_combo.currentText())
@@ -738,8 +735,6 @@ class RendermanWidget(qg.QWidget):
         # connect vlaues to widget
         self.maxsamples_combo.activated.connect(lambda: self._rms_maxsamples(self.maxsamples_combo.currentText()))
         self.integrator_combo.activated.connect(lambda: self._rms_integrator(self.integrator_combo.currentText()))
-        # self.memory_combo.activated.connect(lambda: self._rms_memory(self.memory_combo.currentText()))
-        # self.threads_combo.activated.connect(lambda: self._rms_threads(self.threads_combo.currentText()))
         self.version_combo.activated.connect(lambda: self._rms_version(self.version_combo.currentText()))
         self.ribchunks_combo.activated.connect(lambda: self._rms_ribchunks(self.ribchunks_combo.currentText()))
         self.options_combo.editTextChanged.connect(lambda: self._rms_options(self.options_combo.currentText()))
@@ -937,6 +932,7 @@ class NukeJobWidget(qg.QWidget):
 class NukeWidget(qg.QWidget):
     def __init__(self,job):
         super(NukeWidget, self).__init__()
+        _width1=180
         self.job=job
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
@@ -952,12 +948,65 @@ class NukeWidget(qg.QWidget):
 
         self.version_text_lb = qg.QLabel('NUKE VERSION:')
         self.version_combo  = qg.QComboBox()
-        self.version_combo.addItem('9.0v8')
-        self.version_combo.addItem('9.0v7')
-
-        self.version_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        self.version_combo.addItems(config.CurrentConfiguration().nukeversions)
+        self.version_combo.setMinimumWidth(_width1)
+        self.version_layout = qg.QHBoxLayout()
+        self.version_layout.setContentsMargins(0,0,0,0)
+        self.version_layout.setSpacing(0)
         self.version_layout.addWidget(self.version_text_lb)
+        self.version_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
         self.version_layout.addWidget(self.version_combo)
+        self.layout().addLayout(self.version_layout)
+        
+        self.chunks_text_lb = qg.QLabel('JOB CHUNKS:')
+        self.chunks_combo  = qg.QComboBox()
+        self.chunks_combo.addItems(config.CurrentConfiguration().ribgenchunks)
+        self.chunks_combo.setMinimumWidth(_width1)
+        self.chunks_layout = qg.QHBoxLayout()
+        self.chunks_layout.setContentsMargins(0,0,0,0)
+        self.chunks_layout.setSpacing(0)
+        self.chunks_layout.addWidget(self.chunks_text_lb)
+        self.chunks_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        self.chunks_layout.addWidget(self.chunks_combo)
+        self.layout().addLayout(self.chunks_layout)
+
+        self.options_text_lb = qg.QLabel('OPTIONS:')
+        self.options_combo  = qg.QComboBox()
+        self.options_combo.addItem("")
+        self.options_combo.addItem("-binary")
+        self.options_combo.setEditable(True)
+        self.options_combo.setMinimumWidth(220)
+        self.options_layout = qg.QHBoxLayout()
+        self.options_layout.setContentsMargins(0,0,0,0)
+        self.options_layout.setSpacing(0)
+        self.options_layout.addWidget(self.options_text_lb)
+        self.options_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        self.options_layout.addWidget(self.options_combo)
+        self.layout().addLayout(self.options_layout)
+
+        # set initial values
+        # self._rms_maxsamples(self.maxsamples_combo.currentText())
+        # self._rms_integrator(self.integrator_combo.currentText())
+        self._version(self.version_combo.currentText())
+        self._chunks(self.chunks_combo.currentText())
+        self._options(self.options_combo.currentText())
+
+        # connect vlaues to widget
+        # self.maxsamples_combo.activated.connect(lambda: self._rms_maxsamples(self.maxsamples_combo.currentText()))
+        # self.integrator_combo.activated.connect(lambda: self._rms_integrator(self.integrator_combo.currentText()))
+        self.version_combo.activated.connect(lambda: self._rms_version(self.version_combo.currentText()))
+        self.chunks_combo.activated.connect(lambda: self._chunks(self.chunks_combo.currentText()))
+        self.options_combo.editTextChanged.connect(lambda: self._options(self.options_combo.currentText()))
+
+    def _options(self,_value):
+        self.job.option=_value
+        logger.debug("Options changed to {}".format(self.job.option))
+    def _chunks(self,_value):
+        self.job.chunks=_value
+        logger.debug("Chunks changed to {}".format(self.job.chunks))
+    def _version(self,_value):
+        self.job.version=_value
+        logger.debug("Version changed to {}".format(self.job.version))
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorWidget(qg.QWidget):
@@ -1011,7 +1060,7 @@ class Directory(qg.QFileDialog):
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class File(qg.QFileDialog):
-    def __init__(self,startplace=None,title='Select a File Please',filetypes=["*.ma","*.mb"]):
+    def __init__(self,startplace=None,title='Select a File Please',filetypes=["*.ma","*.mb","*.nk"]):
         super(File, self).__init__()
         # self.setWindowTitle(title)
         '''
@@ -1092,7 +1141,7 @@ class FarmJobExtraWidget(qg.QWidget):
         self.layout().setContentsMargins(2,2,2,2)
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
         
-        self.layout().addWidget(Splitter("FARM EXTRA OPTIONS"))
+        # self.layout().addWidget(Splitter("FARM EXTRA OPTIONS"))
 
         self.farm_group_box = qg.QGroupBox("Farm Options")
         self.farm_group_box_layout = qg.QGridLayout()
