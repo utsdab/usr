@@ -1,15 +1,14 @@
 #!/bin/bash
 
-echo "USING: ${DABRENDERPATH}/usr/etc/profile"
-export USING_DABRENDER_PROFILE=1
+echo "USING: ${DABUSR}/etc/profile"
+#export USING_DABRENDER_PROFILE=1
 export PATH="/usr/X11R6/bin:${PATH}"
-#export DISPLAY=:0.0
 
 ##########################
 export MAYA_VERSION=2016
-export RMAN_VERSION=20.2
-export TRACTOR_VERSION=2.1
-export NUKE_VERSION=9.0v7
+export RMAN_VERSION=20.6
+export TRACTOR_VERSION=2.2
+export NUKE_VERSION=9.0v8
 
 # echo "INFO: OS is: ${OSTYPE:0:5}"
 case ${OSTYPE:0:5} in
@@ -45,11 +44,12 @@ darwi)
 esac
 
 #  $DABRENDERPATH is set in /etc/profile.d/dabanim.sh and is OS aware
+#  $DABUSR is set in /etc/profile.d/dabanim.sh and is OS aware
 #  These are locations for central scripts and python scripts common to osx and linux eg perl, shell, python:wq
 #  Not entirely sure what the dirrernce between RDIR and RMS_SCRIPT_PATHS is
-export RMS_SCRIPT_PATHS="${DABRENDERPATH}/usr/custom/pixar/configs:/usr/local/dabanim/etc/pixar/config"
-export RDIR="${DABRENDERPATH}/usr/custom/pixar/configs"
-export PIXAR_LICENSE_FILE="${DABRENDERPATH}/usr/pixar/pixar.license"
+export RMS_SCRIPT_PATHS="${DABUSR}/custom/pixar/configs:/usr/local/dabanim/etc/pixar/config"
+export RDIR="${DABUSR}/usr/custom/pixar/configs"
+#export PIXAR_LICENSE_FILE="${DABUSR}/custom/pixar/pixar.license"
 
 # WORKAROUND for libMC3.so.8 error in Maya2016 (added by Chris Bell 10/9/15
 export MAYA_DISABLE_CIP=1
@@ -60,27 +60,18 @@ export MAYA_DISABLE_CIP=1
 
 ##########################  generic maya settings
 export MAYA_SCRIPT_PATH="${RMSTREE}/scripts:${MAYA_SCRIPT_PATH}"
+#export MAYA_SCRIPT_PATH="${MAYA_LOCATION}/scripts:${MAYA_SCRIPT_PATH}"
 export MAYA_PLUG_IN_PATH="${RMSTREE}/plug-ins:${MAYA_LOCATION}/plug-ins:${MAYA_PLUG_IN_PATH}"
+#export MAYA_PLUG_IN_PATH="${MAYA_LOCATION}/plug-ins/xgen/plug-ins:${MAYA_PLUG_IN_PATH}"
 export XBMLANGPATH="${RMSTREE}/icons:${XBMLANGPATH}"
 export MAYA_MAC_SET_UMASK=0
 
-# if [ $CONFIG ] ; then
-# 	echo  "INFO: local CONFIG found"
-# 	source ${DABRENDERPATH}/usr/etc/profile_local_extra
-# else
-# 	echo  "INFO: CONFIG not found trying central configs"
-# 	export CONFIG="${DABRENDERPATH}/usr/custom/maya"
-# 	source ${DABRENDERPATH}/usr/etc/profile_local_extra
-# fi
-
-if [ -e ${DABRENDERPATH}/usr/etc/profile_central_extra ] ; then
-	export CENTRAL=${DABRENDERPATH}/usr/custom/maya
-	source ${DABRENDERPATH}/usr/etc/profile_central_extra
+if [ -e ${DABUSR}/etc/profile_central_extra ] ; then
+	export CENTRAL=${DABUSR}/custom/maya
+	source ${DABUSR}/etc/profile_central_extra
 else
-	echo  "WARNING: central Configs not found to source"
+	echo  "WARNING: Central Configs not found to source at ${DABUSR}/etc/profile_central_extra"
 fi
-
-
 
 #########################  DYNAMIC LIBRARIES
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MAYA_LOCATION}/lib
@@ -91,36 +82,45 @@ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${TRACTOR_LOCATION}/lib
 
 #export DYLD_LIBRARY_PATH=${NUKE_LOCATION}/MacOS:${DYLD_LIBRARY_PATH}
 export DYLD_LIBRARY_PATH=${MAYA_LOCATION}/MacOS:${DYLD_LIBRARY_PATH}
-export DYLD_LIBRARY_PATH=${MAYA_APPLICATION_LOCATION}/plug-ins/xgen/lib:${DYLD_LIBRARY_PATH}
-export DYLD_LIBRARY_PATH=${RMANTREE}/lib:${DYLD_LIBRARY_PATH}
-export DYLD_LIBRARY_PATH=${TRACTOR_LOCATION}/lib:${DYLD_LIBRARY_PATH}
+#export DYLD_LIBRARY_PATH=${MAYA_APPLICATION_LOCATION}/plug-ins/xgen/lib:${DYLD_LIBRARY_PATH}
+#export DYLD_LIBRARY_PATH=${RMANTREE}/lib:${DYLD_LIBRARY_PATH}
+#export DYLD_LIBRARY_PATH=${TRACTOR_LOCATION}/lib:${DYLD_LIBRARY_PATH}
 #export DYLD_LIBRARY_PATH="${OCIO_EXECROOT}/lib:${DYLD_LIBRARY_PATH}"
 
 ##########################  PATH settings
 export PATH=/usr/local/dabrender/bin:${PATH}
-export PATH=${DABRENDERPATH}/usr/bin:${PATH}
-export PATH=${DABRENDERPATH}/usr/renderfarm/bin:${PATH}
+export PATH=${DABUSR}/bin:${PATH}
+export PATH=${DABUSR}/software/renderfarm/bin:${PATH}
 export PATH=${RMANTREE}/bin:${PATH}
 export PATH=${RMSTREE}/bin:${PATH}
 export PATH=${TRACTOR_LOCATION}/bin:${PATH}
 ######export PATH=${OCIO_EXECROOT}/bin:${PATH}
 export PATH=${PATH}:${MAYA_LOCATION}/bin
-export PATH=${DABRENDERPATH}/usr/custom/tractor:${PATH}
+export PATH=${DABUSR}/custom/tractor:${PATH}
 
 ##########################  PYTHONPATH settings
 export PYTHONPATH=${RMSTREE}/scripts:${PYTHONPATH}
-export PYTHONPATH=${DABRENDERPATH}/usr/lib/python:${PYTHONPATH}
-export PYTHONPATH=${DABRENDERPATH}/usr/renderfarm:${PYTHONPATH}
-export PYTHONPATH=${DABRENDERPATH}/usr/custom/tractor:${PYTHONPATH}
+export PYTHONPATH=${DABUSR}/lib/python:${PYTHONPATH}
+export PYTHONPATH=${DABUSR}/software/renderfarm:${PYTHONPATH}
+export PYTHONPATH=${DABUSR}/custom/tractor:${PYTHONPATH}
+export PYTHONPATH=${DABUSR}:${PYTHONPATH}
+
+#export DYLD_LIBRARY_PATH=${RMSTREE}/lib/python2.7/site-packages/PySide:${RMSTREE}/lib:${DYLD_LIBRARY_PATH}
+#export PYTHONPATH=${TRACTOR_LOCATION}/lib/python2.7/site-packages/tractor:${PYTHONPATH}
+########################## copy of tractor package only
+##### need to do this as we dont want all the other site-packages from tractor and rmstree like pyside etc
+export PYTHONPATH=${DABUSR}/lib/site-packages:${PYTHONPATH}
+#export PYTHONPATH=${PYTHONPATH}:${RMSTREE}/lib/python2.7/site-packages
+
 #export PYTHONPATH="${OCIO_EXECROOT}/lib/python2.7/site-packages:${PYTHONPATH}"
 
 ##########################  NUKE settings
 #export NUKE_PATH="${OCIO_EXECROOT}/lib/nuke:${NUKE_PATH}"
 #export NUKE_PATH="${OCIO_ROOT}/share/nuke:${NUKE_PATH}";
-#export NUKE_PATH="${DABRENDERPATH}/usr/custom/nuke/tractorNuke:${NUKE_PATH}";
+#export NUKE_PATH="${DABUSR}/custom/nuke/tractorNuke:${NUKE_PATH}";
+
 
 ###########################  ALIAS's
-export DYLD_LIBRARY_PATH=${MAYA_LOCATION}/MacOS:${DYLD_LIBRARY_PATH}
 alias nukex='source nuke_env;Nuke${NUKE_VERSION} --nukex'
 alias nukestudio='source nuke_env;Nuke${NUKE_VERSION} --studio'
 alias nukeassist='source nuke_env;Nuke${NUKE_VERSION} --nukeassist'

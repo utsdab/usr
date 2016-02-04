@@ -1,0 +1,57 @@
+[
+    {
+        "keys": ["default"],
+        "environment": {
+        },
+        "envhandler": "default"
+    },
+    {
+        "keys": ["rms-*-maya-*"],
+        "environment": {
+            "RMSTREE": "/opt/pixar/RenderManStudio-$TR_ENV_RMSVER-maya$TR_ENV_MAYAVER",
+            "MAYA_LOCATION": "$TR_ENV_MAYALOCATION",
+            "MAYA_MODULE_PATH": "$RMSTREE/etc",
+            "PATH": "$RMSTREE/bin:$MAYA_LOCATION/bin:$PATH"
+        },
+        "envhandler": "rmshandler"
+    },
+    {
+        "keys": ["prman-*"], 
+        "environment": {
+            "APPBASEDIR": "/opt/pixar",
+            "RMANTREE": "$TR_ENV_RMANTREE",
+            "PATH": "$RMANTREE/bin:$PATH"
+        },
+        "envhandler": "rmanhandler"
+    },
+    {
+        "keys": ["rmantree=*"],
+        "environment": {
+            "RMANTREE": "$TR_ENV_RMANTREE",
+            "PATH": "$RMANTREE/bin:$PATH",
+        },
+        "envhandler": "rmantreehandler",
+        "rewritedict": {}
+    },
+    {
+        "keys": ["rmstree=*"],
+        "environment": {
+            "RMSTREE": "$TR_ENV_RMSTREE",
+            "PATH": "$RMSTREE/bin:$PATH",
+        },
+        "envhandler": "rmstreehandler",
+        "rewritedict": {}
+    },
+    {
+        "keys": ["maya*"],
+        "environment": {
+            "MAYA_LOCATION": "$TR_ENV_MAYALOCATION",
+            "PATH": "$MAYA_LOCATION/bin:$PATH"
+        },
+        "envhandler": "mayahandler"
+    },
+    {
+        "keys": ["setenv *"],
+        "envhandler": "setenvhandler"
+    }
+]

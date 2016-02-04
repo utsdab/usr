@@ -1,6 +1,6 @@
 + PLATFORM:mac MAYAVERSION:2016 UTSMOD 1.0 UTSMOD/2016/mac
-PYTHONPATH +:= python
-MODULESLOADED += UTSMOD
+PYTHONPATH+:=python
+MODULESLOADED+=UTSMOD
 [r] scripts: scripts
 [r] icons: icons
 plug-ins: plug-ins

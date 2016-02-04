@@ -1,0 +1,39 @@
+global proc shelf_UTS_lighting () {
+    global string $gBuffStr;
+    global string $gBuffStr0;
+    global string $gBuffStr1;
+
+
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Tractor for Maya" 
+        -enableBackground 0
+        -align "center" 
+        -label "tractorMayaSpool" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "tractorMayaSpool" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.2 
+        -image "TractorRenderSpool.png" 
+        -image1 "TractorRenderSpool.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "from tractorspoolformaya import tractorSpoolForMaya\ntractorSpoolForMaya.tractorSpoolForMayaWindow()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+
+} 

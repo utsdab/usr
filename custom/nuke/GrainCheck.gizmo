@@ -1,0 +1,62 @@
+Gizmo {
+ addUserKnob {20 User}
+ addUserKnob {26 Info l "" +STARTLINE T "Graincheck for Nuke Studio & Hiero.\nby Mads Hagbarth Lund 2015"}
+ addUserKnob {26 ""}
+ addUserKnob {7 Multiplier R 0 4}
+ Multiplier 1
+ addUserKnob {4 Operation M {"Grain Check (Laplacian)" "Edge Check (Sobel)" "Saturation Check" "" ""}}
+ addUserKnob {26 ""}
+ addUserKnob {4 NukeVersion l "Nuke Version" M {"Nuke 9.0v7 and above" "Nuke 9.0v6 and below" ""}}
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos -366
+  ypos 93
+ }
+set N3668800 [stack 0]
+ GPUOp {
+  gpuEngine "vec4 outputs = 0;\nif (\$CheckMethod\$ == 0)\n\{\nconst float imagewidth = \$formatWidth\$;\nconst float imageheight = \$formatHeight\$;\nconst float step_w = 1.0/imagewidth;\nconst float step_h = 1.0/imageheight;\nconst vec2 offset\[9] =\{vec2(-step_w, step_h), vec2(0.0, step_h), vec2(step_w, step_h),vec2(-step_w, 0.0), vec2(0.0, 0.0), vec2(step_w, 0.0),vec2(-step_w, -step_h), vec2(0.0, -step_h), vec2(step_w,-step_h)\};\nvec4 sum = vec4(0.0);\nvec4 tmp = readTexture(input0_tex, input0_v_tex+offset\[0], input0_tex_transform,0.0,0);\nsum += tmp;\nfor(int i=1; i < 9; i++)\n\{\n\ttmp =readTexture(input0_tex, input0_v_tex+offset\[i], input0_tex_transform,0.0,0);\n\tsum += tmp;\n\}\noutputs = abs(IN-(sum/9))*\$Multiplier\$; \n\}\nelse if (\$CheckMethod\$ == 1)\n\{\nconst float imagewidth = \$formatWidth\$;\nconst float imageheight = \$formatHeight\$;\nconst float step_w = 1.0/imagewidth;\nconst float step_h = 1.0/imageheight;\nconst float kernel_a\[9] = \{-1, 0,1,-2, 0,2,-1,0,1\};\nconst float kernel_b\[9] = \{1, 2,1,0, 0,0,-1,-2,-1\};\nconst vec2 offset_a\[9] =\{vec2(-step_w, step_h), vec2(0.0, step_h), vec2(step_w, step_h),vec2(-step_w, 0.0), vec2(0.0, 0.0), vec2(step_w, 0.0),vec2(-step_w, -step_h), vec2(0.0, -step_h), vec2(step_w,-step_h)\};\nconst vec2 offset_b\[9] =\{vec2(-step_w, step_h), vec2(0.0, step_h), vec2(step_w, step_h),vec2(-step_w, 0.0), vec2(0.0, 0.0), vec2(step_w, 0.0),vec2(-step_w, -step_h), vec2(0.0, -step_h), vec2(step_w,-step_h)\};\nvec4 sum_a = vec4(0.0);\nvec4 tmp_a = readTexture(input0_tex, input0_v_tex+offset_a\[0], input0_tex_transform,0.0,0);\nsum_a += tmp_a*kernel_a\[0];\nvec4 sum_b = vec4(0.0);\nvec4 tmp_b = readTexture(input0_tex, input0_v_tex+offset_b\[0], input0_tex_transform,0.0,0);\nsum_b += tmp_b*kernel_b\[0];\nfor(int i=1; i < 9; i++)\n\{\n\ttmp_a =readTexture(input0_tex, input0_v_tex+offset_a\[i], input0_tex_transform,0.0,0);\n\tsum_a += tmp_a*kernel_a\[i];\n\ttmp_b =readTexture(input0_tex, input0_v_tex+offset_b\[i], input0_tex_transform,0.0,0);\n\tsum_b += tmp_b*kernel_b\[i];\n\}\noutputs = ((abs(sum_a/9)+abs(sum_b/9))/2)*\$Multiplier\$; \n\}\nelse\n\{\nfloat rgbMax = max(max(IN\[0],IN\[1]),IN\[2]);\nfloat rgbMin = min(min(IN\[0],IN\[1]),IN\[2]);\nfloat sat = (rgbMax-rgbMin)/(rgbMax+rgbMin);\noutputs = sat;\n\}\nOUT = outputs;"
+  name GrainCheckNuke9v6
+  label "i owe you a beer theo!"
+  xpos -312
+  ypos 228
+  addUserKnob {20 User}
+  addUserKnob {3 CheckMethod}
+  CheckMethod {{parent.Operation}}
+  addUserKnob {7 Multiplier R 0 100}
+  Multiplier {{parent.Multiplier*25}}
+  addUserKnob {3 formatWidth}
+  formatWidth {{input.width}}
+  addUserKnob {3 formatHeight}
+  formatHeight {{input.height}}
+ }
+push $N3668800
+ GPUOp {
+  gpuEngine "vec4 outputs = 0;\nif (\$CheckMethod\$ == 0)\n\{\nconst float imagewidth = \$formatWidth\$;\nconst float imageheight = \$formatHeight\$;\nconst float step_w = 1.0/imagewidth;\nconst float step_h = 1.0/imageheight;\nconst vec2 offset\[9] =\{vec2(-step_w, step_h), vec2(0.0, step_h), vec2(step_w, step_h),vec2(-step_w, 0.0), vec2(0.0, 0.0), vec2(step_w, 0.0),vec2(-step_w, -step_h), vec2(0.0, -step_h), vec2(step_w,-step_h)\};\nvec4 sum = vec4(0.0);\nvec4 tmp = readTexture(input0_tex, input0_v_tex+offset\[0], input0_tex_transform,0.0,0,vec4(0.0,0.0,1.0,1.0));\nsum += tmp;\nfor(int i=1; i < 9; i++)\n\{\n\ttmp =readTexture(input0_tex, input0_v_tex+offset\[i], input0_tex_transform,0.0,0,vec4(0.0,0.0,1.0,1.0));\n\tsum += tmp;\n\}\noutputs = abs(IN-(sum/9))*\$Multiplier\$; \n\}\nelse if (\$CheckMethod\$ == 1)\n\{\nconst float imagewidth = \$formatWidth\$;\nconst float imageheight = \$formatHeight\$;\nconst float step_w = 1.0/imagewidth;\nconst float step_h = 1.0/imageheight;\nconst float kernel_a\[9] = \{-1, 0,1,-2, 0,2,-1,0,1\};\nconst float kernel_b\[9] = \{1, 2,1,0, 0,0,-1,-2,-1\};\nconst vec2 offset_a\[9] =\{vec2(-step_w, step_h), vec2(0.0, step_h), vec2(step_w, step_h),vec2(-step_w, 0.0), vec2(0.0, 0.0), vec2(step_w, 0.0),vec2(-step_w, -step_h), vec2(0.0, -step_h), vec2(step_w,-step_h)\};\nconst vec2 offset_b\[9] =\{vec2(-step_w, step_h), vec2(0.0, step_h), vec2(step_w, step_h),vec2(-step_w, 0.0), vec2(0.0, 0.0), vec2(step_w, 0.0),vec2(-step_w, -step_h), vec2(0.0, -step_h), vec2(step_w,-step_h)\};\nvec4 sum_a = vec4(0.0);\nvec4 tmp_a = readTexture(input0_tex, input0_v_tex+offset_a\[0], input0_tex_transform,0.0,0,vec4(0.0,0.0,1.0,1.0));\nsum_a += tmp_a*kernel_a\[0];\nvec4 sum_b = vec4(0.0);\nvec4 tmp_b = readTexture(input0_tex, input0_v_tex+offset_b\[0], input0_tex_transform,0.0,0,vec4(0.0,0.0,1.0,1.0));\nsum_b += tmp_b*kernel_b\[0];\nfor(int i=1; i < 9; i++)\n\{\n\ttmp_a =readTexture(input0_tex, input0_v_tex+offset_a\[i], input0_tex_transform,0.0,0,vec4(0.0,0.0,1.0,1.0));\n\tsum_a += tmp_a*kernel_a\[i];\n\ttmp_b =readTexture(input0_tex, input0_v_tex+offset_b\[i], input0_tex_transform,0.0,0,vec4(0.0,0.0,1.0,1.0));\n\tsum_b += tmp_b*kernel_b\[i];\n\}\noutputs = ((abs(sum_a/9)+abs(sum_b/9))/2)*\$Multiplier\$; \n\}\nelse\n\{\nfloat rgbMax = max(max(IN\[0],IN\[1]),IN\[2]);\nfloat rgbMin = min(min(IN\[0],IN\[1]),IN\[2]);\nfloat sat = (rgbMax-rgbMin)/(rgbMax+rgbMin);\noutputs = sat;\n\}\nOUT = outputs;"
+  name GrainCheckNuke9v8
+  xpos -434
+  ypos 235
+  addUserKnob {20 User}
+  addUserKnob {3 CheckMethod}
+  CheckMethod {{parent.Operation}}
+  addUserKnob {7 Multiplier R 0 100}
+  Multiplier {{parent.Multiplier*25}}
+  addUserKnob {3 formatWidth}
+  formatWidth {{input.width}}
+  addUserKnob {3 formatHeight}
+  formatHeight {{input.height}}
+ }
+ Switch {
+  inputs 2
+  which {{parent.NukeVersion}}
+  name Switch1
+  xpos -377
+  ypos 300
+ }
+ Output {
+  name Output1
+  xpos -377
+  ypos 423
+ }
+end_group

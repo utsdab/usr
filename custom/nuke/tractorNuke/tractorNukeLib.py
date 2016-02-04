@@ -178,7 +178,7 @@ class TrHttpRPC (object):
         #
         # Expect a JSON object, which of course also happens to be the
         # same format as a python dictionary:
-        #  { "user": "yoda", "jid": 123, ..., "cmdline": "prman ..." }
+        #  { "user": "yoda", "jid": 123, ..., "cmdline": "pixar ..." }
         #
         # NOTE: python eval() will *fail* on strings ending in CRLF (\r\n),
         # they must be stripped!  (by our caller, if necessary)

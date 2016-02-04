@@ -101,7 +101,7 @@ remote=author.Command(local=True,tags=["aa"],envkey=["maya2014"],argv=["pwd"])
 task3.addCommand(remote)
 #task3 = author.Task(title="multi-command task", service="PixarRender")
 #task3.newCommand(argv=["scp", "remote:/path/file.rib", "/local/file.rib"])
-#task3.newCommand(argv=["/usr/bin/prman", "/local/file.rib"])
+#task3.newCommand(argv=["/usr/bin/pixar", "/local/file.rib"])
 #task3.newCommand(argv=["scp", "/local/file.tif", "remote:/path/file.tif"])
 
 job3.addChild(task3)

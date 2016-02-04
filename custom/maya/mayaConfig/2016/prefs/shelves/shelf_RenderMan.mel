@@ -119,7 +119,7 @@ global proc shelf_RenderMan () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "rmanLoadPlugin; rmanChangeToRenderMan; evalDeferred -lowestPriority \"rmanRerenderStart(1)\";" 
+        -command "rmanRerenderStart(1);" 
         -sourceType "mel" 
         -commandRepeatable 1
         -flat 1
