@@ -161,7 +161,7 @@ class NukeJob(RenderBase):
                 userspecificargs = [utils.expandargumentstring(self.options),]
                 finalargs = commonargs + userspecificargs + filespecificargs
             else:
-                finalargs = commonargs  + filespecificargs
+                finalargs = commonargs + filespecificargs
 
             render = author.Command(
                                     argv=finalargs,
@@ -178,7 +178,6 @@ class NukeJob(RenderBase):
             logger.info("\n\n{:_^80}\n{}\n{:_^80}".format("snip", self.job.asTcl(), "snip"))
         except Exception, err:
             logger.warn("Validate error {}".format(err))
-
 
 
     def mail(self, level="Level", trigger="Trigger", body="Render Progress Body"):
