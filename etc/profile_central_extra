@@ -3,7 +3,11 @@
 echo "USING: ${DABUSR}/etc/profile_central_extra"
 
 if [ $CENTRAL ] ; then
+<<<<<<< Updated upstream
  	echo  "INFO: CENTRAL is ${CENTRAL} "
+=======
+# 	echo  "INFO: CENTRAL is ${CENTRAL} "
+>>>>>>> Stashed changes
     export MAYA_SCRIPT_PATH="${CENTRAL}/mayaConfig/scripts_central:${MAYA_SCRIPT_PATH}"
     export MAYA_PLUG_IN_PATH="${CENTRAL}/mayaConfig/plug-ins_central:${MAYA_PLUG_IN_PATH}"
     export MAYA_PRESET_PATH="${CENTRAL}/mayaConfig/preset_central:${MAYA_PRESET_PATH}"

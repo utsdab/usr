@@ -1,0 +1,19 @@
+Flags:
+-v                       prints the product version and cut number
+-batch                   for batch mode
+-prompt                  for interactive non-gui mode
+-proj [dir]              look for files in the specified project dir
+-command [mel command]   runs the specified command on startup
+-file [file]             opens the specified file
+-script [file]           sources the specified file on startup
+                             (use complete file name)
+-recover                 recover the last journal file
+                             (use 'Render -help' for more options)
+-optimizeRender [file] [outfile]
+                             (use 'maya -optimizeRender -help' for more options)
+-archive [file]          displays a list of files required to archive the specified scene
+-noAutoloadPlugins       do not auto-load any plug-ins.
+-3                       enable Python 3000 compatibility warnings
+-help                    prints this message
+
+

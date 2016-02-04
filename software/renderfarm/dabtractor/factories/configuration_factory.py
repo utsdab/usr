@@ -7,9 +7,15 @@
            move all this to a json file and have this method look it up.
 """
 import os
+<<<<<<< Updated upstream
 import software.renderfarm.dabtractor as dt
 import inspect
 # from   software.renderfarm.dt.factories import utils_factory  as utils
+=======
+import sys
+import json
+
+>>>>>>> Stashed changes
 
 # ##############################################################
 import logging
@@ -29,17 +35,23 @@ class ConfigurationBase(object):
         # logger.info("config path = {}".format(self.configpath))
         # print os.path.abspath(sys.modules[ConfigurationBase.__module__].__file__)
         self.mayaversions = ("2016",)
+<<<<<<< Updated upstream
         self.rendermanversions = ("20.6","20.5","20.2",)
         self.rendermanrenderers = ("rms-ris", "rms-reyes")
         self.rendermanintegrators = ("FROMFILE","pxr", "vcm","visualiser")
         self.nukeversions = ("9.0v8","9.0v7","9.0v6")
         self.configuration = "base"
+=======
+        self.rendermanversions = ("20.2","20.1",)
+        self.nukeversions = ("9.0v7","9.0v6")
+>>>>>>> Stashed changes
         self.projectgroups = ("yr1", "yr2", "yr3", "yr4", "masters", "personal", "admin")
         self.mayarenderers = ("mr", "sw","FROMFILE")
         self.renderfarmbin = (os.path.join(os.path.dirname(os.path.dirname(dt.__file__)), "bin"),)
         self.renderfarmmodulepath = (os.path.dirname(os.path.dirname(dt.__file__)),)
         self.renderfarmproxypath = (os.path.join(os.path.dirname(dt.__file__), "proxys"),)
         self.nukedefaultproxytemplate = ("nuke_proxy_720p_prores_v003.py")
+<<<<<<< Updated upstream
         self.dabrender = self.getfromenv("DABRENDER", "/Volumes/dabrender")
         self.dabusrpath = self.getfromenv("DABUSR", "/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr/")
         # self.dabusrpath = self.getfromenv("DABUSR", self.getusrinternally())
@@ -52,14 +64,26 @@ class ConfigurationBase(object):
         self.resolutions = ("FROMFILE","1080p","720p","540p","108p",)
         self.outformats = ("exr",)
         self.envtypes = ("user_work","project_work",)
+=======
+        self.dabrenderpath = ("/Volumes/dabrender")
+        self.usermapfilepath = (os.path.join(self.dabrenderpath, "usr/map"))
+        self.editproxydumppath = (os.path.join(self.dabrenderpath, "renderproxies"))
+        self.renderthreads = ("16","8","4","2")
+        self.envtypes = ("work","project",)
+>>>>>>> Stashed changes
         self.envshow = ("matthewgidney",)
         self.envproject = ("testFarm",)
         self.envscene = ("rmsTestFile.ma",)
         self.userid = self.getfromenv("USER")
 
+<<<<<<< Updated upstream
     # def getusrinternally(self):
     #     a= utils.truncatepath(os.path.dirname(self.configpath))
     #     return a
+=======
+        # with open() as json_data:
+        #     d = json.load(json_data)
+>>>>>>> Stashed changes
 
     def getfromenv(self,key,default=None):
         # try to use an environment variable over the default
@@ -80,12 +104,13 @@ class CurrentConfiguration(ConfigurationBase):
         self.mayaversion = self.mayaversions[0]
         self.resolution=self.resolutions[1]
         self.rendermanversion = self.rendermanversions[0]
-        self.rendermanrenderer = self.rendermanrenderers[0]
-        self.rendermanintegrator = self.rendermanintegrators[0]
         self.renderthread = self.renderthreads[1]
+<<<<<<< Updated upstream
         self.rendermemory = self.rendermemorys[1]
         self.ringenchunk= self.ribgenchunks[0]
         self.rendermaxsample = self.rendermaxsamples[2]
+=======
+>>>>>>> Stashed changes
         self.nukeversion = self.nukeversions[0]
         self.mayarenderer = self.mayarenderers[0]
         self.projectgroup = self.projectgroups[5]
@@ -106,6 +131,7 @@ if __name__ == "__main__":
     print "proxypath is %s" % AA.renderfarmproxypath
     print "usermappath is %s" % AA.usermapfilepath
 
+<<<<<<< Updated upstream
     _env = os.environ
     _keys = _env.keys()
     _keys.sort()
@@ -114,3 +140,6 @@ if __name__ == "__main__":
     for key in _keys:
         print key, _env.get(key)
     print "{:_^80}".format("env")
+=======
+    print os.environ.keys()
+>>>>>>> Stashed changes
