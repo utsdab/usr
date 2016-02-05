@@ -5,9 +5,14 @@ By Matt Gidney - mgidney@gmail.com
 
 In maya run this at the moment....
 
+
+
+
 import sys
 sys.path.append("/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr")
+
 from software.maya.uts_tools import tractor_submit_maya_UI
+
 
 tractor_submit_maya_UI.TractorSubmit().show()
 tractor_submit_maya_UI.create()
@@ -59,7 +64,7 @@ MAYA_PRESENT = False
 COL1 = "background-color:lightgrey;color:black"
 COL2 = "background-color:lightgreen;color:darkblue"
 VERSION="0.9"
-BUILD="20160205"
+BUILD="2016_02_05"
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmit(qg.QDialog):

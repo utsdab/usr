@@ -64,16 +64,9 @@ class RenderBase(object):
 
 
 class RenderPrman(RenderBase):
-<<<<<<< Updated upstream
     '''
         Renderman job defined using the tractor api
     '''
-=======
-    """
-        renderman or prman
-
-    """
->>>>>>> Stashed changes
 
     def __init__(self,
                  envdabrender="",
@@ -326,13 +319,8 @@ class RenderPrman(RenderBase):
 
             rendererspecificargs.extend([
                 # "-pad", "4",
-<<<<<<< Updated upstream
                 # "-memorylimit", self.threadmemory,  # mb
                 "-t:{}".format(self.threads),
-=======
-                "-memorylimit", self.rendermemory,  # mb
-                "-t:{}".format(self.renderthreads),
->>>>>>> Stashed changes
                 "-Progress",
                 "-recover", "%r",
                 "-checkpoint", "5m",
