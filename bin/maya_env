@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+
+########
+#
+# This configures nujke to run by clearing out the maya lib that is in conflict
+#
+#
+
+export DYLD_LIBRARY_PATH=${NUKE_LOCATION}/MacOS:${DYLD_LIBRARY_PATH}
+export DYLD_LIBRARY_PATH=${MAYA_LOCATION}/MacOS:${DYLD_LIBRARY_PATH}
+NEW_PATH=
+
+for i in $(echo $DYLD_LIBRARY_PATH | sed -e 's/\:/\ /g' );
+
+do
+
+case "$i" in
+  *Nuke*) echo "Nuke present, removed";;
+  *Maya*) NEW_PATH=$i:$NEW_PATH ;;
+  *)      NEW_PATH=$i:$NEW_PATH ;;
+esac
+
+done
+
+export DYLD_LIBRARY_PATH=${NEW_PATH}
+
+CLEAN_PATH=`perl -e 'print join ":", grep {!$h{$_}++} split ":", $ENV{DYLD_LIBRARY_PATH}'`
+export DYLD_LIBRARY_PATH=${CLEAN_PATH}
+echo "INFO: DYLD_LIBRARY_PATH  ${DYLD_LIBRARY_PATH}"

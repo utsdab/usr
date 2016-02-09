@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo "USING: ${DABUSR}/etc/uts/profile_local_extra"
+
+if [ $CONFIG ] ; then
+# 	echo  "INFO: CONFIG is ${CONFIG} "
+        export MAYA_SCRIPT_PATH="${CONFIG}/mayaConfig/scripts_local:${MAYA_SCRIPT_PATH}"
+        export MAYA_PLUG_IN_PATH="${CONFIG}/mayaConfig/plug-ins_local:${MAYA_PLUG_IN_PATH}"
+        export MAYA_APP_DIR="${CONFIG}/mayaConfig"
+        export MAYA_MODULE_PATH="${CONFIG}/mayaConfig/modules_local:${MAYA_MODULE_PATH}"
+        export XBMLANGPATH="${CONFIG}/mayaConfig/icons_local/\%B":${XBMLANGPATH}
+        export MAYA_SHELF_PATH="${CONFIG}/mayaConfig/shelves_local:${MAYA_SHELF_PATH}"
+else
+	echo  "WARNING: CONFIG not found still "
+fi
+
+
