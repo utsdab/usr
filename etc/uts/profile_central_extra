@@ -1,9 +1,9 @@
 #!/bin/bash
 
-echo "USING: ${DABUSR}/etc/profile_central_extra"
+echo      "USING:    ${DABUSR}/etc/uts/profile_central_extra"
 
 if [ $CENTRAL ] ; then
- 	echo  "INFO: CENTRAL is ${CENTRAL} "
+ 	echo  "INFO:     CENTRAL is ${CENTRAL} "
     export MAYA_SCRIPT_PATH="${CENTRAL}/mayaConfig/scripts_central:${MAYA_SCRIPT_PATH}"
     export MAYA_PLUG_IN_PATH="${CENTRAL}/mayaConfig/plug-ins_central:${MAYA_PLUG_IN_PATH}"
     export MAYA_PRESET_PATH="${CENTRAL}/mayaConfig/preset_central:${MAYA_PRESET_PATH}"
@@ -13,7 +13,7 @@ if [ $CENTRAL ] ; then
 	export MAYA_SHELF_PATH="${CENTRAL}/mayaConfig/shelves_central:${MAYA_SHELF_PATH}"
 	
 else
-	echo  "WARNING: CENTRAL not found still "
+	echo   "WARNING:  CENTRAL not found still "
 fi
 
 

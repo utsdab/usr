@@ -1,8 +1,8 @@
-//CopyRight Dustin Nelson 2010-2015. Please do not distribute
+//CopyRight Dustin Nelson 2010-2016. Please do not distribute
 //http://www.creativecrash.com/maya/script/-rapid-rig-modular-procedural-auto-rig-for-maya
-//Script for Modular Character Rigging.
-//VERSION 1.6.3
-//AUGUST 1, 2015
+//Script for selecting controls on Rapid Rig: Modular rigs.
+//VERSION 1.7.0
+//JANUARY 27, 2016
 //FILE IS NOT INTENDED TO BE HARMFUL, HOWEVER USE AT YOUR OWN RISK
 /*/////////////////////////////////////////////////////////////////////////////
 // 
@@ -1997,7 +1997,7 @@ global proc RapidRig_Modular_Selector()
 	{
 		if (`objExists ($mainCtrl[0] + ".isMain")`)
 		{
-			window -title "Rapid Rig: Modular Selector 1.6.3"
+			window -title "Rapid Rig: Modular Selector 1.7.0"
 			//-wh 375 212
 			-rtf on
 			-mnb true

@@ -15,7 +15,7 @@ windowPref -topLeftCorner 203 848 -widthHeight 634 975 -maximized false pluginMa
 windowPref -topLeftCorner 1 4 -widthHeight 2238 1339 -maximized true MayaWindow;
 windowPref -topLeftCorner 361 124 -widthHeight 1333 684 -maximized false scriptEditorPanel1Window;
 windowPref -topLeftCorner 476 853 -widthHeight 358 199 -maximized false LayerEditorQuickEditWindow;
-windowPref -topLeftCorner 559 1652 -widthHeight 778 643 -maximized false RRM_Window;
+windowPref -topLeftCorner 292 52 -widthHeight 778 847 -maximized false RRM_Window;
 windowPref -topLeftCorner 210 390 -widthHeight 665 500 -maximized false PreferencesWindow;
 windowPref -topLeftCorner 476 853 -widthHeight 546 350 -maximized false OptionBoxWindow;
 windowPref -topLeftCorner 476 853 -widthHeight 510 600 -maximized false PaintEffectsBrushWindow;
@@ -57,4 +57,8 @@ windowPref -topLeftCorner 476 853 -widthHeight 256 262 -maximized false uvSetEdi
 windowPref -topLeftCorner 222 1640 -widthHeight 396 347 -maximized false AutoUnwrapWin;
 windowPref -topLeftCorner 476 853 -widthHeight 490 580 -maximized false psdTextureWindow;
 windowPref -topLeftCorner 476 853 -widthHeight 357 275 -maximized false namespaceEditor;
-windowPref -topLeftCorner 415 642 -widthHeight 408 650 -maximized false poses_w;
+windowPref -topLeftCorner 342 260 -widthHeight 408 650 -maximized false poses_w;
+windowPref -topLeftCorner 415 642 -widthHeight 752 678 -maximized false shelfEditor;
+windowPref -topLeftCorner 415 642 -widthHeight 300 217 -maximized false icTransferSkinClusterUI;
+windowPref -topLeftCorner 415 642 -widthHeight 305 250 -maximized false dpInfoWindow;
+windowPref -topLeftCorner 415 642 -widthHeight 209 150 -maximized false parentWeightsUI;

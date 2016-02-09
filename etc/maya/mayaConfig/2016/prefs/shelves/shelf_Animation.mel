@@ -404,7 +404,7 @@ global proc shelf_Animation () {
     shelfButton
         -enableCommandRepeat 1
         -enable 1
-        -width 36
+        -width 35
         -height 35
         -manage 1
         -visible 1

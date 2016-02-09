@@ -22,7 +22,7 @@ def Quadruped(self):
         # create spine module instance:
         spineInstance = self.initGuide('dpSpine', guideDir)
         # editing spine base guide informations:
-        self.guide.Spine.editUserName(spineInstance, checkText=self.langDic[self.langName]['m011_spine'].lower())
+        self.guide.Spine.editUserName(spineInstance, checkText=self.langDic[self.langName]['m011_spine'])
         cmds.setAttr(spineInstance.moduleGrp+".translateY", 10)
         cmds.setAttr(spineInstance.moduleGrp+".translateZ", -5)
         cmds.setAttr(spineInstance.moduleGrp+".rotateX", 0)
@@ -36,21 +36,40 @@ def Quadruped(self):
         # create head module instance:
         headInstance = self.initGuide('dpHead', guideDir)
         # editing head base guide informations:
-        self.guide.Head.editUserName(headInstance, checkText=self.langDic[self.langName]['m017_head'].lower())
+        self.guide.Head.editUserName(headInstance, checkText=self.langDic[self.langName]['c_head'])
         cmds.setAttr(headInstance.moduleGrp+".translateY", 11)
         cmds.setAttr(headInstance.moduleGrp+".translateZ", 7)
         cmds.setAttr(headInstance.moduleGrp+".rotateX", 0)
         cmds.setAttr(headInstance.moduleGrp+".rotateY", 8)
         cmds.setAttr(headInstance.moduleGrp+".rotateZ", 90)
-        cmds.setAttr(headInstance.cvHeadLoc+".translateX", 2)
-        cmds.setAttr(headInstance.cvHeadLoc+".translateZ", 3)
-        cmds.setAttr(headInstance.cvJawLoc+".translateZ", 2)
-        cmds.setAttr(headInstance.cvJawLoc+".rotateY", -15)
+        cmds.setAttr(headInstance.cvNeckLoc+".rotateY", 25)
+        cmds.setAttr(headInstance.cvHeadLoc+".translateZ", 3.5)
+        cmds.setAttr(headInstance.cvHeadLoc+".rotateY", -33)
+        cmds.setAttr(headInstance.cvJawLoc+".translateZ", 1.6)
+        cmds.setAttr(headInstance.cvJawLoc+".rotateY", -5.5)
+        cmds.setAttr(headInstance.cvLLipLoc+".translateY", -0.5)
+        cmds.setAttr(headInstance.cvLLipLoc+".translateZ", 0.6)
         cmds.setAttr(headInstance.annotation+".translateX", 4)
         cmds.setAttr(headInstance.annotation+".translateY", 0)
         
         # parent head guide to spine guide:
         cmds.parent(headInstance.moduleGrp, spineInstance.cvLocator, absolute=True)
+        
+        # woking with EyeLookAt system:
+        # create eyeLookAt module instance:
+        eyeLookAtInstance = self.initGuide('dpEyeLookAt', guideDir)
+        # setting X mirror:
+        self.guide.EyeLookAt.changeMirror(eyeLookAtInstance, "X")
+        # editing eyeLookAt base guide informations:
+        self.guide.EyeLookAt.editUserName(eyeLookAtInstance, checkText=self.langDic[self.langName]['c_eye'])
+        cmds.setAttr(eyeLookAtInstance.moduleGrp+".translateX", 0.5)
+        cmds.setAttr(eyeLookAtInstance.moduleGrp+".translateY", 13.5)
+        cmds.setAttr(eyeLookAtInstance.moduleGrp+".translateZ", 11)
+        cmds.setAttr(eyeLookAtInstance.annotation+".translateY", 3.5)
+        cmds.setAttr(eyeLookAtInstance.radiusCtrl+".translateX", 0.5)
+        
+        # parent head guide to spine guide:
+        cmds.parent(eyeLookAtInstance.moduleGrp, headInstance.cvHeadLoc, absolute=True)
         
         # working with BACK LEG (B) system:
         # create back leg module instance:
@@ -62,7 +81,7 @@ def Quadruped(self):
         # set for not use bend ribbons as default:
         self.guide.Limb.setBendFalse(backLegLimbInstance)
         # change name to back leg:
-        self.guide.Limb.editUserName(backLegLimbInstance, checkText=self.langDic[self.langName]['m030_leg'].lower()+'B')
+        self.guide.Limb.editUserName(backLegLimbInstance, checkText=self.langDic[self.langName]['m030_leg'].capitalize()+'B')
         cmds.setAttr(backLegLimbInstance.annotation+".translateY", -4)
         
         # editing back leg base guide informations:
@@ -79,14 +98,16 @@ def Quadruped(self):
         cmds.setAttr(backLegLimbInstance.cvBeforeLoc+".translateZ", -1)
         cmds.setAttr(backLegLimbInstance.cvBeforeLoc+".rotateY", 65)
         cmds.setAttr(backLegLimbInstance.cvBeforeLoc+".rotateZ", -136)
-        cmds.setAttr(backLegLimbInstance.cvMainLoc+".rotateY", 12)
-        cmds.setAttr(backLegLimbInstance.cvCornerALoc+".translateX", 0.7)
-        cmds.setAttr(backLegLimbInstance.cvCornerALoc+".translateZ", -0.7)
-        cmds.setAttr(backLegLimbInstance.cvCornerBLoc+".translateX", -0.5)
-        cmds.setAttr(backLegLimbInstance.cvCornerBLoc+".translateZ", 2)
+        cmds.setAttr(backLegLimbInstance.cvMainLoc+".rotateY", 25)
+        cmds.setAttr(backLegLimbInstance.cvCornerLoc+".translateX", 0.7)
+        cmds.setAttr(backLegLimbInstance.cvCornerLoc+".translateZ", -0.7)
         
         # edit location of back leg ankle guide:
         cmds.setAttr(backLegLimbInstance.cvExtremLoc+".translateZ", 8)
+
+        # edit location of double back leg joint:
+        cmds.setAttr(backLegLimbInstance.cvCornerBLoc+".translateX", -2)
+
         # parent back leg guide to spine base guide:
         cmds.parent(backLegBaseGuide, spineInstance.moduleGrp, absolute=True)
         # setting X mirror:
@@ -94,7 +115,7 @@ def Quadruped(self):
         
         # create BACK FOOT (B) module instance:
         backFootInstance = self.initGuide('dpFoot', guideDir)
-        self.guide.Foot.editUserName(backFootInstance, checkText=self.langDic[self.langName]['m024_foot'].lower()+'B')
+        self.guide.Foot.editUserName(backFootInstance, checkText=self.langDic[self.langName]['c_foot']+'B')
         cmds.setAttr(backFootInstance.annotation+".translateY", -3)
         cmds.setAttr(backFootInstance.moduleGrp+".translateX", 3)
         cmds.setAttr(backFootInstance.moduleGrp+".translateZ", -6.5)
@@ -117,7 +138,7 @@ def Quadruped(self):
         # set for not use bend ribbons as default:
         self.guide.Limb.setBendFalse(frontLegLimbInstance)
         # change name to front leg:
-        self.guide.Limb.editUserName(frontLegLimbInstance, checkText=self.langDic[self.langName]['m030_leg'].lower()+'A')
+        self.guide.Limb.editUserName(frontLegLimbInstance, checkText=self.langDic[self.langName]['m030_leg'].capitalize()+'A')
         cmds.setAttr(frontLegLimbInstance.annotation+".translateY", -4)
         
         # editing front leg base guide informations:
@@ -134,14 +155,16 @@ def Quadruped(self):
         cmds.setAttr(frontLegLimbInstance.cvBeforeLoc+".translateZ", -2.5)
         cmds.setAttr(frontLegLimbInstance.cvBeforeLoc+".rotateY", 40)
         cmds.setAttr(frontLegLimbInstance.cvBeforeLoc+".rotateZ", -50)
-        cmds.setAttr(frontLegLimbInstance.cvMainLoc+".rotateY", -15)
-        cmds.setAttr(frontLegLimbInstance.cvCornerALoc+".translateX", -0.5)
-        cmds.setAttr(frontLegLimbInstance.cvCornerALoc+".translateZ", -1.3)
-        cmds.setAttr(frontLegLimbInstance.cvCornerBLoc+".translateX", 0.2)
-        cmds.setAttr(frontLegLimbInstance.cvCornerBLoc+".translateZ", 1.2)
+        cmds.setAttr(frontLegLimbInstance.cvMainLoc+".rotateY", 18)
+        cmds.setAttr(frontLegLimbInstance.cvCornerLoc+".translateX", -0.5)
+        cmds.setAttr(frontLegLimbInstance.cvCornerLoc+".translateZ", -1.3)
         
         # edit location of front leg ankle guide:
         cmds.setAttr(frontLegLimbInstance.cvExtremLoc+".translateZ", 6.5)
+
+        # edit location of double front leg joint:
+        cmds.setAttr(frontLegLimbInstance.cvCornerBLoc+".translateX", 0.5)
+
         # parent front leg guide to spine chest guide:
         cmds.parent(frontLegBaseGuide, spineInstance.cvLocator, absolute=True)
         # setting X mirror:
@@ -149,7 +172,7 @@ def Quadruped(self):
         
         # create FRONT FOOT (A) module instance:
         frontFootInstance = self.initGuide('dpFoot', guideDir)
-        self.guide.Foot.editUserName(frontFootInstance, checkText=self.langDic[self.langName]['m024_foot'].lower()+'A')
+        self.guide.Foot.editUserName(frontFootInstance, checkText=self.langDic[self.langName]['c_foot']+'A')
         cmds.setAttr(frontFootInstance.annotation+".translateY", -3)
         cmds.setAttr(frontFootInstance.moduleGrp+".translateX", 2.5)
         cmds.setAttr(frontFootInstance.moduleGrp+".translateZ", 5.5)
@@ -166,7 +189,7 @@ def Quadruped(self):
         # create FkLine module instance:
         tailInstance = self.initGuide('dpFkLine', guideDir)
         # editing tail base guide informations:
-        self.guide.FkLine.editUserName(tailInstance, checkText=self.langDic[self.langName]['m039_tail'].lower())
+        self.guide.FkLine.editUserName(tailInstance, checkText=self.langDic[self.langName]['m039_tail'])
         cmds.setAttr(tailInstance.moduleGrp+".translateY", 9.8)
         cmds.setAttr(tailInstance.moduleGrp+".translateZ", -7.6)
         cmds.setAttr(tailInstance.moduleGrp+".rotateX", 180)
@@ -185,7 +208,7 @@ def Quadruped(self):
         # create FkLine module instance:
         earInstance = self.initGuide('dpFkLine', guideDir)
         # editing ear base guide informations:
-        self.guide.FkLine.editUserName(earInstance, checkText=self.langDic[self.langName]['m040_ear'].lower())
+        self.guide.FkLine.editUserName(earInstance, checkText=self.langDic[self.langName]['m040_ear'])
         cmds.setAttr(earInstance.moduleGrp+".translateX", 0.8)
         cmds.setAttr(earInstance.moduleGrp+".translateY", 14.5)
         cmds.setAttr(earInstance.moduleGrp+".translateZ", 10)
@@ -206,9 +229,10 @@ def Quadruped(self):
         cmds.setAttr(earInstance.moduleGrp+".scaleZ", 0.5)
         # setting X mirror:
         self.guide.FkLine.changeMirror(earInstance, "X")
+        cmds.setAttr(earInstance.moduleGrp+".flip", 1)
         
-        # select spineGuide_base:
+        # select spineGuide_Base:
         cmds.select(spineInstance.moduleGrp)
     else:
         # error checking modules in the folder:
-        mel.eval('error \"'+ self.langDic[self.langName]['e001_guideNotChecked'] +' - '+ (", ").join(checkResultList) +'\";')
+        mel.eval('error \"'+ self.langDic[self.langName]['e001_GuideNotChecked'] +' - '+ (", ").join(checkResultList) +'\";')

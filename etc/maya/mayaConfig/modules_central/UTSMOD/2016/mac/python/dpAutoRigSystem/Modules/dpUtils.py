@@ -12,7 +12,10 @@ def findEnv(key, path):
     envStr = os.environ[key]
     
     dpARPath = findPath("dpAutoRig.py")
-    splitEnvList = envStr.split(";")
+    if os.name == "posix":
+        splitEnvList = envStr.split(":")
+    else:
+        splitEnvList = envStr.split(";")
     envPath = ""
     if splitEnvList:
         for env in splitEnvList:
@@ -21,12 +24,20 @@ def findEnv(key, path):
                     envPath = dpARPath.split(env)[1][+1:].split(path)[0][:-1].replace('/','.')
                 except:
                     pass
-                if envPath != "" and envPath != " " and envPath != None:
+                if len(env) < 4:
+                    envPath = dpARPath.split(env)[1][0:].split(path)[0][:-1].replace('/','.')
                     return envPath+"."+path
                 break
     # if we are here, we must return a default path:
     splitEnvList = envStr.rpartition(path)
-    envPath = splitEnvList[0][splitEnvList[0].rfind(":")-1:]
+    if os.name == "posix":
+        if envPath != "":
+            envPath = envPath+".dpAutoRigSystem"
+        else:
+            envPath = "dpAutoRigSystem"
+    else:
+        if ":" in envPath:
+            envPath = splitEnvList[0][splitEnvList[0].rfind(":")-1:]
     if envPath == "" or envPath == " " or envPath == None:
         return path
     return envPath
@@ -38,9 +49,9 @@ def findPath(filename):
     stringPath   = str(os.path.join(os.path.dirname(sys._getframe(1).f_code.co_filename), filename))
     correctPath  = stringPath.replace("\\", "/")
     if os.name == "posix":
-		absolutePath = stringPath[0:stringPath.rfind("/")]
+        absolutePath = stringPath[0:stringPath.rfind("/")]
     else:
-		absolutePath = correctPath[correctPath.find("/")-2:correctPath.rfind("/")]
+        absolutePath = correctPath[correctPath.find("/")-2:correctPath.rfind("/")]
     return absolutePath
 
 
@@ -70,7 +81,7 @@ def findAllModules(path, dir):
     moduleList = []
     # removing "__init__":
     for file in allPyFilesList:
-        if file != "__init__" and file != "dpControls" and file != "dpUtils" and file != "dpBaseClass" and file != "dpLayoutClass" and file != 'jcRibbon':
+        if file != "__init__" and file != "dpControls" and file != "dpUtils" and file != "dpBaseClass" and file != "dpLayoutClass" and file != 'jcRibbon' and file != 'sqIkFkTools':
             moduleList.append(file)
     return moduleList
 
@@ -130,7 +141,7 @@ def findLastNumber(nameList, basename):
                 # verify if this got number is greather than the last number (value) in order to return them:
                 if numberElement > lastValue:
                     lastValue = numberElement
-    # analisys which value must be returned:
+    # analysis which value must be returned:
     if lastValue > existValue:
         finalValue = lastValue
     else:
@@ -198,7 +209,7 @@ def zeroOut(transformList=[]):
     zeroList = []
     if transformList:
         for transform in transformList:
-            zero = cmds.duplicate(transform, name=transform+'_zero')[0]
+            zero = cmds.duplicate(transform, name=transform+'_Zero')[0]
             if( cmds.objExists(zero+".originedFrom") ):
                 try:
                     cmds.deleteAttr(zero+".originedFrom")
@@ -306,7 +317,7 @@ def hook():
                     tempBMirrorName  = cmds.getAttr(guideParent+".mirrorName")
                     fatherMirrorName = [tempBMirrorName[0]+"_" , tempBMirrorName[len(tempBMirrorName)-1:]+"_"]
                     if fatherNodeList:
-                        fatherGuideLoc = fatherNodeList[0][fatherNodeList[0].find("guide_")+6:]
+                        fatherGuideLoc = fatherNodeList[0][fatherNodeList[0].find("Guide_")+6:]
                     else:
                         guideParentChildrenList = cmds.listRelatives(guideParent, children=True, type='transform')
                         if guideParentChildrenList:
@@ -315,7 +326,7 @@ def hook():
                                     if cmds.getAttr(guideParentChild+'.nJoint') == 1:
                                         if guideParent[:guideParent.rfind(":")] in guideParentChild:
                                             fatherNodeList = [guideParentChild]
-                                            fatherGuideLoc = guideParentChild[guideParentChild.find("guide_")+6:]
+                                            fatherGuideLoc = guideParentChild[guideParentChild.find("Guide_")+6:]
                 
                 # parentNode info:
                 parentNode = cmds.listRelatives(item, parent=True, type='transform')[0]
@@ -332,7 +343,7 @@ def hook():
     return hookDic
 
 
-def clearNodeGrp(nodeGrpName='dpAR_guideMirror_grp', attrFind='guideBaseMirror', unparent=False):
+def clearNodeGrp(nodeGrpName='dpAR_GuideMirror_Grp', attrFind='guideBaseMirror', unparent=False):
     """ Check if there is any node with the attribute attrFind in the nodeGrpName and then unparent its children and delete it.
     """
     if cmds.objExists(nodeGrpName):
@@ -414,7 +425,7 @@ def getModulesToBeRigged(instanceList):
             guideNamespaceName = guideModule.guideNamespace
             if guideNamespaceName in allNamespaceList:
                 userGuideName = guideModule.userGuideName
-                if not cmds.objExists(userGuideName+'_grp'):
+                if not cmds.objExists(userGuideName+'_Grp'):
                     modulesToBeRiggedList.append(guideModule)
     return modulesToBeRiggedList
 
@@ -428,3 +439,46 @@ def getCtrlRadius(nodeName):
         for parent in parentList:
             radius *= cmds.getAttr(parent+'.scaleX')
     return radius
+
+
+
+def zeroOutJoints(jntList=None):
+    """ Duplicate the joints, parent as zeroOut.
+        Returns the father joints (zeroOuted).
+    """
+    resultList = []
+    zeroOutJntSuffix = "_Jzt"
+    if jntList:
+        for jnt in jntList:
+            if cmds.objExists(jnt):
+                jxtName = jnt.replace("_Jnt", "").replace("_Jxt", "")
+                if not zeroOutJntSuffix in jxtName:
+                    jxtName += zeroOutJntSuffix
+                dup = cmds.duplicate(jnt, name=jxtName)[0]
+                deleteChildren(dup)
+                clearDpArAttr([dup])
+                cmds.parent(jnt, dup)
+                resultList.append(dup)
+    return resultList
+
+
+def clearDpArAttr(itemList):
+    """ Delete all dpAR (dpAutoRigSystem) attributes in this joint
+    """
+    dpArAttrList = ['dpAR_joint']
+    if itemList:
+        for item in itemList:
+            for dpArAttr in dpArAttrList:
+                if cmds.objExists(item+"."+dpArAttr):
+                    cmds.deleteAttr(item+"."+dpArAttr)
+
+
+def deleteChildren(item):
+    """ Delete all child of the item node passed as argument.
+    """
+    if(cmds.objExists(item)):
+        childrenList = cmds.listRelatives(item, children=True, fullPath=True)
+        if(childrenList):
+            for child in childrenList:
+                cmds.delete(child)
+

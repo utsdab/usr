@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "USING: ${DABUSR}/etc/profile_local_extra"
+echo "USING: ${DABUSR}/etc/uts/profile_local_extra"
 
 if [ $CONFIG ] ; then
 # 	echo  "INFO: CONFIG is ${CONFIG} "
