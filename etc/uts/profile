@@ -1,9 +1,6 @@
 #!/bin/bash
 
 echo "USING:    ${DABUSR}/etc/profile"
-PCE=${DABUSR}/etc/uts/profile_central_extra
-
-
 export USING_DABRENDER_PROFILE=1
 export PATH="/usr/X11R6/bin:${PATH}"
 
@@ -50,7 +47,7 @@ esac
 export RMS_SCRIPT_PATHS="${DABUSR}/etc/pixar/configs:/usr/local/dabanim/etc/pixar/config"
 export RDIR="${DABUSR}/usr/etc/pixar/configs"
 ##### needs editing in place
-#export PIXAR_LICENSE_FILE="${DABUSR}/custom/pixar/pixar.license"
+export PIXAR_LICENSE_FILE="${DABUSR}/etc/pixar/pixar.license"
 
 # WORKAROUND for libMC3.so.8 error in Maya2016 (added by Chris Bell 10/9/15
 export MAYA_DISABLE_CIP=1
@@ -116,7 +113,7 @@ export PYTHONPATH=${DABUSR}/lib/site-packages:${PYTHONPATH}
 ##########################  NUKE settings
 #export NUKE_PATH="${OCIO_EXECROOT}/lib/nuke:${NUKE_PATH}"
 #export NUKE_PATH="${OCIO_ROOT}/share/nuke:${NUKE_PATH}";
-#export NUKE_PATH="${DABUSR}/custom/nuke/tractorNuke:${NUKE_PATH}";
+#export NUKE_PATH="${DABUSR}/etc/nuke/tractorNuke:${NUKE_PATH}";
 
 
 ###########################  ALIAS's
