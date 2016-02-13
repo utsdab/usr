@@ -150,7 +150,7 @@ class Job(env.Environment):
                  mayaprojectpath=self.projectpath,
                  mayascenefilefullpath=self.scenefullpath,
                  mayaversion=self.mayaversion,
-                 rendermanversion=self.rms_version,
+                 rendermanversion=self.rmanversion,
                  startframe=self.startframe,
                  endframe=self.endframe,
                  byframe=self.byframe,
