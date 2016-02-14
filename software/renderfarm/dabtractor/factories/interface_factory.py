@@ -93,7 +93,7 @@ class ProjectWidget(qg.QWidget):
         self.layout().addLayout(self.dabrender_text_layout)
 
         self.dabrender_text_le.setMinimumHeight(25)
-        _dabrender = "border:1px solid rgba(0,0,0,190);background-color:rgb(255, 255, 200);color:rgb(0, 30, 0)"
+        _dabrender = "border:1px solid rgba(0,0,0,190);background-color:rgb(100, 255, 100);color:rgb(0, 30, 0)"
         self.dabrender_text_le.setStyleSheet(_dabrender)
         # self.job.dabrenderpath=self.job.dabrender
 
@@ -395,7 +395,7 @@ class RangeWidget(qg.QWidget):
 
         self.framerange_end_text_lb = qg.QLabel('END:')
         self.framerange_end_text_lb.setMinimumWidth(15)
-        self.framerange_end_text_le = qg.QLineEdit("12")
+        self.framerange_end_text_le = qg.QLineEdit("24")
         self.framerange_end_text_le.setMaximumWidth(50)
 
         self.framerange_by_text_lb = qg.QLabel('BY:')
@@ -426,12 +426,13 @@ class RangeWidget(qg.QWidget):
         self.chunks_layout.addWidget(self.chunks_text_lb)
         self.chunks_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
         self.chunks_layout.addWidget(self.chunks_combo)
+        self.chunks_combo.setCurrentIndex(2)
 
         # set initial values
         self._start()
         self._end()
         self._by()
-        self._chunks(1)
+        self._chunks()
 
         self.framerange_start_text_le.textEdited.connect(lambda: self._start())
         self.framerange_end_text_le.textEdited.connect(lambda: self._end())
@@ -455,8 +456,8 @@ class RangeWidget(qg.QWidget):
         self.job.byframe=self.framerange_by_text_le.text()
         logger.debug("By changed to {}".format(self.job.byframe))
 
-    def _chunks(self,_value):
-        self.job.chunks = _value
+    def _chunks(self):
+        self.job.chunks = self.chunks_combo.currentText()
         logger.debug("Chunks changed to {}".format(self.job.chunks))
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -575,6 +576,9 @@ class ThreadMemoryWidget(qg.QWidget):
         self._memory(self.threadmemory_combo.currentText())
         self.threadmemory_combo.activated.connect(lambda: self._memory(self.threadmemory_combo.currentText()))
         self.layout().addLayout(self.threadmemory_layout)
+
+        self.threadmemory_combo.setCurrentIndex(1)
+        self.threads_combo.setCurrentIndex(2)
 
     def _threads(self,_value):
         self.job.threads=_value
