@@ -110,7 +110,9 @@ class NukeJob(RenderBase):
         _nuke_proxy_template = "{d}/usr/custom/nuke/proxy_script_templates/nuke_proxy_v002.nk".format(d=self.dabrender)
         _nuke_version = "Nuke{}".format(config.CurrentConfiguration().nukeversion)
         _nuke_envkey = "nuke{}".format(config.CurrentConfiguration().nukeversion)
-        _nuke_executable="/Applications/{n}/{n}.app/Contents/MacOS/{n}".format(n=_nuke_version)
+        #_nuke_executable="/Applications/{n}/{n}.app/Contents/MacOS/{n}".format(n=_nuke_version)
+        _nuke_executable="{n}".format(n=_nuke_version)
+
         _nukescriptbaseonly = os.path.basename(self.nukescriptfullpath)
 
         if self.testing:

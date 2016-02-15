@@ -437,7 +437,7 @@ class RangeWidget(qg.QWidget):
         self.framerange_start_text_le.textEdited.connect(lambda: self._start())
         self.framerange_end_text_le.textEdited.connect(lambda: self._end())
         self.framerange_by_text_le.textEdited.connect(lambda: self._by())
-        self.chunks_combo.activated.connect(lambda: self._chunks(self.chunks_combo.currentText()))
+        self.chunks_combo.activated.connect(lambda: self._chunks())
 
         self.layout().addSpacerItem(qg.QSpacerItem(0,10,qg.QSizePolicy.Expanding))
         self.layout().addLayout(self.framerange_layout)
