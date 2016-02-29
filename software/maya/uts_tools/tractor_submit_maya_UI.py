@@ -240,7 +240,9 @@ class Job(env.Environment):
 
     def commandvalidate(self):
         try:
-            self.tractorjob=cmdfac.Bash(command=self.bashcommand,
+            self.tractorjob=cmdfac.Bash(
+                command=self.bashcommand,
+                projectgroup=self.projectgroup,
                 email=[1,0,0,0,1,0],
             )
             self.tractorjob.build()
