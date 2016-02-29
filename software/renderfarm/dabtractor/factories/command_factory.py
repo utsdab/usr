@@ -32,7 +32,7 @@ class CommandBase(object):
     def __init__(self):
         self.user = os.getenv("USER")
         self.spooljob = False
-        self.job = ""
+        self.testing=False
 
         try:
             # get the names of the central render location for the user
@@ -47,21 +47,21 @@ class CommandBase(object):
             logger.warn("Cant get the users name and number back %s" % erroruser)
             sys.exit("Cant get the users name")
 
+        if os.path.isdir(self.dabrender):
+            logger.info("Found %s" % self.dabrender)
+        else:
+            self.initialProjectPath = None
+            logger.critical("Cant find central filer mounted %s" % self.dabrender)
+            raise Exception, "dabrender not a valid mount point"
+
 
 class Bash(CommandBase):
     """
     example of standard bash command
     """
-    def __init__(self,
-                startdirectory="",
-                command="",
-                options="",
-                email=[1,0,0,0,1,0]
-                ):
+    def __init__(self,command="",email=[1,0,0,0,1,0]):
         super(Bash, self).__init__()
-        self.startdirectory = startdirectory
         self.command = command
-        self.options = options
         self.email = email
 
     def build(self):
@@ -69,9 +69,6 @@ class Bash(CommandBase):
         Main method to build the job
         """
         # ################ 0 JOB ################
-        logger.info("Start Directory: {}".format(self.startdirectory))
-        logger.info("Options: {}".format(self.options))
-
         self.job = author.Job(title="Bash Job: {}".format(self.renderusername),
                               priority=10,
                               metadata="user={} realname={}".format(self.user,
@@ -79,8 +76,7 @@ class Bash(CommandBase):
                               comment="LocalUser is {} {} {}".format(self.user,
                                                                      self.renderusername,
                                                                      self.renderusernumber),
-                              service="Ffmpeg")
-
+                              service="ShellServices")
 
 
         # ############## 2  BASH ###########
@@ -88,17 +84,9 @@ class Bash(CommandBase):
         task_parent.serialsubtasks = 1
         task_bash = author.Task(title="Command")
 
-
-        if os.path.isdir(self.startdirectory):
-            logger.info("Found Start Directory {}".format(self.startdirectory))
-            _command = self.command
-            bashcommand = author.Command(argv=["bash","-c",_command])
-            task_bash.addCommand(bashcommand)
-            task_parent.addChild(task_bash)
-
-        else:
-            logger.warn("No Start Directory {}".format(self.startdirectory))
-
+        bashcommand = author.Command(argv=["bash","-c",self.command])
+        task_bash.addCommand(bashcommand)
+        task_parent.addChild(task_bash)
 
         # ############## 7 NOTIFY ###############
         logger.info("email = {}".format(self.email))
@@ -121,23 +109,19 @@ class Bash(CommandBase):
 
     def mail(self, level="Level", trigger="Trigger", body="Render Progress Body"):
         bodystring = "Bash Progress: \nLevel: {}\nTrigger: {}\n\n{}".format(level, trigger, body)
-        subjectstring = "FARM JOB: %s %s %s" % (str(self.startdirectory), self.command, self.options)
+        subjectstring = "FARM JOB: %s " % (self.command)
         mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
                                        "-b", bodystring, "-s", subjectstring])
         return mailcmd
 
     def spool(self):
-        if os.path.exists(self.startdirectory):
-            try:
-                logger.info("Spooled correctly")
-                # all jobs owner by pixar user on the farm
-                self.job.spool(owner="pixar")
-            except Exception, spoolerr:
-                logger.warn("A spool error %s" % spoolerr)
-        else:
-            message = "Cant find source %s" % self.startdirectory
-            logger.critical(message)
-            sys.exit(message)
+        try:
+            self.job.spool(owner="pixar")
+            logger.info("Spooled correctly")
+
+        except Exception, spoolerr:
+            logger.warn("A spool error %s" % spoolerr)
+
 
 # ##############################################################################
 class Rsync(CommandBase):

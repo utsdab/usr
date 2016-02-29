@@ -34,6 +34,7 @@ class RenderBase(object):
     def __init__(self):
         self.user = os.getenv("USER")
         self.spooljob = False
+        self.testing=False
 
         try:
             # get the names of the central render location for the user
@@ -217,14 +218,7 @@ class RenderMentalray(RenderBase):
                                                   self.envproject,self.envscene)
         self.scenename = os.path.split(envscene)[-1:][0]
         self.scenebasename = os.path.splitext(self.scenename)[0]
-
         self.sceneext = os.path.splitext(self.scenename)[1]
-
-
-
-
-
-
 
         self.mayaversion = mayaversion
         self.envkey_maya="maya{}".format(self.mayaversion)
@@ -324,7 +318,7 @@ class RenderMentalray(RenderBase):
                                     ],
                               service=_service_Testing)
 
-        self.job.newDirMap("/dabrender", "/dabrender", "linux")
+        self.job.newDirMap("/dabrender", "/Volumes/dabrender", "linux")
         self.job.newDirMap("/dabrender", "/Volumes/dabrender", "osx")
         self.job.newDirMap("/dabrender", "Z:", "windows")
         self.job.newDirMap("/Volumes/dabrender", "Z:", "windows")
@@ -341,8 +335,7 @@ class RenderMentalray(RenderBase):
 
 
         # ############## 3 RENDER ##############
-        task_render = author.Task(title="Rendering",
-                                  service="MayaMentalRay")
+        task_render = author.Task(title="Rendering",service="MayaMentalRay")
         task_render.serialsubtasks = 0
 
         if (self.endframe - self.startframe) < self.framechunks:

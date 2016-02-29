@@ -41,7 +41,7 @@ class ConfigurationBase(object):
         self.renderfarmproxypath = (os.path.join(os.path.dirname(dt.__file__), "proxys"),)
         self.nukedefaultproxytemplate = ("nuke_proxy_720p_prores_v003.py")
         self.dabrender = self.getfromenv("DABRENDER", "/Volumes/dabrender")
-        self.dabusrpath = self.getfromenv("DABUSR", "/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr/")
+        self.dabusrpath = self.getfromenv("DABUSR", "/Volumes/dabrender/usr")
         # self.dabusrpath = self.getfromenv("DABUSR", self.getusrinternally())
         self.usermapfilepath = (os.path.join(self.dabusrpath, "etc/map"))
         self.editproxydumppath = (os.path.join(self.dabrender, "renderproxies"))
