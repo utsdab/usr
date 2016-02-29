@@ -447,7 +447,7 @@ class RenderMentalray(RenderBase):
 
         # ############## 7 NOTIFY ###############
         task_notify = author.Task(title="Notify")
-        email = author.Command(self.mail("JOB", "COMPLETE", "blah"), service="Ffmpeg")
+        email = author.Command(self.mail("JOB", "COMPLETE", "blah"), service="ShellServices")
         task_notify.addCommand(email)
         logger.info("email = {}".format(self.email))
         """
@@ -458,7 +458,7 @@ class RenderMentalray(RenderBase):
         window.emailcompletion.get(),
         window.emailerror.get()
         """
-        task_notify = author.Task(title="Notify", service="Ffmpeg")
+        task_notify = author.Task(title="Notify", service="ShellServices")
         task_notify.addCommand(self.mail("JOB", "COMPLETE", "blah"))
         task_thisjob.addChild(task_notify)
         self.job.addChild(task_thisjob)
@@ -472,7 +472,7 @@ class RenderMentalray(RenderBase):
                                                                                          body)
         subjectstring = "FARM JOB: %s %s" % (str(self.mayascenenamebase), self.renderusername)
         mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
-                                       "-b", bodystring, "-s", subjectstring], service="Ffmpeg")
+                                       "-b", bodystring, "-s", subjectstring], service="ShellServices")
         return mailcmd
 
     def spool(self):
