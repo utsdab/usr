@@ -21,7 +21,7 @@ from Tkinter import *
 import ttk
 import tkFileDialog
 import Tkconstants
-from software.dabtractor.python.factories import farm_user as fu
+from software.renderfarm.dabtractor.factories import farm_user as fu
 
 class Student(object):
     def __init__(self, test=False):
