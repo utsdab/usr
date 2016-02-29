@@ -234,14 +234,14 @@ parent.addChild(rendering)
     -codec:v prores -profile:v 2 -y 
     020me_090_lighting_review_mono_v002_pro720p_ffmpeg2.mov
 """
-proxy = author.Task(title="Make Proxy", service="Ffmpeg")
+proxy = author.Task(title="Make Proxy")
 
 ffmpeg = author.Command(argv=["ffmpeg_osx","-f", "image2",
                                 "-i", "%s" % finalOutputImages,
                                 "-codec:v", "prores","-profile:v","0",
                                 "-s","960x540","-threads","2","-loglevel","info","-y",
-                                "%s" % proxyOutput],service="Ffmpeg")
-env = author.Command(argv=["printenv"],service="Ffmpeg")
+                                "%s" % proxyOutput], service="Transcoding")
+env = author.Command(argv=["printenv"],service="ShellServices")
 proxy.addCommand(env)
 proxy.addCommand(ffmpeg)
 parent.addChild(proxy)

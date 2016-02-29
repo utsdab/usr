@@ -738,7 +738,7 @@ class RendermanWidget(qg.QWidget):
         self._maya_version(self.mayaversion_combo.currentText())
         self._rms_options(self.options_combo.currentText())
         
-        # connect vlaues to widget
+        # connect values to widget
         self.maxsamples_combo.activated.connect(lambda: self._rms_maxsamples(self.maxsamples_combo.currentText()))
         self.integrator_combo.activated.connect(lambda: self._rms_integrator(self.integrator_combo.currentText()))
         self.mayaversion_combo.activated.connect(lambda: self._maya_version(self.mayaversion_combo.currentText()))

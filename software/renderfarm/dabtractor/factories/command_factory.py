@@ -32,7 +32,7 @@ class CommandBase(object):
     def __init__(self):
         self.user = os.getenv("USER")
         self.spooljob = False
-        self.testing=False
+        self.testing = False
 
         try:
             # get the names of the central render location for the user
@@ -59,15 +59,25 @@ class Bash(CommandBase):
     """
     example of standard bash command
     """
-    def __init__(self,command="",email=[1,0,0,0,1,0]):
+    def __init__(self,command="",projectgroup="",email=[1,0,0,0,1,0]):
         super(Bash, self).__init__()
         self.command = command
+        self.projectgroup = projectgroup
         self.email = email
 
     def build(self):
         """
         Main method to build the job
         """
+
+        if self.testing:
+            _service_Testing="Testing"
+            _tier="admin"
+
+        else:
+            _service_Testing=""
+            _tier="batch"
+
         # ################ 0 JOB ################
         self.job = author.Job(title="Bash Job: {}".format(self.renderusername),
                               priority=10,
@@ -76,6 +86,10 @@ class Bash(CommandBase):
                               comment="LocalUser is {} {} {}".format(self.user,
                                                                      self.renderusername,
                                                                      self.renderusernumber),
+                              projects=[str(self.projectgroup)],
+
+                              tier=_tier,
+                              tags=["theWholeFarm"],
                               service="ShellServices")
 
 
@@ -176,11 +190,11 @@ class Rsync(CommandBase):
         pwd = author.Command(argv=["pwd"], samehost=1)
 
         # ############## PARENT #################
-        parent = author.Task(title="Parent Task", service="Ffmpeg")
+        parent = author.Task(title="Parent Task")
         parent.serialsubtasks = 1
 
         # ############## 2  RSYNC ###########
-        task_loadon = author.Task(title="Rsync", service="Ffmpeg")
+        task_loadon = author.Task(title="Rsync", service="ShellServices")
         _sourceproject = self.sourcedirectory
         _targetproject = self.targetdirectory
 
@@ -206,7 +220,7 @@ class Rsync(CommandBase):
         window.emailcompletion.get(),
         window.emailerror.get()
         """
-        task_notify = author.Task(title="Notify", service="Ffmpeg")
+        task_notify = author.Task(title="Notify", service="ShellServices")
         task_notify.addCommand(self.mail("JOB", "COMPLETE", "blah"))
         parent.addChild(task_notify)
         self.job.addChild(parent)
@@ -218,7 +232,7 @@ class Rsync(CommandBase):
         bodystring = "Rsync Progress: \nLevel: {}\nTrigger: {}\n\n{}".format(level, trigger, body)
         subjectstring = "FARM JOB: %s %s" % (str(self.sourcedirectory), self.targetdirectory)
         mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
-                                       "-b", bodystring, "-s", subjectstring], service="Ffmpeg")
+                                       "-b", bodystring, "-s", subjectstring], service="ShellServices")
         return mailcmd
 
     def spool(self):

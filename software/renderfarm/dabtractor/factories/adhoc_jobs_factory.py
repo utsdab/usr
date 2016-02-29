@@ -117,7 +117,7 @@ class SendMail(JobBase):
 
         # ############## 5 NOTIFY ###############
         # logger.info("email = {}".format(self.email))
-        task_notify = author.Task(title="Notify", service="Ffmpeg")
+        task_notify = author.Task(title="Notify", service="ShellServices")
         task_notify.addCommand(self.bugreport("BUG", self.mailbody))
         task_thisjob.addChild(task_notify)
 

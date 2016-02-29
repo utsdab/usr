@@ -391,7 +391,7 @@ class RenderPrman(RenderBase):
 
         # ############## 5 NOTIFY ###############
         logger.info("email = {}".format(self.email))
-        task_notify = author.Task(title="Notify", service="Ffmpeg")
+        task_notify = author.Task(title="Notify", service="ShellServices")
         task_notify.addCommand(self.mail("JOB", "COMPLETE", "email details still wip"))
         task_thisjob.addChild(task_notify)
 
@@ -404,7 +404,7 @@ class RenderPrman(RenderBase):
         bodystring = "Prman Render Progress: \nLevel: {}\nTrigger: {}\n\n{}".format(level, trigger, body)
         subjectstring = "FARM JOB: %s %s" % (str(self.scenebasename), self.renderusername)
         mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
-                                       "-b", bodystring, "-s", subjectstring], service="Ffmpeg")
+                                       "-b", bodystring, "-s", subjectstring], service="ShellServices")
         return mailcmd
 
     def spool(self):
