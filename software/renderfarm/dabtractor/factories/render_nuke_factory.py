@@ -40,7 +40,7 @@ class RenderBase(object):
     def __init__(self):
         self.user = os.getenv("USER")
         self.spooljob = False
-        self.testing=True
+        self.testing = False
         try:
             # get the names of the central render location for the user
             ru = ufac.User()
@@ -67,7 +67,7 @@ class NukeJob(RenderBase):
     Nuke Job instance which takes all relevant ags as input and constucts a tractor job using the API
     """
     def __init__(self, envdabrender, envtype, envproject, envshow, envscene, threads, threadmemory,
-                 scenefullpath, startframe, endframe, byframe, framechunks, options,
+                 scenefullpath, startframe, endframe, byframe, framechunks, options, projectgroup,
                  version, email):
         super(NukeJob, self).__init__()
         self.envdabrender = envdabrender
@@ -75,8 +75,11 @@ class NukeJob(RenderBase):
         self.envproject = envproject
         self.envshow = envshow
         self.envscene = envscene
+        self.scenename = os.path.split(envscene)[-1:][0]
+        self.scenebasename = os.path.splitext(self.scenename)[0]
         self.version = version
         self.nukescriptfullpath = scenefullpath
+        self.projectgroup = projectgroup
         self.startframe = startframe
         self.endframe = endframe
         self.byframe = byframe
@@ -110,26 +113,29 @@ class NukeJob(RenderBase):
         _nuke_proxy_template = "{d}/usr/custom/nuke/proxy_script_templates/nuke_proxy_v002.nk".format(d=self.dabrender)
         _nuke_version = "Nuke{}".format(config.CurrentConfiguration().nukeversion)
         _nuke_envkey = "nuke{}".format(config.CurrentConfiguration().nukeversion)
-        #_nuke_executable="/Applications/{n}/{n}.app/Contents/MacOS/{n}".format(n=_nuke_version)
         _nuke_executable="{n}".format(n=_nuke_version)
-
         _nukescriptbaseonly = os.path.basename(self.nukescriptfullpath)
 
         if self.testing:
             _service_Testing="Testing"
             _tier="admin"
-
         else:
             _service_Testing=""
             _tier="batch"
 
         self.job = author.Job(title="Nuke Render Job: {} {}".format(self.renderusername, _nukescriptbaseonly),
                               priority=100,
-                              envkey=[_nuke_envkey],
+                              envkey=[_nuke_envkey,"ProjectX",
+                                    "TYPE={}".format(self.envtype),
+                                    "SHOW={}".format(self.envshow),
+                                    "PROJECT={}".format(self.envproject),
+                                    "SCENE={}".format(self.envscene),
+                                    "SCENENAME={}".format(self.scenebasename)],
                               metadata="user={} realname={}".format(self.renderusernumber,self.renderusername),
                               comment="LocalUser is {} {} {}".format(
                                       self.renderusernumber, self.renderusername,self.renderusernumber),
                               tier=_tier,
+                              projects=[str(self.projectgroup)],
                               tags=["theWholeFarm"],
                               service=_service_Testing)
 
@@ -184,10 +190,10 @@ class NukeJob(RenderBase):
 
     def mail(self, level="Level", trigger="Trigger", body="Render Progress Body"):
         bodystring = "{}  Progress: \nLevel: {}\nTrigger: {}\n\n{}".format(
-                self.renderername,level,trigger,body)
-        subjectstring = "FARM JOB: %s %s" % (str(self.mayascenenamebase), self.renderusername)
+                self.envproject,level,trigger,body)
+        subjectstring = "FARM JOB: %s %s" % (str(self.envscene), self.renderusername)
         mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
-                                       "-b", bodystring, "-s", subjectstring], service="Ffmpeg")
+                                       "-b", bodystring, "-s", subjectstring], service="ShellServices")
         return mailcmd
 
     def spool(self):
