@@ -8,8 +8,11 @@
     this just need to be in the path some place  dabanim/usr/bin
 """
 import os
+import sys
 import json
 import shutil
+import string
+import subprocess
 from software.renderfarm.dabtractor.factories import utils_factory as utils
 from software.renderfarm.dabtractor.factories import configuration_factory as config
 
@@ -93,7 +96,7 @@ class Map(object):
             return _result
         except Exception, e:
             logger.warn("{} not found {}".format(usernumber,e))
-            return None
+            raise
 
     def getusername(self,usernumber):
         return self.getuser(usernumber).get("name")
@@ -183,6 +186,30 @@ class TractorUserConfig(object):
         pass
 
 
+class Utsuser(object):
+    def __init__(self):
+        self.name=None
+        self.number = os.getenv("USER")
+
+        try:
+            p = subprocess.Popen(["ldapsearch", "-h", "moe-ldap1.itd.uts.edu.au", "-LLL", "-D",
+                                  "uid=%s,ou=people,dc=uts,dc=edu,dc=au" % self.number,
+                                  "-Z", "-b", "dc=uts,dc=edu,dc=au", "-s", "sub", "-W",
+                                  "uid=%s" % self.number, "uid", "mail"], stdout=subprocess.PIPE)
+            result = p.communicate()[0].splitlines()
+
+            # logger.debug(">>>%s<<<<" % result)
+            niceemailname = result[2].split(":")[1]
+            nicename = niceemailname.split("@")[0]
+            compactnicename = nicename.lower().translate(None, string.whitespace)
+            cleancompactnicename = compactnicename.translate(None, string.punctuation)
+            logger.info("UTS thinks you are: %s" % cleancompactnicename)
+            self.name = cleancompactnicename
+            # return self.name
+
+        except Exception, error7:
+            logger.warn("    Cant get ldapsearch to work: %s" % error7)
+            sys.exit("UTS doesnt seem to know you")
 
 class User(object):
     def __init__(self):
@@ -208,6 +235,8 @@ class User(object):
     def getenrolmentyear(self):
         return self.year
 
+
+
 class SpoolJob(object):
     # simple command spooled to a tractor job so that pixar user can execute it.
 
@@ -220,30 +249,73 @@ class SpoolJob(object):
 if __name__ == '__main__':
 
     sh.setLevel(logging.DEBUG)
-    logger.debug("-------- TEST MAP ------------")
+    logger.setLevel(logging.DEBUG)
+
     m=Map()
-    m.getuser("120988")
-    print m.getusername("120988")
-    # m.getallusers()
-    # m.backup()
-    m.adduser("1209880","mattgidney","2020")
-    m.adduser("0000000","nextyearstudent","2016")
-    m.adduser("9999999","neveryearstudent","2016")
-    m.getuser("9999999")
-    m.removeuser("9999999")
-    m.getuser("9999999")
-    logger.debug("MAP: {}".format(m.__dict__))
-    logger.debug("   : {}".format(dir(m)))
+
+    logger.debug("-------- TEST MAP ------------")
+    try:
+        logger.debug("getuser:{} getusername:{}".format( m.getuser("120988"), m.getusername("120988")) )
+    except Exception, err:
+        logger.warn(err)
+
+
+    logger.debug("-------- TEST adduser ------------")
+    try:
+        # m.getallusers()
+        m.backup()
+        m.adduser("1209880","mattgidney","2020")
+        m.adduser("0000000","nextyearstudent","2016")
+        m.adduser("9999999","neveryearstudent","2016")
+
+    except Exception, err:
+        logger.warn(err)
+
+
+    logger.debug("-------- TEST getuser ------------")
+    try:
+        m.getuser("9999999")
+    except Exception, err:
+        logger.warn(err)
+
+    logger.debug("-------- TEST removeuser ------------")
+    try:
+        m.removeuser("9999999")
+        m.getuser("9999999")
+    except Exception, err:
+        logger.warn(err)
+
+
+    u = User()
+    uts = Utsuser()
+    print uts.name
+    print uts.number
+
+
+    '''
+    logger.debug("-------- TEST show __dict__ ------------")
+    try:
+        logger.debug("MAP: {}".format(m.__dict__))
+        logger.debug("   : {}".format(dir(m)))
+    except Exception, err:
+        logger.warn(err)
 
     logger.debug("-------- TEST USER------------")
-    u=User()
-    logger.debug("USER: {}".format(u.__dict__))
-    logger.debug("    : {}".format(dir(u)))
+    try:
+        u=User()
+        logger.debug("USER: {}".format(u.__dict__))
+        logger.debug("    : {}".format(dir(u)))
+    except Exception, err:
+        logger.warn(err)
 
     logger.debug("-------- TEST ENVTYPE ------------")
-    e=EnvType(userid="120988")
-    e.makedirectory()
-    e=EnvType(projectname="albatross")
-    e.makedirectory()
-    logger.debug("ENVTYPE: {}".format(e.__dict__))
-    logger.debug("       : {}".format(dir(e)))
+    try:
+        e=EnvType(userid="120988")
+        e.makedirectory()
+        e=EnvType(projectname="albatross")
+        e.makedirectory()
+        logger.debug("ENVTYPE: {}".format(e.__dict__))
+        logger.debug("       : {}".format(dir(e)))
+    except Exception, err:
+        logger.warn(err)
+    '''

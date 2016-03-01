@@ -75,7 +75,7 @@ class SendMail(JobBase):
                  mailbody="body"):
 
         super(SendMail, self).__init__()
-        self.testing=True
+        self.testing=False
         self.mailto=mailto
         self.mailfrom=mailfrom
         self.mailcc=mailcc
@@ -95,7 +95,7 @@ class SendMail(JobBase):
 
         else:
             _service_Testing=""
-            _tier="admin"
+            _tier="batch"
 
         # ################ 0 JOB ################
         self.job = author.Job(title="Send Mail: {}".format(self.renderusername),

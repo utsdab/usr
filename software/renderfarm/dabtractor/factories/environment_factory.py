@@ -4,7 +4,7 @@
     This code handles the creation of a user area.
     At UTS the $USER is a number and there is no nice name exposed at all.
     However we can query this from the ldap database using ldapsearch.
-    Thus we can definr the concept of renderusername and renderusernumber
+    Thus we can define the concept of renderusername and renderusernumber
     this just need to be in the path some place  dabanim/usr/bin
 """
 import os
