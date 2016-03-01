@@ -34,7 +34,7 @@ class RenderBase(object):
     def __init__(self):
         self.user = os.getenv("USER")
         self.spooljob = False
-        self.testing=False
+        self.testing = False
 
         try:
             # get the names of the central render location for the user
@@ -201,7 +201,6 @@ class RenderMentalray(RenderBase):
 
         super(RenderMentalray, self).__init__()
 
-        self.testing=True
         self.envdabrender = envdabrender
         self.envtype=envtype
         self.envproject=envproject

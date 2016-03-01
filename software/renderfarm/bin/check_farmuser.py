@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-from dabtractor.factories import user_factory as fu
+from dabtractor.factories import user_factory as uf
 
 # ##############################################################
 import logging
@@ -15,5 +15,5 @@ logger.addHandler(sh)
 # ##############################################################
 
 
-a = fu.FarmUser(os.getenv("USER"))
+a = uf.U
 logger.info("Found user name >>>> %s" % (a.matchedusername))
