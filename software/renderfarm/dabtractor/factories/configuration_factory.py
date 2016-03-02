@@ -54,7 +54,7 @@ class ConfigurationBase(object):
         self.envtypes = ("user_work","project_work",)
         self.envshow = ("matthewgidney",)
         self.envproject = ("testFarm",)
-        self.envscene = ("rmsTestFile.ma",)
+        self.envscene = ("rmsDefaultFile.ma",)
         self.userid = self.getfromenv("USER")
 
     # def getusrinternally(self):
