@@ -29,10 +29,10 @@ class ConfigurationBase(object):
         # logger.info("config path = {}".format(self.configpath))
         # print os.path.abspath(sys.modules[ConfigurationBase.__module__].__file__)
         self.mayaversions = ("2016",)
-        self.rendermanversions = ("20.7","20.6","20.5","20.2",)
+        self.rendermanversions = ("20.7","20.6",)
         self.rendermanrenderers = ("rms-ris", "rms-reyes")
         self.rendermanintegrators = ("FROMFILE","pxr", "vcm","visualiser")
-        self.nukeversions = ("9.0v8","9.0v7","9.0v6")
+        self.nukeversions = ("9.0v8","9.0v7")
         self.configuration = "base"
         self.projectgroups = ("yr1", "yr2", "yr3", "yr4", "masters", "personal", "admin")
         self.mayarenderers = ("mr", "sw", "FROMFILE")

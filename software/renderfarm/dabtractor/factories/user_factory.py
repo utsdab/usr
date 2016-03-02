@@ -224,7 +224,7 @@ class User(object):
         self.username = self.name
         self.usernumber = self.number
         self.dabrender = config.CurrentConfiguration().dabrender  # "/Volumes/dabrender"
-        self.dabuserworkpath = os.path.join(self.dabrender,"work",self.name)
+        self.dabuserworkpath = os.path.join(self.dabrender,"user_work",self.name)
 
     def getusername(self):
         return self.name
