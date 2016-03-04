@@ -56,6 +56,7 @@ class ConfigurationBase(object):
         self.envproject = ("testFarm",)
         self.envscene = ("rmsDefaultFile.ma",)
         self.userid = self.getfromenv("USER")
+        self.superuser = ("120988",)
 
     # def getusrinternally(self):
     #     a= utils.truncatepath(os.path.dirname(self.configpath))

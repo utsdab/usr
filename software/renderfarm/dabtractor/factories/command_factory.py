@@ -20,7 +20,7 @@ import tractor.api.author as author
 import os
 import sys
 from software.renderfarm.dabtractor.factories import user_factory as ufac
-from software.renderfarm.dabtractor.factories import utils_factory as utils
+# from software.renderfarm.dabtractor.factories import utils_factory as utils
 
 
 
@@ -59,7 +59,7 @@ class Bash(CommandBase):
     """
     example of standard bash command
     """
-    def __init__(self,command="",projectgroup="",email=[1,0,0,0,1,0]):
+    def __init__(self, command="", projectgroup="", email=[1,0,0,0,1,0]):
         super(Bash, self).__init__()
         self.command = command
         self.projectgroup = projectgroup
@@ -87,7 +87,6 @@ class Bash(CommandBase):
                                                                      self.renderusername,
                                                                      self.renderusernumber),
                               projects=[str(self.projectgroup)],
-
                               tier=_tier,
                               tags=["theWholeFarm"],
                               service="ShellServices")
@@ -268,9 +267,9 @@ if __name__ == '__main__':
     #     )
 
     TEST = Bash(
-               startdirectory="/var/tmp",
+               # startdirectory="/var/tmp",
                command="check_farmuser.py",
-               options="",
+               # options="",
                email=[0,0,0,0,0,0]
     )
 
