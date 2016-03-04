@@ -43,7 +43,7 @@ class ConfigurationBase(object):
         self.dabrender = self.getfromenv("DABRENDER", "/Volumes/dabrender")
         self.dabusrpath = self.getfromenv("DABUSR", "/Volumes/dabrender/usr")
         # self.dabusrpath = self.getfromenv("DABUSR", self.getusrinternally())
-        self.usermapfilepath = (os.path.join(self.dabusrpath, "etc/map"))
+        self.usermapfilepath = (os.path.join(self.dabrender, "etc/map"))
         self.editproxydumppath = (os.path.join(self.dabrender, "renderproxies"))
         self.renderthreads = ("16","8","4","2","1")
         self.ribgenchunks = ("1","2","4","8","16")
@@ -56,6 +56,7 @@ class ConfigurationBase(object):
         self.envproject = ("testFarm",)
         self.envscene = ("rmsDefaultFile.ma",)
         self.userid = self.getfromenv("USER")
+        self.superuser = ("120988",)
 
     # def getusrinternally(self):
     #     a= utils.truncatepath(os.path.dirname(self.configpath))

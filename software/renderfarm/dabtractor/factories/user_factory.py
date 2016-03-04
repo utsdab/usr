@@ -15,6 +15,7 @@ import string
 import subprocess
 from software.renderfarm.dabtractor.factories import utils_factory as utils
 from software.renderfarm.dabtractor.factories import configuration_factory as config
+import tractor.api.author as author
 
 # ##############################################################
 import logging
@@ -32,15 +33,15 @@ class Map(object):
     This class is the mapping of students
     """
     def __init__(self, mapfilepath=config.CurrentConfiguration().usermapfilepath):
-        logger.debug("Map File Path {}".format(mapfilepath))
+        logger.info("Map File Path {}".format(mapfilepath))
         try:
 
             self.mapfilejson = os.path.join(mapfilepath,"user_map.json")
             self.tractorcrewlist = os.path.join(mapfilepath,"crewlist.txt")
-            self.oldmaplist = os.path.join(mapfilepath,"oldmaplist.txt")
+            # self.oldmaplist = os.path.join(mapfilepath,"oldmaplist.txt")
 
             # self.mapfilepickle= os.path.join(mapfilepath,"map_file.pickle")
-            self.backuppath = os.path.join(mapfilepath,"backups")
+            self.backuppath = os.path.join(mapfilepath, "backups")
 
             logger.debug("Map File: {}".format(self.mapfilejson))
 
@@ -51,8 +52,9 @@ class Map(object):
 
         except Exception,err:
             logger.critical("No Map Path {}".format(err))
+            raise
 
-    def getcrewformat(self):
+    def writecrewformat(self):
         with open(self.mapfilejson) as json_data:
             all = json.load(json_data)
 
@@ -96,7 +98,7 @@ class Map(object):
             return _result
         except Exception, e:
             logger.warn("{} not found {}".format(usernumber,e))
-            raise
+            return None
 
     def getusername(self,usernumber):
         return self.getuser(usernumber).get("name")
@@ -135,14 +137,22 @@ class Map(object):
             # self.backup()
             logger.info("No one by that number {}, adding".format(number))
 
-            with open(self.mapfilejson) as json_data:
-                all = json.load(json_data)
+            try:
+                with open(self.mapfilejson) as json_data:
+                    all = json.load(json_data)
 
-            new={number:{"name":name,"number":number,"year":year}}
-            all.update(new)
+                new={number:{"name":name,"number":number,"year":year}}
+                all.update(new)
 
-            with open(self.mapfilejson, 'w') as outfile:
-                json.dump(all, outfile, sort_keys = True, indent = 4,)
+                with open(self.mapfilejson, 'w') as outfile:
+                    json.dump(all, outfile, sort_keys = True, indent = 4,)
+            except Exception,err:
+                logger.warn("Error adding user {}".format(err))
+                raise
+        else:
+            logger.info("User {} already in map file".format(number))
+
+
 
 
 class EnvType(object):
@@ -174,7 +184,8 @@ class EnvType(object):
                 os.mkdir( os.path.join(self.dabrenderpath,self.envtype,self.projectname))
                 logger.info("Made {} under user_projects".format(self.projectname))
             else:
-                logger.debug("Made no directories")
+                logger.info("Made no directories")
+                raise
         except Exception, e:
             logger.warn("Made nothing {}".format(e))
 
@@ -185,11 +196,11 @@ class TractorUserConfig(object):
     def __init__(self):
         pass
 
-
-class Utsuser(object):
+class UTSuser(object):
     def __init__(self):
         self.name=None
         self.number = os.getenv("USER")
+        self.job=None
 
         try:
             p = subprocess.Popen(["ldapsearch", "-h", "moe-ldap1.itd.uts.edu.au", "-LLL", "-D",
@@ -205,26 +216,86 @@ class Utsuser(object):
             cleancompactnicename = compactnicename.translate(None, string.punctuation)
             logger.info("UTS thinks you are: %s" % cleancompactnicename)
             self.name = cleancompactnicename
-            # return self.name
 
         except Exception, error7:
             logger.warn("    Cant get ldapsearch to work: %s" % error7)
             sys.exit("UTS doesnt seem to know you")
 
+    def addtomap(self):
+
+        if self.number in config.CurrentConfiguration().superuser:
+            logger.info("Your are a superuser - yay")
+        else:
+            logger.warn("You need to be a superuser to mess with the map file sorry")
+            # sys.exit("You need to be a superuser to mess with the map file sorry")
+
+        try:
+            author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
+
+            # ################ TRACTOR JOB ################
+            self.base = ["bash", "-c","add_farm_user.py",]
+            self.args = ["-n",self.number,"-u",self.name,"-y","2016"]
+            self.command = self.base+self.args
+            self.job = author.Job(title="New User Request: {}".format(self.name),
+                                  priority=100,
+                                  metadata="user={} realname={}".format(self.number, self.name),
+                                  comment="New User Request is {} {} {}".format(self.number,
+                                                self.name,self.number),
+                                  projects=["admin"],
+                                  tier="admin",
+                                  envkey=["default"],
+                                  tags=["theWholeFarm"],
+                                  service="ShellServices")
+            # ############## 2  RUN COMMAND ###########
+            task_parent = author.Task(title="Parent")
+            task_parent.serialsubtasks = 1
+            task_bash = author.Task(title="Command")
+            bashcommand = author.Command(argv=self.command)
+            task_bash.addCommand(bashcommand)
+            task_parent.addChild(task_bash)
+
+            # ############## 7 NOTIFY ###############
+            task_notify = author.Task(title="Notify")
+            task_notify.addCommand(self.mail("JOB", "COMPLETE", "blah"))
+            task_parent.addChild(task_notify)
+            self.job.addChild(task_parent)
+        except Exception, joberror:
+            logger.warn(joberror)
+
+    def validate(self):
+        if self.job:
+            logger.info("\n\n{:_^80}\n{}\n{:_^80}".format("snip", self.job.asTcl(), "snip"))
+
+    def mail(self, level="Level", trigger="Trigger", body="Render Progress Body"):
+        bodystring = "Add New User: \nLevel: {}\nTrigger: {}\n\n{}".format(level, trigger, body)
+        subjectstring = "FARM JOB: %s " % (self.command)
+        mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.number,
+                                       "-b", bodystring, "-s", subjectstring])
+        return mailcmd
+
+    def spool(self):
+        try:
+            self.job.spool(owner="pixar")
+            logger.info("Spooled correctly")
+        except Exception, spoolerr:
+            logger.warn("A spool error %s" % spoolerr)
+
+
+
 class User(object):
     def __init__(self):
         # the user details as defined in the map
         self.user = os.getenv("USER")
-        m=Map()
-        _userdict=m.getuser(self.user)
+        usermap = Map()
+        _userdict=usermap.getuser(self.user)
         self.name=_userdict.get("name")
         self.number=_userdict.get("number")
         self.year=_userdict.get("year")
-        logger.debug("User: {}".format( m.getuser(self.user) ))
+        logger.debug("User: {}".format( usermap.getuser(self.user) ))
         self.username = self.name
         self.usernumber = self.number
         self.dabrender = config.CurrentConfiguration().dabrender  # "/Volumes/dabrender"
-        self.dabuserworkpath = os.path.join(self.dabrender,"user_work",self.name)
+        self.dabuserworkpath = os.path.join(self.dabrender, "user_work", self.name)
 
     def getusername(self):
         return self.name
@@ -237,13 +308,6 @@ class User(object):
 
 
 
-class SpoolJob(object):
-    # simple command spooled to a tractor job so that pixar user can execute it.
-
-    def __init__(self):
-        pass
-
-
 
 
 if __name__ == '__main__':
@@ -251,7 +315,7 @@ if __name__ == '__main__':
     sh.setLevel(logging.DEBUG)
     logger.setLevel(logging.DEBUG)
 
-    m=Map()
+    m = Map()
 
     logger.debug("-------- TEST MAP ------------")
     try:
