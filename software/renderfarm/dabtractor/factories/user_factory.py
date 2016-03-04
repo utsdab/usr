@@ -33,15 +33,15 @@ class Map(object):
     This class is the mapping of students
     """
     def __init__(self, mapfilepath=config.CurrentConfiguration().usermapfilepath):
-        logger.debug("Map File Path {}".format(mapfilepath))
+        logger.info("Map File Path {}".format(mapfilepath))
         try:
 
             self.mapfilejson = os.path.join(mapfilepath,"user_map.json")
             self.tractorcrewlist = os.path.join(mapfilepath,"crewlist.txt")
-            self.oldmaplist = os.path.join(mapfilepath,"oldmaplist.txt")
+            # self.oldmaplist = os.path.join(mapfilepath,"oldmaplist.txt")
 
             # self.mapfilepickle= os.path.join(mapfilepath,"map_file.pickle")
-            self.backuppath = os.path.join(mapfilepath,"backups")
+            self.backuppath = os.path.join(mapfilepath, "backups")
 
             logger.debug("Map File: {}".format(self.mapfilejson))
 
@@ -54,7 +54,7 @@ class Map(object):
             logger.critical("No Map Path {}".format(err))
             raise
 
-    def getcrewformat(self):
+    def writecrewformat(self):
         with open(self.mapfilejson) as json_data:
             all = json.load(json_data)
 
@@ -196,7 +196,6 @@ class TractorUserConfig(object):
     def __init__(self):
         pass
 
-
 class UTSuser(object):
     def __init__(self):
         self.name=None
@@ -228,14 +227,14 @@ class UTSuser(object):
             logger.info("Your are a superuser - yay")
         else:
             logger.warn("You need to be a superuser to mess with the map file sorry")
-            sys.exit("You need to be a superuser to mess with the map file sorry")
+            # sys.exit("You need to be a superuser to mess with the map file sorry")
 
         try:
             author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
 
             # ################ TRACTOR JOB ################
             self.base = ["bash", "-c","add_farm_user.py",]
-            self.args = ["-n","33333","-u","spog","-y","2016"]
+            self.args = ["-n",self.number,"-u",self.name,"-y","2016"]
             self.command = self.base+self.args
             self.job = author.Job(title="New User Request: {}".format(self.name),
                                   priority=100,
@@ -244,6 +243,7 @@ class UTSuser(object):
                                                 self.name,self.number),
                                   projects=["admin"],
                                   tier="admin",
+                                  envkey=["default"],
                                   tags=["theWholeFarm"],
                                   service="ShellServices")
             # ############## 2  RUN COMMAND ###########
@@ -305,6 +305,7 @@ class User(object):
 
     def getenrolmentyear(self):
         return self.year
+
 
 
 

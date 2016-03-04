@@ -1,4 +1,5 @@
 #!/usr/bin/env rmanpy
+
 import os,sys
 import argparse
 from software.renderfarm.dabtractor.factories import user_factory as uf
@@ -26,16 +27,20 @@ def main(n="120988",u="matthewgidney",y="staff"):
     try:
         usermap=uf.Map()
         usermap.adduser(n, u, y)
-        env=uf.EnvType(userid=n)
-        env.makedirectory()
 
     except Exception,err:
         logger.warn("Cant add user to map, {}".format(err))
         raise
 
     try:
+        usermap.writecrewformat()
+    except Exception, err:
+        logger.warn("Cant write crew format, {}".format(err))
+
+
+    try:
         logger.info("Adding your working directory in dabrender")
-        env = uf.EnvType(userid=me)
+        env = uf.EnvType(userid=n)
         env.makedirectory()
     except Exception,err:
         logger.info("Cant make directory {}".format(err))

@@ -18,15 +18,16 @@ logger.addHandler(sh)
 
 
 usermap=uf.Map()
-u=uf.User()
 me = os.getenv("USER")
+# me = "11712700"  #test
 
 #looking up the map file
 try:
     usermap.getuser(me)
-    logger.info("You are a farm user: {} {} in year group: {}".format(u.name,u.number,u.year))
+    logger.info("You are a farm user: {} {} in year group: {}".format(usermap.getuser(me),
+                                                                      usermap.getusername(me)))
 except Exception, err:
-    logger.info("User {} is not in the map file.  Follow the steps to be added.....".format(err))
+    logger.info("User {} is not in the map file.  Follow the steps to be added.....".format(me))
     u = uf.UTSuser()
     u.addtomap()
     u.validate()
