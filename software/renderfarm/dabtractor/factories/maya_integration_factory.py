@@ -35,7 +35,7 @@ if __name__ == '__main__':
     # if running as main - you are essentially testing the factory classes
 
     sh.setLevel(logging.DEBUG)
-    u=ufac.User()
+    u=ufac.FARMuser()
     logger.info("{}".format( u.__dict__))
     logger.info("hello {}".format(u.username))
     utilfac.printdict(u.__dict__)

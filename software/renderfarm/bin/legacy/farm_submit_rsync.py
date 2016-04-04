@@ -31,7 +31,7 @@ import os, sys
 
 ################################
 _thisuser = os.getenv("USER")
-(_usernumber,_username) =  ufac.FarmUser(_thisuser).query()
+(_usernumber,_username) =  ufac.FARMuser(_thisuser).query()
 
 if not _username:
     sys.exit("Sorry you dont appear to be a registered farm user {}, try running farm_user.py and then contact matt - "

@@ -35,12 +35,9 @@ class Map(object):
     def __init__(self, mapfilepath=config.CurrentConfiguration().usermapfilepath):
         logger.info("Map File Path {}".format(mapfilepath))
         try:
-
             self.mapfilejson = os.path.join(mapfilepath,"user_map.json")
             self.tractorcrewlist = os.path.join(mapfilepath,"crewlist.txt")
-            # self.oldmaplist = os.path.join(mapfilepath,"oldmaplist.txt")
-
-            # self.mapfilepickle= os.path.join(mapfilepath,"map_file.pickle")
+            self.mapfilepickle= os.path.join(mapfilepath,"map_file.pickle")
             self.backuppath = os.path.join(mapfilepath, "backups")
 
             logger.debug("Map File: {}".format(self.mapfilejson))
@@ -59,11 +56,9 @@ class Map(object):
             all = json.load(json_data)
 
         allkeys = all.keys()
-
         if not os.path.exists(self.tractorcrewlist):
             open(self.tractorcrewlist, 'w').close()
 
-        ###  print for crews.config file
         _crewlist = open(self.tractorcrewlist, 'w')
         for i, student in enumerate(allkeys):
             _line='"{number}", # {index} {student} {name} {year}'.format(index= i,
@@ -71,7 +66,6 @@ class Map(object):
                                                                number=all[student].get("number","NONE"),
                                                                name=all[student].get("name","NONE"),
                                                                year=all[student].get("year","NONE"))
-            # print _line
             _crewlist.write("{}\n".format(_line))
         _crewlist.close()
 
@@ -80,6 +74,7 @@ class Map(object):
         with open(self.mapfilejson) as json_data:
             all = json.load(json_data)
         allkeys = all.keys()
+
         ###  print for crews.config file
         for i, student in enumerate(allkeys):
             logger.info('"{number}", # {index} {student} {name} {year}'.format(index= i,
@@ -146,7 +141,7 @@ class Map(object):
 
                 with open(self.mapfilejson, 'w') as outfile:
                     json.dump(all, outfile, sort_keys = True, indent = 4,)
-            except Exception,err:
+            except Exception, err:
                 logger.warn("Error adding user {}".format(err))
                 raise
         else:
@@ -191,7 +186,7 @@ class EnvType(object):
 
 
 
-class TractorUserConfig(object):
+class TRACTORuser(object):
     # this is the crew.config for tractor
     def __init__(self):
         pass
@@ -209,7 +204,7 @@ class UTSuser(object):
                                   "uid=%s" % self.number, "uid", "mail"], stdout=subprocess.PIPE)
             result = p.communicate()[0].splitlines()
 
-            # logger.debug(">>>%s<<<<" % result)
+            logger.debug(">>>%s<<<<" % result)
             niceemailname = result[2].split(":")[1]
             nicename = niceemailname.split("@")[0]
             compactnicename = nicename.lower().translate(None, string.whitespace)
@@ -282,20 +277,28 @@ class UTSuser(object):
 
 
 
-class User(object):
+class FARMuser(object):
     def __init__(self):
         # the user details as defined in the map
         self.user = os.getenv("USER")
         usermap = Map()
-        _userdict=usermap.getuser(self.user)
-        self.name=_userdict.get("name")
-        self.number=_userdict.get("number")
-        self.year=_userdict.get("year")
-        logger.debug("User: {}".format( usermap.getuser(self.user) ))
-        self.username = self.name
-        self.usernumber = self.number
-        self.dabrender = config.CurrentConfiguration().dabrender  # "/Volumes/dabrender"
-        self.dabuserworkpath = os.path.join(self.dabrender, "user_work", self.name)
+        try:
+            _userdict=usermap.getuser(self.user)
+        except Exception, err:
+            logger.critical("Problem creating User: {}".format(err))
+
+        try:
+            _userdict=usermap.getuser(self.user)
+            self.name=_userdict.get("name")
+            self.number=_userdict.get("number")
+            self.year=_userdict.get("year")
+            logger.debug("User: {}".format( usermap.getuser(self.user) ))
+            self.username = self.name
+            self.usernumber = self.number
+            self.dabrender = config.CurrentConfiguration().dabrender  # "/Volumes/dabrender"
+            self.dabuserworkpath = os.path.join(self.dabrender, "user_work", self.name)
+        except Exception,err:
+            logger.critical("Problem creating User: {}".format(err))
 
     def getusername(self):
         return self.name
@@ -350,8 +353,8 @@ if __name__ == '__main__':
         logger.warn(err)
 
 
-    u = User()
-    uts = Utsuser()
+    u = FARMuser()
+    uts = UTSuser()
     print uts.name
     print uts.number
 
