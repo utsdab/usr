@@ -43,7 +43,7 @@ class RenderBase(object):
         self.testing = False
         try:
             # get the names of the central render location for the user
-            ru = ufac.User()
+            ru = ufac.FARMuser()
             self.usernumber = ru.number
             self.username = ru.name
             self.dabrender = ru.dabrender
@@ -92,7 +92,7 @@ class NukeJob(RenderBase):
 
         try:
             # get the names of the central render location for the user
-            ru = ufac.User()
+            ru = ufac.FARMuser()
             self.renderusernumber = ru.number
             self.renderusername = ru.name
             self.dabrender = ru.dabrender

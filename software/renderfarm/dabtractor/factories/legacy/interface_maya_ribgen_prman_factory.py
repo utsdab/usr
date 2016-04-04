@@ -41,7 +41,7 @@ class WindowBase(object):
         self.master = tk.Tk()
         try:
             # get the names of the central render location for the user
-            ru = ufac.User()
+            ru = ufac.FARMuser()
             self.renderusernumber = ru.number
             self.renderusername = ru.name
             self.dabrender = ru.dabrender

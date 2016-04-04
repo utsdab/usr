@@ -1,6 +1,5 @@
 #!/usr/bin/env rmanpy
 
-
 import os
 from software.renderfarm.dabtractor.factories import user_factory as uf
 # ##############################################################
@@ -15,11 +14,8 @@ logger.addHandler(sh)
 # ##############################################################
 
 
-
-
 usermap=uf.Map()
 me = os.getenv("USER")
-# me = "11712700"  #test
 
 #looking up the map file
 try:
