@@ -62,8 +62,8 @@ TRACTOT_SUBMIT_DIALOG = None
 MAYA_PRESENT = False
 COL1 = "background-color:lightgrey;color:black"
 COL2 = "background-color:lightgreen;color:darkblue"
-VERSION="0.9"
-BUILD="2016_02_05"
+VERSION = "0.99"
+BUILD = "2016_04_16"
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmit(qg.QDialog):
@@ -93,12 +93,12 @@ class TractorSubmit(qg.QDialog):
         self.setLayout(qg.QVBoxLayout())
         self.setFixedWidth(350)
         self.setMinimumHeight(900)
-        self.scroll_area=qg.QScrollArea()
+        self.scroll_area = qg.QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setFocusPolicy(qc.Qt.NoFocus)
         self.layout().addWidget(self.scroll_area)
         self.layout().setSpacing(0)
-        self.layout().setContentsMargins(5,5,5,5)
+        self.layout().setContentsMargins(5, 5, 5, 5)
         self.layout().addWidget(self.main_widget)
         self.scroll_area.setWidget(self.main_widget)
 
@@ -116,24 +116,24 @@ class Job(env.Environment):
         super(Job, self).__init__()
         # self.env=proj.Environment()
         # self.dabrender=self.env.dabrender
-        self.usernumber=None
-        self.username=None
-        self.projectgroup=None
-        self.outformat=None
-        self.jobtitle=None
-        self.startframe=None
-        self.endframe=None
-        self.byframe=None
-        self.threads=None
-        self.threadmemory=None
-        self.email=None
-        self.fb=None
-        self.email=None
-        self.options=None
-        self.chunks=None
-        self.startdirectory=None,
-        self.bashcommand=None,
-        self.bashoptions=None,
+        self.usernumber = None
+        self.username = None
+        self.projectgroup = None
+        self.outformat = None
+        self.jobtitle = None
+        self.startframe = None
+        self.endframe = None
+        self.byframe = None
+        self.threads = None
+        self.threadmemory = None
+        self.email = None
+        self.fb = None
+        self.email = None
+        self.options = None
+        self.chunks = None
+        self.startdirectory = None,
+        self.bashcommand = None,
+        self.bashoptions = None,
 
     def printme(self):
         logger.info("\n\n{:_^80}\n".format(" job attributes "))
@@ -218,23 +218,23 @@ class Job(env.Environment):
                 envtype=self.type,
                 envshow=self.show,
                 envproject=self.project,
-                envscene= self.scene,
-                scenefullpath = self.scenefullpath,
-                framechunks = int(self.chunks),
-                startframe = int(self.startframe),
-                endframe = int(self.endframe),
-                byframe = int(self.byframe),
-                options = self.options,
-                version = self.version,
+                envscene=self.scene,
+                scenefullpath=self.scenefullpath,
+                framechunks=int(self.chunks),
+                startframe=int(self.startframe),
+                endframe=int(self.endframe),
+                byframe=int(self.byframe),
+                options=self.options,
+                version=self.version,
                 threads=self.threads,
                 threadmemory=self.threadmemory,
                 projectgroup=self.projectgroup,
-                email=[1,0,0,0,1,0],
+                email=[1, 0, 0, 0, 1, 0],
             )
             self.tractorjob.build()
             self.tractorjob.validate()
             self.fb.write("Validate OK")
-        except Exception,err:
+        except Exception, err:
             logger.warn("nukevalidate error: {}".format(err))
             self.fb.write("Validate Fail: {}".format(err))
 
@@ -243,7 +243,7 @@ class Job(env.Environment):
             self.tractorjob=cmdfac.Bash(
                 command=self.bashcommand,
                 projectgroup=self.projectgroup,
-                email=[1,0,0,0,1,0],
+                email=[1, 0, 0, 0, 1, 0],
             )
             self.tractorjob.build()
             self.tractorjob.validate()
@@ -269,10 +269,10 @@ class TractorSubmitWidget(qg.QFrame):
         self.job = job
         self.maya = maya
         self.setFrameStyle(qg.QFrame.Panel | qg.QFrame.Raised)
-        self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
+        self.setSizePolicy(qg.QSizePolicy.Minimum, qg.QSizePolicy.Fixed)
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
-        self.layout().setContentsMargins(0,0,0,0)
+        self.layout().setContentsMargins(0, 0, 0, 0)
         self.layout().setAlignment(qc.Qt.AlignTop)
         self.feedback_widget = ifac.FeedbackWidget()
         self.job.fb = self.feedback_widget
@@ -299,7 +299,7 @@ class TractorSubmitWidget(qg.QFrame):
         self.grid_widget = qg.QWidget()
         self.grid_widget.setLayout(qg.QGridLayout())
         self.grid_widget.layout().setSpacing(12)
-        self.grid_widget.layout().setContentsMargins(0,0,0,0)
+        self.grid_widget.layout().setContentsMargins(0, 0, 0, 0)
 
         self.layout_1_bttn = qg.QPushButton('Maya')
         self.layout_2_bttn = qg.QPushButton('Renderman')
@@ -308,12 +308,12 @@ class TractorSubmitWidget(qg.QFrame):
         self.layout_5_bttn = qg.QPushButton('Diagnostics')
         self.layout_6_bttn = qg.QPushButton('Bug Report')
 
-        self.grid_widget.layout().addWidget(self.layout_1_bttn,0,0)
-        self.grid_widget.layout().addWidget(self.layout_2_bttn,0,1)
-        self.grid_widget.layout().addWidget(self.layout_3_bttn,0,2)
-        self.grid_widget.layout().addWidget(self.layout_4_bttn,1,0)
-        self.grid_widget.layout().addWidget(self.layout_5_bttn,1,1)
-        self.grid_widget.layout().addWidget(self.layout_6_bttn,1,2)
+        self.grid_widget.layout().addWidget(self.layout_1_bttn, 0, 0)
+        self.grid_widget.layout().addWidget(self.layout_2_bttn, 0, 1)
+        self.grid_widget.layout().addWidget(self.layout_3_bttn, 0, 2)
+        self.grid_widget.layout().addWidget(self.layout_4_bttn, 1, 0)
+        self.grid_widget.layout().addWidget(self.layout_5_bttn, 1, 1)
+        self.grid_widget.layout().addWidget(self.layout_6_bttn, 1, 2)
 
         self.layout().addWidget(self.grid_widget)
 
@@ -361,13 +361,13 @@ class TractorSubmitWidget(qg.QFrame):
         self.emit(qc.SIGNAL('CLOSE'), self)
 
     def _stackchange(self,index):
-        widgets=["maya","rms","nuke","bash","diag","bug"]
+        widgets=["maya", "rms", "nuke", "bash", "diag", "bug"]
         self.feedback_widget.write("MODE changed to {}".format(widgets[index]))
         self.job.mode=widgets[index]
         self.stacked_layout.setCurrentIndex(index)
         self._colourButtons(index)
 
-    def _colourButtons(self,index):
+    def _colourButtons(self, index):
         _default = "background-color:lightgrey;color:black"
         _pressed = "background-color:lightgreen;color:darkblue"
         self.layout_1_bttn.setStyleSheet(_default)

@@ -52,11 +52,11 @@ class ConfigurationBase(object):
         self.resolutions = ("FROMFILE","1080p","720p","540p","108p",)
         self.outformats = ("exr",)
         self.envtypes = ("user_work","project_work",)
-        self.envshow = ("matthewgidney",)
-        self.envproject = ("testFarm",)
-        self.envscene = ("rmsDefaultFile.ma",)
+        self.envshow = ("",)
+        self.envproject = ("",)
+        self.envscene = ("",)
         self.userid = self.getfromenv("USER")
-        self.superuser = ("120988",)
+        self.superuser = ("",)
 
     # def getusrinternally(self):
     #     a= utils.truncatepath(os.path.dirname(self.configpath))
