@@ -24,7 +24,7 @@ logger.addHandler(sh)
 def printdict(dict):
     if type(dict) == type({"a": "1"}):
         for i, key in enumerate(dict.keys()):
-            print "DICT %s %s: %s" % (i, key, dict.get(key))
+            logger.debug("DICT %s %s: %s" % (i, key, dict.get(key)))
 
 
 def sendmail(mailto,

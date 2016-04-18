@@ -101,17 +101,17 @@ class RenderPrman(RenderBase):
         self.envshow=envshow
         self.envscene=envscene
         self.mayaprojectpathalias       = "$DABRENDER/$TYPE/$SHOW/$PROJECT"
-        self.mayaprojectpath = os.path.join(self.envdabrender,self.envtype,self.envshow,self.envproject)
+        self.mayaprojectpath = os.path.join(self.envdabrender, self.envtype, self.envshow, self.envproject)
         self.mayaprojectnamealias       = "$PROJECT"
         self.mayaprojectname = envproject
         self.mayascenefilefullpathalias = "$DABRENDER/$TYPE/$SHOW/$PROJECT/$SCENE"
         self.mayascenefilefullpath = os.path.join(
-                self.envdabrender,self.envtype,self.envshow,self.envproject,self.envscene)
+                self.envdabrender, self.envtype, self.envshow, self.envproject, self.envscene)
         self.scenename = os.path.split(envscene)[-1:][0]
         self.scenebasename = os.path.splitext(self.scenename)[0]
         self.sceneext = os.path.splitext(self.scenename)[1]
         self.rendermanpath = os.path.join(
-                self.envdabrender,self.envtype,self.envshow,self.envproject,"renderman",self.scenebasename)
+                self.envdabrender, self.envtype, self.envshow, self.envproject, "renderman", self.scenebasename)
         self.rendermanpathalias = "$DABRENDER/$TYPE/$SHOW/$PROJECT/renderman/$SCENENAME"
         self.renderdirectory = os.path.join(self.rendermanpath,"images")
         self.renderimagesalias  = "$DABRENDER/$TYPE/$SHOW/$PROJECT/renderman/$SCENENAME/images"
@@ -133,13 +133,12 @@ class RenderPrman(RenderBase):
         self.threads=threads
         self.threadmemory=threadmemory
         self.mayaprojectname = os.path.basename(self.mayaprojectpath)
-        self.finaloutputimages = "{finaloutputpath}/$SCENENAME.\\*.{ext}".format(
-                finaloutputpath=self.rendermanpathalias,ext=self.outformat)
-        self.renderimages = "{}/{}.\\*.{}".format(self.rendermanpathalias,self.scenebasename,self.outformat)
-        self.ribpath = "{}/rib".format(self.rendermanpathalias)
-        self.finaloutputimagebase = "{}/{}".format(self.rendermanpathalias,self.scenebasename)
+        self.renderimages = "{}/{}.\\*.{}".format(self.rendermanpath,self.scenebasename,self.outformat)
+        self.ribpath = "{}/rib".format(self.rendermanpath)
+        self.finaloutputimagebase = "{}/{}".format(self.rendermanpath,self.scenebasename)
         self.proxyoutput = "$DABRENDER/$TYPE/$SHOW/$PROJECT/movies/$SCENENAME_{}.mov".format("datehere")
-
+        self.finaloutputimages = "{finaloutputpath}/$SCENENAME.\\*.{ext}".format(
+                finaloutputpath=self.renderimages, ext=self.outformat)
     def build(self):
         """
         Main method to build the job
@@ -275,17 +274,17 @@ class RenderPrman(RenderBase):
         task_render_frames = author.Task(title="RENDER Frames {}-{}".format(self.startframe, self.endframe))
         task_render_frames.serialsubtasks = 0
 
-        for frame in range(self.startframe, (self.endframe + 1),self.byframe):
-            _shofile = utils.usedirmap("{proj}/{scenebase}.{frame:04d}.{ext}".format(
-                proj=self.renderimagesalias, scenebase=self.scenebasename, frame=frame, ext=self.outformat))
-            _imgfile = utils.usedirmap("{proj}/{scenebase}.{frame:04d}.{ext}".format(
-                proj=self.finaloutputimagebase,scenebase=self.scenebasename, frame=frame, ext=self.outformat))
-            _statsfile = utils.usedirmap("{proj}/rib/{frame:04d}/{frame:04d}.xml".format(
-                proj=self.rendermanpath, frame=frame))
-            _ribfile = utils.usedirmap("{proj}/rib/{frame:04d}/{frame:04d}.rib".format(
-                proj=self.rendermanpath, frame=frame))
+        for frame in range(self.startframe, (self.endframe + 1), self.byframe):
+            _shofile = "{proj}/{scenebase}.{frame:04d}.{ext}".format(
+                proj=self.renderimages, scenebase=self.scenebasename, frame=frame, ext=self.outformat)
+            _imgfile = "{proj}/{scenebase}.{frame:04d}.{ext}".format(
+                proj=self.finaloutputimagebase, scenebase=self.scenebasename, frame=frame, ext=self.outformat)
+            _statsfile = "{proj}/rib/{frame:04d}/{frame:04d}.xml".format(
+                proj=self.rendermanpath, frame=frame)
+            _ribfile = "{proj}/rib/{frame:04d}/{frame:04d}.rib".format(
+                proj=self.rendermanpath, frame=frame)
 
-            task_render_rib = author.Task(title="RENDER Frame %s" % frame,preview="sho {}".format(_shofile),
+            task_render_rib = author.Task(title="RENDER Frame %s" % frame, preview="sho {}".format(_shofile),
                                           metadata="statsfile={} imgfile={}".format(_statsfile, _imgfile))
             commonargs = ["prman", "-cwd", utils.usedirmap(self.mayaprojectpath)]
 
@@ -429,7 +428,7 @@ class RenderPrman(RenderBase):
 # ##############################################################################
 
 if __name__ == "__main__":
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     logger.info("START TESTING")
 
     TEST = RenderPrman(
