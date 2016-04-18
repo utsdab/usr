@@ -425,16 +425,16 @@ class RangeWidget(qg.QWidget):
         self.framerange_layout.addItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding),0,9)
 
         self.chunks_text_lb = qg.QLabel('JOB CHUNKS:')
-        self.chunks_combo  = qg.QComboBox()
+        self.chunks_combo = qg.QComboBox()
         self.chunks_combo.addItems(config.CurrentConfiguration().ribgenchunks)
         self.chunks_combo.setMinimumWidth(_width1)
         self.chunks_layout = qg.QHBoxLayout()
-        self.chunks_layout.setContentsMargins(0,0,0,0)
+        self.chunks_layout.setContentsMargins(0, 0, 0, 0)
         self.chunks_layout.setSpacing(0)
         self.chunks_layout.addWidget(self.chunks_text_lb)
-        self.chunks_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        self.chunks_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.chunks_layout.addWidget(self.chunks_combo)
-        self.chunks_combo.setCurrentIndex(2)
+        self.chunks_combo.setCurrentIndex(0)
 
         # set initial values
         self._start()

@@ -29,7 +29,7 @@ class ConfigurationBase(object):
         # logger.info("config path = {}".format(self.configpath))
         # print os.path.abspath(sys.modules[ConfigurationBase.__module__].__file__)
         self.mayaversions = ("2016",)
-        self.rendermanversions = ("20.7","20.6",)
+        self.rendermanversions = ("20.8","20.7","20.6",)
         self.rendermanrenderers = ("rms-ris", "rms-reyes")
         self.rendermanintegrators = ("FROMFILE","pxr", "vcm","visualiser")
         self.nukeversions = ("9.0v8","9.0v7")

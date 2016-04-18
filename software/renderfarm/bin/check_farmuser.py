@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-from dabtractor.factories import user_factory as uf
+from software.renderfarm.dabtractor.factories import user_factory as uf
 
 # ##############################################################
 import logging
@@ -14,6 +14,9 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
-
-a = uf.U
-logger.info("Found user name >>>> %s" % (a.matchedusername))
+try:
+    a = uf.UTSuser()
+    logger.info("Found user name >>>> %s" % (a.name))
+    logger.info("Found user number >>>> %s" % (a.number))
+except Exception,err:
+    logger.critical("Error You are NOT Known >>>> %s" % (err))

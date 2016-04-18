@@ -190,7 +190,7 @@ class Job(env.Environment):
                     startframe=self.startframe,
                     endframe=self.endframe,
                     byframe=self.byframe,
-                    framechunks = int(self.chunks),
+                    framechunks=int(self.chunks),
                     projectgroup=self.projectgroup,
                     renderer="mr",
                     outformat="exr",
