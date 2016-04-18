@@ -263,11 +263,11 @@ class Job(env.Environment):
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmitWidget(qg.QFrame):
-    def __init__(self,job,maya=None):
+    def __init__(self, job, maya=None):
         super(TractorSubmitWidget, self).__init__()
         logger.info("TractorSubmitWidget")
-        self.job=job
-        self.maya=maya
+        self.job = job
+        self.maya = maya
         self.setFrameStyle(qg.QFrame.Panel | qg.QFrame.Raised)
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
         self.setLayout(qg.QVBoxLayout())
@@ -396,7 +396,7 @@ def create():
     if tractor_submit_dialog is None:
         tractor_submit_dialog = TractorSubmit(mayapresent=True)
     tractor_submit_dialog.show()
-    tractor_submit_dialog.job.maya=True
+    tractor_submit_dialog.job.maya = True
 
 
 def delete():

@@ -31,14 +31,14 @@ class Environment(object):
     move this all to a json file template
     """
     def __init__(self):
-        self.dabrender = self.alreadyset("DABRENDER","/Volumes/dabrender")
-        self.dabusr = self.alreadyset("DABUSR",self.getsoftwarepackagepath())
-        self.type = self.alreadyset("TYPE","user_work")
-        self.show = self.alreadyset("SHOW","matthewgidney")
-        self.project = self.alreadyset("PROJECT","testFarm")
-        self.scene = self.alreadyset("SCENE","scenes/testscenefile.ma")
-        self.user = self.alreadyset("USER","120988")
-        self.username = self.alreadyset("USERNAME",ufac.Map().getusername(self.user))
+        self.dabrender = self.alreadyset("DABRENDER", "/Volumes/dabrender")
+        self.dabusr = self.alreadyset("DABUSR", self.getsoftwarepackagepath())
+        self.type = self.alreadyset("TYPE", "user_work")
+        self.show = self.alreadyset("SHOW", "matthewgidney")
+        self.project = self.alreadyset("PROJECT", "testFarm")
+        self.scene = self.alreadyset("SCENE", "scenes/testscenefile.ma")
+        self.user = self.alreadyset("USER", "120988")
+        self.username = self.alreadyset("USERNAME", ufac.Map().getusername(self.user))
 
     def alreadyset(self, envar, default):
         # look to see if an environment variable is already define an if not return a default value
@@ -51,14 +51,14 @@ class Environment(object):
             logger.info("{} :: not found in environment, setting to default: {}".format(envar,default))
             return default
 
-    def setfromscenefile(self,mayascenefilefullpath):
+    def setfromscenefile(self, mayascenefilefullpath):
         if os.path.isfile(mayascenefilefullpath):
             _dirname=os.path.dirname(mayascenefilefullpath)
             _basename=os.path.basename(mayascenefilefullpath)
             _dirbits=os.path.normpath(_dirname).split("/")
             _fullpath=os.path.normpath(mayascenefilefullpath).split("/")
             for i,bit in enumerate(_dirbits):
-                if bit=="project_work" or bit=="user_work":
+                if bit == "project_work" or bit == "user_work":
                     logger.debug("")
                     self.dabrender="/".join(_dirbits[0:i])
                     logger.debug("DABRENDER: {}".format(self.dabrender))
@@ -75,9 +75,9 @@ class Environment(object):
             logger.warn("Cant set from file. Not a file: {}".format(mayascenefilefullpath))
 
     def getsoftwarepackagepath(self):
-        _userfacpath=os.path.dirname(ufac.__file__)
+        _userfacpath = os.path.dirname(ufac.__file__)
         directories = os.path.normpath(_userfacpath).split("software")
-        if len(directories)==2:
+        if len(directories) == 2:
             _base = directories[0]
         else:
             raise "path is bad"
