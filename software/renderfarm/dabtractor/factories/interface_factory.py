@@ -174,26 +174,26 @@ class ProjectWidget(qg.QWidget):
 
         if _type=="user_work":
             self._combo_from_path(self.show_combo, self.job.username)
-            self.job.showpath=os.path.join(self.job.typepath, self.job.username)
+            self.job.showpath = os.path.join(self.job.typepath, self.job.username)
             self._combo_from_path(self.project_combo, self.job.showpath)
         elif _type=="project_work":
             self._combo_from_path(self.show_combo, self.job.typepath)
-            self._combo_from_path(self.project_combo,"")
+            self._combo_from_path(self.project_combo, "")
         logger.debug("Type changed to {}".format(_type))
 
 
     def _show_change(self):
         _show=self.show_combo.currentText()
-        self.job.showpath=os.path.join(self.job.dabrender,self.job.type,_show)
+        self.job.showpath = os.path.join(self.job.dabrender, self.job.type, _show)
 
-        self._combo_from_path(self.project_combo,self.job.showpath)
+        self._combo_from_path(self.project_combo, self.job.showpath)
         logger.debug("Show changed to {}".format(_show))
 
     def _project_change(self):
         _project=self.project_combo.currentText()
-        self.job.projectpath=os.path.join(self.job.showpath,_project)
+        self.job.projectpath = os.path.join(self. job.showpath, _project)
 
-        self.job.project=_project
+        self.job.project = _project
         logger.debug("Project changed to {}".format(_project))
 
 
@@ -204,7 +204,7 @@ class ProjectWidget(qg.QWidget):
         logger.debug("$DABRENDER is {}".format(_dabrender))
         return _dabrender
 
-    def _combo_from_path(self,_combobox,_dirpath):
+    def _combo_from_path(self, _combobox, _dirpath):
         # rebuild a combobox list from the contents of a path
         # given a path build a list of files and directories
         try:
@@ -220,7 +220,7 @@ class ProjectWidget(qg.QWidget):
                         _dirs.append(_item)
             else:
                 # just pass thru the string
-                _dirs=[_dirpath]
+                _dirs = [_dirpath]
 
             for i,_item in enumerate(_dirs):
                 _combobox.addItem(_item)
@@ -259,12 +259,13 @@ class SceneWidget(qg.QWidget):
         self.scene_file_lb.clicked.connect(lambda : self._get_scene())
         
     def _get_scene(self):
-        f=File(startplace=self.job.projectpath)
-        self.job.scenefullpath=f.fullpath
-        self.job.scenerelpath=f.relpath
-        self.job.scene=f.relpath
+        f = File(startplace=self.job.projectpath)
+        self.job.scenefullpath = f.fullpath
+        self.job.scenerelpath = f.relpath
+        self.job.scene = f.relpath
         self.scene_file_lb.setText(f.relpath)
         try:
+            self.job.setfromscenefile(self.job.scenefullpath)
             self.job.putback()
             logger.debug("Scene changed to {}".format(self.job.scene))
         except Exception,err:
@@ -424,16 +425,16 @@ class RangeWidget(qg.QWidget):
         self.framerange_layout.addItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding),0,9)
 
         self.chunks_text_lb = qg.QLabel('JOB CHUNKS:')
-        self.chunks_combo  = qg.QComboBox()
+        self.chunks_combo = qg.QComboBox()
         self.chunks_combo.addItems(config.CurrentConfiguration().ribgenchunks)
         self.chunks_combo.setMinimumWidth(_width1)
         self.chunks_layout = qg.QHBoxLayout()
-        self.chunks_layout.setContentsMargins(0,0,0,0)
+        self.chunks_layout.setContentsMargins(0, 0, 0, 0)
         self.chunks_layout.setSpacing(0)
         self.chunks_layout.addWidget(self.chunks_text_lb)
-        self.chunks_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        self.chunks_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.chunks_layout.addWidget(self.chunks_combo)
-        self.chunks_combo.setCurrentIndex(2)
+        self.chunks_combo.setCurrentIndex(0)
 
         # set initial values
         self._start()

@@ -16,7 +16,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 sh = logging.StreamHandler()
-sh.setLevel(logging.DEBUG)
+sh.setLevel(logging.INFO)
 formatter = logging.Formatter('%(levelname)5.5s \t%(filename)s as %(name)s \t%(message)s')
 sh.setFormatter(formatter)
 logger.addHandler(sh)
@@ -30,25 +30,26 @@ class Environment(object):
     presently $TASK and $SHOT not used
     move this all to a json file template
     """
+
     def __init__(self):
         self.dabrender = self.alreadyset("DABRENDER", "/Volumes/dabrender")
         self.dabusr = self.alreadyset("DABUSR", self.getsoftwarepackagepath())
         self.type = self.alreadyset("TYPE", "user_work")
-        self.show = self.alreadyset("SHOW", "matthewgidney")
-        self.project = self.alreadyset("PROJECT", "testFarm")
-        self.scene = self.alreadyset("SCENE", "scenes/testscenefile.ma")
-        self.user = self.alreadyset("USER", "120988")
+        self.show = self.alreadyset("SHOW", "")
+        self.project = self.alreadyset("PROJECT", "")
+        self.scene = self.alreadyset("SCENE", "")
+        self.user = self.alreadyset("USER", "")
         self.username = self.alreadyset("USERNAME", ufac.Map().getusername(self.user))
 
     def alreadyset(self, envar, default):
         # look to see if an environment variable is already define an if not return a default value
         try:
-            env=os.environ
+            env = os.environ
             val = env[envar]
-            logger.info("{} :: found in environment as {}".format(envar,val))
+            logger.debug("{} :: found in environment as {}".format(envar, val))
             return val
-        except:
-            logger.info("{} :: not found in environment, setting to default: {}".format(envar,default))
+        except Exception, err:
+            logger.debug("{} :: not found in environment, setting to default: {}".format(envar, default))
             return default
 
     def setfromscenefile(self, mayascenefilefullpath):
@@ -57,7 +58,7 @@ class Environment(object):
             _basename=os.path.basename(mayascenefilefullpath)
             _dirbits=os.path.normpath(_dirname).split("/")
             _fullpath=os.path.normpath(mayascenefilefullpath).split("/")
-            for i,bit in enumerate(_dirbits):
+            for i, bit in enumerate(_dirbits):
                 if bit == "project_work" or bit == "user_work":
                     logger.debug("")
                     self.dabrender="/".join(_dirbits[0:i])
@@ -70,7 +71,6 @@ class Environment(object):
                     logger.debug("PROJECT: {}".format( self.project))
                     self.scene="/".join(_fullpath[i+3:])
                     logger.debug("SCENE: {}".format( self.scene))
-
         else:
             logger.warn("Cant set from file. Not a file: {}".format(mayascenefilefullpath))
 
@@ -81,35 +81,27 @@ class Environment(object):
             _base = directories[0]
         else:
             raise "path is bad"
-
         return directories[0]
 
     def putback(self):
-        os.environ["DABRENDER"]=self.dabrender
-        os.environ["TYPE"]=self.type
-        os.environ["SHOW"]=self.show
-        os.environ["PROJECT"]=self.project
-        os.environ["SCENE"]=self.scene
+        os.environ["DABRENDER"] = self.dabrender
+        os.environ["TYPE"] = self.type
+        os.environ["SHOW"] = self.show
+        os.environ["PROJECT"] = self.project
+        os.environ["SCENE"] = self.scene
         logger.info("Putback main environment variables")
-
-
-
-
 
 
 if __name__ == '__main__':
 
     sh.setLevel(logging.DEBUG)
-    logger.info("-------- PROJECT FACTORY TEST ------------")
+    logger.debug("-------- PROJECT FACTORY TEST ------------")
 
     p = Environment()
-    p.setfromscenefile("/Volumes/dabrender/user_work/matthewgidney/testFarm/scenes/dottyRMS.0055.ma")
-    print utils.printdict(p.__dict__)
+    logger.debug("{}".format(utils.printdict(p.__dict__)))
 
-    p.setfromscenefile("/Volumes/dabrender/user_work/matthewgidney/testFarm/dottyRMS.0055.ma")
-    logger.debug("ProjectBase: {}".format(p.__dict__))
-
-    print utils.printdict(p.__dict__)
+    p.setfromscenefile("/Volumes/dabrender/user_work/matthewgidney/testFarm/scenes/maya2016_rms_20_8_textured_cubes.ma")
+    logger.debug("{}".format(utils.printdict(p.__dict__)))
 
 
 
