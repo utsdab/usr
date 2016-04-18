@@ -48,9 +48,8 @@ from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.renderfarm.dabtractor.factories import interface_factory as ifac
 from software.renderfarm.dabtractor.factories import render_prman_factory as rmsfac
 from software.renderfarm.dabtractor.factories import render_mr_factory as mrfac
-from software.renderfarm.dabtractor.factories import render_mr_factory as mrfac
 from software.renderfarm.dabtractor.factories import render_nuke_factory as nukefac
-
+from software.renderfarm.dabtractor.factories import command_factory as cmdfac
 from software.renderfarm.dabtractor.factories import environment_factory as env
 
 from functools import partial
@@ -132,6 +131,9 @@ class Job(env.Environment):
         self.email=None
         self.options=None
         self.chunks=None
+        self.startdirectory=None,
+        self.bashcommand=None,
+        self.bashoptions=None,
 
     def printme(self):
         logger.info("\n\n{:_^80}\n".format(" job attributes "))
@@ -150,7 +152,7 @@ class Job(env.Environment):
                  mayaprojectpath=self.projectpath,
                  mayascenefilefullpath=self.scenefullpath,
                  mayaversion=self.mayaversion,
-                 rendermanversion=self.rms_version,
+                 rendermanversion=self.rmanversion,
                  startframe=self.startframe,
                  endframe=self.endframe,
                  byframe=self.byframe,
@@ -226,6 +228,7 @@ class Job(env.Environment):
                 version = self.version,
                 threads=self.threads,
                 threadmemory=self.threadmemory,
+                projectgroup=self.projectgroup,
                 email=[1,0,0,0,1,0],
             )
             self.tractorjob.build()
@@ -235,22 +238,36 @@ class Job(env.Environment):
             logger.warn("nukevalidate error: {}".format(err))
             self.fb.write("Validate Fail: {}".format(err))
 
+    def commandvalidate(self):
+        try:
+            self.tractorjob=cmdfac.Bash(
+                command=self.bashcommand,
+                projectgroup=self.projectgroup,
+                email=[1,0,0,0,1,0],
+            )
+            self.tractorjob.build()
+            self.tractorjob.validate()
+            self.fb.write("Validate OK")
+        except Exception,err:
+            logger.warn("Commandvalidate error: {}".format(err))
+            self.fb.write("Validate Fail: {}".format(err))
+
     def spool(self):
         try:
             self.tractorjob.spool()
             self.fb.write("Spool OK")
         except Exception, err:
-            logger.warn("job spool error: {}".format(err))
+            logger.warn("Job spool error: {}".format(err))
             self.fb.write("Spool Fail: {}".format(err))
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmitWidget(qg.QFrame):
-    def __init__(self,job,maya=None):
+    def __init__(self, job, maya=None):
         super(TractorSubmitWidget, self).__init__()
         logger.info("TractorSubmitWidget")
-        self.job=job
-        self.maya=maya
+        self.job = job
+        self.maya = maya
         self.setFrameStyle(qg.QFrame.Panel | qg.QFrame.Raised)
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
         self.setLayout(qg.QVBoxLayout())
@@ -379,7 +396,7 @@ def create():
     if tractor_submit_dialog is None:
         tractor_submit_dialog = TractorSubmit(mayapresent=True)
     tractor_submit_dialog.show()
-    tractor_submit_dialog.job.maya=True
+    tractor_submit_dialog.job.maya = True
 
 
 def delete():

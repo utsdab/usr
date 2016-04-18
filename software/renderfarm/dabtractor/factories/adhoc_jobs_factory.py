@@ -43,7 +43,7 @@ class JobBase(object):
 
         try:
             # get the names of the central render location for the user
-            ru = ufac.User()
+            ru = ufac.FARMuser()
             self.renderusernumber = ru.number
             self.renderusername = ru.name
             self.dabrender = ru.dabrender
@@ -75,7 +75,7 @@ class SendMail(JobBase):
                  mailbody="body"):
 
         super(SendMail, self).__init__()
-        self.testing=True
+        self.testing=False
         self.mailto=mailto
         self.mailfrom=mailfrom
         self.mailcc=mailcc
@@ -95,7 +95,7 @@ class SendMail(JobBase):
 
         else:
             _service_Testing=""
-            _tier="admin"
+            _tier="batch"
 
         # ################ 0 JOB ################
         self.job = author.Job(title="Send Mail: {}".format(self.renderusername),
@@ -117,7 +117,7 @@ class SendMail(JobBase):
 
         # ############## 5 NOTIFY ###############
         # logger.info("email = {}".format(self.email))
-        task_notify = author.Task(title="Notify", service="Ffmpeg")
+        task_notify = author.Task(title="Notify", service="ShellServices")
         task_notify.addCommand(self.bugreport("BUG", self.mailbody))
         task_thisjob.addChild(task_notify)
 

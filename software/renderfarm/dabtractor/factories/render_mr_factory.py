@@ -34,10 +34,11 @@ class RenderBase(object):
     def __init__(self):
         self.user = os.getenv("USER")
         self.spooljob = False
+        self.testing = False
 
         try:
             # get the names of the central render location for the user
-            ru = ufac.User()
+            ru = ufac.FARMuser()
             self.renderusernumber = ru.number
             self.renderusername = ru.name
             self.dabrender = ru.dabrender
@@ -200,7 +201,6 @@ class RenderMentalray(RenderBase):
 
         super(RenderMentalray, self).__init__()
 
-        self.testing=True
         self.envdabrender = envdabrender
         self.envtype=envtype
         self.envproject=envproject
@@ -217,14 +217,7 @@ class RenderMentalray(RenderBase):
                                                   self.envproject,self.envscene)
         self.scenename = os.path.split(envscene)[-1:][0]
         self.scenebasename = os.path.splitext(self.scenename)[0]
-
         self.sceneext = os.path.splitext(self.scenename)[1]
-
-
-
-
-
-
 
         self.mayaversion = mayaversion
         self.envkey_maya="maya{}".format(self.mayaversion)
@@ -324,7 +317,7 @@ class RenderMentalray(RenderBase):
                                     ],
                               service=_service_Testing)
 
-        self.job.newDirMap("/dabrender", "/dabrender", "linux")
+        self.job.newDirMap("/dabrender", "/Volumes/dabrender", "linux")
         self.job.newDirMap("/dabrender", "/Volumes/dabrender", "osx")
         self.job.newDirMap("/dabrender", "Z:", "windows")
         self.job.newDirMap("/Volumes/dabrender", "Z:", "windows")
@@ -341,8 +334,7 @@ class RenderMentalray(RenderBase):
 
 
         # ############## 3 RENDER ##############
-        task_render = author.Task(title="Rendering",
-                                  service="MayaMentalRay")
+        task_render = author.Task(title="Rendering",service="MayaMentalRay")
         task_render.serialsubtasks = 0
 
         if (self.endframe - self.startframe) < self.framechunks:
@@ -454,7 +446,7 @@ class RenderMentalray(RenderBase):
 
         # ############## 7 NOTIFY ###############
         task_notify = author.Task(title="Notify")
-        email = author.Command(self.mail("JOB", "COMPLETE", "blah"), service="Ffmpeg")
+        email = author.Command(self.mail("JOB", "COMPLETE", "blah"), service="ShellServices")
         task_notify.addCommand(email)
         logger.info("email = {}".format(self.email))
         """
@@ -465,7 +457,7 @@ class RenderMentalray(RenderBase):
         window.emailcompletion.get(),
         window.emailerror.get()
         """
-        task_notify = author.Task(title="Notify", service="Ffmpeg")
+        task_notify = author.Task(title="Notify", service="ShellServices")
         task_notify.addCommand(self.mail("JOB", "COMPLETE", "blah"))
         task_thisjob.addChild(task_notify)
         self.job.addChild(task_thisjob)
@@ -479,7 +471,7 @@ class RenderMentalray(RenderBase):
                                                                                          body)
         subjectstring = "FARM JOB: %s %s" % (str(self.mayascenenamebase), self.renderusername)
         mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
-                                       "-b", bodystring, "-s", subjectstring], service="Ffmpeg")
+                                       "-b", bodystring, "-s", subjectstring], service="ShellServices")
         return mailcmd
 
     def spool(self):

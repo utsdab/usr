@@ -30,7 +30,7 @@ from software.renderfarm.dabtractor.factories import user_factory as ufac
 _thisuser = os.getenv("USER")
 # (_usernumber,_username) =  ufac.FarmUser(_thisuser).query()
 try:
-    u=ufac.User()
+    u=ufac.FARMuser()
     _usernumber=u.number
     _username=u.name
 except:

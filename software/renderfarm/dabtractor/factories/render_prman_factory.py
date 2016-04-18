@@ -40,11 +40,11 @@ class RenderBase(object):
     def __init__(self):
         self.user = os.getenv("USER")
         self.spooljob = False
-        self.testing=True
+        self.testing=False
 
         try:
             # get the names of the central render location for the user
-            ru = ufac.User()
+            ru = ufac.FARMuser()
             self.renderusernumber = ru.number
             self.renderusername = ru.name
             self.dabrender = ru.dabrender
@@ -95,7 +95,6 @@ class RenderPrman(RenderBase):
                  email=[]
     ):
         super(RenderPrman, self).__init__()
-        self.testing=True
         self.envdabrender = envdabrender
         self.envtype=envtype
         self.envproject=envproject
@@ -185,7 +184,7 @@ class RenderPrman(RenderBase):
               tags=["theWholeFarm",],
               service=_service_Testing)
 
-        self.job.newDirMap("/dabrender", "/dabrender", "linux")
+        self.job.newDirMap("/dabrender", "/Volumes/dabrender", "linux")
         self.job.newDirMap("/dabrender", "/Volumes/dabrender", "osx")
         self.job.newDirMap("/dabrender", "Z:", "windows")
         self.job.newDirMap("/Volumes/dabrender", "Z:", "windows")
@@ -306,7 +305,6 @@ class RenderPrman(RenderBase):
                 self.xres, self.yres = 192, 108
                 rendererspecificargs.extend(["-res", "%s" % self.xres, "%s" % self.yres])
 
-
             if self.rendermaxsamples != "FROMFILE":
                 rendererspecificargs.extend([ "-maxsamples", "{}".format(self.rendermaxsamples) ])
             if self.threadmemory != "FROMFILE":
@@ -393,12 +391,11 @@ class RenderPrman(RenderBase):
 
         # ############## 5 NOTIFY ###############
         logger.info("email = {}".format(self.email))
-        task_notify = author.Task(title="Notify", service="Ffmpeg")
+        task_notify = author.Task(title="Notify", service="ShellServices")
         task_notify.addCommand(self.mail("JOB", "COMPLETE", "email details still wip"))
         task_thisjob.addChild(task_notify)
 
         self.job.addChild(task_thisjob)
-
 
     def validate(self):
         logger.info("\n\n{:_^80}\n{}\n{:_^80}".format("snip", self.job.asTcl(), "snip"))
@@ -407,7 +404,7 @@ class RenderPrman(RenderBase):
         bodystring = "Prman Render Progress: \nLevel: {}\nTrigger: {}\n\n{}".format(level, trigger, body)
         subjectstring = "FARM JOB: %s %s" % (str(self.scenebasename), self.renderusername)
         mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
-                                       "-b", bodystring, "-s", subjectstring], service="Ffmpeg")
+                                       "-b", bodystring, "-s", subjectstring], service="ShellServices")
         return mailcmd
 
     def spool(self):

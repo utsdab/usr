@@ -93,7 +93,7 @@ class ProjectWidget(qg.QWidget):
         self.layout().addLayout(self.dabrender_text_layout)
 
         self.dabrender_text_le.setMinimumHeight(25)
-        _dabrender = "border:1px solid rgba(0,0,0,190);background-color:rgb(255, 255, 200);color:rgb(0, 30, 0)"
+        _dabrender = "border:1px solid rgba(0,0,0,190);background-color:rgb(100, 255, 100);color:rgb(0, 30, 0)"
         self.dabrender_text_le.setStyleSheet(_dabrender)
         # self.job.dabrenderpath=self.job.dabrender
 
@@ -315,6 +315,13 @@ class SubmitWidget(qg.QWidget):
             self.job.mayavalidate()
         elif self.job.mode=="nuke":
             self.job.nukevalidate()
+        elif self.job.mode=="bash":
+            self.job.commandvalidate()
+        # elif self.job.mode=="diag":
+        #     self.job.commandvalidate()
+        # elif self.job.mode=="bug":
+        #     self.job.commandvalidate()
+
 
     def submit(self):
         self.fb.write("Submit Job")
@@ -395,7 +402,7 @@ class RangeWidget(qg.QWidget):
 
         self.framerange_end_text_lb = qg.QLabel('END:')
         self.framerange_end_text_lb.setMinimumWidth(15)
-        self.framerange_end_text_le = qg.QLineEdit("12")
+        self.framerange_end_text_le = qg.QLineEdit("24")
         self.framerange_end_text_le.setMaximumWidth(50)
 
         self.framerange_by_text_lb = qg.QLabel('BY:')
@@ -426,17 +433,18 @@ class RangeWidget(qg.QWidget):
         self.chunks_layout.addWidget(self.chunks_text_lb)
         self.chunks_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
         self.chunks_layout.addWidget(self.chunks_combo)
+        self.chunks_combo.setCurrentIndex(2)
 
         # set initial values
         self._start()
         self._end()
         self._by()
-        self._chunks(1)
+        self._chunks()
 
         self.framerange_start_text_le.textEdited.connect(lambda: self._start())
         self.framerange_end_text_le.textEdited.connect(lambda: self._end())
         self.framerange_by_text_le.textEdited.connect(lambda: self._by())
-        self.chunks_combo.activated.connect(lambda: self._chunks(self.chunks_combo.currentText()))
+        self.chunks_combo.activated.connect(lambda: self._chunks())
 
         self.layout().addSpacerItem(qg.QSpacerItem(0,10,qg.QSizePolicy.Expanding))
         self.layout().addLayout(self.framerange_layout)
@@ -455,8 +463,8 @@ class RangeWidget(qg.QWidget):
         self.job.byframe=self.framerange_by_text_le.text()
         logger.debug("By changed to {}".format(self.job.byframe))
 
-    def _chunks(self,_value):
-        self.job.chunks = _value
+    def _chunks(self):
+        self.job.chunks = self.chunks_combo.currentText()
         logger.debug("Chunks changed to {}".format(self.job.chunks))
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -575,6 +583,9 @@ class ThreadMemoryWidget(qg.QWidget):
         self._memory(self.threadmemory_combo.currentText())
         self.threadmemory_combo.activated.connect(lambda: self._memory(self.threadmemory_combo.currentText()))
         self.layout().addLayout(self.threadmemory_layout)
+
+        self.threadmemory_combo.setCurrentIndex(1)
+        self.threads_combo.setCurrentIndex(2)
 
     def _threads(self,_value):
         self.job.threads=_value
@@ -727,7 +738,7 @@ class RendermanWidget(qg.QWidget):
         self._maya_version(self.mayaversion_combo.currentText())
         self._rms_options(self.options_combo.currentText())
         
-        # connect vlaues to widget
+        # connect values to widget
         self.maxsamples_combo.activated.connect(lambda: self._rms_maxsamples(self.maxsamples_combo.currentText()))
         self.integrator_combo.activated.connect(lambda: self._rms_integrator(self.integrator_combo.currentText()))
         self.mayaversion_combo.activated.connect(lambda: self._maya_version(self.mayaversion_combo.currentText()))
@@ -773,27 +784,58 @@ class BashJobWidget(qg.QWidget):
 class BashWidget(qg.QWidget):
     def __init__(self,job):
         super(BashWidget, self).__init__()
+        _width1=250
+        _target = "120988@uts.edu.au"
+        self.defaults={
+            "custon":"",
+            "project disk report":\
+                 "du -sg /Volumes/dabrender/project_work/* | sort -rn | mail %s"%_target,
+            "user disk report":\
+                 "du -sg /Volumes/dabrender/user_work/* | sort -rn | mail %s"%_target,
+            }
+
         self.job=job
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
         self.layout().setContentsMargins(0,0,0,0)
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
+        self.layout().addWidget(Splitter("BASH COMMAND"))
+        self.bashcommand_text_lb = qg.QLabel('COMMAND:')
+        self.bashcommand_combo  = qg.QComboBox()
+        self.bashcommand_combo.setEditable(False)
+        self.bashcommand_combo.setMinimumWidth(_width1)
+        self.bashcommand_layout = qg.QHBoxLayout()
+        self.bashcommand_layout.setContentsMargins(0,0,0,0)
+        self.bashcommand_layout.setSpacing(0)
+        self.bashcommand_layout.addWidget(self.bashcommand_text_lb)
+        self.bashcommand_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
+        self.bashcommand_layout.addWidget(self.bashcommand_combo)
+        self.layout().addLayout(self.bashcommand_layout)
+        self.commandtext= FeedbackWidget()
+        self.commandtext.setReadOnly(False)
+        self.layout().addWidget(self.commandtext)
+        self.bashcommand_combo.addItems(list(self.defaults.keys()))
+        self.bashcommand_combo.setCurrentIndex(1)
 
-        self.layout().addWidget(Splitter("BASH OPTIONS"))
+        # set initial values
+        self._options(self.bashcommand_combo.currentText())
+        self._commandedit(self.commandtext.toPlainText())
 
-        self.version_layout = qg.QHBoxLayout()
-        self.version_layout.setContentsMargins(0,0,0,0)
-        self.version_layout.setSpacing(0)
-        self.layout().addLayout(self.version_layout)
+        # connect values to widget
+        self.bashcommand_combo.activated.connect(lambda: self._options(self.bashcommand_combo.currentText()))
+        self.commandtext.textChanged.connect(lambda: self._commandedit(self.commandtext.toPlainText()))
 
-        self.version_text_lb = qg.QLabel('VERSION:')
-        self.version_combo  = qg.QComboBox()
-        self.version_combo.addItems(config.CurrentConfiguration().rendermanversions)
-        # self.version_combo.setMinimumWidth(150)
 
-        self.version_layout.addSpacerItem(qg.QSpacerItem(0,5,qg.QSizePolicy.Expanding))
-        self.version_layout.addWidget(self.version_text_lb)
-        self.version_layout.addWidget(self.version_combo)
+    def _options(self,_value):
+        self.commandtext.setText(self.defaults.get(_value))
+        logger.debug("Default changed to {}".format(_value))
+
+    def _commandedit(self,_value):
+        self.job.bashcommand = _value
+        logger.debug("Command changed to {}".format(self.job.bashcommand))
+
+
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class DiagnosticJobWidget(qg.QWidget):
@@ -820,23 +862,16 @@ class BugWidget(qg.QWidget):
         self.layout().setSpacing(0)
         self.layout().setContentsMargins(0,0,0,0)
         self.layout().setAlignment(qc.Qt.AlignTop)
-
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
 
         # BUG WIDGET
-        # self.layout().addSpacerItem(qg.QSpacerItem(0,50,qg.QSizePolicy.Expanding))
         self.layout().addWidget(Splitter("SEND BUG DETAILS TO MATT"))
-        # self.layout().setAlignment(qc.Qt.AlignTop)
-
-        self.bug_widget = FeedbackWidget()
-        self.bug_widget.setReadOnly(False)
-        self.bug_widget.setMinimumHeight(200)
-        self.layout().addWidget(self.bug_widget)
-
         self.setLayout(qg.QVBoxLayout())
         self.setSizePolicy(qg.QSizePolicy.Minimum,qg.QSizePolicy.Fixed)
+        self.bug_widget = FeedbackWidget()
+        self.bug_widget.setReadOnly(False)
+        self.layout().addWidget(self.bug_widget)
         self.email_layout_bttn = qg.QPushButton('Email Matt')
-
         self.layout().addWidget(self.email_layout_bttn)
         self.layout().addSpacerItem(qg.QSpacerItem(0,50,qg.QSizePolicy.Expanding))
 
@@ -926,13 +961,12 @@ class NukeWidget(qg.QWidget):
         self.version_layout.addWidget(self.version_combo)
         self.layout().addLayout(self.version_layout)
 
-
         self.options_text_lb = qg.QLabel('OPTIONS:')
         self.options_combo  = qg.QComboBox()
         self.options_combo.setToolTip("Select from presets or edit yourself")
         self.options_combo.addItem("")
         self.options_combo.addItem("-V 2")
-        self.options_combo.addItem("-V 2 -F 1-10 -F 20 -F50-80x10")
+        self.options_combo.addItem("-V 2 -F 1-10 -F 20 -F 50-80x10")
         self.options_combo.setEditable(True)
         self.options_combo.setMinimumWidth(180)
         self.options_layout = qg.QHBoxLayout()
@@ -944,26 +978,17 @@ class NukeWidget(qg.QWidget):
         self.layout().addLayout(self.options_layout)
 
         # set initial values
-        # self._rms_maxsamples(self.maxsamples_combo.currentText())
-        # self._rms_integrator(self.integrator_combo.currentText())
         self._version(self.version_combo.currentText())
-        # self._chunks(self.chunks_combo.currentText())
         self._options(self.options_combo.currentText())
 
         # connect vlaues to widget
-        # self.maxsamples_combo.activated.connect(lambda: self._rms_maxsamples(self.maxsamples_combo.currentText()))
-        # self.integrator_combo.activated.connect(lambda: self._rms_integrator(self.integrator_combo.currentText()))
         self.version_combo.activated.connect(lambda: self._rms_version(self.version_combo.currentText()))
-        # self.chunks_combo.activated.connect(lambda: self._chunks(self.chunks_combo.currentText()))
         self.options_combo.editTextChanged.connect(lambda: self._options(self.options_combo.currentText()))
 
     def _options(self,_value):
         self.job.options = _value
         logger.debug("Options changed to {}".format(self.job.options))
 
-    # def _chunks(self,_value):
-    #     self.job.chunks = _value
-    #     logger.debug("Chunks changed to {}".format(self.job.chunks))
 
     def _version(self,_value):
         self.job.version = _value

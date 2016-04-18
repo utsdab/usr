@@ -257,7 +257,7 @@ class BatchJob(object):
                                                                                          body)
         subjectstring = "FARM JOB: %s %s" % (str(self.mayascenenamebase), self.renderusername)
         mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
-                                       "-b", bodystring, "-s", subjectstring], service="Ffmpeg")
+                                       "-b", bodystring, "-s", subjectstring], service="ShellServices")
         return mailcmd
 
     def spool(self):
