@@ -137,7 +137,7 @@ class Job(env.Environment):
 
     def rmsvalidate(self):
         try:
-            self.tractorjob=rmsfac.RenderPrman(
+            self.tractorjob = rmsfac.RenderPrman(
                  envdabrender=self.dabrender,
                  envtype=self.type,
                  envshow=self.show,
@@ -172,7 +172,7 @@ class Job(env.Environment):
     def mayavalidate(self):
         if self.renderer == "mr":
             try:
-                self.tractorjob=mrfac.RenderMentalray(
+                self.tractorjob = mrfac.RenderMentalray(
                     envdabrender=self.dabrender,
                     envtype=self.type,
                     envshow=self.show,
