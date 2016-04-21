@@ -5,15 +5,10 @@ By Matt Gidney - mgidney@gmail.com
 
 In maya run this at the moment....
 
-
-
-
 import sys
 sys.path.append("/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr")
 
 from software.maya.uts_tools import tractor_submit_maya_UI
-
-
 tractor_submit_maya_UI.TractorSubmit().show()
 tractor_submit_maya_UI.create()
 tractor_submit_maya_UI.main()
@@ -21,7 +16,6 @@ tractor_submit_maya_UI.delete()
 
 reload(tractor_submit_maya_UI)
 reload(tractor_submit_maya_UI.ifac)
-
 
 ########  set up rms camera projector
 from software.maya.uts_tools.prman import cam_proj_setup_ui

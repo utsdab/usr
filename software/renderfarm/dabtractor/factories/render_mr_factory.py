@@ -271,28 +271,6 @@ class RenderMentalray(RenderBase):
         """
         Main method to build the job
         """
-        ########### TESTING ##############
-        # _threadsM=4
-        _threadsPixarRender=4
-        _threads_RfMRibGen=4
-        _threadsMaya=4
-        _servicePixarRender=_service_RfMRibGen=_serviceMaya=None
-
-        if self.testing:
-            _service_Testing="Testing"
-            _tier="admin"
-
-        else:
-            _service_Testing=""
-            _tier="batch"
-
-        _servicePixarRender="PixarRender"
-        _serviceMaya="PixarRender"
-        _service_RfMRibGen="RfMRibGen"
-        _service_NukeRender="NukeRender"
-
-        #############################
-
 
         # ################ 0 JOB ################
         self.job = author.Job(title="MentalRay: {} {} {}-{}".format(self.renderusername,
@@ -311,18 +289,9 @@ class RenderMentalray(RenderBase):
                                                                      self.renderusernumber),
                               projects=[str(self.projectgroup)],
 
-                              tier=_tier,
-                              tags=[
-                                     "theWholeFarm",
-                                    ],
-                              service=_service_Testing)
-
-        self.job.newDirMap("/dabrender", "/Volumes/dabrender", "linux")
-        self.job.newDirMap("/dabrender", "/Volumes/dabrender", "osx")
-        self.job.newDirMap("/dabrender", "Z:", "windows")
-        self.job.newDirMap("/Volumes/dabrender", "Z:", "windows")
-        # self.job.newDirMap("Z:","//Volumes/dabrender", "UNC")
-        # self.job.newDirMap("Z:","/Volumes/dabrender", "NFS")
+                              tier=config.CurrentConfiguration().defaultrendertier,
+                              tags=[ "theWholeFarm", ],
+                              service="")
 
 
         # ############## PARENT #################
