@@ -560,6 +560,7 @@ class ThreadMemoryWidget(qg.QWidget):
         self.threads_combo = qg.QComboBox()
         self.threads_combo.setMinimumWidth(_width)
         self.threads_combo.addItems(config.CurrentConfiguration().renderthreads)
+
         self.threads_combo.setCurrentIndex(2)
         self.threads_layout.addWidget(self.threads_text_lb)
         self.threads_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
