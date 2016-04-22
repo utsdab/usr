@@ -334,6 +334,20 @@ class RenderPrman(RenderBase):
 
         if self.makeproxy:
 
+
+            '''
+            rvio cameraShape1/StillLife.####.exr  -v -fps 25
+            -rthreads 4
+            -outres 1280 720 -out8
+            -leader simpleslate "UTS" "Artist=Anthony" "Show=Still_Life" "Shot=Testing"
+            -overlay frameburn .4 1.0 30.0  -overlay matte 2.35 0.3 -overlay watermark "UTS 3D LAB" .2
+            -outgamma 2.2
+            -o cameraShape1_StillLife.mov
+            '''
+
+
+
+
             #### using the proxy_run.py script
             try:
                 _directory = "{p}/renderman/{s}/images".format( p=self.mayaprojectpath, s=self.scenebasename)
