@@ -172,11 +172,11 @@ class RenderPrman(RenderBase):
         task_preflight.serialsubtasks = 1
         task_thisjob.addChild(task_preflight)
         task_generate_rib_preflight = author.Task(title="Generate RIB Preflight")
-        command_ribgen = author.Command(argv=["maya","-batch","-proj", utils.usedirmap(self.mayaprojectpath),
+        command_ribgen = author.Command(argv=["maya","-batch","-proj", self.mayaprojectpath,
                                               "-command",
                                               "renderManBatchGenRibForLayer {layerid} {start} {end} {phase}".format(
                                                   layerid=0, start=self.startframe, end=self.endframe, phase=1),
-                                              "-file", utils.usedirmap(self.mayascenefilefullpath)],
+                                              "-file", self.mayascenefilefullpath],
                                               tags=["maya", "rms", "theWholeFarm"],
                                               atleast=int(self.threads),
                                               atmost=int(self.threads),
@@ -187,7 +187,7 @@ class RenderPrman(RenderBase):
 
         command_render_preflight = author.Command(argv=[
                 "prman","-t:{}".format(self.threads), "-Progress", "-recover", "%r", "-checkpoint", "5m",
-                "-cwd", utils.usedirmap(self.mayaprojectpath),
+                "-cwd", self.mayaprojectpath,
                 "renderman/{}/rib/job/job.rib".format(self.scenebasename)],
                 tags=["prman", "theWholeFarm"],
                 atleast=int(self.threads),
@@ -224,10 +224,10 @@ class RenderPrman(RenderBase):
             task_generate_rib = author.Task(title="RIB GEN chunk {} frames {}-{}".format(
                     chunk, _chunkstart, _chunkend ))
             command_generate_rib = author.Command(argv=[
-                    "maya", "-batch", "-proj", utils.usedirmap(self.mayaprojectpath), "-command",
+                    "maya", "-batch", "-proj", self.mayaprojectpath, "-command",
                     "renderManBatchGenRibForLayer {layerid} {start} {end} {phase}".format(
                             layerid=0, start=_chunkstart, end=_chunkend, phase=2),
-                            "-file", utils.usedirmap(self.mayascenefilefullpath)],
+                            "-file", self.mayascenefilefullpath],
                     tags=["maya", "rms", "theWholeFarm"],
                     atleast=int(self.threads),
                     atmost=int(self.threads),
@@ -254,7 +254,7 @@ class RenderPrman(RenderBase):
 
             task_render_rib = author.Task(title="RENDER Frame %s" % frame, preview="sho {}".format(_shofile),
                                           metadata="statsfile={} imgfile={}".format(_statsfile, _imgfile))
-            commonargs = ["prman", "-cwd", utils.usedirmap(self.mayaprojectpath)]
+            commonargs = ["prman", "-cwd", self.mayaprojectpath]
 
             rendererspecificargs = []
 
