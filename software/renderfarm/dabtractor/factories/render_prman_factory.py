@@ -86,6 +86,7 @@ class RenderPrman(RenderBase):
                  outformat="",
                  resolution="720p",
                  skipframes=0,
+                 sendmail=0,
                  makeproxy=0,
                  options="",
                  threadmemory=4000,
@@ -128,6 +129,7 @@ class RenderPrman(RenderBase):
         self.resolution = resolution
         self.outformat = outformat
         self.makeproxy = makeproxy
+        self.sendmail = sendmail
         self.skipframes = skipframes
         self.rendermaxsamples=rendermaxsamples
         self.threads = threads
@@ -330,10 +332,7 @@ class RenderPrman(RenderBase):
 
 
         # ############## 5 PROXY ###############
-        # using nuke as exr colour is handled correctly
-
         if self.makeproxy:
-
 
             '''
             rvio cameraShape1/StillLife.####.exr  -v -fps 25
@@ -345,31 +344,57 @@ class RenderPrman(RenderBase):
             -o cameraShape1_StillLife.mov
             '''
 
-
-
-
             #### using the proxy_run.py script
             try:
                 _directory = "{p}/renderman/{s}/images".format( p=self.mayaprojectpath, s=self.scenebasename)
-                _nuke_envkey = "proxynuke{}".format(config.CurrentConfiguration().nukeversion)
-                _proxy_runner_cmd = ["proxy_run.py", "-s", _directory]
+                _proxy_envkey = "bash"
+                _option1 = " -v -fps 25 -rthreads {threads} -outres {xres} {yres} ".format(threads="4",
+                                                                                           xres="1280",
+                                                                                           yres = "720")
+                _option2 = "-out8 -leader simpleslate UTS Student={student} Show={show} Shot={shot} ".format(
+                        student="stu",show="show",shot="shot")
+                _option3 = "-overlay frameburn .4 1.0 30.0"
+                _seq = "cameraShape1/StillLife.####.exr"
+                _rvio_cmd = "rvio {} {} {} {}".format(_seq, _option1,_option2,_option3)
+
+                _proxy_runner_cmd = [ utils.expandargumentstring(_rvio_cmd) ]
 
                 task_proxy = author.Task(title="Proxy Generation", service="NukeRender")
-                nukecommand = author.Command(argv=_proxy_runner_cmd,
+                proxycommand = author.Command(argv=_proxy_runner_cmd,
                                       service="NukeRender",
                                       tags=["nuke", "theWholeFarm"],
-                                      envkey=[_nuke_envkey])
-                task_proxy.addCommand(nukecommand)
+                                      envkey=[_proxy_envkey])
+                task_proxy.addCommand(proxycommand)
                 task_thisjob.addChild(task_proxy)
+
             except Exception, proxyerror:
                 logger.warn("Cant make a proxy {}".format(proxyerror))
 
 
+            # #### using the proxy_run.py script
+            # try:
+            #     _directory = "{p}/renderman/{s}/images".format( p=self.mayaprojectpath, s=self.scenebasename)
+            #     _nuke_envkey = "proxynuke{}".format(config.CurrentConfiguration().nukeversion)
+            #     _proxy_runner_cmd = ["proxy_run.py", "-s", _directory]
+            #
+            #     task_proxy = author.Task(title="Proxy Generation", service="NukeRender")
+            #     nukecommand = author.Command(argv=_proxy_runner_cmd,
+            #                           service="NukeRender",
+            #                           tags=["nuke", "theWholeFarm"],
+            #                           envkey=[_nuke_envkey])
+            #     task_proxy.addCommand(nukecommand)
+            #     task_thisjob.addChild(task_proxy)
+            # except Exception, proxyerror:
+            #     logger.warn("Cant make a proxy {}".format(proxyerror))
+        else:
+            logger.info("make proxy = {}".format(self.makeproxy))
+
         # ############## 5 NOTIFY ###############
-        logger.info("email = {}".format(self.email))
-        task_notify = author.Task(title="Notify", service="ShellServices")
-        task_notify.addCommand(self.mail("JOB", "COMPLETE", "email details still wip"))
-        task_thisjob.addChild(task_notify)
+        if self.sendmail:
+            logger.info("email = {}".format(self.email))
+            task_notify = author.Task(title="Notify", service="ShellServices")
+            task_notify.addCommand(self.mail("JOB", "COMPLETE", "email details still wip"))
+            task_thisjob.addChild(task_notify)
 
         self.job.addChild(task_thisjob)
 

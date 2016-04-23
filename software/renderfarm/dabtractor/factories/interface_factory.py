@@ -1135,9 +1135,7 @@ class FarmJobExtraWidget(qg.QWidget):
         self.farm_group_box = qg.QGroupBox("Farm Options")
         self.farm_group_box_layout = qg.QGridLayout()
         self.farm_radio_box1 = qg.QRadioButton("Send Email")
-        self.farm_radio_box1.setChecked(True)
-        self.farm_radio_box2 = qg.QRadioButton("Make Editorial Proxy")
-        self.farm_radio_box2.setChecked(True)
+        self.farm_radio_box2 = qg.QRadioButton("Make Edit Proxy")
         self.farm_radio_box3 = qg.QRadioButton("Make Perfect")
         self.farm_radio_box4 = qg.QRadioButton("Wipe My Ass")
 
@@ -1160,4 +1158,31 @@ class FarmJobExtraWidget(qg.QWidget):
 
         self.layout().addLayout(self.farm_group_box_layout)
 
+        # connections
+        self.farm_radio_box1.clicked.connect(lambda: self._box1(self.farm_radio_box1.isChecked()))
+        self.farm_radio_box2.clicked.connect(lambda: self._box2(self.farm_radio_box2.isChecked()))
+        self.farm_radio_box3.clicked.connect(lambda: self._box3(self.farm_radio_box3.isChecked()))
+        self.farm_radio_box4.clicked.connect(lambda: self._box4(self.farm_radio_box4.isChecked()))
+
+        # set initial
+        self.farm_radio_box2.setChecked(True)
+        self.job.makeproxy=True
+        self.farm_radio_box1.setChecked(True)
+        self.job.sendmail=True
+
+    def _box2(self, _value):
+        self.job.makeproxy = _value
+        logger.info("Options - Make proxy changed to {}".format(self.job.makeproxy))
+
+    def _box1(self, _value):
+        self.job.sendmail = _value
+        logger.info("Options - Send mail changed to {}".format(self.job.sendmail))
+
+    def _box3(self, _value):
+        self.job.makeperfect = _value
+        logger.info("Options - Make perfect changed to {}".format(self.job.makeperfect))
+
+    def _box4(self, _value):
+        self.job.wipeass = _value
+        logger.info("Options - Wipe my ass changed to {}".format(self.job.wipeass))
 

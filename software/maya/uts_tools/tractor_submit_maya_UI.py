@@ -120,6 +120,8 @@ class Job(env.Environment):
         self.byframe = None
         self.threads = None
         self.threadmemory = None
+        self.makeproxy = None
+        self.sendmail= None
         self.email = None
         self.fb = None
         self.email = None
@@ -154,7 +156,8 @@ class Job(env.Environment):
                  outformat=self.outformat,
                  resolution=self.resolution,
                  skipframes=0,
-                 makeproxy=0,
+                 makeproxy=self.makeproxy,
+                 sendmail=self.sendmail,
                  options=self.options,
                  threadmemory=self.threadmemory,
                  threads=self.threads,
@@ -190,7 +193,8 @@ class Job(env.Environment):
                     outformat="exr",
                     resolution=self.resolution,
                     skipframes=0,
-                    makeproxy=0,
+                    makeproxy=self.makeproxy,
+                    sendmail=self.sendmail,
                     options="",
                     threads=self.threads,
                     threadmemory=self.threadmemory,
