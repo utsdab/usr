@@ -287,7 +287,7 @@ class RenderPrman(RenderBase):
                 "-recover", "%r",
                 "-checkpoint", "5m",
                 "-statslevel", "2",
-                # "-maxsamples", "{}".format(self.rendermaxsamples)  # override RIB ray trace hider maxsamples
+                #"-maxsamples", "{}".format(self.rendermaxsamples)  # override RIB ray trace hider maxsamples
                 # "-pixelvariance","3"      # override RIB PixelVariance
                 # "-d", ""                  # dispType
                 #                 -version          : print the version

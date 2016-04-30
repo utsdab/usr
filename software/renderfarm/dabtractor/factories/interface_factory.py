@@ -1141,13 +1141,10 @@ class FarmJobExtraWidget(qg.QWidget):
 
         self.farm_radio_box1.setCheckable(True)
         self.farm_radio_box1.setAutoExclusive(False)
-
         self.farm_radio_box2.setCheckable(True)
         self.farm_radio_box2.setAutoExclusive(False)
-
         self.farm_radio_box2.setCheckable(True)
         self.farm_radio_box3.setAutoExclusive(False)
-
         self.farm_radio_box4.setCheckable(True)
         self.farm_radio_box4.setAutoExclusive(False)
 
