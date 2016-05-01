@@ -86,6 +86,7 @@ class RenderPrman(RenderBase):
                  outformat="",
                  resolution="720p",
                  skipframes=0,
+                 sendmail=0,
                  makeproxy=0,
                  options="",
                  threadmemory=4000,
@@ -128,10 +129,11 @@ class RenderPrman(RenderBase):
         self.resolution = resolution
         self.outformat = outformat
         self.makeproxy = makeproxy
+        self.sendmail = sendmail
         self.skipframes = skipframes
         self.rendermaxsamples=rendermaxsamples
-        self.threads=threads
-        self.threadmemory=threadmemory
+        self.threads = threads
+        self.threadmemory = threadmemory
         self.mayaprojectname = os.path.basename(self.mayaprojectpath)
         self.renderimages = "{}/{}.\\*.{}".format(self.rendermanpath,self.scenebasename,self.outformat)
         self.ribpath = "{}/rib".format(self.rendermanpath)
@@ -143,27 +145,6 @@ class RenderPrman(RenderBase):
         """
         Main method to build the job
         """
-        ########### TESTING ##############
-        # _threadsM=4
-        _threadsPixarRender=4
-        _threads_RfMRibGen=1
-        _servicePixarRender=_service_RfMRibGen=_serviceMaya=None
-
-        if self.testing:
-            _service_Testing="Testing"
-            _tier="admin"
-
-        else:
-            _service_Testing=""
-            _tier="batch"
-
-        _servicePixarRender="PixarRender"
-        _serviceMaya="PixarRender"
-        _service_RfMRibGen="RfMRibGen"
-        _service_NukeRender="NukeRender"
-
-        #############################
-
 
         # ################ 0 JOB ################
         self.job = author.Job(title="Renderman: {} {} {}-{}".format(
@@ -179,23 +160,9 @@ class RenderPrman(RenderBase):
                       self.user, self.renderusername,self.renderusernumber),
               comment="LocalUser is {} {} {}".format(self.user,self.renderusername,self.renderusernumber),
               projects=[str(self.projectgroup)],
-              tier=_tier,
-              tags=["theWholeFarm",],
-              service=_service_Testing)
-
-        self.job.newDirMap("/dabrender", "/Volumes/dabrender", "linux")
-        self.job.newDirMap("/dabrender", "/Volumes/dabrender", "osx")
-        self.job.newDirMap("/dabrender", "Z:", "windows")
-        self.job.newDirMap("/Volumes/dabrender", "Z:", "windows")
-
-        '''
-        self.job.newDirMap("Z:","//Volumes/dabrender", "UNC")
-        self.job.newDirMap("Z:","/Volumes/dabrender", "NFS")
-         {{mayabatch} {maya} NFS}
-         {{X:/} {//fileserver/projects/} UNC}
-         {{X:/} {/fileserver/projects/} NFS}
-         { { source } { destination } zone }
-        '''
+              tier=config.CurrentConfiguration().defaultrendertier,
+              tags=["theWholeFarm", ],
+              service="")
 
 
         # ############## 0 ThisJob #################
@@ -207,25 +174,27 @@ class RenderPrman(RenderBase):
         task_preflight.serialsubtasks = 1
         task_thisjob.addChild(task_preflight)
         task_generate_rib_preflight = author.Task(title="Generate RIB Preflight")
-        command_ribgen = author.Command(argv=["maya","-batch","-proj", utils.usedirmap(self.mayaprojectpath),
+        command_ribgen = author.Command(argv=["maya","-batch","-proj", self.mayaprojectpath,
                                               "-command",
                                               "renderManBatchGenRibForLayer {layerid} {start} {end} {phase}".format(
                                                   layerid=0, start=self.startframe, end=self.endframe, phase=1),
-                                              "-file", utils.usedirmap(self.mayascenefilefullpath)],
+                                              "-file", self.mayascenefilefullpath],
                                               tags=["maya", "rms", "theWholeFarm"],
-                                              atleast=_threads_RfMRibGen,atmost=_threads_RfMRibGen,
-                                              service=_service_RfMRibGen)
+                                              atleast=int(self.threads),
+                                              atmost=int(self.threads),
+                                              service="RfMRibGen")
         task_generate_rib_preflight.addCommand(command_ribgen)
         task_preflight.addChild(task_generate_rib_preflight)
         task_render_preflight = author.Task(title="Render Preflight")
 
         command_render_preflight = author.Command(argv=[
-                "prman","-t:{}".format(_threadsPixarRender), "-Progress", "-recover", "%r", "-checkpoint", "5m",
-                "-cwd", utils.usedirmap(self.mayaprojectpath),
+                "prman","-t:{}".format(self.threads), "-Progress", "-recover", "%r", "-checkpoint", "5m",
+                "-cwd", self.mayaprojectpath,
                 "renderman/{}/rib/job/job.rib".format(self.scenebasename)],
                 tags=["prman", "theWholeFarm"],
-                atleast=_threadsPixarRender,atmost=_threadsPixarRender,
-                service=_servicePixarRender)
+                atleast=int(self.threads),
+                atmost=int(self.threads),
+                service="PixarRender")
 
         task_render_preflight.addCommand(command_render_preflight)
         task_preflight.addChild(task_render_preflight)
@@ -249,21 +218,22 @@ class RenderPrman(RenderBase):
             _offset=i*_framesperchunk
             _chunkstart=(self.startframe+_offset)
             _chunkend=(_offset+_framesperchunk)
-            logger.info("Chunk {} is frames {}-{}".format(chunk,_chunkstart,_chunkend))
+            logger.info("Chunk {} is frames {}-{}".format(chunk, _chunkstart, _chunkend))
 
-            if chunk ==_chunks:
+            if chunk == _chunks:
                 _chunkend = self.endframe
 
             task_generate_rib = author.Task(title="RIB GEN chunk {} frames {}-{}".format(
-                    chunk,_chunkstart, _chunkend ))
+                    chunk, _chunkstart, _chunkend ))
             command_generate_rib = author.Command(argv=[
-                    "maya","-batch","-proj", utils.usedirmap(self.mayaprojectpath),"-command",
+                    "maya", "-batch", "-proj", self.mayaprojectpath, "-command",
                     "renderManBatchGenRibForLayer {layerid} {start} {end} {phase}".format(
                             layerid=0, start=_chunkstart, end=_chunkend, phase=2),
-                            "-file", utils.usedirmap(self.mayascenefilefullpath)],
+                            "-file", self.mayascenefilefullpath],
                     tags=["maya", "rms", "theWholeFarm"],
-                    atleast=int(_threads_RfMRibGen),atmost=int(_threads_RfMRibGen),
-                    service=_service_RfMRibGen)
+                    atleast=int(self.threads),
+                    atmost=int(self.threads),
+                    service="RfMRibGen")
             task_generate_rib.addCommand(command_generate_rib)
             task_ribgen_allframes.addChild(task_generate_rib)
 
@@ -286,7 +256,7 @@ class RenderPrman(RenderBase):
 
             task_render_rib = author.Task(title="RENDER Frame %s" % frame, preview="sho {}".format(_shofile),
                                           metadata="statsfile={} imgfile={}".format(_statsfile, _imgfile))
-            commonargs = ["prman", "-cwd", utils.usedirmap(self.mayaprojectpath)]
+            commonargs = ["prman", "-cwd", self.mayaprojectpath]
 
             rendererspecificargs = []
 
@@ -308,11 +278,6 @@ class RenderPrman(RenderBase):
                 rendererspecificargs.extend([ "-maxsamples", "{}".format(self.rendermaxsamples) ])
             if self.threadmemory != "FROMFILE":
                 rendererspecificargs.extend([ "-memorylimit", "{}".format(self.threadmemory) ])
-            # if self.rendermaxsamples != "FROMFILE":
-            #     rendererspecificargs.extend([ "-maxsamples", "{}".format(self.rendermaxsamples) ])
-            # if self.threads != "FROMFILE":
-            #     rendererspecificargs.extend([ "-maxsamples", "{}".format(self.rendermaxsamples) ])
-
 
             rendererspecificargs.extend([
                 # "-pad", "4",
@@ -322,7 +287,7 @@ class RenderPrman(RenderBase):
                 "-recover", "%r",
                 "-checkpoint", "5m",
                 "-statslevel", "2",
-                # "-maxsamples", "{}".format(self.rendermaxsamples)  # override RIB ray trace hider maxsamples
+                #"-maxsamples", "{}".format(self.rendermaxsamples)  # override RIB ray trace hider maxsamples
                 # "-pixelvariance","3"      # override RIB PixelVariance
                 # "-d", ""                  # dispType
                 #                 -version          : print the version
@@ -357,7 +322,7 @@ class RenderPrman(RenderBase):
                                             tags=["prman", "theWholeFarm"],
                                             atleast=int(self.threads),
                                             atmost=int(self.threads),
-                                            service=_servicePixarRender)
+                                            service="PixarRender")
 
             task_render_rib.addCommand(command_render)
             task_render_frames.addChild(task_render_rib)
@@ -367,32 +332,69 @@ class RenderPrman(RenderBase):
 
 
         # ############## 5 PROXY ###############
-        # using nuke as exr colour is handled correctly
-
         if self.makeproxy:
+
+            '''
+            rvio cameraShape1/StillLife.####.exr  -v -fps 25
+            -rthreads 4
+            -outres 1280 720 -out8
+            -leader simpleslate "UTS" "Artist=Anthony" "Show=Still_Life" "Shot=Testing"
+            -overlay frameburn .4 1.0 30.0  -overlay matte 2.35 0.3 -overlay watermark "UTS 3D LAB" .2
+            -outgamma 2.2
+            -o cameraShape1_StillLife.mov
+            '''
 
             #### using the proxy_run.py script
             try:
                 _directory = "{p}/renderman/{s}/images".format( p=self.mayaprojectpath, s=self.scenebasename)
-                _nuke_envkey = "proxynuke{}".format(config.CurrentConfiguration().nukeversion)
-                _proxy_runner_cmd = ["proxy_run.py","-s",_directory]
+                _proxy_envkey = "bash"
+                _option1 = " -v -fps 25 -rthreads {threads} -outres {xres} {yres} ".format(threads="4",
+                                                                                           xres="1280",
+                                                                                           yres = "720")
+                _option2 = "-out8 -leader simpleslate UTS Student={student} Show={show} Shot={shot} ".format(
+                        student="stu",show="show",shot="shot")
+                _option3 = "-overlay frameburn .4 1.0 30.0"
+                _seq = "cameraShape1/StillLife.####.exr"
+                _rvio_cmd = "rvio {} {} {} {}".format(_seq, _option1,_option2,_option3)
 
-                task_proxy = author.Task(title="Proxy Generation", service=_service_NukeRender)
-                nukecommand = author.Command(argv=_proxy_runner_cmd,
+                _proxy_runner_cmd = [ utils.expandargumentstring(_rvio_cmd) ]
+
+                task_proxy = author.Task(title="Proxy Generation", service="NukeRender")
+                proxycommand = author.Command(argv=_proxy_runner_cmd,
                                       service="NukeRender",
                                       tags=["nuke", "theWholeFarm"],
-                                      envkey=[_nuke_envkey])
-                task_proxy.addCommand(nukecommand)
+                                      envkey=[_proxy_envkey])
+                task_proxy.addCommand(proxycommand)
                 task_thisjob.addChild(task_proxy)
+
             except Exception, proxyerror:
                 logger.warn("Cant make a proxy {}".format(proxyerror))
 
 
+            # #### using the proxy_run.py script
+            # try:
+            #     _directory = "{p}/renderman/{s}/images".format( p=self.mayaprojectpath, s=self.scenebasename)
+            #     _nuke_envkey = "proxynuke{}".format(config.CurrentConfiguration().nukeversion)
+            #     _proxy_runner_cmd = ["proxy_run.py", "-s", _directory]
+            #
+            #     task_proxy = author.Task(title="Proxy Generation", service="NukeRender")
+            #     nukecommand = author.Command(argv=_proxy_runner_cmd,
+            #                           service="NukeRender",
+            #                           tags=["nuke", "theWholeFarm"],
+            #                           envkey=[_nuke_envkey])
+            #     task_proxy.addCommand(nukecommand)
+            #     task_thisjob.addChild(task_proxy)
+            # except Exception, proxyerror:
+            #     logger.warn("Cant make a proxy {}".format(proxyerror))
+        else:
+            logger.info("make proxy = {}".format(self.makeproxy))
+
         # ############## 5 NOTIFY ###############
-        logger.info("email = {}".format(self.email))
-        task_notify = author.Task(title="Notify", service="ShellServices")
-        task_notify.addCommand(self.mail("JOB", "COMPLETE", "email details still wip"))
-        task_thisjob.addChild(task_notify)
+        if self.sendmail:
+            logger.info("email = {}".format(self.email))
+            task_notify = author.Task(title="Notify", service="ShellServices")
+            task_notify.addCommand(self.mail("JOB", "COMPLETE", "email details still wip"))
+            task_thisjob.addChild(task_notify)
 
         self.job.addChild(task_thisjob)
 
@@ -451,7 +453,7 @@ if __name__ == "__main__":
                        makeproxy=1,
                        threadmemory="4000",
                        rendermaxsamples="128",
-                       threads="8",
+                       threads="4",
                        ribgenchunks=3,
                        email=[1, 0, 0, 0, 1, 0]
     )

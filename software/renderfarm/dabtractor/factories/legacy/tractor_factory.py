@@ -77,20 +77,6 @@ class WindowBase(object):
             logger.critical("Cant find central filer mounted %s" % self.dabrender)
             raise Exception, "dabrender not a valid mount point"
 
-    @staticmethod
-    def usedirmap(inputstring):
-        # wraps a command string up as per dirmap needs in pixar tractor eg. %D(mayabatch)
-        return '%D({thing})'.format(thing=inputstring)
-
-    @staticmethod
-    def expandargumentstring(inputargs=""):
-        """
-        This takes a string like "-r 2 -l 4" and returns
-        {-r} {2} {-l} {4} which is what tractor wants for arguments
-        """
-        arglist = inputargs.split(" ")
-        outputstring = "} {".join(arglist)
-        return outputstring
 
 class WindowRman(WindowBase):
     """

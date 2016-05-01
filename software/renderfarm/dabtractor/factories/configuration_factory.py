@@ -45,18 +45,19 @@ class ConfigurationBase(object):
         # self.dabusrpath = self.getfromenv("DABUSR", self.getusrinternally())
         self.usermapfilepath = (os.path.join(self.dabrender, "etc/map"))
         self.editproxydumppath = (os.path.join(self.dabrender, "renderproxies"))
-        self.renderthreads = ("16","8","4","2","1")
-        self.ribgenchunks = ("1","2","4","8","16")
-        self.rendermemorys = ("8000","4000","2000")
-        self.rendermaxsamples = ("FROMFILE","1024","512","256","128","64","32","16")
-        self.resolutions = ("FROMFILE","1080p","720p","540p","108p",)
+        self.renderthreads = ("16", "8", "4", "2", "1")
+        self.ribgenchunks = ("1", "2", "4", "8", "16")
+        self.rendermemorys = ("8000", "4000", "2000")
+        self.rendermaxsamples = ("FROMFILE", "1024", "512", "256", "128", "64", "32", "16")
+        self.resolutions = ("FROMFILE", "1080p", "720p", "540p", "108p",)
         self.outformats = ("exr",)
-        self.envtypes = ("user_work","project_work",)
+        self.envtypes = ("user_work", "project_work",)
         self.envshow = ("",)
         self.envproject = ("",)
         self.envscene = ("",)
         self.userid = self.getfromenv("USER")
         self.superuser = ("",)
+        self.defaultrendertiers = ("batch", "rush", "admin")
 
     # def getusrinternally(self):
     #     a= utils.truncatepath(os.path.dirname(self.configpath))
@@ -92,6 +93,7 @@ class CurrentConfiguration(ConfigurationBase):
         self.projectgroup = self.projectgroups[5]
         self.envtype = self.envtypes[0]
         self.outformat = self.outformats[0]
+        self.defaultrendertier = self.defaultrendertiers[0]
 
 
 

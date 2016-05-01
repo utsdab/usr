@@ -5,15 +5,10 @@ By Matt Gidney - mgidney@gmail.com
 
 In maya run this at the moment....
 
-
-
-
 import sys
 sys.path.append("/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr")
 
 from software.maya.uts_tools import tractor_submit_maya_UI
-
-
 tractor_submit_maya_UI.TractorSubmit().show()
 tractor_submit_maya_UI.create()
 tractor_submit_maya_UI.main()
@@ -21,7 +16,6 @@ tractor_submit_maya_UI.delete()
 
 reload(tractor_submit_maya_UI)
 reload(tractor_submit_maya_UI.ifac)
-
 
 ########  set up rms camera projector
 from software.maya.uts_tools.prman import cam_proj_setup_ui
@@ -126,6 +120,8 @@ class Job(env.Environment):
         self.byframe = None
         self.threads = None
         self.threadmemory = None
+        self.makeproxy = None
+        self.sendmail= None
         self.email = None
         self.fb = None
         self.email = None
@@ -143,7 +139,7 @@ class Job(env.Environment):
 
     def rmsvalidate(self):
         try:
-            self.tractorjob=rmsfac.RenderPrman(
+            self.tractorjob = rmsfac.RenderPrman(
                  envdabrender=self.dabrender,
                  envtype=self.type,
                  envshow=self.show,
@@ -160,7 +156,8 @@ class Job(env.Environment):
                  outformat=self.outformat,
                  resolution=self.resolution,
                  skipframes=0,
-                 makeproxy=0,
+                 makeproxy=self.makeproxy,
+                 sendmail=self.sendmail,
                  options=self.options,
                  threadmemory=self.threadmemory,
                  threads=self.threads,
@@ -178,7 +175,7 @@ class Job(env.Environment):
     def mayavalidate(self):
         if self.renderer == "mr":
             try:
-                self.tractorjob=mrfac.RenderMentalray(
+                self.tractorjob = mrfac.RenderMentalray(
                     envdabrender=self.dabrender,
                     envtype=self.type,
                     envshow=self.show,
@@ -196,7 +193,8 @@ class Job(env.Environment):
                     outformat="exr",
                     resolution=self.resolution,
                     skipframes=0,
-                    makeproxy=0,
+                    makeproxy=self.makeproxy,
+                    sendmail=self.sendmail,
                     options="",
                     threads=self.threads,
                     threadmemory=self.threadmemory,

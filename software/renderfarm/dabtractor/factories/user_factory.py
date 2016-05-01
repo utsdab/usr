@@ -49,6 +49,7 @@ class Map(object):
 
         except Exception,err:
             logger.critical("No Map Path {}".format(err))
+            sys.exit(err)
             raise
 
     def writecrewformat(self):
@@ -286,6 +287,7 @@ class FARMuser(object):
             _userdict=usermap.getuser(self.user)
         except Exception, err:
             logger.critical("Problem creating User: {}".format(err))
+            sys.exit(err)
 
         try:
             _userdict=usermap.getuser(self.user)
@@ -299,6 +301,7 @@ class FARMuser(object):
             self.dabuserworkpath = os.path.join(self.dabrender, "user_work", self.name)
         except Exception,err:
             logger.critical("Problem creating User: {}".format(err))
+            sys.exit(err)
 
     def getusername(self):
         return self.name

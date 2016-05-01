@@ -271,28 +271,6 @@ class RenderMentalray(RenderBase):
         """
         Main method to build the job
         """
-        ########### TESTING ##############
-        # _threadsM=4
-        _threadsPixarRender=4
-        _threads_RfMRibGen=4
-        _threadsMaya=4
-        _servicePixarRender=_service_RfMRibGen=_serviceMaya=None
-
-        if self.testing:
-            _service_Testing="Testing"
-            _tier="admin"
-
-        else:
-            _service_Testing=""
-            _tier="batch"
-
-        _servicePixarRender="PixarRender"
-        _serviceMaya="PixarRender"
-        _service_RfMRibGen="RfMRibGen"
-        _service_NukeRender="NukeRender"
-
-        #############################
-
 
         # ################ 0 JOB ################
         self.job = author.Job(title="MentalRay: {} {} {}-{}".format(self.renderusername,
@@ -311,18 +289,9 @@ class RenderMentalray(RenderBase):
                                                                      self.renderusernumber),
                               projects=[str(self.projectgroup)],
 
-                              tier=_tier,
-                              tags=[
-                                     "theWholeFarm",
-                                    ],
-                              service=_service_Testing)
-
-        self.job.newDirMap("/dabrender", "/Volumes/dabrender", "linux")
-        self.job.newDirMap("/dabrender", "/Volumes/dabrender", "osx")
-        self.job.newDirMap("/dabrender", "Z:", "windows")
-        self.job.newDirMap("/Volumes/dabrender", "Z:", "windows")
-        # self.job.newDirMap("Z:","//Volumes/dabrender", "UNC")
-        # self.job.newDirMap("Z:","/Volumes/dabrender", "NFS")
+                              tier=config.CurrentConfiguration().defaultrendertier,
+                              tags=[ "theWholeFarm", ],
+                              service="")
 
 
         # ############## PARENT #################
@@ -426,7 +395,6 @@ class RenderMentalray(RenderBase):
         # using nuke as exr colour is handled correctly
 
         if self.makeproxy:
-
             #### using the proxy_run.py script
             try:
                 _directory = "{p}/images/{s}".format( p=self.mayaprojectpath, s=self.mayascenenamebase)
@@ -445,22 +413,23 @@ class RenderMentalray(RenderBase):
 
 
         # ############## 7 NOTIFY ###############
-        task_notify = author.Task(title="Notify")
-        email = author.Command(self.mail("JOB", "COMPLETE", "blah"), service="ShellServices")
-        task_notify.addCommand(email)
-        logger.info("email = {}".format(self.email))
-        """
-        window.emailjob.get(),
-        window.emailtasks.get(),
-        window.emailcommands.get(),
-        window.emailstart.get(),
-        window.emailcompletion.get(),
-        window.emailerror.get()
-        """
-        task_notify = author.Task(title="Notify", service="ShellServices")
-        task_notify.addCommand(self.mail("JOB", "COMPLETE", "blah"))
-        task_thisjob.addChild(task_notify)
-        self.job.addChild(task_thisjob)
+        if self.sendmail:
+            task_notify = author.Task(title="Notify")
+            email = author.Command(self.mail("JOB", "COMPLETE", "blah"), service="ShellServices")
+            task_notify.addCommand(email)
+            logger.info("email = {}".format(self.email))
+            """
+            window.emailjob.get(),
+            window.emailtasks.get(),
+            window.emailcommands.get(),
+            window.emailstart.get(),
+            window.emailcompletion.get(),
+            window.emailerror.get()
+            """
+            task_notify = author.Task(title="Notify", service="ShellServices")
+            task_notify.addCommand(self.mail("JOB", "COMPLETE", "blah"))
+            task_thisjob.addChild(task_notify)
+            self.job.addChild(task_thisjob)
 
     def validate(self):
         logger.info("\n\n{:_^80}\n{}\n{:_^80}".format("snip", self.job.asTcl(), "snip"))
