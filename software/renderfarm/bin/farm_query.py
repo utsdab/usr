@@ -99,7 +99,7 @@ def gettimes():
 def getstuff(days=1):
 
     report=[]
-    jobs=tq.jobs("owner in [pixar] and spooltime < -{}d".format(int(days)),
+    jobs=tq.jobs("owner in [pixar] and spooltime > -{}d".format(int(days)),
                  columns=["jid","title","numerror","numtasks","numdone","elapsedsecs","maxslots"],
                  # limit=5,
                  sortby=["elapsedsecs"])
@@ -126,7 +126,7 @@ def getstuff(days=1):
         # print "total {} core seconds".format(totalseconds)
         corehours=totalseconds/60.0/60.0
         cost=corehours*0.2
-        report.append( "jid={},tasks={},errors={},done={},cost=${:.2f},title={},sec={:.0f}".format(jid,
+        report.append( "jid={}, tasks={}, errors={}, done={}, cost=${:.2f}, title={}, sec={:.0f}".format(jid,
                                                         tasks,errors,done,
                                                         cost,title,
                                                         elapsedsecs ))
@@ -134,4 +134,4 @@ def getstuff(days=1):
     for i,r in enumerate(report):
         print i,r
 if __name__ == '__main__':
-    getstuff(1)
+    getstuff(7)
