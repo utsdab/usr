@@ -103,6 +103,9 @@ def getstuff(days=1):
                  columns=["jid","title","numerror","numtasks","numdone","elapsedsecs","maxslots"],
                  # limit=5,
                  sortby=["elapsedsecs"])
+
+    report.append( "i,costjid, tasks, errors, done, cost $, title, corehours")
+
     for i,j in enumerate(jobs):
         # print j
         jid=j.get("jid")
@@ -126,10 +129,11 @@ def getstuff(days=1):
         # print "total {} core seconds".format(totalseconds)
         corehours=totalseconds/60.0/60.0
         cost=corehours*0.2
-        report.append( "jid={}, tasks={}, errors={}, done={}, cost=${:.2f}, title={}, sec={:.0f}".format(jid,
-                                                        tasks,errors,done,
-                                                        cost,title,
-                                                        elapsedsecs ))
+        report.append( ",{jid}, {tasks}, {errors}, {done}, {cost:.02f}, {title}, {corehours:.01f}".format(jid=jid,
+                                                        tasks=tasks,errors=errors,done=done,
+                                                        cost=cost, title=title,
+                                                        corehours=corehours))
+
 
     for i,r in enumerate(report):
         print i,r
