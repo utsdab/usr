@@ -98,7 +98,7 @@ class SendMail(JobBase):
             _tier="batch"
 
         # ################ 0 JOB ################
-        self.job = author.Job(title="Send Mail: {}".format(self.renderusername),
+        self.job = author.Job(title="MAIL: {}".format(self.renderusername),
                               priority=10,
                               envkey=["ShellServices"],
                               metadata="user={} username={} usernumber={}".format(self.user, self.renderusername,

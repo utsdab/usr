@@ -123,7 +123,7 @@ class NukeJob(RenderBase):
             _service_Testing=""
             _tier="batch"
 
-        self.job = author.Job(title="Nuke Render Job: {} {}".format(self.renderusername, _nukescriptbaseonly),
+        self.job = author.Job(title="NK: {} {}".format(self.renderusername, _nukescriptbaseonly),
                               priority=100,
                               envkey=[_nuke_envkey,"ProjectX",
                                     "TYPE={}".format(self.envtype),

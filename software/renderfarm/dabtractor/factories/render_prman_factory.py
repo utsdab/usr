@@ -23,6 +23,7 @@ logger.addHandler(sh)
 # ##############################################################
 
 import tractor.api.author as author
+import tractor.api.query as tq
 import os
 import sys
 import time
@@ -31,6 +32,7 @@ from software.renderfarm.dabtractor.factories import utils_factory as utils
 from software.renderfarm.dabtractor.factories import configuration_factory as config
 
 author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
+tq.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
 
 class RenderBase(object):
     """
@@ -147,7 +149,7 @@ class RenderPrman(RenderBase):
         """
 
         # ################ 0 JOB ################
-        self.job = author.Job(title="Renderman: {} {} {}-{}".format(
+        self.job = author.Job(title="RM: {} {} {}-{}".format(
               self.renderusername,self.scenename,self.startframe,self.endframe),
               priority=10,
               envkey=[self.envkey_rms,"ProjectX",
@@ -390,6 +392,13 @@ class RenderPrman(RenderBase):
 
         # ############## 5 NOTIFY ###############
         if self.sendmail:
+
+            # get the jid of this job
+            # query info
+            # compose mail
+
+
+
             logger.info("email = {}".format(self.email))
             task_notify = author.Task(title="Notify", service="ShellServices")
             task_notify.addCommand(self.mail("JOB", "COMPLETE", "email details still wip"))

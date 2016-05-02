@@ -273,7 +273,7 @@ class RenderMentalray(RenderBase):
         """
 
         # ################ 0 JOB ################
-        self.job = author.Job(title="MentalRay: {} {} {}-{}".format(self.renderusername,
+        self.job = author.Job(title="MR: {} {} {}-{}".format(self.renderusername,
                                                                      self.scenename,self.startframe,self.endframe),
                               priority=10,
                               envkey=[self.envkey_maya,"ProjectX",
