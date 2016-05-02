@@ -347,7 +347,6 @@ class RenderPrman(RenderBase):
             #### using the proxy_run.py script
             try:
                 _directory = "{p}/renderman/{s}/images".format( p=self.mayaprojectpath, s=self.scenebasename)
-                _proxy_envkey = "bash"
                 _option1 = " -v -fps 25 -rthreads {threads} -outres {xres} {yres} ".format(threads="4",
                                                                                            xres="1280",
                                                                                            yres = "720")
@@ -359,11 +358,11 @@ class RenderPrman(RenderBase):
 
                 _proxy_runner_cmd = [ utils.expandargumentstring(_rvio_cmd) ]
 
-                task_proxy = author.Task(title="Proxy Generation", service="NukeRender")
+                task_proxy = author.Task(title="Proxy Generation")
                 proxycommand = author.Command(argv=_proxy_runner_cmd,
-                                      service="NukeRender",
+                                      service="Transcoding",
                                       tags=["nuke", "theWholeFarm"],
-                                      envkey=[_proxy_envkey])
+                                      envkey=["rvio"])
                 task_proxy.addCommand(proxycommand)
                 task_thisjob.addChild(task_proxy)
 
