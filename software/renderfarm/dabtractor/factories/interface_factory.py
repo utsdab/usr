@@ -747,7 +747,7 @@ class RendermanWidget(qg.QWidget):
 
     def _rms_maxsamples(self, _value):
         self.job.rms_maxsamples=_value
-        logger.info("Maya changed to {}".format(self.job.rms_maxsamples))
+        logger.info("rms_maxsamples changed to {}".format(self.job.rms_maxsamples))
 
     def _rman_version(self, _value):
         self.job.rmanversion=_value

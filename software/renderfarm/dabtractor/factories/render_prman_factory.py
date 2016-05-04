@@ -278,8 +278,9 @@ class RenderPrman(RenderBase):
 
             if self.rendermaxsamples != "FROMFILE":
                 rendererspecificargs.extend([ "-maxsamples", "{}".format(self.rendermaxsamples) ])
-            if self.threadmemory != "FROMFILE":
-                rendererspecificargs.extend([ "-memorylimit", "{}".format(self.threadmemory) ])
+
+            # if self.threadmemory != "FROMFILE":
+            #     rendererspecificargs.extend([ "-memorylimit", "{}".format(self.threadmemory) ])
 
             rendererspecificargs.extend([
                 # "-pad", "4",
@@ -314,10 +315,7 @@ class RenderPrman(RenderBase):
                 # -memorylimit f    : override RIB to set memory limit ratio
                 # -checkpoint t[,t] : checkpoint interval and optional exit time
             ])
-            userspecificargs = [
-                utils.expandargumentstring(self.options),
-                "{}".format(_ribfile)
-            ]
+            userspecificargs = [ utils.expandargumentstring(self.options),"{}".format(_ribfile)]
             finalargs = commonargs + rendererspecificargs + userspecificargs
             command_render = author.Command(argv=finalargs,
                                             #envkey=[self.envkey_prman],
@@ -346,19 +344,37 @@ class RenderPrman(RenderBase):
             -o cameraShape1_StillLife.mov
             '''
 
-            #### using the proxy_run.py script
-            try:
-                _directory = "{p}/renderman/{s}/images".format( p=self.mayaprojectpath, s=self.scenebasename)
-                _option1 = " -v -fps 25 -rthreads {threads} -outres {xres} {yres} ".format(threads="4",
-                                                                                           xres="1280",
-                                                                                           yres = "720")
-                _option2 = "-out8 -leader simpleslate UTS Student={student} Show={show} Shot={shot} ".format(
-                        student="stu",show="show",shot="shot")
-                _option3 = "-overlay frameburn .4 1.0 30.0"
-                _seq = "cameraShape1/StillLife.####.exr"
-                _rvio_cmd = "rvio {} {} {} {}".format(_seq, _option1,_option2,_option3)
+            #### making proxys with rvio
+            _outmov = "{}/movies/{}.mov ".format(self.mayaprojectpath, self.scenebasename)
+            _inseq = "{}.####.exr".format(self.scenebasename)    #cameraShape1/StillLife.####.exr"
+            _directory = "{}/renderman/{}/images".format( self.mayaprojectpath, self.scenebasename)
+            _seq = os.path.join(_directory, _inseq)
 
-                _proxy_runner_cmd = [ utils.expandargumentstring(_rvio_cmd) ]
+            try:
+                utils.makedirectoriesinpath(os.path.dirname(_outmov))
+            except Exception, err:
+                logger.warn( err )
+
+            try:
+                _option1 = "-v -fps 25 -rthreads {threads} -outres {xres} {yres}".format(
+                           threads="4",
+                           xres="1280",
+                           yres = "720")
+                _option2 = "-out8 -outgamma 2.2"
+                                    # .format(
+                _student="stu"
+                _show="show"
+                _shot="shot"
+                _option3 = '{"-leader simpleslate UTS Student=%s Show=%s Shot=%s"}'%(_student,_show,_shot)
+                _option4 = '{"-overlay frameburn .4 1.0 30.0"}'
+                _option5 = '{%s}'%_outmov
+
+                _rvio_cmd = " rvio {} {} {} ".format(_seq, _option1, _option2)
+
+                _proxy_runner_cmd = [ "{a} {b} {c} {d}".format(a=utils.expandargumentstring(_rvio_cmd),
+                                                               b=_option3,
+                                                               c=_option4,
+                                                               d=_option5) ]
 
                 task_proxy = author.Task(title="Proxy Generation")
                 proxycommand = author.Command(argv=_proxy_runner_cmd,
@@ -371,22 +387,6 @@ class RenderPrman(RenderBase):
             except Exception, proxyerror:
                 logger.warn("Cant make a proxy {}".format(proxyerror))
 
-
-            # #### using the proxy_run.py script
-            # try:
-            #     _directory = "{p}/renderman/{s}/images".format( p=self.mayaprojectpath, s=self.scenebasename)
-            #     _nuke_envkey = "proxynuke{}".format(config.CurrentConfiguration().nukeversion)
-            #     _proxy_runner_cmd = ["proxy_run.py", "-s", _directory]
-            #
-            #     task_proxy = author.Task(title="Proxy Generation", service="NukeRender")
-            #     nukecommand = author.Command(argv=_proxy_runner_cmd,
-            #                           service="NukeRender",
-            #                           tags=["nuke", "theWholeFarm"],
-            #                           envkey=[_nuke_envkey])
-            #     task_proxy.addCommand(nukecommand)
-            #     task_thisjob.addChild(task_proxy)
-            # except Exception, proxyerror:
-            #     logger.warn("Cant make a proxy {}".format(proxyerror))
         else:
             logger.info("make proxy = {}".format(self.makeproxy))
 
@@ -440,6 +440,8 @@ class RenderPrman(RenderBase):
 if __name__ == "__main__":
     logger.setLevel(logging.INFO)
     logger.info("START TESTING")
+
+
 
     TEST = RenderPrman(
                        envdabrender="/Volumes/dabrender",

@@ -121,6 +121,18 @@ def getfloat(inputstring):
 def getnow():
     return datetime.datetime.now().strftime("%Y-%m-%d-%H-%M")
 
+def makedirectoriesinpath(path):
+    #looks at a path and makes the directories that may be missing
+    try:
+        os.makedirs(os.path.dirname(path))
+        logger.info("Made directory {}".format(path))
+    except Exception,err:
+        logger.warn("Didnt make {} {}".format(path,err))
+        raise
+
+
+
+
 def truncatepath(inputpath,truncatebit):
     if os.path.isdir(inputpath):
         _pathbits = os.path.abspath(inputpath).split("/")
