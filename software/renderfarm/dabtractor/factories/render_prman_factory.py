@@ -137,12 +137,10 @@ class RenderPrman(RenderBase):
         self.threads = threads
         self.threadmemory = threadmemory
         self.mayaprojectname = os.path.basename(self.mayaprojectpath)
-        self.renderimages = "{}/{}.\\*.{}".format(self.rendermanpath,self.scenebasename,self.outformat)
         self.ribpath = "{}/rib".format(self.rendermanpath)
         self.finaloutputimagebase = "{}/{}".format(self.rendermanpath,self.scenebasename)
-        self.proxyoutput = "$DABRENDER/$TYPE/$SHOW/$PROJECT/movies/$SCENENAME_{}.mov".format("datehere")
-        self.finaloutputimages = "{finaloutputpath}/$SCENENAME.\\*.{ext}".format(
-                finaloutputpath=self.renderimages, ext=self.outformat)
+        # self.proxyoutput = "$DABRENDER/$TYPE/$SHOW/$PROJECT/movies/$SCENENAME_{}.mov".format("datehere")
+
     def build(self):
         """
         Main method to build the job
@@ -247,16 +245,17 @@ class RenderPrman(RenderBase):
         task_render_frames.serialsubtasks = 0
 
         for frame in range(self.startframe, (self.endframe + 1), self.byframe):
-            _shofile = "{proj}/{scenebase}.{frame:04d}.{ext}".format(
-                proj=self.renderimages, scenebase=self.scenebasename, frame=frame, ext=self.outformat)
             _imgfile = "{proj}/{scenebase}.{frame:04d}.{ext}".format(
-                proj=self.finaloutputimagebase, scenebase=self.scenebasename, frame=frame, ext=self.outformat)
+                proj=self.renderdirectory, scenebase=self.scenebasename, frame=frame, ext=self.outformat)
+            # _imgfile = "{proj}/{scenebase}.{frame:04d}.{ext}".format(
+                # proj=self.renderdirectory, scenebase=self.scenebasename, scenebase=self.scenebasename, frame=frame, ext=self.outformat)
             _statsfile = "{proj}/rib/{frame:04d}/{frame:04d}.xml".format(
                 proj=self.rendermanpath, frame=frame)
             _ribfile = "{proj}/rib/{frame:04d}/{frame:04d}.rib".format(
                 proj=self.rendermanpath, frame=frame)
 
-            task_render_rib = author.Task(title="RENDER Frame %s" % frame, preview="sho {}".format(_shofile),
+            task_render_rib = author.Task(title="RENDER Frame {}".format(frame),
+                                          preview="sho {}".format(_imgfile),
                                           metadata="statsfile={} imgfile={}".format(_statsfile, _imgfile))
             commonargs = ["prman", "-cwd", self.mayaprojectpath]
 
@@ -345,8 +344,8 @@ class RenderPrman(RenderBase):
             '''
 
             #### making proxys with rvio
-            _outmov = "{}/movies/{}.mov ".format(self.mayaprojectpath, self.scenebasename)
-            _inseq = "{}.####.exr".format(self.scenebasename)    #cameraShape1/StillLife.####.exr"
+            _outmov = "{}/movies/{}.mov ".format(self.mayaprojectpath, self.scenebasename,utils.getnow())
+            _inseq = "{}.#.exr".format(self.scenebasename)    #cameraShape1/StillLife.####.exr"
             _directory = "{}/renderman/{}/images".format( self.mayaprojectpath, self.scenebasename)
             _seq = os.path.join(_directory, _inseq)
 
@@ -356,30 +355,33 @@ class RenderPrman(RenderBase):
                 logger.warn( err )
 
             try:
-                _option1 = "-v -fps 25 -rthreads {threads} -outres {xres} {yres}".format(
+                _option1 = "-v -fps 25 -rthreads {threads} -outres {xres} {yres} -t {start}-{end}".format(
                            threads="4",
                            xres="1280",
-                           yres = "720")
+                           yres = "720",
+                           start=self.startframe,
+                           end=self.endframe)
                 _option2 = "-out8 -outgamma 2.2"
-                                    # .format(
-                _student="stu"
-                _show="show"
-                _shot="shot"
-                _option3 = '{"-leader simpleslate UTS Student=%s Show=%s Shot=%s"}'%(_student,_show,_shot)
-                _option4 = '{"-overlay frameburn .4 1.0 30.0"}'
-                _option5 = '{%s}'%_outmov
+                _output = "-o %s" % _outmov
+                # _student="stu"
+                # _show="show"
+                # _shot="shot"
+                # _option3 = '{"-leader simpleslate UTS Student=%s Show=%s Shot=%s"}'%(_student,_show,_shot)
+                # _option4 = '{"-overlay frameburn .4 1.0 30.0"}'
+                _rvio_cmd = [ utils.expandargumentstring("rvio %s %s %s %s" % (_seq, _option1, _option2, _output)) ]
 
-                _rvio_cmd = " rvio {} {} {} ".format(_seq, _option1, _option2)
+                # _proxy_runner_cmd = [ "{a} {o}".format(a=utils.expandargumentstring(_rvio_cmd),o=_option5) ]
 
-                _proxy_runner_cmd = [ "{a} {b} {c} {d}".format(a=utils.expandargumentstring(_rvio_cmd),
-                                                               b=_option3,
-                                                               c=_option4,
-                                                               d=_option5) ]
+                # _cmd = ["{a} {o}".format(
+                #         a=_rvio_cmd,
+                #         o=_outmovie)
+                #        ]
+
 
                 task_proxy = author.Task(title="Proxy Generation")
-                proxycommand = author.Command(argv=_proxy_runner_cmd,
+                proxycommand = author.Command(argv=_rvio_cmd,
                                       service="Transcoding",
-                                      tags=["nuke", "theWholeFarm"],
+                                      tags=["rvio", "theWholeFarm"],
                                       envkey=["rvio"])
                 task_proxy.addCommand(proxycommand)
                 task_thisjob.addChild(task_proxy)

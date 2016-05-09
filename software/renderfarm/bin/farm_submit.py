@@ -28,7 +28,8 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 ###############################################################
 
-import os, sys
+import os
+import sys
 import tractor.api.author as author
 from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.maya.uts_tools import tractor_submit_maya_UI as ts
