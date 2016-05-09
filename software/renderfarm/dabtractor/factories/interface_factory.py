@@ -211,6 +211,7 @@ class ProjectWidget(qg.QWidget):
             _combobox.clear()
         except Exception,err:
             logger.critical("cant clear combobox: {}".format(err))
+            sys.exit("cant clear combobox: {}".format(err))
 
         if os.path.isdir(_dirpath):
             _items = os.listdir(_dirpath)
@@ -225,9 +226,6 @@ class ProjectWidget(qg.QWidget):
 
         for i, _item in enumerate(_dirs):
             _combobox.addItem(_item)
-
-        # except Exception, err:
-        #     logger.warn("combo from path: %s"%err)
 
     def _get_show(self):
         pass
