@@ -135,11 +135,9 @@ class ProjectWidget(qg.QWidget):
         self.show_combo.activated.connect(lambda: self._show_change())
         self.show_layout.addWidget(self.show_text_lb)
         self.show_layout.addWidget(self.show_combo)
-
         self.show_combo.setMinimumHeight(25)
         _show = "background-color:rgb(210, 255, 210);color:rgb(0, 30, 0)"
         self.show_combo.setStyleSheet(_show)
-
         self.show_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.layout().addLayout(self.show_layout)
 
@@ -155,11 +153,9 @@ class ProjectWidget(qg.QWidget):
         self.project_combo.activated.connect(lambda: self._project_change())
         self.project_layout.addWidget(self.project_text_lb)
         self.project_layout.addWidget(self.project_combo)
-
         self.project_combo.setMinimumHeight(25)
         _project = "background-color:rgb(230, 255, 230);color:rgb(0, 0, 30)"
         self.project_combo.setStyleSheet(_project)
-
         self.project_layout.addSpacerItem(qg.QSpacerItem(0,12, qg.QSizePolicy.Expanding))
         self.layout().addLayout(self.project_layout)
 
@@ -171,6 +167,7 @@ class ProjectWidget(qg.QWidget):
     def _type_change(self):
         _type = self.type_combo.currentText()
         self.job.typepath=os.path.join(self.job.dabrender, _type)
+        self.job.type=_type
 
         if _type=="user_work":
             self._combo_from_path(self.show_combo, self.job.username)
@@ -179,23 +176,24 @@ class ProjectWidget(qg.QWidget):
         elif _type=="project_work":
             self._combo_from_path(self.show_combo, self.job.typepath)
             self._combo_from_path(self.project_combo, "")
+
         logger.info("Type changed to {}".format(_type))
+        self._show_change()
 
 
     def _show_change(self):
         _show=self.show_combo.currentText()
         self.job.showpath = os.path.join(self.job.dabrender, self.job.type, _show)
-
+        self.job.show = _show
         self._combo_from_path(self.project_combo, self.job.showpath)
         logger.info("Show changed to {}".format(_show))
+        self._project_change()
 
     def _project_change(self):
         _project=self.project_combo.currentText()
         self.job.projectpath = os.path.join(self. job.showpath, _project)
-
         self.job.project = _project
         logger.info("Project changed to {}".format(_project))
-
 
     def _get_dabrender(self):
         _dabrender = os.getenv("DABRENDER")
@@ -207,26 +205,29 @@ class ProjectWidget(qg.QWidget):
     def _combo_from_path(self, _combobox, _dirpath):
         # rebuild a combobox list from the contents of a path
         # given a path build a list of files and directories
+        _files=[]
+        _dirs=[]
         try:
             _combobox.clear()
-            _files=[]
-            _dirs=[]
-            if os.path.isdir(_dirpath):
-                _items = os.listdir(_dirpath)
-                for i, _item in enumerate(_items):
-                    if os.path.isfile(os.path.join(_dirpath, _item)):
-                        _files.append(_item)
-                    elif os.path.isdir(os.path.join(_dirpath, _item)):
-                        _dirs.append(_item)
-            else:
-                # just pass thru the string
-                _dirs = [_dirpath]
+        except Exception,err:
+            logger.critical("cant clear combobox: {}".format(err))
 
-            for i, _item in enumerate(_dirs):
-                _combobox.addItem(_item)
+        if os.path.isdir(_dirpath):
+            _items = os.listdir(_dirpath)
+            for i, _item in enumerate(_items):
+                if os.path.isfile(os.path.join(_dirpath, _item)):
+                    _files.append(_item)
+                elif os.path.isdir(os.path.join(_dirpath, _item)):
+                    _dirs.append(_item)
+        else:
+            # just pass thru the string
+            _dirs = [_dirpath]
 
-        except Exception, err:
-            logger.warn("combo from path: %s"%err)
+        for i, _item in enumerate(_dirs):
+            _combobox.addItem(_item)
+
+        # except Exception, err:
+        #     logger.warn("combo from path: %s"%err)
 
     def _get_show(self):
         pass
@@ -454,7 +455,7 @@ class RangeWidget(qg.QWidget):
 
     def _start(self):
         self.job.startframe = self.framerange_start_text_le.text()
-        logger.info("Start changed to {}".format(self.job.scene))
+        logger.info("Start changed to {}".format(self.job.startframe))
 
     def _end(self):
         self.job.endframe = self.framerange_end_text_le.text()
@@ -697,6 +698,7 @@ class RendermanWidget(qg.QWidget):
         self.integrator_combo = qg.QComboBox()
         self.integrator_combo.addItems(config.CurrentConfiguration().rendermanintegrators)
         self.integrator_combo.setMinimumWidth(_width1)
+        self.integrator_combo.setCurrentIndex(0)
         self.integrator_layout = qg.QHBoxLayout()
         self.integrator_layout.setContentsMargins(0, 0, 0, 0)
         self.integrator_layout.setSpacing(0)
@@ -709,6 +711,9 @@ class RendermanWidget(qg.QWidget):
         self.maxsamples_combo = qg.QComboBox()
         self.maxsamples_combo.addItems(config.CurrentConfiguration().rendermaxsamples)
         self.maxsamples_combo.setMinimumWidth(_width1)
+
+        self.maxsamples_combo.setCurrentIndex(3)
+
         self.maxsamples_layout = qg.QHBoxLayout()
         self.maxsamples_layout.setContentsMargins(0, 0, 0, 0)
         self.maxsamples_layout.setSpacing(0)
@@ -719,7 +724,7 @@ class RendermanWidget(qg.QWidget):
 
         self.options_text_lb = qg.QLabel('OPTIONS:')
         self.options_combo = qg.QComboBox()
-        self.options_combo.addItem("")
+        self.options_combo.addItem("-v")
         self.options_combo.addItem("-binary")
         self.options_combo.setEditable(True)
         self.options_combo.setMinimumWidth(220)
@@ -1010,11 +1015,10 @@ class TractorWidget(qg.QWidget):
         self.project_group_layout = qg.QHBoxLayout()
         self.project_group_layout.setContentsMargins(0, 0, 0, 0)
         self.project_group_layout.setSpacing(0)
-
         self.project_group_text_lb = qg.QLabel('PROJECT GROUP:')
         self.project_group_combo = qg.QComboBox()
         self.project_group_combo.addItems(config.CurrentConfiguration().projectgroups)
-
+        self.project_group_combo.setCurrentIndex(0)
         self.project_group_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.project_group_layout.addWidget(self.project_group_text_lb)
         self.project_group_layout.addWidget(self.project_group_combo)
@@ -1162,10 +1166,14 @@ class FarmJobExtraWidget(qg.QWidget):
         self.farm_radio_box4.clicked.connect(lambda: self._box4(self.farm_radio_box4.isChecked()))
 
         # set initial
-        self.farm_radio_box2.setChecked(True)
-        self.job.makeproxy=True
         self.farm_radio_box1.setChecked(True)
-        self.job.sendmail=True
+        self.farm_radio_box2.setChecked(True)
+        self.farm_radio_box3.setChecked(True)
+        self.farm_radio_box4.setChecked(True)
+        self._box1(True)
+        self._box2(True)
+        self._box3(True)
+        self._box4(True)
 
     def _box2(self, _value):
         self.job.makeproxy = _value
