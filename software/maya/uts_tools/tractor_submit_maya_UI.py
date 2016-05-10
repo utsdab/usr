@@ -38,13 +38,14 @@ import PySide.QtCore as qc
 import PySide.QtGui as qg
 import sys
 import os
-from software.renderfarm.dabtractor.factories import user_factory as ufac
+from software.renderfarm.dabtractor.factories import configuration_factory as config
 from software.renderfarm.dabtractor.factories import interface_factory as ifac
 from software.renderfarm.dabtractor.factories import render_prman_factory as rmsfac
 from software.renderfarm.dabtractor.factories import render_mr_factory as mrfac
 from software.renderfarm.dabtractor.factories import render_nuke_factory as nukefac
 from software.renderfarm.dabtractor.factories import command_factory as cmdfac
 from software.renderfarm.dabtractor.factories import environment_factory as env
+
 
 from functools import partial
 import tractor.api.query as tq
@@ -56,8 +57,8 @@ TRACTOT_SUBMIT_DIALOG = None
 MAYA_PRESENT = False
 COL1 = "background-color:lightgrey;color:black"
 COL2 = "background-color:lightgreen;color:darkblue"
-VERSION = "0.99"
-BUILD = "2016_04_16"
+VERSION = config.CurrentConfiguration().farmversion
+BUILD = config.CurrentConfiguration().farmbuild
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmit(qg.QDialog):
@@ -80,7 +81,7 @@ class TractorSubmit(qg.QDialog):
         except Exception,err:
             sys.exit(err)
 
-        self.setWindowTitle('UTS FARM SUBMIT V{}_{}'.format(VERSION,BUILD))
+        self.setWindowTitle('UTS FARM SUBMIT BLD{} {}'.format(BUILD, VERSION))
         self.setObjectName('UTS_FARM_SUBMIT')
         self.setWindowFlags(qc.Qt.WindowStaysOnTopHint)
         self.main_widget = TractorSubmitWidget(self.job,self.maya)
@@ -256,7 +257,7 @@ class Job(env.Environment):
             self.fb.write("Spool OK")
         except Exception, err:
             logger.warn("Job spool error: {}".format(err))
-            self.fb.write("Spool Fail: {}".format(err))
+            self.fb.write("Spool Fail, Validate first!! : {}".format(err))
 
 
 # -------------------------------------------------------------------------------------------------------------------- #

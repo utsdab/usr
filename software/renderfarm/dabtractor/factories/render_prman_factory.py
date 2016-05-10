@@ -345,7 +345,7 @@ class RenderPrman(RenderBase):
 
             #### making proxys with rvio
             _outmov = "{}/movies/{}.mov ".format(self.mayaprojectpath, self.scenebasename,utils.getnow())
-            _inseq = "{}.#.exr".format(self.scenebasename)    #cameraShape1/StillLife.####.exr"
+            _inseq = "{}.####.exr".format(self.scenebasename)    #cameraShape1/StillLife.####.exr"
             _directory = "{}/renderman/{}/images".format( self.mayaprojectpath, self.scenebasename)
             _seq = os.path.join(_directory, _inseq)
 
@@ -362,21 +362,10 @@ class RenderPrman(RenderBase):
                            start=self.startframe,
                            end=self.endframe)
                 _option2 = "-out8 -outgamma 2.2"
+                _option3 = "-overlay frameburn 0.5 1.0 30 -leader simpleslate UTS_BDES_ANIMATION Student={}".format(self.user)
                 _output = "-o %s" % _outmov
-                # _student="stu"
-                # _show="show"
-                # _shot="shot"
-                # _option3 = '{"-leader simpleslate UTS Student=%s Show=%s Shot=%s"}'%(_student,_show,_shot)
-                # _option4 = '{"-overlay frameburn .4 1.0 30.0"}'
-                _rvio_cmd = [ utils.expandargumentstring("rvio %s %s %s %s" % (_seq, _option1, _option2, _output)) ]
 
-                # _proxy_runner_cmd = [ "{a} {o}".format(a=utils.expandargumentstring(_rvio_cmd),o=_option5) ]
-
-                # _cmd = ["{a} {o}".format(
-                #         a=_rvio_cmd,
-                #         o=_outmovie)
-                #        ]
-
+                _rvio_cmd = [ utils.expandargumentstring("rvio %s %s %s %s %s" % (_seq, _option1, _option2, _option3, _output)) ]
 
                 task_proxy = author.Task(title="Proxy Generation")
                 proxycommand = author.Command(argv=_rvio_cmd,
@@ -398,8 +387,6 @@ class RenderPrman(RenderBase):
             # get the jid of this job
             # query info
             # compose mail
-
-
 
             logger.info("email = {}".format(self.email))
             task_notify = author.Task(title="Notify", service="ShellServices")

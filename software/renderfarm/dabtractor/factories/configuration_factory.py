@@ -58,6 +58,8 @@ class ConfigurationBase(object):
         self.userid = self.getfromenv("USER")
         self.superuser = ("",)
         self.defaultrendertiers = ("batch", "rush", "admin")
+        self.farmversion = ("2016-05-10")
+        self.farmbuild = ("1.01")
 
     # def getusrinternally(self):
     #     a= utils.truncatepath(os.path.dirname(self.configpath))
