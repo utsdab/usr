@@ -191,7 +191,7 @@ class Job(env.Environment):
                     framechunks=int(self.chunks),
                     projectgroup=self.projectgroup,
                     renderer="mr",
-                    outformat="exr",
+                    outformat=self.outformat,
                     resolution=self.resolution,
                     skipframes=0,
                     makeproxy=self.makeproxy,

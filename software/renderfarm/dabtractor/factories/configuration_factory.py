@@ -50,7 +50,7 @@ class ConfigurationBase(object):
         self.rendermemorys = ("8000", "4000", "2000")
         self.rendermaxsamples = ("FROMFILE", "1024", "512", "256", "128", "64", "32", "16")
         self.resolutions = ("FROMFILE", "1080p", "720p", "540p", "108p",)
-        self.outformats = ("exr",)
+        self.outformats = ("exr","png","jpg","iff","tif")
         self.envtypes = ("user_work", "project_work",)
         self.envshow = ("",)
         self.envproject = ("",)

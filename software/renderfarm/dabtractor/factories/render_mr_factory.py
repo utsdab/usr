@@ -195,6 +195,7 @@ class RenderMentalray(RenderBase):
                  resolution="540p",
                  skipframes=0,
                  makeproxy=0,
+                 sendmail = 0,
                  options="",
                  email=[1,0,0,0,1,0]
         ):
@@ -218,7 +219,6 @@ class RenderMentalray(RenderBase):
         self.scenename = os.path.split(envscene)[-1:][0]
         self.scenebasename = os.path.splitext(self.scenename)[0]
         self.sceneext = os.path.splitext(self.scenename)[1]
-
         self.mayaversion = mayaversion
         self.envkey_maya="maya{}".format(self.mayaversion)
 
@@ -234,13 +234,13 @@ class RenderMentalray(RenderBase):
             self.renderername = 'Maya Render'
         else:
             self.renderername = 'Render'
-
         self.projectgroup = projectgroup
         self.options = options
         self.email = email
         self.resolution = resolution
         self.outformat = outformat
         self.makeproxy = makeproxy
+        self.sendmail = sendmail
         self.skipframes = skipframes
         self.threads=threads
         self.threadmemory=threadmemory
@@ -251,7 +251,6 @@ class RenderMentalray(RenderBase):
         self.mayascenenameext = os.path.splitext(self.mayascenename)[1]
         self.renderdirectory = "images"
         self.environmentkey = 'maya{}'.format(self.mayaversion)
-
         self.finaloutputpath = "{work}/{proj}/{images}/{scene}".format(
             work=self.dabrenderworkpath,
             proj=self.mayaprojectname,
@@ -297,9 +296,6 @@ class RenderMentalray(RenderBase):
         # ############## PARENT #################
         task_thisjob = author.Task(title="Maya Render Job", service="MayaMentalRay")
         task_thisjob.serialsubtasks = 1
-
-
-        # ############## 1 PREFLIGHT ##############
 
 
         # ############## 3 RENDER ##############
@@ -366,8 +362,10 @@ class RenderMentalray(RenderBase):
                 "-mem", "4000",
                 "-v", "4",
                 "-pad", "4",
-                #"-of", "%s" % self.outformat,
+                "-of", "%s" % self.outformat,
                 # the -of flag is fawlty for setting exr
+                "-rgb", "1"               # Turn RGB output on or off
+                "-alpha", "1"              #Turn Alpha output on or off
                 "-skipExistingFrames", "%s" % self.skipframes])
 
             userspecificargs = [
