@@ -104,7 +104,13 @@ def expandargumentstring(inputargs=""):
     This takes a string like "-r 2 -l 4" and returns
     {-r} {2} {-l} {4} which is what tractor wants for arguments
     """
-    arglist = inputargs.split(" ")
+    mystring = inputargs.strip()  # the while loop will leave a trailing space,
+                  # so the trailing whitespace must be dealt with
+                  # before or after the while loop
+    while '  ' in mystring:
+        mystring = mystring.replace('  ', ' ')
+
+    arglist = mystring.split(" ")
     outputstring = "} {".join(arglist)
     return outputstring
 

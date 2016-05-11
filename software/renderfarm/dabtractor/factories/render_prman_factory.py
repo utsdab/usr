@@ -247,8 +247,6 @@ class RenderPrman(RenderBase):
         for frame in range(self.startframe, (self.endframe + 1), self.byframe):
             _imgfile = "{proj}/{scenebase}.{frame:04d}.{ext}".format(
                 proj=self.renderdirectory, scenebase=self.scenebasename, frame=frame, ext=self.outformat)
-            # _imgfile = "{proj}/{scenebase}.{frame:04d}.{ext}".format(
-                # proj=self.renderdirectory, scenebase=self.scenebasename, scenebase=self.scenebasename, frame=frame, ext=self.outformat)
             _statsfile = "{proj}/rib/{frame:04d}/{frame:04d}.xml".format(
                 proj=self.rendermanpath, frame=frame)
             _ribfile = "{proj}/rib/{frame:04d}/{frame:04d}.rib".format(

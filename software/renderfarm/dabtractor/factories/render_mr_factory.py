@@ -362,10 +362,10 @@ class RenderMentalray(RenderBase):
                 "-mem", "4000",
                 "-v", "4",
                 "-pad", "4",
-                "-of", "%s" % self.outformat,
+                # "-of", "%s" % self.outformat,
                 # the -of flag is fawlty for setting exr
-                "-rgb", "1"               # Turn RGB output on or off
-                "-alpha", "1"              #Turn Alpha output on or off
+                "-rgb", "True",               # Turn RGB output on or off
+                "-alpha", "True",              #Turn Alpha output on or off
                 "-skipExistingFrames", "%s" % self.skipframes])
 
             userspecificargs = [
@@ -381,7 +381,6 @@ class RenderMentalray(RenderBase):
                                     atleast=int(self.threads),
                                     envkey=["maya{}".format(self.mayaversion)]
                                     )
-            # thischunk.addCommand(env)
             thischunk.addCommand(render)
             _chunkstart = _chunkend + 1
             _chunkend += self.framechunks
@@ -390,24 +389,57 @@ class RenderMentalray(RenderBase):
         task_thisjob.addChild(task_render)
 
         # ############## 4 PROXY ###############
-        # using nuke as exr colour is handled correctly
+
 
         if self.makeproxy:
-            #### using the proxy_run.py script
-            try:
-                _directory = "{p}/images/{s}".format( p=self.mayaprojectpath, s=self.mayascenenamebase)
-                _nuke_envkey = "proxynuke{}".format(config.CurrentConfiguration().nukeversion)
-                _proxy_runner_cmd = ["proxy_run.py","-s",_directory]
 
-                task_proxy = author.Task(title="Proxy Generation", service="NukeRender")
-                nukecommand = author.Command(argv=_proxy_runner_cmd,
-                                      service="NukeRender",
-                                      tags=["nuke", "theWholeFarm"],
-                                      envkey=[_nuke_envkey])
-                task_proxy.addCommand(nukecommand)
+            '''
+            rvio cameraShape1/StillLife.####.exr  -v -fps 25
+            -rthreads 4
+            -outres 1280 720 -out8
+            -leader simpleslate "UTS" "Artist=Anthony" "Show=Still_Life" "Shot=Testing"
+            -overlay frameburn .4 1.0 30.0  -overlay matte 2.35 0.3 -overlay watermark "UTS 3D LAB" .2
+            -outgamma 2.2
+            -o cameraShape1_StillLife.mov
+            '''
+
+            #### making proxys with rvio
+            _outmov = "{}/movies/{}.mov".format(self.mayaprojectpath, self.scenebasename,utils.getnow())
+            _inseq = "{}.####.exr".format(self.scenebasename)    #cameraShape1/StillLife.####.exr"
+            _directory = "{}/images/{}".format( self.mayaprojectpath, self.scenebasename)
+            _seq = os.path.join(_directory, _inseq)
+
+            try:
+                utils.makedirectoriesinpath(os.path.dirname(_outmov))
+            except Exception, err:
+                logger.warn( err )
+
+            try:
+                _option1 = "-v -fps 25 -rthreads {threads} -outres {xres} {yres} -t {start}-{end}".format(
+                           threads="4",
+                           xres="1280",
+                           yres = "720",
+                           start=self.startframe,
+                           end=self.endframe)
+                _option2 = "-out8 -outgamma 2.2"
+                _option3 = "-overlay frameburn 0.5 1.0 30 -leader simpleslate UTS_BDES_ANIMATION Student={}".format(self.user)
+                _output = "-o %s" % _outmov
+
+                _rvio_cmd = [ utils.expandargumentstring("rvio %s %s %s %s %s" % (_seq, _option1, _option2, _option3, _output)) ]
+
+                task_proxy = author.Task(title="Proxy Generation")
+                proxycommand = author.Command(argv=_rvio_cmd,
+                                      service="Transcoding",
+                                      tags=["rvio", "theWholeFarm"],
+                                      envkey=["rvio"])
+                task_proxy.addCommand(proxycommand)
                 task_thisjob.addChild(task_proxy)
+
             except Exception, proxyerror:
                 logger.warn("Cant make a proxy {}".format(proxyerror))
+
+        else:
+            logger.info("make proxy = {}".format(self.makeproxy))
 
 
         # ############## 7 NOTIFY ###############
