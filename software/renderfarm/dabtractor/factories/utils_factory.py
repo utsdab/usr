@@ -52,7 +52,7 @@ def sendmail(mailto,
 def getfrompathlist(filetoget, iconpath="ICONPATH"):
     # the path list is much assumed to be much like the environment PATH list separated by :
     # the file is without string
-    #returns the matching full path
+    # returns the matching full path
     _iconpaths = []
     _icon = None
 
@@ -67,6 +67,7 @@ def getfrompathlist(filetoget, iconpath="ICONPATH"):
             logger.debug("Found icon: {}".format(_icon))
 
     return _icon
+
 
 def frompathgetuserhome(inputpath):
     try:
@@ -95,9 +96,11 @@ def getvalues(entries):
         text = entry[1].get()
         logger.info('%s: "%s"' % (field, text))
 
+
 def usedirmap(inputstring):
     # wraps a command string up as per dirmap needs in pixar tractor eg. %D(mayabatch)
     return '%D({thing})'.format(thing=inputstring)
+
 
 def expandargumentstring(inputargs=""):
     """
@@ -113,6 +116,7 @@ def expandargumentstring(inputargs=""):
     arglist = mystring.split(" ")
     outputstring = "} {".join(arglist)
     return outputstring
+
 
 def getfloat(inputstring):
     """
