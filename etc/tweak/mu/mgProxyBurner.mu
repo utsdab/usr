@@ -77,7 +77,7 @@ module: mgProxyBurner
 
         let op  = 1.0, 
             size 	= 128.0,
-            tif 	= "/jobs/alfx/al_library/assets/still/animal/logo/small_001/still_animal_logo_small_001_v008/ALLogo_onBlack_512x512.tif",
+            tif 	= "Logo_onBlack_512x512.tif",
             logo  	= image(tif),
             filename 	= logo.name,
             unpremult 	= true;
@@ -87,7 +87,7 @@ module: mgProxyBurner
         let msize = max(float(size), float(size) * aspect),
             n = int(log2(msize));
 
-        //  Some AL logo assets are here: 
+        //  Some logo assets are here:
         //     /jobs/alfx/al_library/assets/still/animal/logo/small_001/still_animal_logo_small_001_v008
         //  Resize the image to a power of 2 texture
         //
@@ -230,7 +230,7 @@ module: mgProxyBurner
         
         // draw Ownership
         glColor(c1);
-		gltext.writeAt(z2, y, "Animal Logic");        
+		gltext.writeAt(z2, y, "UTS Animation");
 		
 		// draw file name root
 		gltext.color(c2);

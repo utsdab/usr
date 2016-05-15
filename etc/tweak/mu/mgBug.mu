@@ -79,7 +79,7 @@ module: mgBug
         //
         //string tif;
         
-        let defaultImage = "/jobs/alfx/al_library/assets/still/animal/logo/small_001/still_animal_logo_small_001_v008/ALLogo_onBlack_512x512.tif",
+        let defaultImage = "Logo_onBlack_512x512.tif",
             tif = defaultImage;
         
         string[] options = string[]();
@@ -94,12 +94,12 @@ module: mgBug
         //
         // Check for the logo, opacity, size, x position, y position
         //
-        print(" [alBug]ARGUMENTS: alBug.mu optional [ tif_file|'nil', opacity, height, x, y ]\n");
+        print(" [alBug]ARGUMENTS:mglBug.mu optional [ tif_file|'nil', opacity, height, x, y ]\n");
         print(" [alBug]SUPPLIED:  %s\n"%(options));
         
         if (options.size() < 1) 
         {
-            print("[alBug]INFO: using default settings %s\n"%(tif));
+            print("[mgBug]INFO: using default settings %s\n"%(tif));
         }
         else  tif = options[0];
         
@@ -142,7 +142,7 @@ module: mgBug
                 d = x - n,
                 p = int(if d > 0.0 then pow(2, n+1) else pow(2, n));
 
-            print("[alBug]INFO: alBug.mu Resizing %s to %d x %d texture\n" % (filename, p, p));
+            print("[alBug]INFO: mgBug.mu Resizing %s to %d x %d texture\n" % (filename, p, p));
             logo = resize(logo, p, p);
         }
 
