@@ -415,6 +415,7 @@ class RenderMentalray(RenderBase):
                 logger.warn( err )
 
             try:
+
                 _option1 = "-v -fps 25 -rthreads {threads} -outres {xres} {yres} -t {start}-{end}".format(
                            threads="4",
                            xres="1280",

@@ -344,13 +344,14 @@ class RenderPrman(RenderBase):
             #### making proxys with rvio
             _outmov = "{}/movies/{}.mov".format(self.mayaprojectpath, self.scenebasename,utils.getnow())
             _inseq = "{}.####.exr".format(self.scenebasename)    #cameraShape1/StillLife.####.exr"
-            _directory = "{}/renderman/{}/images".format( self.mayaprojectpath, self.scenebasename)
+            _directory = "{}/renderman/{}/images".format(self.mayaprojectpath, self.scenebasename)
             _seq = os.path.join(_directory, _inseq)
+
 
             try:
                 utils.makedirectoriesinpath(os.path.dirname(_outmov))
             except Exception, err:
-                logger.warn( err )
+                logger.warn(err)
 
             try:
                 _option1 = "-v -fps 25 -rthreads {threads} -outres {xres} {yres} -t {start}-{end}".format(
