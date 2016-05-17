@@ -14,11 +14,11 @@ Draws the frame number on lower-right part the image. You specify
 the opacity, greyscale value, and point size of the font as args. 
 
 ----
-  rvio in.#.jpg -o out.mov -overlay mgFrameBurn 0
+  rvio in.#.jpg -o out.mov -overlay frameburn .4 1.0 30.0
 ----
 
 The above example will render a frame number in the bottom right
-corner of the image with an opacity of 0.6 a greyscale value of 1
+corner of the image with an opacity of 0.4 a greyscale value of 1
 (white) and point size 30.0.
 
 To change the font you must hack the frameburn.mu file to call
@@ -28,11 +28,9 @@ make sure this file is not "old" style --
 it needs to have all of the font data in the data fork of the file.
 """;
 
-module: mgFrameBurn
+module: frameburn
 {
     documentation: "See module documentation.";
-    global int counter = -1;
-
 
     \: main (void; int w, int h, 
              int tx, int ty,
@@ -46,43 +44,24 @@ module: mgFrameBurn
         setupProjection(w, h);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        
-        //print(" ARGUMENTS: mgFrameBurn.mu  [offset ]\n");
 
-        
-		let _ : offset : _  = argv;
-        let op = 0.6, grey = 1.0, size =  h / 30; 
-        
-        
+        let _ : op : grey : size : _  = argv;
+
         gltext.size(int(size));
-    
-        let g      = float(grey);
-        let c      = Color(g, g, g, float(op));
+
+        let text   = "%04d" % frame,
+            b      = gltext.bounds("0000"),
+            sh     = b[1] + b[3],
+            sw     = b[0] + b[2],
+            margin = 6,
+            x      = w - sw - margin,
+            y      = margin,
+            g      = float(grey),
+            c      = Color(g, g, g, float(op));
 
         glColor(c);
         gltext.color(c);
-		
-        let b = gltext.bounds("00000000"),
-			height = b[1] + b[3],
-			width  = b[0] + b[2],
-			x      = int (w * 0.95 - (width/2) ),
-			y	   = int(   height * 2.0   );
-        
 
-					
-        let newframe = int(offset) + frame,
-        	text   = "%0.8d" % (newframe);
-        	
-		
-		if (counter != -1)
-		{
-			let counter = newframe;
-		}
-		else
-		{
-			let counter = counter;
-		}
-        
         for_each (keyval; keyvals)
         {
             let (key, value) = keyval;
@@ -94,10 +73,9 @@ module: mgFrameBurn
                 //
 
                 gltext.color(Color(1,0,0,float(op)));
-            };
+            }
         }
-        
+
         gltext.writeAt(x, y, text);
-        
     }
 }

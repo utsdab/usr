@@ -54,7 +54,7 @@ module: mgTimecode
 		
 		
 		//print(" ARGUMENTS: alTimecode.mu  [opacity,grey,size,offset,rate,xloc,yloc ]\n");
-		//print(" EXAMPLE  : -leader -alTimecode 1.0 1.0 20 1000 24.0 0.5 0.5\n");
+		//print(" EXAMPLE  : -leader -mgTimecode 1.0 1.0 20 1000 24.0 0.5 0.5\n");
 		//print(" SUPPLIED :  %s\n"%(argv));
 		
 		let _ : offset :  _  = argv;

@@ -17,33 +17,25 @@ This overlay script also contains an init() function which is called
 only once before the first time main() is called. In this case, this
 function is used to load a texture (.tiff file) only once.
 
-This module draws a logo/bug image in the output imagery. The options to this 
-    module are as follows:
+This module draws a logo/bug image in the output imagery. The options to this module are as follows:
 
 required:
-none
+logo_file_path - path to the square power-of-two tiff to be used as the bug/logo
 
 optional:
-logo_file_path - path to the square power-of-two tiff to be used as the bug/logo
-    if "nil" is supplied or no args then a default animal logo from
-    the asset library is used.
 logo_opacity - how transparent the logo is rendered (default opacity is 0.3)
-logo_height - height to render the logo at into each frame (default is the 
-    height of the image NOTE: will be resized to nearest power of 2)
-logo_x_location - horizontal position of the logo based on native coordinate 
-    system of source media (default 10 pixels in)
-logo_y_location - veritical position of the logo based on native coordinate 
-    system of source media (default 10 pxels in)
+logo_height - height to render the logo at into each frame (default is the height of the image NOTE: will be resized to nearest power of 2)
+logo_x_location - horizontal position of the logo based on native coordinate system of source media (default 10 pixels in)
+logo_y_location - veritical position of the logo based on native coordinate system of source media (default 10 pxels in)
 
 ----
   rvio in.#.jpg -o out.mov -overlay bug logo.tif 0.4 100 15 100
-                                                 opacity height x y
 ----
 
 The above example will render a 40% opaque bug image 128 pixels tall 15 pixels into the frame and 100 pixels down the frame.
 """;
 
-module: mgBug
+module: bug
 {
     //
     //  init() is called only once before the first call to main. 
@@ -77,11 +69,7 @@ module: mgBug
         //
         // Convert the argv list to an options array
         //
-        //string tif;
-        
-        let defaultImage = "Logo_onBlack_512x512.tif",
-            tif = defaultImage;
-        
+
         string[] options = string[]();
         let _ : args = argv;
         while (args neq nil)
@@ -94,42 +82,28 @@ module: mgBug
         //
         // Check for the logo, opacity, size, x position, y position
         //
-        print(" [mgBug]ARGUMENTS:mglBug.mu optional [ tif_file|'nil', opacity, height, x, y ]\n");
-        print(" [mgBug]SUPPLIED:  %s\n"%(options));
-        
-        if (options.size() < 1) 
-        {
-            print("[mgBug]INFO: using default settings %s\n"%(tif));
-        }
-        else  tif = options[0];
-        
-        if ( tif == "nil" ) tif = defaultImage;
-        {
-        	print("[alBug]INFO: using default file:\n\t%s\n"%(tif));
-        }
-        
-        let logo = image(tif);
-        let filename = logo.name;
+
+        if (options.size() < 1) print("ERROR: bug requires a path to the logo tiff file.\n");
+        string tif = options[0];
+        let logo = image(tif), filename = logo.name;
 
         if (options.size() > 1) op = float(options[1]);
-        else                    op = 1.0;
+        else                    op = 0.3;
 
         if (options.size() > 2) size = int(options[2]);
-        else                    size = 92;
-        //else                    size = logo.height;
+        else                    size = logo.height;
 
         if (options.size() > 3) xloc = int(options[3]);
-        else                    xloc = w-size;
+        else                    xloc = 10;
 
         if (options.size() > 4) yloc = int(options[4]);
-        else                    yloc = h-size;
+        else                    yloc = 10;
 
         aspect = float(logo.width) / float(logo.height);
 
         let msize = max(float(size), float(size) * aspect),
             n = int(log2(msize));
 
-        //print("%s %s"%(xloc,yloc));
         //
         //  Resize the image to a power of 2 texture
         //
@@ -142,7 +116,7 @@ module: mgBug
                 d = x - n,
                 p = int(if d > 0.0 then pow(2, n+1) else pow(2, n));
 
-            print("[alBug]INFO: mgBug.mu Resizing %s to %d x %d texture\n" % (filename, p, p));
+            print("INFO: Resizing %s to %d x %d texture\n" % (filename, p, p));
             logo = resize(logo, p, p);
         }
 
@@ -181,11 +155,9 @@ module: mgBug
 
         let iw      = size,
             ih      = size,
-            iy      = yloc,
-            ix      = xloc;            
+            iy      = h - ih - yloc,
+            ix      = xloc;
 
-        //print("%s %s"%(ix,iy));
         drawTexture(texid, ix, iy, iw * aspect, ih, op, true);
-        glDisable(GL_TEXTURE_2D); //important
     }
 }

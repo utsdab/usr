@@ -181,11 +181,11 @@ module: mgProxyData
         
         if (dataOK)
         {
-			print("\n[alProxyData] DATAFILELOADED   : %s"%( D.getFile()));
-			print("\n[alProxyData] BUILDING : %s"%( "stringArray"));
+			print("\n[mgProxyData] DATAFILELOADED   : %s"%( D.getFile()));
+			print("\n[mgProxyData] BUILDING : %s"%( "stringArray"));
 			
 			D.buildStringArray();
-			print("\n[alProxyData] DONE \n" );
+			print("\n[mgProxyData] DONE \n" );
 			let dataArray = D.getStringArray();  
 			//print(">>>>>>>>>\n%s"%(D.getStringArray()));
         }
@@ -224,7 +224,7 @@ module: mgProxyData
             }
             else 
             {
-            	print("\nDEBUG[alProxyData]: writeText: %s got %s" % ("Expecting 8 args",format.size()));
+            	print("\nDEBUG[mgProxyData]: writeText: %s got %s" % ("Expecting 8 args",format.size()));
             }
         }
 
@@ -258,7 +258,7 @@ module: mgProxyData
 
                 int index = 0;                
 
-                //print("\nDEBUG[alProxyData]: data KEYS data[0]: %s" % (dataArray[0]));
+                //print("\nDEBUG[mgProxyData]: data KEYS data[0]: %s" % (dataArray[0]));
                 
                 int matchedKey;
                 
@@ -300,12 +300,12 @@ module: mgProxyData
                 }
                 catch (exception exc)
                 {
-                    print("\n[alProxyData] exception thrown");
+                    print("\n[mgProxyData] exception thrown");
                 }
             }
             else 
             {
-                print("\nWARNING[alProxyData]: Couldnt write format wrong: %s " % ( keyNames[0] ) );
+                print("\nWARNING[mgProxyData]: Couldnt write format wrong: %s " % ( keyNames[0] ) );
             }
         }
 
@@ -339,7 +339,7 @@ module: mgProxyData
             else 
             {
 
-            	print("\nDEBUG[alProxyData]: writeBox: %s " % ("Failed"));
+            	print("\nDEBUG[mgProxyData]: writeBox: %s " % ("Failed"));
 
             }
        
@@ -387,8 +387,8 @@ module: mgProxyData
 					{
 						matchedKey = i;
 
-						//print("\nDEBUG[alProxyData]: found your KEYWORD %s %s" % ( dataArray[0][i], i) );
-						//print("\nDEBUG[alProxyData]: name munging %s %s %s=>%s"% ( dataArray[0][i],format[0],keyNames[0],keyNames[1]));
+						//print("\nDEBUG[mgProxyData]: found your KEYWORD %s %s" % ( dataArray[0][i], i) );
+						//print("\nDEBUG[mgProxyData]: name munging %s %s %s=>%s"% ( dataArray[0][i],format[0],keyNames[0],keyNames[1]));
 
 					}
 				}
@@ -397,9 +397,9 @@ module: mgProxyData
 					if ( matchedKey != "nil")
 					{
 
-						//print("\nDEBUG[alProxyData]: data from : %s " % (datafile) );
-						//print("\nDEBUG[alProxyData]:    format : %s " % (format) );
-						//print("\nDEBUG[alProxyData]:      data : %s " % (dataArray[frame][matchedKey]) );
+						//print("\nDEBUG[mgProxyData]: data from : %s " % (datafile) );
+						//print("\nDEBUG[mgProxyData]:    format : %s " % (format) );
+						//print("\nDEBUG[mgProxyData]:      data : %s " % (dataArray[frame][matchedKey]) );
 
 						gltext.size(size);
 						gltext.color(color);
@@ -410,12 +410,12 @@ module: mgProxyData
 				}
 				catch (exception exc)
 				{
-					print("\n[alProxyData] exception thrown");
+					print("\n[mgProxyData] exception thrown");
 				}
 			}
 			else 
 			{
-				print("\nWARNING[alProxyData]: Couldnt write: %s " % ( keyNames[0] ) );
+				print("\nWARNING[mgProxyData]: Couldnt write: %s " % ( keyNames[0] ) );
 			}
 		}
 

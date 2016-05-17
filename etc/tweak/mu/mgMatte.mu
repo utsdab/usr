@@ -35,7 +35,7 @@ module: mgMatte
 			int frame,
 			[string] argv)
 	{
-			print("\n[alMatte] ARGUMENTS: aspect opacity\n" );
+			print("\n[mgMatte] ARGUMENTS: aspect opacity\n" );
 	}
     
     
