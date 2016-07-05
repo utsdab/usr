@@ -23,8 +23,8 @@ esac
 
 done
 
-export DYLD_LIBRARY_PATH=${NEW_PATH}
+#export DYLD_LIBRARY_PATH=${NEW_PATH}
 
 CLEAN_PATH=`perl -e 'print join ":", grep {!$h{$_}++} split ":", $ENV{DYLD_LIBRARY_PATH}'`
-export DYLD_LIBRARY_PATH=${CLEAN_PATH}
+#export DYLD_LIBRARY_PATH=${CLEAN_PATH}
 echo "INFO: DYLD_LIBRARY_PATH  ${DYLD_LIBRARY_PATH}"
