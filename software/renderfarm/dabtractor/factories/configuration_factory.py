@@ -28,11 +28,11 @@ class ConfigurationBase(object):
         self.configpath = inspect.getfile(self.__class__)
         # logger.info("config path = {}".format(self.configpath))
         # print os.path.abspath(sys.modules[ConfigurationBase.__module__].__file__)
-        self.mayaversions = ("2016",)
-        self.rendermanversions = ("20.8","20.7","20.6",)
+        self.mayaversions = ("2016.5","2016",)
+        self.rendermanversions = ("20.10",)
         self.rendermanrenderers = ("rms-ris", "rms-reyes")
         self.rendermanintegrators = ("FROMFILE","pxr", "vcm","visualiser")
-        self.nukeversions = ("9.0v8","9.0v7")
+        self.nukeversions = ("10.0v2","9.0v8")
         self.configuration = "base"
         self.projectgroups = ("yr1", "yr2", "yr3", "yr4", "masters", "personal", "admin")
         self.mayarenderers = ("mr", "sw", "FROMFILE")
@@ -40,6 +40,8 @@ class ConfigurationBase(object):
         self.renderfarmmodulepath = (os.path.dirname(os.path.dirname(dt.__file__)),)
         self.renderfarmproxypath = (os.path.join(os.path.dirname(dt.__file__), "proxys"),)
         self.nukedefaultproxytemplate = ("nuke_proxy_720p_prores_v003.py")
+        #self.defaultrvproxytemplate = ("rv_proxy_720p_mjpga_v001.py")
+        # this need developing
         self.dabrender = self.getfromenv("DABRENDER", "/Volumes/dabrender")
         self.dabusrpath = self.getfromenv("DABUSR", "/Volumes/dabrender/usr")
         # self.dabusrpath = self.getfromenv("DABUSR", self.getusrinternally())
@@ -50,6 +52,7 @@ class ConfigurationBase(object):
         self.rendermemorys = ("8000", "4000", "2000")
         self.rendermaxsamples = ("FROMFILE", "1024", "512", "256", "128", "64", "32", "16")
         self.resolutions = ("FROMFILE", "1080p", "720p", "540p", "108p",)
+        # these dont work properly
         self.outformats = ("exr","png","jpg","iff","tif")
         self.envtypes = ("user_work", "project_work",)
         self.envshow = ("",)
@@ -58,7 +61,7 @@ class ConfigurationBase(object):
         self.userid = self.getfromenv("USER")
         self.superuser = ("",)
         self.defaultrendertiers = ("batch", "rush", "admin")
-        self.farmversion = ("2016-05-10")
+        self.farmversion = ("2016-07-16")
         self.farmbuild = ("1.01")
 
     # def getusrinternally(self):
