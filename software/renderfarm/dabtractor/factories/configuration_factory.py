@@ -44,6 +44,7 @@ class ConfigurationBase(object):
         # this need developing
         self.dabrender = self.getfromenv("DABRENDER", "/Volumes/dabrender")
         self.dabusrpath = self.getfromenv("DABUSR", "/Volumes/dabrender/usr")
+        self.dabworkpath = self.getfromenv("DABWORK", "/Volumes/dabrender/work")
         # self.dabusrpath = self.getfromenv("DABUSR", self.getusrinternally())
         self.usermapfilepath = (os.path.join(self.dabrender, "etc/map"))
         self.editproxydumppath = (os.path.join(self.dabrender, "renderproxies"))
