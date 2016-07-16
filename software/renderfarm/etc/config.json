@@ -1,0 +1,84 @@
+{
+  "configpath": "/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr/software/renderfarm/dabtractor/factories/configuration_factory.py",
+  "maya": {
+    "versions": [ "2016.5", "2016"],
+    "defaultversion": 0
+  },
+  "nuke": {
+    "versions": [ "10.0v2", "9.0v8"],
+    "defaultversion": 0
+  },
+  "houdini": {
+    "versions": [ "15.5" ],
+    "defaultversion": 0
+  },
+  "renderman": {
+    "versions": [ "20.10" ],
+    "defaultversion": 0
+  },
+  "rendertier": {
+    "versions": [ "batch", "rush", "admin" ],
+    "defaultversion": 0
+  },
+  "renderthreads": {
+    "versions": [ "16", "8", "4", "2", "1" ],
+    "defaultversion": 2
+  },
+  "renderchunks": {
+    "versions": [ "16", "8", "4", "2", "1" ],
+    "defaultversion": 4
+  },
+  "rendermaxsamples": {
+    "versions": [ "FROMFILE", "1024", "512", "256", "128", "64", "32", "16" ],
+    "defaultversion": 3
+  },
+  "rendermemory": {
+    "versions": [ "8000", "4000", "2000" ],
+    "defaultversion": 1
+  },
+  "envtype": {
+    "versions": [ "user_work", "project_work" ],
+    "defaultversion": 0
+  },
+  "outformat": {
+    "versions": [ "exr", "png", "jpg", "iff", "tif" ],
+    "defaultversion": 0
+  },
+  "resolution": {
+    "versions": [ "FROMFILE", "1080p", "720p", "540p", "108p" ],
+    "defaultversion": 2
+  },
+  "projectgroup": {
+    "versions": [ "yr1", "yr2", "yr3", "yr4", "masters", "personal", "admin" ],
+    "defaultversion": 5
+  },
+
+  "dabrender": "/Users/Shared/UTS_Dev/gitRepositories/utsdab/config/dabrender"
+}
+
+configpath /Users/Shared/UTS_Dev/gitRepositories/utsdab/usr/software/renderfarm/dabtractor/factories/configuration_factory.py
+configuration current
+dabwork /Volumes/dabrender/work
+editproxydumppath /Users/Shared/UTS_Dev/gitRepositories/utsdab/config/dabrender/renderproxies
+farmbuild 1.02
+farmversion 2016-07-16
+mayarenderer mr
+mayarenderers ('mr', 'sw', 'FROMFILE')
+nukedefaultproxytemplate nuke_proxy_720p_prores_v003.py
+project_work project_work
+renderfarmbin ('/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr/software/renderfarm/bin',)
+renderfarmmodulepath ('/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr/software/renderfarm',)
+renderfarmproxypath ('/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr/software/renderfarm/dabtractor/proxys',)
+rendermanintegrator FROMFILE
+rendermanintegrators ('FROMFILE', 'pxr', 'vcm', 'visualiser')
+rendermanrenderer rms-ris
+rendermanrenderers ('rms-ris', 'rms-reyes')
+ribgenchunks ('1', '2', '4', '8', '16')
+ringenchunk 1
+superuser ('',)
+tractorengine tractor-engine
+tractorengineport 5600
+tractorusername pixar
+user_work user_work
+userid 120988
+usermapfilepath /Users/Shared/UTS_Dev/gitRepositories/utsdab/config/dabrender/etc/map

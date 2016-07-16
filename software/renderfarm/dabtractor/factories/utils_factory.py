@@ -139,7 +139,7 @@ def makedirectoriesinpath(path):
         logger.info("Made directory {}".format(path))
     except Exception,err:
         logger.warn("Didnt make {} {}".format(path,err))
-        sys.exit("Cant make directory")
+        # sys.exit("Cant make directory")
         raise
 
 
@@ -227,5 +227,4 @@ if __name__ == "__main__":
     me = frompathgetuserhome('/Volumes/dabrender/work/matthewgidney/testshite/file.001.exr')
     print "my work directory is",me
 
-    truncatepath("/Users/Shared/UTS_Dev","Shared")
 

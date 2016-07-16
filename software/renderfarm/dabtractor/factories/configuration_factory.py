@@ -9,6 +9,9 @@
 import os
 import software.renderfarm.dabtractor as dt
 import inspect
+import json
+
+
 # from   software.renderfarm.dt.factories import utils_factory  as utils
 
 # ##############################################################
@@ -42,9 +45,9 @@ class ConfigurationBase(object):
         self.nukedefaultproxytemplate = ("nuke_proxy_720p_prores_v003.py")
         #self.defaultrvproxytemplate = ("rv_proxy_720p_mjpga_v001.py")
         # this need developing
-        self.dabrender = self.getfromenv("DABRENDER", "/Volumes/dabrender")
-        self.dabusrpath = self.getfromenv("DABUSR", "/Volumes/dabrender/usr")
-        self.dabworkpath = self.getfromenv("DABWORK", "/Volumes/dabrender/work")
+        #self.dabrender = self.getfromenv("DABRENDER", "/Volumes/dabrender")
+        #self.dabusr = self.getfromenv("DABUSR", "/Volumes/dabrender/usr")
+        #self.dabwork = self.getfromenv("DABWORK", "/Volumes/dabrender/work")
         # self.dabusrpath = self.getfromenv("DABUSR", self.getusrinternally())
         self.usermapfilepath = (os.path.join(self.dabrender, "etc/map"))
         self.editproxydumppath = (os.path.join(self.dabrender, "renderproxies"))

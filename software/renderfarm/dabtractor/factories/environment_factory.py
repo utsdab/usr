@@ -32,8 +32,8 @@ class Environment(object):
     """
 
     def __init__(self):
-        self.dabrender = self.alreadyset("DABRENDER", "/Volumes/dabrender")
-        self.dabusr = self.alreadyset("DABUSR", self.getsoftwarepackagepath())
+        #self.dabrender = self.alreadyset("DABRENDER", "/Volumes/dabrender")
+        #self.dabusr = self.alreadyset("DABUSR", self.getsoftwarepackagepath())
         self.type = self.alreadyset("TYPE", "user_work")
         self.show = self.alreadyset("SHOW", "")
         self.project = self.alreadyset("PROJECT", "")

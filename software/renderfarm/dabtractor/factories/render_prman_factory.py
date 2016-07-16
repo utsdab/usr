@@ -447,7 +447,7 @@ if __name__ == "__main__":
                        mayaversion="2016",
                        rendermanversion="20.2",
                        startframe=1,
-                       endframe=12,
+                       endframe=4,
                        byframe=1,
                        outformat="exr",
                        resolution="540p",
@@ -457,7 +457,7 @@ if __name__ == "__main__":
                        threadmemory="4000",
                        rendermaxsamples="128",
                        threads="4",
-                       ribgenchunks=3,
+                       ribgenchunks=2,
                        email=[1, 0, 0, 0, 1, 0]
     )
     TEST.build()

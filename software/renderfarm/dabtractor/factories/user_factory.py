@@ -298,7 +298,8 @@ class FARMuser(object):
             self.username = self.name
             self.usernumber = self.number
             self.dabrender = config.CurrentConfiguration().dabrender  # "/Volumes/dabrender"
-            self.dabuserworkpath = os.path.join(self.dabrender, "user_work", self.name)
+            self.dabwork = config.CurrentConfiguration().dabwork  # "/Volumes/dabrender"
+            self.dabuserworkpath = os.path.join(self.dabwork, "user_work", self.name)
         except Exception,err:
             logger.critical("Problem creating User: {}".format(err))
             sys.exit(err)
