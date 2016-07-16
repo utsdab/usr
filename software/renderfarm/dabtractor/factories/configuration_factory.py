@@ -62,7 +62,10 @@ class ConfigurationBase(object):
         self.superuser = ("",)
         self.defaultrendertiers = ("batch", "rush", "admin")
         self.farmversion = ("2016-07-16")
-        self.farmbuild = ("1.01")
+        self.farmbuild = ("1.02")
+        self.tractorengine = ("tractor-engine")
+        self.tractorengineport = ("5600")
+        self.tractorusername = ("pixar")
 
     # def getusrinternally(self):
     #     a= utils.truncatepath(os.path.dirname(self.configpath))

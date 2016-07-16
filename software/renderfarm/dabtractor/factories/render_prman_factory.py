@@ -1,5 +1,5 @@
 #!/usr/bin/env rmanpy
-"""
+'''
 To do:
     find commonality in render jobs and put it in base class
 
@@ -9,7 +9,8 @@ To do:
     implement previews???
     implement stats to browswer
 
-"""
+'''
+
 # ##############################################################
 import logging
 
@@ -31,13 +32,17 @@ from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.renderfarm.dabtractor.factories import utils_factory as utils
 from software.renderfarm.dabtractor.factories import configuration_factory as config
 
-author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
-tq.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
+author.setEngineClientParam(hostname=config.CurrentConfiguration().tractorengine,
+                            port=config.CurrentConfiguration().tractorengineport,
+                            user=config.CurrentConfiguration().tractorusername,
+                            debug=True)
+tq.setEngineClientParam(hostname=config.CurrentConfiguration().tractorengine,
+                            port=config.CurrentConfiguration().tractorengineport,
+                            user=config.CurrentConfiguration().tractorusername,
+                            debug=True)
 
 class RenderBase(object):
-    """
-    Base class for all batch jobs
-    """
+    ''' Base class for all batch jobs'''
 
     def __init__(self):
         self.user = os.getenv("USER")
@@ -66,9 +71,7 @@ class RenderBase(object):
 
 
 class RenderPrman(RenderBase):
-    '''
-        Renderman job defined using the tractor api
-    '''
+    ''' Renderman job defined using the tractor api '''
 
     def __init__(self,
                  envdabrender="",
@@ -103,21 +106,21 @@ class RenderPrman(RenderBase):
         self.envproject=envproject
         self.envshow=envshow
         self.envscene=envscene
-        self.mayaprojectpathalias       = "$DABRENDER/$TYPE/$SHOW/$PROJECT"
+        self.mayaprojectpathalias = "$DABRENDER/$TYPE/$SHOW/$PROJECT"
         self.mayaprojectpath = os.path.join(self.envdabrender, self.envtype, self.envshow, self.envproject)
-        self.mayaprojectnamealias       = "$PROJECT"
+        self.mayaprojectnamealias = "$PROJECT"
         self.mayaprojectname = envproject
         self.mayascenefilefullpathalias = "$DABRENDER/$TYPE/$SHOW/$PROJECT/$SCENE"
-        self.mayascenefilefullpath = os.path.join(
-                self.envdabrender, self.envtype, self.envshow, self.envproject, self.envscene)
+        self.mayascenefilefullpath = os.path.join( self.envdabrender, self.envtype, self.envshow, self.envproject, 
+                                                   self.envscene)
         self.scenename = os.path.split(envscene)[-1:][0]
         self.scenebasename = os.path.splitext(self.scenename)[0]
         self.sceneext = os.path.splitext(self.scenename)[1]
-        self.rendermanpath = os.path.join(
-                self.envdabrender, self.envtype, self.envshow, self.envproject, "renderman", self.scenebasename)
+        self.rendermanpath = os.path.join( self.envdabrender, self.envtype, self.envshow, self.envproject, 
+                                           "renderman", self.scenebasename)
         self.rendermanpathalias = "$DABRENDER/$TYPE/$SHOW/$PROJECT/renderman/$SCENENAME"
         self.renderdirectory = os.path.join(self.rendermanpath,"images")
-        self.renderimagesalias  = "$DABRENDER/$TYPE/$SHOW/$PROJECT/renderman/$SCENENAME/images"
+        self.renderimagesalias = "$DABRENDER/$TYPE/$SHOW/$PROJECT/renderman/$SCENENAME/images"
         self.mayaversion = mayaversion,
         self.rendermanversion = rendermanversion,
         self.envkey_rms = "rms-{}-maya-{}".format(self.rendermanversion[0], self.mayaversion[0])
@@ -142,9 +145,10 @@ class RenderPrman(RenderBase):
         # self.proxyoutput = "$DABRENDER/$TYPE/$SHOW/$PROJECT/movies/$SCENENAME_{}.mov".format("datehere")
 
     def build(self):
-        """
+        ''' 
         Main method to build the job
-        """
+        :return: 
+        '''
 
         # ################ 0 JOB ################
         self.job = author.Job(title="RM: {} {} {}-{}".format(
@@ -156,8 +160,8 @@ class RenderPrman(RenderBase):
                     "PROJECT={}".format(self.envproject),
                     "SCENE={}".format(self.envscene),
                     "SCENENAME={}".format(self.scenebasename)],
-              metadata="user={} username={} usernumber={}".format(
-                      self.user, self.renderusername,self.renderusernumber),
+              metadata="user={} username={} usernumber={}".format( self.user, self.renderusername,
+                                                                   self.renderusernumber),
               comment="LocalUser is {} {} {}".format(self.user,self.renderusername,self.renderusernumber),
               projects=[str(self.projectgroup)],
               tier=config.CurrentConfiguration().defaultrendertier,
