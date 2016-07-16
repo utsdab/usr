@@ -5,6 +5,7 @@
 """
 
 import os
+import sys
 import string
 import subprocess
 import datetime
@@ -138,9 +139,8 @@ def makedirectoriesinpath(path):
         logger.info("Made directory {}".format(path))
     except Exception,err:
         logger.warn("Didnt make {} {}".format(path,err))
+        sys.exit("Cant make directory")
         raise
-
-
 
 
 def truncatepath(inputpath,truncatebit):

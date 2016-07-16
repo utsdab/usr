@@ -109,13 +109,15 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     AA=CurrentConfiguration()
     print "**** TESTING ****"
-    print "latest maya is %s" % AA.mayaversion
-    print "latest nuke is %s" % AA.nukeversion
-    print "latest renderman is %s" % AA.rendermanversion
-    print "latest projects is %s" % AA.projectgroup
-    print "renderfarmbin is %s" % AA.renderfarmbin
-    print "proxypath is %s" % AA.renderfarmproxypath
-    print "usermappath is %s" % AA.usermapfilepath
+
+    _configkeys = AA.__dict__.keys()
+    _configkeys.sort()
+
+    print "{:_^80}".format("configs")
+    for key in _configkeys:
+        print key, AA.__dict__.get(key)
+    print "{:_^80}".format("configs")
+
 
     _env = os.environ
     _keys = _env.keys()

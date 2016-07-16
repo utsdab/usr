@@ -186,7 +186,7 @@ class RenderMantra(RenderBase):
               tier=config.CurrentConfiguration().defaultrendertier,
               tags=["theWholeFarm", ],
               service="")
-        
+
     def validate(self):
         logger.info("\n\n{:_^80}\n{}\n{:_^80}".format("snip", self.job.asTcl(), "snip"))
 

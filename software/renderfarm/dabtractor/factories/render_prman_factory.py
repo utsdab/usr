@@ -62,8 +62,11 @@ class RenderBase(object):
             logger.warn("Cant get the users name and number back %s" % erroruser)
             sys.exit("Cant get the users name")
 
+        if os.path.ismount(self.dabrender):
+            logger.info("Found mount %s" % self.dabrender)
+
         if os.path.isdir(self.dabrender):
-            logger.info("Found %s" % self.dabrender)
+            logger.info("Yet found directory %s" % self.dabrender)
         else:
             self.initialProjectPath = None
             logger.critical("Cant find central filer mounted %s" % self.dabrender)
@@ -111,12 +114,12 @@ class RenderPrman(RenderBase):
         self.mayaprojectnamealias = "$PROJECT"
         self.mayaprojectname = envproject
         self.mayascenefilefullpathalias = "$DABRENDER/$TYPE/$SHOW/$PROJECT/$SCENE"
-        self.mayascenefilefullpath = os.path.join( self.envdabrender, self.envtype, self.envshow, self.envproject, 
+        self.mayascenefilefullpath = os.path.join( self.envdabrender, self.envtype, self.envshow, self.envproject,
                                                    self.envscene)
         self.scenename = os.path.split(envscene)[-1:][0]
         self.scenebasename = os.path.splitext(self.scenename)[0]
         self.sceneext = os.path.splitext(self.scenename)[1]
-        self.rendermanpath = os.path.join( self.envdabrender, self.envtype, self.envshow, self.envproject, 
+        self.rendermanpath = os.path.join( self.envdabrender, self.envtype, self.envshow, self.envproject,
                                            "renderman", self.scenebasename)
         self.rendermanpathalias = "$DABRENDER/$TYPE/$SHOW/$PROJECT/renderman/$SCENENAME"
         self.renderdirectory = os.path.join(self.rendermanpath,"images")
@@ -145,9 +148,9 @@ class RenderPrman(RenderBase):
         # self.proxyoutput = "$DABRENDER/$TYPE/$SHOW/$PROJECT/movies/$SCENENAME_{}.mov".format("datehere")
 
     def build(self):
-        ''' 
+        '''
         Main method to build the job
-        :return: 
+        :return:
         '''
 
         # ################ 0 JOB ################
@@ -432,8 +435,6 @@ class RenderPrman(RenderBase):
 if __name__ == "__main__":
     logger.setLevel(logging.INFO)
     logger.info("START TESTING")
-
-
 
     TEST = RenderPrman(
                        envdabrender="/Volumes/dabrender",
