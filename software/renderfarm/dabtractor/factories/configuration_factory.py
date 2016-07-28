@@ -8,11 +8,12 @@
 """
 import os
 import software.renderfarm.dabtractor as dt
+import software.renderfarm as rf
 import inspect
 import json
 
 
-# from   software.renderfarm.dt.factories import utils_factory  as utils
+# from   software.renderfarm.dabtractor.factories import utils_factory  as utils
 
 # ##############################################################
 import logging
@@ -45,10 +46,10 @@ class ConfigurationBase(object):
         self.nukedefaultproxytemplate = ("nuke_proxy_720p_prores_v003.py")
         #self.defaultrvproxytemplate = ("rv_proxy_720p_mjpga_v001.py")
         # this need developing
-        #self.dabrender = self.getfromenv("DABRENDER", "/Volumes/dabrender")
-        #self.dabusr = self.getfromenv("DABUSR", "/Volumes/dabrender/usr")
-        #self.dabwork = self.getfromenv("DABWORK", "/Volumes/dabrender/work")
-        # self.dabusrpath = self.getfromenv("DABUSR", self.getusrinternally())
+        self.dabrender = self.getfromenv("DABRENDER", "/Volumes/dabrender")
+        self.dabusr = self.getfromenv("DABUSR", "/Volumes/dabrender/usr")
+        self.dabwork = self.getfromenv("DABWORK", "/Volumes/dabrender/work")
+        self.dabusrpath = self.getfromenv("DABUSR", self.getusrinternally())
         self.usermapfilepath = (os.path.join(self.dabrender, "etc/map"))
         self.editproxydumppath = (os.path.join(self.dabrender, "renderproxies"))
         self.renderthreads = ("16", "8", "4", "2", "1")
@@ -71,11 +72,21 @@ class ConfigurationBase(object):
         self.tractorengineport = ("5600")
         self.tractorusername = ("pixar")
 
-    # def getusrinternally(self):
-    #     a= utils.truncatepath(os.path.dirname(self.configpath))
-    #     return a
+    def getusrinternally(self):
+        a= utils.truncatepath(os.path.dirname(self.configpath))
+        return a
 
     def getfromenv(self,key,default=None):
+        # try to use an environment variable over the default
+        _value = None
+        try:
+            _value = os.getenv(key, default)
+            logger.debug("Found {} to be {}".format(key,_value))
+        except Exception, e:
+            logger.warn("Failed to find anything for {}".format(key))
+        return _value
+
+    def getdefault(self,key,default=None):
         # try to use an environment variable over the default
         _value = None
         try:
@@ -107,10 +118,37 @@ class CurrentConfiguration(ConfigurationBase):
         self.outformat = self.outformats[0]
         self.defaultrendertier = self.defaultrendertiers[0]
 
+class ConfigBase(object):
+    def __init__(self):
+        self.configjson = os.path.join(os.path.dirname(rf.__file__), "etc","config.json")
+        try:
+            _file=open(self.configjson)
+        except Exception,err:
+            logger.warn(err)
+            _file.close()
+        else:
+            self.config=json.load(_file)
+            _file.close()
+        finally:
+            # _file.close()
+            _keys=self.config.keys()
+            _keys.sort()
+            for i,k in enumerate(_keys):
+                _value=self.config.get(k)
+                if type(_value)==type({}):
+                    print i,k, _value.get("versions"), _value.get("versions")[_value.get("defaultversion")]
+    # def getlist(self,key):
+
+    # def getdefault(self, key):
+
 
 
 if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
+
+    JJ = ConfigBase()
+
+    '''
     AA=CurrentConfiguration()
     print "**** TESTING ****"
 
@@ -131,3 +169,4 @@ if __name__ == "__main__":
     for key in _keys:
         print key, _env.get(key)
     print "{:_^80}".format("env")
+    '''
