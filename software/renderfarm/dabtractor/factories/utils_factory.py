@@ -4,13 +4,12 @@
     Useful user functions
 """
 
+import datetime
 import os
-import sys
 import string
 import subprocess
-import datetime
-from software.renderfarm.dabtractor.factories import configuration_factory as config
 
+from software.renderfarm.dabtractor.factories import environment_factory as env
 ###############################################################
 import logging
 logger = logging.getLogger(__name__)
@@ -72,7 +71,7 @@ def getfrompathlist(filetoget, iconpath="ICONPATH"):
 
 def frompathgetuserhome(inputpath):
     try:
-        dabrender = config.CurrentConfiguration().dabrender
+        dabrender = config.ConfigBase.getdefault("dabrender")
 
     except:
         print "err"

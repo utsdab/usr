@@ -25,12 +25,19 @@ logger.addHandler(sh)
 import tractor.api.author as author
 import os
 import sys
-import time
 from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.renderfarm.dabtractor.factories import utils_factory as utils
-from software.renderfarm.dabtractor.factories import configuration_factory as config
+from software.renderfarm.dabtractor.factories import environment_factory as env
 
-author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
+cfg=env.ConfigBase()
+author.setEngineClientParam(hostname=cfg.getdefault("tractorengine"),
+                            port=cfg.getdefault("tractorengineport"),
+                            user=cfg.getdefault("tractorusername"),
+                            debug=True)
+tq.setEngineClientParam(hostname=cfg.getdefault("tractorengine"),
+                            port=cfg.getdefault("tractorengineport"),
+                            user=cfg.getdefault("tractorusername"),
+                            debug=True)
 
 class RenderBase(object):
     """
@@ -111,8 +118,8 @@ class NukeJob(RenderBase):
 
     def build(self):
         _nuke_proxy_template = "{d}/usr/custom/nuke/proxy_script_templates/nuke_proxy_v002.nk".format(d=self.dabrender)
-        _nuke_version = "Nuke{}".format(config.CurrentConfiguration().nukeversion)
-        _nuke_envkey = "nuke{}".format(config.CurrentConfiguration().nukeversion)
+        _nuke_version = "Nuke{}".format(config.ConfigBase.getdefault("nukeversion"))
+        _nuke_envkey = _nuke_version
         _nuke_executable="{n}".format(n=_nuke_version)
         _nukescriptbaseonly = os.path.basename(self.nukescriptfullpath)
 

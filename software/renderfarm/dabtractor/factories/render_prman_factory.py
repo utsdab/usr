@@ -27,18 +27,19 @@ import tractor.api.author as author
 import tractor.api.query as tq
 import os
 import sys
-import time
 from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.renderfarm.dabtractor.factories import utils_factory as utils
-from software.renderfarm.dabtractor.factories import configuration_factory as config
+from software.renderfarm.dabtractor.factories import environment_factory as env
 
-author.setEngineClientParam(hostname=config.CurrentConfiguration().tractorengine,
-                            port=config.CurrentConfiguration().tractorengineport,
-                            user=config.CurrentConfiguration().tractorusername,
+cfg = env.ConfigBase()
+
+author.setEngineClientParam(hostname=cfg.getdefault("tractorengine"),
+                            port=cfg.getdefault("tractorengineport"),
+                            user=cfg.getdefault("tractorusername"),
                             debug=True)
-tq.setEngineClientParam(hostname=config.CurrentConfiguration().tractorengine,
-                            port=config.CurrentConfiguration().tractorengineport,
-                            user=config.CurrentConfiguration().tractorusername,
+tq.setEngineClientParam(hostname=cfg.getdefault("tractorengine"),
+                            port=cfg.getdefault("tractorengineport"),
+                            user=cfg.getdefault("tractorusername"),
                             debug=True)
 
 class RenderBase(object):
@@ -167,7 +168,7 @@ class RenderPrman(RenderBase):
                                                                    self.renderusernumber),
               comment="LocalUser is {} {} {}".format(self.user,self.renderusername,self.renderusernumber),
               projects=[str(self.projectgroup)],
-              tier=config.CurrentConfiguration().defaultrendertier,
+              tier=config.ConfigBase.getdefault("defaultrendertier"),
               tags=["theWholeFarm", ],
               service="")
 

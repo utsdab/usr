@@ -1,5 +1,15 @@
 {
   "configpath": "/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr/software/renderfarm/dabtractor/factories/configuration_factory.py",
+  "dabrender": "/Volumes/dabrender",
+  "dabusr": "",
+  "dabwork": "",
+  "usermapfile": "etc/map/user_map.json",
+  "mapfilepickle": "etc/map/user_map.pickle",
+  "tractorcrewlist" : "etc/map/tractor_crew_list.txt",
+  "backuppath": "etc/map/backup",
+  "tractorengine": "tractor-engine",
+  "tractorengineport": "5600",
+  "tractorusername" : "pixar",
   "maya": {
     "versions": [ "2016.5", "2016"],
     "defaultversion": 0
@@ -55,11 +65,6 @@
   "rendermanintegrators": {
     "versions": [ "FROMFILE", "pxr", "vcm", "visualiser"],
     "defaultversion": 0
-  },
-
-  "dabrender": "/Users/Shared/UTS_Dev/gitRepositories/utsdab/config/dabrender",
-  "tractorengineport": 5600,
-  "tractorusername" : "pixar",
-  "tractorengine": "tractor-engine"
+  }
 }
 

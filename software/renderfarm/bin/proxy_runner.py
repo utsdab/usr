@@ -8,15 +8,13 @@ handle multiple proxy definitions, probably my
 ###############################################################
 import logging
 import os
-import re
-import sys
-import glob
 import subprocess
+import sys
 import time
-import argparse
-from software.renderfarm.dabtractor.factories import configuration_factory as config
-from software.renderfarm.dabtractor.factories import utils_factory as utils
+
 from software.renderfarm.dabtractor import proxys as pt
+from software.renderfarm.dabtractor.factories import utils_factory as utils
+from software.renderfarm.dabtractor.factories import environment_factory as env
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -90,7 +88,7 @@ class ImageSequence(object):
 
         _nuke_proxy_template_path = Proxytemplate("nuke_proxy_720p_prores_v003.py").proxytouse
 
-        _nuke_version = "Nuke{}".format(config.CurrentConfiguration().nukeversion)
+        _nuke_version = "Nuke{}".format(config.ConfigBase.getdefault("nukeversion"))
         _nuke_executable = "/Applications/{n}/{n}.app/Contents/MacOS/{n}".format(n=_nuke_version)
         _date = time.strftime("%Y_%m_%d__%H-%M")
 

@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 """
+    All these Classes are to do with the defining of the USER
+
     This code handles the creation of a user area.
     At UTS the $USER is a number and there is no nice name exposed at all.
     However we can query this from the ldap database using ldapsearch.
@@ -14,7 +16,7 @@ import shutil
 import string
 import subprocess
 from software.renderfarm.dabtractor.factories import utils_factory as utils
-from software.renderfarm.dabtractor.factories import configuration_factory as config
+from software.renderfarm.dabtractor.factories import environment_factory as env
 import tractor.api.author as author
 
 # ##############################################################
@@ -28,29 +30,54 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
+cfg = env.ConfigBase()
+
 class Map(object):
     """
     This class is the mapping of students
     """
-    def __init__(self, mapfilepath=config.CurrentConfiguration().usermapfilepath):
-        logger.info("Map File Path {}".format(mapfilepath))
+    def __init__(self):
+        __dabrender = cfg.getdefault("dabrender")
+        self.mapfilejson = None
+        self.tractorcrewlist = None
+        self.mapfilepickle = None
+        self.backuppath = None
+
         try:
-            self.mapfilejson = os.path.join(mapfilepath,"user_map.json")
-            self.tractorcrewlist = os.path.join(mapfilepath,"crewlist.txt")
-            self.mapfilepickle= os.path.join(mapfilepath,"map_file.pickle")
-            self.backuppath = os.path.join(mapfilepath, "backups")
+            self.mapfilejson = os.path.join(__dabrender, cfg.getdefault("usermapfile"))
+        except Exception, err:
+            logger.critical("No Map Path {}".format(err))
+        else:
+            logger.info("Map File: {}".format(self.mapfilejson))
+            if os.path.exists(self.mapfilejson):
+                file(self.mapfilejson).close()
 
-            logger.debug("Map File: {}".format(self.mapfilejson))
+        try:
+            self.tractorcrewlist = os.path.join(__dabrender, cfg.getdefault("tractorcrewlist"))
+        except Exception, err:
+            logger.critical("No Tractor Crew List Not in Config {}".format(err))
+        else:
+            logger.info("Tractor Crew List: {}".format(self.tractorcrewlist))
 
-            if not os.path.exists(self.mapfilejson):
-                open(self.mapfilejson, 'w').close()
+
+        try:
+            self.mapfilepickle = os.path.join(__dabrender, cfg.getdefault("mapfilepickle"))
+        except Exception, err:
+            logger.critical("No Map Pickle  Not in Config {}".format(err))
+        else:
+            logger.info("Map Pickle  : {}".format(self.mapfilepickle))
+
+
+        try:
+            self.backuppath = os.path.join(__dabrender, cfg.getdefault("backuppath"))
+        except Exception, err:
+            logger.critical("Backup Path Not in Config {}".format(err))
+        else:
+            logger.info("Backup Path: {}".format(self.backuppath))
             if not os.path.exists(self.backuppath):
                 os.mkdir(self.backuppath)
 
-        except Exception,err:
-            logger.critical("No Map Path {}".format(err))
-            sys.exit(err)
-            raise
+
 
     def writecrewformat(self):
         with open(self.mapfilejson) as json_data:
@@ -154,7 +181,7 @@ class Map(object):
 class EnvType(object):
     # this is the user work area either work/number or projects/projectname
     def __init__(self,userid=None,projectname=None):
-        self.dabrenderpath=config.CurrentConfiguration().dabrender
+        self.dabrenderpath=cfg.getdefault("dabrender")
 
         if userid:
             self.envtype="user_work"
@@ -219,7 +246,7 @@ class UTSuser(object):
 
     def addtomap(self):
 
-        if self.number in config.CurrentConfiguration().superuser:
+        if self.number in config.ConfigBase.getdefault("superuser"):
             logger.info("Your are a superuser - yay")
         else:
             logger.warn("You need to be a superuser to mess with the map file sorry")
@@ -297,8 +324,8 @@ class FARMuser(object):
             logger.debug("User: {}".format( usermap.getuser(self.user) ))
             self.username = self.name
             self.usernumber = self.number
-            self.dabrender = config.CurrentConfiguration().dabrender  # "/Volumes/dabrender"
-            self.dabwork = config.CurrentConfiguration().dabwork  # "/Volumes/dabrender"
+            self.dabrender = config.ConfigBase.getdefault("dabrender")  # "/Volumes/dabrender"
+            self.dabwork = config.ConfigBase.getdefault("dabwork")  # "/Volumes/dabrender"
             self.dabuserworkpath = os.path.join(self.dabwork, "user_work", self.name)
         except Exception,err:
             logger.critical("Problem creating User: {}".format(err))

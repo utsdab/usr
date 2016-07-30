@@ -8,15 +8,13 @@ handle multiple proxy definitions, probably my
 ###############################################################
 import logging
 import os
-import re
-import sys
-import glob
 import subprocess
+import sys
 import time
-import argparse
-from software.renderfarm.dabtractor.factories import configuration_factory as config
-from software.renderfarm.dabtractor.factories import utils_factory as utils
+
 from software.renderfarm.dabtractor import proxys as pt
+from software.renderfarm.dabtractor.factories import utils_factory as utils
+from software.renderfarm.dabtractor.factories import environment_factory as env
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

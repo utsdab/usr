@@ -19,12 +19,12 @@ logger.addHandler(sh)
 import tractor.api.author as author
 import os
 import sys
-import time
 from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.renderfarm.dabtractor.factories import utils_factory as utils
-from software.renderfarm.dabtractor.factories import configuration_factory as config
+from software.renderfarm.dabtractor.factories import environment_factory as env
 
-author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
+cfg=env.ConfigBase()
+author.setEngineClientParam(hostname=cfg.getdefault("tractor-engine"), port=5600, user="pixar", debug=True)
 
 class RenderBase(object):
     """
@@ -288,7 +288,7 @@ class RenderMentalray(RenderBase):
                                                                      self.renderusernumber),
                               projects=[str(self.projectgroup)],
 
-                              tier=config.CurrentConfiguration().defaultrendertier,
+                              tier=config.ConfigBase.getdefault("defaultrendertier"),
                               tags=[ "theWholeFarm", ],
                               service="")
 

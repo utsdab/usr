@@ -37,18 +37,14 @@ logger.addHandler(sh)
 import PySide.QtCore as qc
 import PySide.QtGui as qg
 import sys
-import os
-from software.renderfarm.dabtractor.factories import configuration_factory as config
+# from software.renderfarm.dabtractor.factories.legacy import configuration_factory as config
 from software.renderfarm.dabtractor.factories import interface_factory as ifac
 from software.renderfarm.dabtractor.factories import render_prman_factory as rmsfac
 from software.renderfarm.dabtractor.factories import render_mr_factory as mrfac
 from software.renderfarm.dabtractor.factories import render_nuke_factory as nukefac
 from software.renderfarm.dabtractor.factories import command_factory as cmdfac
 from software.renderfarm.dabtractor.factories import environment_factory as env
-
-
 from functools import partial
-import tractor.api.query as tq
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -57,8 +53,9 @@ TRACTOT_SUBMIT_DIALOG = None
 MAYA_PRESENT = False
 COL1 = "background-color:lightgrey;color:black"
 COL2 = "background-color:lightgreen;color:darkblue"
-VERSION = config.CurrentConfiguration().farmversion
-BUILD = config.CurrentConfiguration().farmbuild
+cfg = env.ConfigBase()
+VERSION = cfg.getdefault("farmversion")
+BUILD = cfg.getdefault("farmbuild")
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmit(qg.QDialog):
@@ -75,11 +72,11 @@ class TractorSubmit(qg.QDialog):
             logger.info("Maya NOT Present")
 
         ###########
-        try:
-            if not os.path.isdir(env.Environment().dabrender):
-                raise("Cant find dabrender")
-        except Exception,err:
-            sys.exit(err)
+        # try:
+        #     if not os.path.isdir(env.Environment().dabrender):
+        #         raise("Cant find dabrender")
+        # except Exception,err:
+        #     sys.exit(err)
 
         self.setWindowTitle('UTS FARM SUBMIT BLD{} {}'.format(BUILD, VERSION))
         self.setObjectName('UTS_FARM_SUBMIT')

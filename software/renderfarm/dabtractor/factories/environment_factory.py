@@ -8,8 +8,12 @@
     this just need to be in the path some place  dabanim/usr/bin
 """
 import os
+import json
+import inspect
 from software.renderfarm.dabtractor.factories import utils_factory as utils
-from software.renderfarm.dabtractor.factories import user_factory as ufac
+# from software.renderfarm.dabtractor.factories import user_factory as ufac
+import software.renderfarm.dabtractor as dt
+import software.renderfarm as rf
 
 # ##############################################################
 import logging
@@ -21,6 +25,63 @@ formatter = logging.Formatter('%(levelname)5.5s \t%(filename)s as %(name)s \t%(m
 sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
+
+class ConfigBase(object):
+    def __init__(self):
+        self.configjson = os.path.join(os.path.dirname(rf.__file__), "etc","config.json")
+        self.defaults = {}
+        self.versions = {}
+        self.defaultindices = {}
+        try:
+            _file=open(self.configjson)
+        except Exception,err:
+            logger.warn(err)
+            _file.close()
+        else:
+            self.config=json.load(_file)
+            _keys=self.config.keys()
+            _keys.sort()
+            for i,k in enumerate(_keys):
+                _value=self.config.get(k)
+                if type(_value)==type({}):
+                    self.versions[k]=_value.get("versions")
+                    self.defaults[k]=_value.get("versions")[_value.get("defaultversion")]
+                    self.defaultindices[k]=_value.get("defaultversion")
+                else:
+                    self.versions[k]=None
+                    self.defaults[k]=_value
+        finally:
+            _file.close()
+    def getversions(self, key):
+        try:
+            return key, self.versions.get(key)
+        except Exception, err:
+            logger.warn(err)
+        else:
+            return key, None
+
+    def getdefault(self, key):
+        try:
+            return self.defaults.get(key)
+        except Exception, err:
+            logger.warn(err)
+        else:
+            return key, None
+
+    def getdefaultindex(self,key):
+        try:
+            return key,self.defaultindices.get(key)
+        except Exception, err:
+            logger.warn(err)
+        else:
+            return key, None
+
+    def getallkeys(self):
+        return self.defaults.keys()
+
+    def getalldefaults(self):
+        return self.defaults
+
 
 class Environment(object):
     """
@@ -39,7 +100,7 @@ class Environment(object):
         self.project = self.alreadyset("PROJECT", "")
         self.scene = self.alreadyset("SCENE", "")
         self.user = self.alreadyset("USER", "")
-        self.username = self.alreadyset("USERNAME", ufac.Map().getusername(self.user))
+        self.username = self.alreadyset("USERNAME", "")
 
     def alreadyset(self, envar, default):
         # look to see if an environment variable is already define an if not return a default value
@@ -94,15 +155,21 @@ class Environment(object):
 
 if __name__ == '__main__':
 
-    sh.setLevel(logging.DEBUG)
+    sh.setLevel(logging.INFO)
     logger.debug("-------- PROJECT FACTORY TEST ------------")
 
-    p = Environment()
-    logger.debug("{}".format(utils.printdict(p.__dict__)))
+    e = Environment()
+    logger.debug("{}".format(utils.printdict(e.__dict__)))
 
-    p.setfromscenefile("/Volumes/dabrender/user_work/matthewgidney/testFarm/scenes/maya2016_rms_20_8_textured_cubes.ma")
-    logger.debug("{}".format(utils.printdict(p.__dict__)))
+    e.setfromscenefile("/Volumes/dabrender/user_work/matthewgidney/testFarm/scenes/maya2016_rms_20_8_textured_cubes.ma")
+    logger.debug("{}".format(utils.printdict(e.__dict__)))
 
-
+    JJ = ConfigBase()
+    key = "usermapfilepath"
+    print "versions=",JJ.getversions(key)
+    print "default=",JJ.getdefault(key)
+    print "defaultindex=",JJ.getdefaultindex(key)
+    print "keys=",JJ.getallkeys()
+    print "defaults=",JJ.getalldefaults()
 
 
