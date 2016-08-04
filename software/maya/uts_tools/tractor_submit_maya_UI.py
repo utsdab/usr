@@ -106,8 +106,8 @@ class Maya(object):
 class Job(env.Environment):
     def __init__(self):
         super(Job, self).__init__()
-        # self.env=proj.Environment()
-        # self.dabrender=self.env.dabrender
+        self.env=env.Environment()
+        self.dabrender=self.env.dabrender
         self.usernumber = None
         self.username = None
         self.projectgroup = None

@@ -1,70 +1,74 @@
 {
   "configpath": "/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr/software/renderfarm/dabtractor/factories/configuration_factory.py",
-  "dabrender": "/Volumes/dabrender",
   "dabusr": "",
   "dabwork": "",
-  "usermapfile": "etc/map/user_map.json",
-  "mapfilepickle": "etc/map/user_map.pickle",
-  "tractorcrewlist" : "etc/map/tractor_crew_list.txt",
-  "backuppath": "etc/map/backup",
-  "tractorengine": "tractor-engine",
-  "tractorengineport": "5600",
-  "tractorusername" : "pixar",
+  "dabrender": {
+    "path":"/Volumes/dabrender",
+    "usermapfile":"etc/map/user_map.json",
+    "mapfilepickle": "etc/map/user_map.pickle",
+    "tractorcrewlist" : "etc/map/tractor_crew_list.txt",
+    "backuppath": "etc/map/backup"
+  },
+  "tractor": {
+    "engine": "tractor-engine",
+    "port": "5600",
+    "username": "pixar"
+  },
   "maya": {
     "versions": [ "2016.5", "2016"],
-    "defaultversion": 0
+    "defaultversionindex": 0
   },
   "nuke": {
     "versions": [ "10.0v2", "9.0v8"],
-    "defaultversion": 0
+    "defaultversionindex": 0
   },
   "houdini": {
     "versions": [ "15.5" ],
-    "defaultversion": 0
+    "defaultversionindex": 0
   },
   "renderman": {
     "versions": [ "20.10" ],
-    "defaultversion": 0
+    "defaultversionindex": 0
   },
   "rendertier": {
     "versions": [ "batch", "rush", "admin" ],
-    "defaultversion": 0
+    "defaultversionindex": 0
   },
   "renderthreads": {
     "versions": [ "16", "8", "4", "2", "1" ],
-    "defaultversion": 2
+    "defaultversionindex": 2
   },
   "renderchunks": {
     "versions": [ "16", "8", "4", "2", "1" ],
-    "defaultversion": 4
+    "defaultversionindex": 4
   },
   "rendermaxsamples": {
     "versions": [ "FROMFILE", "1024", "512", "256", "128", "64", "32", "16" ],
-    "defaultversion": 3
+    "defaultversionindex": 3
   },
   "rendermemory": {
     "versions": [ "8000", "4000", "2000" ],
-    "defaultversion": 1
+    "defaultversionindex": 1
   },
   "envtype": {
     "versions": [ "user_work", "project_work" ],
-    "defaultversion": 0
+    "defaultversionindex": 0
   },
   "outformat": {
     "versions": [ "exr", "png", "jpg", "iff", "tif" ],
-    "defaultversion": 0
+    "defaultversionindex": 0
   },
   "resolution": {
     "versions": [ "FROMFILE", "1080p", "720p", "540p", "108p" ],
-    "defaultversion": 2
+    "defaultversionindex": 2
   },
   "projectgroup": {
     "versions": [ "yr1", "yr2", "yr3", "yr4", "masters", "personal", "admin" ],
-    "defaultversion": 0
+    "defaultversionindex": 0
   },
   "rendermanintegrators": {
     "versions": [ "FROMFILE", "pxr", "vcm", "visualiser"],
-    "defaultversion": 0
+    "defaultversionindex": 0
   }
 }
 

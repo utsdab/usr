@@ -8,8 +8,6 @@ import datetime
 import os
 import string
 import subprocess
-
-from software.renderfarm.dabtractor.factories import environment_factory as env
 ###############################################################
 import logging
 logger = logging.getLogger(__name__)

@@ -30,14 +30,14 @@ from software.renderfarm.dabtractor.factories import utils_factory as utils
 from software.renderfarm.dabtractor.factories import environment_factory as env
 
 cfg=env.ConfigBase()
-author.setEngineClientParam(hostname=cfg.getdefault("tractorengine"),
-                            port=cfg.getdefault("tractorengineport"),
-                            user=cfg.getdefault("tractorusername"),
+author.setEngineClientParam(hostname=cfg.getfromgroup("tractor","engine"),
+                            port=cfg.getfromgroup("tractor","port"),
+                            user=cfg.getfromgroup("tractor","username"),
                             debug=True)
-tq.setEngineClientParam(hostname=cfg.getdefault("tractorengine"),
-                            port=cfg.getdefault("tractorengineport"),
-                            user=cfg.getdefault("tractorusername"),
-                            debug=True)
+# tq.setEngineClientParam(hostname=cfg.getfromgroup("tractor","engine"),
+#                             port=cfg.getfromgroup("tractor","port"),
+#                             user=cfg.getfromgroup("tractor","username"),
+#                             debug=True)
 
 class RenderBase(object):
     """

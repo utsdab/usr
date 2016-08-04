@@ -37,14 +37,14 @@ class Map(object):
     This class is the mapping of students
     """
     def __init__(self):
-        __dabrender = cfg.getdefault("dabrender")
+        __dabrender = cfg.getfromgroup("dabrender","path")
         self.mapfilejson = None
         self.tractorcrewlist = None
         self.mapfilepickle = None
         self.backuppath = None
 
         try:
-            self.mapfilejson = os.path.join(__dabrender, cfg.getdefault("usermapfile"))
+            self.mapfilejson = os.path.join(__dabrender, cfg.getfromgroup("dabrender","usermapfile"))
         except Exception, err:
             logger.critical("No Map Path {}".format(err))
         else:
@@ -53,7 +53,7 @@ class Map(object):
                 file(self.mapfilejson).close()
 
         try:
-            self.tractorcrewlist = os.path.join(__dabrender, cfg.getdefault("tractorcrewlist"))
+            self.tractorcrewlist = os.path.join(__dabrender, cfg.getfromgroup("dabrender","tractorcrewlist"))
         except Exception, err:
             logger.critical("No Tractor Crew List Not in Config {}".format(err))
         else:
@@ -61,7 +61,7 @@ class Map(object):
 
 
         try:
-            self.mapfilepickle = os.path.join(__dabrender, cfg.getdefault("mapfilepickle"))
+            self.mapfilepickle = os.path.join(__dabrender, cfg.getfromgroup("dabrender","mapfilepickle"))
         except Exception, err:
             logger.critical("No Map Pickle  Not in Config {}".format(err))
         else:
@@ -69,7 +69,7 @@ class Map(object):
 
 
         try:
-            self.backuppath = os.path.join(__dabrender, cfg.getdefault("backuppath"))
+            self.backuppath = os.path.join(__dabrender, cfg.getfromgroup("dabrender","backuppath"))
         except Exception, err:
             logger.critical("Backup Path Not in Config {}".format(err))
         else:

@@ -26,11 +26,15 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
+
+print dir(yaml)
+
 class ConfigBase(object):
     def __init__(self):
         self.configjson = os.path.join(os.path.dirname(rf.__file__), "etc","config.json")
         self.defaults = {}
         self.versions = {}
+        self.groups = {}
         self.defaultindices = {}
         try:
             _file=open(self.configjson)
@@ -43,22 +47,24 @@ class ConfigBase(object):
             _keys.sort()
             for i,k in enumerate(_keys):
                 _value=self.config.get(k)
-                if type(_value)==type({}):
-                    self.versions[k]=_value.get("versions")
-                    self.defaults[k]=_value.get("versions")[_value.get("defaultversion")]
-                    self.defaultindices[k]=_value.get("defaultversion")
-                else:
-                    self.versions[k]=None
-                    self.defaults[k]=_value
+                if type(_value)==type({}):  # has children
+                    if _value.has_key("versions"):
+                        self.versions[k]=_value.get("versions")
+                        self.defaults[k]=_value.get("versions")[_value.get("defaultversionindex")]
+                        self.defaultindices[k]=_value.get("defaultversionindex")
+                    else:
+                        self.versions[k]=None
+                        self.defaults[k]=None
+                        self.groups[k]=_value
         finally:
             _file.close()
     def getversions(self, key):
         try:
-            return key, self.versions.get(key)
+            return self.versions.get(key)
         except Exception, err:
             logger.warn(err)
         else:
-            return key, None
+            return None
 
     def getdefault(self, key):
         try:
@@ -66,21 +72,40 @@ class ConfigBase(object):
         except Exception, err:
             logger.warn(err)
         else:
-            return key, None
+            return None
 
     def getdefaultindex(self,key):
         try:
-            return key,self.defaultindices.get(key)
+            return self.defaultindices.get(key)
         except Exception, err:
             logger.warn(err)
         else:
-            return key, None
+            return None
+
+    def getgroupmembers(self,key):
+        try:
+            return self.groups.get(key)
+        except Exception, err:
+            logger.warn(err)
+        else:
+            return None
+
+    def getfromgroup(self,group,member):
+        try:
+            return self.groups.get(group).get(member)
+        except Exception, err:
+            logger.warn(err)
+        else:
+            return None
 
     def getallkeys(self):
         return self.defaults.keys()
 
     def getalldefaults(self):
         return self.defaults
+
+    def getallgroups(self):
+        return self.groups
 
 
 class Environment(object):
@@ -93,8 +118,8 @@ class Environment(object):
     """
 
     def __init__(self):
-        #self.dabrender = self.alreadyset("DABRENDER", "/Volumes/dabrender")
-        #self.dabusr = self.alreadyset("DABUSR", self.getsoftwarepackagepath())
+        self.dabrender = self.alreadyset("DABRENDER", "/Volumes/dabrender")
+        self.dabusr = self.alreadyset("DABUSR", self.getsoftwarepackagepath())
         self.type = self.alreadyset("TYPE", "user_work")
         self.show = self.alreadyset("SHOW", "")
         self.project = self.alreadyset("PROJECT", "")
@@ -166,10 +191,30 @@ if __name__ == '__main__':
 
     JJ = ConfigBase()
     key = "usermapfilepath"
-    print "versions=",JJ.getversions(key)
-    print "default=",JJ.getdefault(key)
-    print "defaultindex=",JJ.getdefaultindex(key)
-    print "keys=",JJ.getallkeys()
-    print "defaults=",JJ.getalldefaults()
+    print "versionlist=",JJ.getversions(key)
+    print "defaultversion=",JJ.getdefault(key)
+    print "defaultversionindex=",JJ.getdefaultindex(key)
+    print "groups=",JJ.getgroupmembers(key)
+    print "allkeys=",JJ.getallkeys()
+    print "alldefaults=",JJ.getalldefaults()
+    print "allgroups=",JJ.getallgroups()
 
+    key = "tractor"
+    print "versionlist=",JJ.getversions(key)
+    print "defaultversion=",JJ.getdefault(key)
+    print "defaultversionindex=",JJ.getdefaultindex(key)
+    print "groups=",JJ.getgroupmembers(key)
+    print "memberfromgroup=", JJ.getfromgroup(key,"port")
+    print "allkeys=",JJ.getallkeys()
+    print "alldefaults=",JJ.getalldefaults()
+    print "allgroups=",JJ.getallgroups()
 
+    key = "nuke"
+    print "versionlist=",JJ.getversions(key)
+    print "defaultversion=",JJ.getdefault(key)
+    print "defaultversionindex=",JJ.getdefaultindex(key)
+    print "groups=",JJ.getgroupmembers(key)
+    print "memberfromgroup=", JJ.getfromgroup(key,"port")
+    print "allkeys=",JJ.getallkeys()
+    print "alldefaults=",JJ.getalldefaults()
+    print "allgroups=",JJ.getallgroups()
