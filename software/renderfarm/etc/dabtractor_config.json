@@ -18,6 +18,10 @@
     "versions": [ "2016.5", "2016"],
     "defaultversionindex": 0
   },
+  "mayarenderer": {
+    "versions": [ "mr", "sw"],
+    "defaultversionindex": 0
+  },
   "nuke": {
     "versions": [ "10.0v2", "9.0v8"],
     "defaultversionindex": 0

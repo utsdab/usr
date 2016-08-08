@@ -26,12 +26,9 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
-
-print dir(yaml)
-
 class ConfigBase(object):
     def __init__(self):
-        self.configjson = os.path.join(os.path.dirname(rf.__file__), "etc","config.json")
+        self.configjson = os.path.join(os.path.dirname(rf.__file__), "etc","dabtractor_config.json")
         self.defaults = {}
         self.versions = {}
         self.groups = {}
@@ -118,8 +115,10 @@ class Environment(object):
     """
 
     def __init__(self):
-        self.dabrender = self.alreadyset("DABRENDER", "/Volumes/dabrender")
-        self.dabusr = self.alreadyset("DABUSR", self.getsoftwarepackagepath())
+        self.dabrender = self.alreadyset("DABRENDER", "")
+        self.dabwork = self.alreadyset("DABWORK", "")
+        self.dabsoftware = self.alreadyset("DABSOFTWARE", "")
+        self.dabusr = self.alreadyset("DABUSR", "")
         self.type = self.alreadyset("TYPE", "user_work")
         self.show = self.alreadyset("SHOW", "")
         self.project = self.alreadyset("PROJECT", "")
@@ -128,7 +127,8 @@ class Environment(object):
         self.username = self.alreadyset("USERNAME", "")
 
     def alreadyset(self, envar, default):
-        # look to see if an environment variable is already define an if not return a default value
+        #  look to see if an environment variable is already define an if not check th e dabtractor config else return
+        #  the default
         try:
             env = os.environ
             val = env[envar]
@@ -160,15 +160,6 @@ class Environment(object):
         else:
             logger.warn("Cant set from file. Not a file: {}".format(mayascenefilefullpath))
 
-    def getsoftwarepackagepath(self):
-        _userfacpath = os.path.dirname(ufac.__file__)
-        directories = os.path.normpath(_userfacpath).split("software")
-        if len(directories) == 2:
-            _base = directories[0]
-        else:
-            raise "path is bad"
-        return directories[0]
-
     def putback(self):
         os.environ["DABRENDER"] = self.dabrender
         os.environ["TYPE"] = self.type
@@ -180,7 +171,7 @@ class Environment(object):
 
 if __name__ == '__main__':
 
-    sh.setLevel(logging.INFO)
+    sh.setLevel(logging.DEBUG)
     logger.debug("-------- PROJECT FACTORY TEST ------------")
 
     e = Environment()

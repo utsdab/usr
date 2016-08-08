@@ -246,7 +246,7 @@ class UTSuser(object):
 
     def addtomap(self):
 
-        if self.number in config.ConfigBase.getdefault("superuser"):
+        if self.number in cfg.getdefault("superuser"):
             logger.info("Your are a superuser - yay")
         else:
             logger.warn("You need to be a superuser to mess with the map file sorry")
@@ -310,23 +310,13 @@ class FARMuser(object):
         # the user details as defined in the map
         self.user = os.getenv("USER")
         usermap = Map()
-        try:
-            _userdict=usermap.getuser(self.user)
-        except Exception, err:
-            logger.critical("Problem creating User: {}".format(err))
-            sys.exit(err)
 
         try:
             _userdict=usermap.getuser(self.user)
             self.name=_userdict.get("name")
             self.number=_userdict.get("number")
             self.year=_userdict.get("year")
-            logger.debug("User: {}".format( usermap.getuser(self.user) ))
-            self.username = self.name
-            self.usernumber = self.number
-            self.dabrender = config.ConfigBase.getdefault("dabrender")  # "/Volumes/dabrender"
-            self.dabwork = config.ConfigBase.getdefault("dabwork")  # "/Volumes/dabrender"
-            self.dabuserworkpath = os.path.join(self.dabwork, "user_work", self.name)
+
         except Exception,err:
             logger.critical("Problem creating User: {}".format(err))
             sys.exit(err)
@@ -385,9 +375,10 @@ if __name__ == '__main__':
 
 
     u = FARMuser()
-    uts = UTSuser()
-    print uts.name
-    print uts.number
+    print u.name
+    # uts = UTSuser()
+    # print uts.name
+    # print uts.number
 
 
     '''
