@@ -27,91 +27,143 @@ logger.addHandler(sh)
 # ##############################################################
 
 class ConfigBase(object):
+    '''
+    This class gathers up the configuration settings from an external json file.
+    Function return configurations.
+    The schema is simple - a two level dictionary:
+
+    { group : {
+        attribute : value
+        attribute : [ default, value1, value2 ]  ### default value is index 0
+        }
+    }
+    '''
     def __init__(self):
         self.configjson = os.path.join(os.path.dirname(rf.__file__), "etc","dabtractor_config.json")
-        self.defaults = {}
-        self.versions = {}
         self.groups = {}
-        self.defaultindices = {}
+        self.config = None
         try:
             _file=open(self.configjson)
-        except Exception,err:
-            logger.warn(err)
-            _file.close()
-        else:
             self.config=json.load(_file)
-            _keys=self.config.keys()
-            _keys.sort()
-            for i,k in enumerate(_keys):
-                _value=self.config.get(k)
-                if type(_value)==type({}):  # has children
-                    if _value.has_key("versions"):
-                        self.versions[k]=_value.get("versions")
-                        self.defaults[k]=_value.get("versions")[_value.get("defaultversionindex")]
-                        self.defaultindices[k]=_value.get("defaultversionindex")
-                    else:
-                        self.versions[k]=None
-                        self.defaults[k]=None
-                        self.groups[k]=_value
+        except Exception,err:
+            logger.warn("Problem reading json file %s"%err)
+        else:
+            _groups=self.config.keys()
+            _groups.sort()
+            for i, group in enumerate(_groups):
+                _attribute=self.config.get(group)
+                if type(_attribute)==type({}):  # has children who are dicts
+                    self.groups[group]=_attribute
         finally:
             _file.close()
-    def getversions(self, key):
-        try:
-            return self.versions.get(key)
-        except Exception, err:
-            logger.warn(err)
-        else:
-            return None
 
-    def getdefault(self, key):
+    def getoptions(self, group, key):
+        # assumes the value of the attribute is a list
+        _return = None
         try:
-            return self.defaults.get(key)
+            _type = type(self.groups.get(group).get(key))
         except Exception, err:
-            logger.warn(err)
+            logger.warn("Group %s or Attribute %s not in config.json file, %s" % (group,key,err))
+            logger.info("ALL DEFAULTS = %s" % self.getalldefaults())
         else:
-            return None
+            if _type==type([]):
+                _return = self.groups.get(group).get(key)
+            else:
+                logger.warn("Attribute %s has no options, %s" % (key,err))
+        finally:
+            return _return
 
-    def getdefaultindex(self,key):
+    def getdefault(self, group, key):
+        # returns the first index if a list or just the vale if not a list
+        _return = None
         try:
-            return self.defaultindices.get(key)
+            _type = type(self.groups.get(group).get(key))
         except Exception, err:
-            logger.warn(err)
+            logger.warn("Group %s or Attribute %s not in config.json file, %s" % (group,key,err))
+            logger.info("ALL DEFAULTS = %s" % self.getalldefaults())
         else:
-            return None
+            if _type==type([]):
+                _return = self.groups.get(group).get(key)[0]
+            elif _type==type(u''):
+                _return = self.groups.get(group).get(key)
+            else:
+                logger.warn("%s not a list or a string" % key)
+        finally:
+            return _return
 
-    def getgroupmembers(self,key):
+    def getgroups(self):
+        # returns all attribute groups
+        _return = None
         try:
-            return self.groups.get(key)
+            _return = self.groups.keys()
         except Exception, err:
-            logger.warn(err)
-        else:
-            return None
+            logger.warn("Groups not defined, %s" % (err))
+        finally:
+            return _return
 
-    def getfromgroup(self,group,member):
+    def getattributes(self,group):
+        # return a groups attributes
+        _return = None
         try:
-            return self.groups.get(group).get(member)
+            _return =  self.groups.get(group).keys()
         except Exception, err:
-            logger.warn(err)
-        else:
-            return None
+            logger.warn("Group %s not in config.json file, %s" % (group,err))
+            logger.info("ALL DEFAULTS = %s" % self.getalldefaults())
+        finally:
+            return _return
 
-    def getallkeys(self):
-        return self.defaults.keys()
+    # def getalldefaults(self):
+    #     _defaults = []
+    #     # print self.groups
+    #     for group in self.groups.keys():
+    #         for attribute in self.groups.get(group).keys():
+    #
+    #             if type(self.groups.get(group).get(attribute))==type([]):
+    #                 default = self.groups.get(group).get(attribute)[0]
+    #             elif type(self.groups.get(group).get(attribute))==type(""):
+    #                 default = self.groups.get(group).get(attribute)
+    #             else:
+    #                 print "%s not a list or a string" % attribute
+    #                 default = None
+    #
+    #             _defaults.append((group,attribute,default))
+    #
+    #     return _defaults
 
     def getalldefaults(self):
-        return self.defaults
+        # returns a dict with key (group,attribute) and value is the default
+        _defaults = {}
+        for group in self.groups.keys():
+            for attribute in self.groups.get(group).keys():
 
-    def getallgroups(self):
-        return self.groups
+                if type(self.groups.get(group).get(attribute))==type([]):
+                    default = self.groups.get(group).get(attribute)[0]
+                elif type(self.groups.get(group).get(attribute))== type(u'xx'):
+                    default = self.groups.get(group).get(attribute)
+                else:
+                    print "%s not a list or a string" % attribute
+                    print type(self.groups.get(group).get(attribute))
+                    default = None
+
+                _defaults[(group,attribute)]=default
+
+        return _defaults
 
 
 class Environment(object):
     """
     This class is the project structure base
     $DABRENDER/$TYPE/$SHOW/$PROJECT/$SCENE
-         $SCENE is possible scenes/mayascene.ma - always relative to the project
+    $SCENE is possible scenes/mayascene.ma - always relative to the project
     presently $TASK and $SHOT not used
     move this all to a json file template
+
+    This probaly needs to be changed as the idea of a project might be buried within the show more deeply as per the
+    way shotun would have it.
+    So $PROJECT is possibly  .../dir1/dir2/dir3/....../project
+    project is a maya project and should therefor have a workspace.mel file.
+
+
     """
 
     def __init__(self):
@@ -119,6 +171,7 @@ class Environment(object):
         self.dabwork = self.alreadyset("DABWORK", "")
         self.dabsoftware = self.alreadyset("DABSOFTWARE", "")
         self.dabusr = self.alreadyset("DABUSR", "")
+        self.dabassets = self.alreadyset("DABASSETS", "")
         self.type = self.alreadyset("TYPE", "user_work")
         self.show = self.alreadyset("SHOW", "")
         self.project = self.alreadyset("PROJECT", "")
@@ -132,11 +185,12 @@ class Environment(object):
         try:
             env = os.environ
             val = env[envar]
-            logger.debug("{} :: found in environment as {}".format(envar, val))
-            return val
         except Exception, err:
             logger.debug("{} :: not found in environment, setting to default: {}".format(envar, default))
             return default
+        else:
+            logger.debug("{} :: found in environment as {}".format(envar, val))
+            return val
 
     def setfromscenefile(self, mayascenefilefullpath):
         if os.path.isfile(mayascenefilefullpath):
@@ -174,38 +228,30 @@ if __name__ == '__main__':
     sh.setLevel(logging.DEBUG)
     logger.debug("-------- PROJECT FACTORY TEST ------------")
 
-    e = Environment()
-    logger.debug("{}".format(utils.printdict(e.__dict__)))
-
-    e.setfromscenefile("/Volumes/dabrender/user_work/matthewgidney/testFarm/scenes/maya2016_rms_20_8_textured_cubes.ma")
-    logger.debug("{}".format(utils.printdict(e.__dict__)))
+    # e = Environment()
+    # logger.debug("{}".format(utils.printdict(e.__dict__)))
+    #
+    # e.setfromscenefile("/Volumes/dabrender/user_work/matthewgidney/testFarm/scenes/maya2016_rms_20_8_textured_cubes.ma")
+    # logger.debug("{}".format(utils.printdict(e.__dict__)))
 
     JJ = ConfigBase()
-    key = "usermapfilepath"
-    print "versionlist=",JJ.getversions(key)
-    print "defaultversion=",JJ.getdefault(key)
-    print "defaultversionindex=",JJ.getdefaultindex(key)
-    print "groups=",JJ.getgroupmembers(key)
-    print "allkeys=",JJ.getallkeys()
-    print "alldefaults=",JJ.getalldefaults()
-    print "allgroups=",JJ.getallgroups()
 
-    key = "tractor"
-    print "versionlist=",JJ.getversions(key)
-    print "defaultversion=",JJ.getdefault(key)
-    print "defaultversionindex=",JJ.getdefaultindex(key)
-    print "groups=",JJ.getgroupmembers(key)
-    print "memberfromgroup=", JJ.getfromgroup(key,"port")
-    print "allkeys=",JJ.getallkeys()
-    print "alldefaults=",JJ.getalldefaults()
-    print "allgroups=",JJ.getallgroups()
+    print "GROUPS = ", JJ.getgroups()
+    group = "maya"
+    attribute = "versions"
 
-    key = "nuke"
-    print "versionlist=",JJ.getversions(key)
-    print "defaultversion=",JJ.getdefault(key)
-    print "defaultversionindex=",JJ.getdefaultindex(key)
-    print "groups=",JJ.getgroupmembers(key)
-    print "memberfromgroup=", JJ.getfromgroup(key,"port")
-    print "allkeys=",JJ.getallkeys()
-    print "alldefaults=",JJ.getalldefaults()
-    print "allgroups=",JJ.getallgroups()
+    print "ATTRIBUTES = ", JJ.getattributes(group)
+    print "ATTRIBUTE VALUES = ", JJ.getoptions(group,attribute)
+    print "DEFAULT VALUE = ",JJ.getdefault(group,attribute)
+
+    group = "nuke"
+    attribute = "versions"
+    print "ATTRIBUTES = ", JJ.getattributes(group)
+    print "ATTRIBUTE VALUES = ", JJ.getoptions(group,attribute)
+    print "DEFAULT VALUE = ",JJ.getdefault(group,attribute)
+
+    group = "renderman"
+    attribute = "versions"
+    print "ATTRIBUTES = ", JJ.getattributes(group)
+    print "ATTRIBUTE VALUES = ", JJ.getoptions(group,attribute)
+    print "DEFAULT VALUE = ",JJ.getdefault(group,attribute)

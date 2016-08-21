@@ -16,7 +16,7 @@ import shutil
 import string
 import subprocess
 from software.renderfarm.dabtractor.factories import utils_factory as utils
-from software.renderfarm.dabtractor.factories import environment_factory as env
+from software.renderfarm.dabtractor.factories import environment_factory as envfac
 import tractor.api.author as author
 
 # ##############################################################
@@ -30,21 +30,21 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
-cfg = env.ConfigBase()
+cfg = envfac.ConfigBase()
 
 class Map(object):
     """
     This class is the mapping of students
     """
     def __init__(self):
-        __dabrender = cfg.getfromgroup("dabrender","path")
-        self.mapfilejson = None
-        self.tractorcrewlist = None
-        self.mapfilepickle = None
-        self.backuppath = None
+        self.dabrender = cfg.getdefault("dabrender","path")
+        self.mapfilejson = cfg.getdefault("dabrender","usermapfile")
+        self.tractorcrewlist = cfg.getdefault("dabrender","tractorcrewlist")
+        self.mapfilepickle = cfg.getdefault("dabrender","mapfilepickle")
+        self.backuppath = cfg.getdefault("dabrender","backuppath")
 
         try:
-            self.mapfilejson = os.path.join(__dabrender, cfg.getfromgroup("dabrender","usermapfile"))
+            self.mapfilejson = os.path.join(self.dabrender, self.mapfilejson)
         except Exception, err:
             logger.critical("No Map Path {}".format(err))
         else:
@@ -53,7 +53,7 @@ class Map(object):
                 file(self.mapfilejson).close()
 
         try:
-            self.tractorcrewlist = os.path.join(__dabrender, cfg.getfromgroup("dabrender","tractorcrewlist"))
+            self.tractorcrewlist = os.path.join(self.dabrender, self.tractorcrewlist)
         except Exception, err:
             logger.critical("No Tractor Crew List Not in Config {}".format(err))
         else:
@@ -61,7 +61,7 @@ class Map(object):
 
 
         try:
-            self.mapfilepickle = os.path.join(__dabrender, cfg.getfromgroup("dabrender","mapfilepickle"))
+            self.mapfilepickle = os.path.join(self.dabrender, self.mapfilepickle)
         except Exception, err:
             logger.critical("No Map Pickle  Not in Config {}".format(err))
         else:
@@ -69,7 +69,7 @@ class Map(object):
 
 
         try:
-            self.backuppath = os.path.join(__dabrender, cfg.getfromgroup("dabrender","backuppath"))
+            self.backuppath = os.path.join(self.dabrender, self.backuppath)
         except Exception, err:
             logger.critical("Backup Path Not in Config {}".format(err))
         else:

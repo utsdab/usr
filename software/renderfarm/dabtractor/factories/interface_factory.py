@@ -23,7 +23,8 @@ logger.addHandler(sh)
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
-cfg = env.ConfigBase()
+CFG = env.ConfigBase()
+
 
 class UserWidget(qg.QWidget):
     def __init__(self,job):
@@ -342,7 +343,7 @@ class OutputWidget(qg.QWidget):
 
         self.resolution_text_lb = qg.QLabel('RESOLUTION:')
         self.resolution_combo = qg.QComboBox()
-        self.resolution_combo.addItems(cfg.getversions("resolution"))
+        self.resolution_combo.addItems(CFG.getoptions("render","resolution"))
         self.resolution_combo.setMinimumWidth(_width1)
         self.resolution_layout = qg.QHBoxLayout()
         self.resolution_combo.setCurrentIndex(2)
@@ -355,7 +356,7 @@ class OutputWidget(qg.QWidget):
 
         self.outformat_text_lb = qg.QLabel('OUTPUT:')
         self.outformat_combo = qg.QComboBox()
-        self.outformat_combo.addItems(cfg.getversions("outformat"))
+        self.outformat_combo.addItems(CFG.getoptions("render","outformat"))
         self.outformat_combo.setMinimumWidth(_width1)
         self.outformat_layout = qg.QHBoxLayout()
         self.outformat_layout.setContentsMargins(0, 0, 0, 0)
@@ -425,9 +426,8 @@ class RangeWidget(qg.QWidget):
 
         self.chunks_text_lb = qg.QLabel('JOB CHUNKS:')
         self.chunks_combo = qg.QComboBox()
-        print cfg.getallkeys()
-        print cfg.groups
-        self.chunks_combo.addItems(cfg.getversions("renderchunks"))
+
+        self.chunks_combo.addItems(CFG.getoptions("render","chunks"))
         self.chunks_combo.setMinimumWidth(_width1)
         self.chunks_layout = qg.QHBoxLayout()
         self.chunks_layout.setContentsMargins(0, 0, 0, 0)
@@ -486,7 +486,7 @@ class MayaJobWidget(qg.QWidget):
 
         self.mayaversion_text_lb = qg.QLabel('MAYA VERSION:')
         self.mayaversion_combo = qg.QComboBox()
-        self.mayaversion_combo.addItems(cfg.getversions("maya"))
+        self.mayaversion_combo.addItems(CFG.getoptions("maya","versions"))
         self.mayaversion_combo.setMinimumWidth(_width1)
         self.mayaversion_layout = qg.QHBoxLayout()
         self.mayaversion_layout.setContentsMargins(0, 0, 0, 0)
@@ -498,7 +498,7 @@ class MayaJobWidget(qg.QWidget):
 
         self.renderer_text_lb = qg.QLabel('RENDERER:')
         self.renderer_combo = qg.QComboBox()
-        self.renderer_combo.addItems(cfg.getversions("mayarenderer"))
+        self.renderer_combo.addItems(CFG.getoptions("maya","mayarenderer"))
         self.renderer_combo.setMinimumWidth(_width1)
         self.renderer_layout = qg.QHBoxLayout()
         self.renderer_layout.setContentsMargins(0, 0, 0, 0)
@@ -560,7 +560,7 @@ class ThreadMemoryWidget(qg.QWidget):
         self.threads_text_lb = qg.QLabel('THREADS:')
         self.threads_combo = qg.QComboBox()
         self.threads_combo.setMinimumWidth(_width)
-        self.threads_combo.addItems(cfg.getversions("renderthreads"))
+        self.threads_combo.addItems(CFG.getoptions("render","threads"))
 
         self.threads_combo.setCurrentIndex(2)
         self.threads_layout.addWidget(self.threads_text_lb)
@@ -576,7 +576,7 @@ class ThreadMemoryWidget(qg.QWidget):
         self.threadmemory_text_lb = qg.QLabel('THREAD MEMORY MB:')
         self.threadmemory_combo = qg.QComboBox()
         self.threadmemory_combo.setMinimumWidth(_width)
-        self.threadmemory_combo.addItems(cfg.getversions("rendermemory"))
+        self.threadmemory_combo.addItems(CFG.getoptions("render","rendermemory"))
         self.threadmemory_combo.setCurrentIndex(1)
         self.threadmemory_layout.addWidget(self.threadmemory_text_lb)
         self.threadmemory_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
@@ -672,7 +672,7 @@ class RendermanWidget(qg.QWidget):
 
         self.mayaversion_text_lb = qg.QLabel('MAYA VERSION:')
         self.mayaversion_combo = qg.QComboBox()
-        self.mayaversion_combo.addItems(cfg.getversions("maya"))
+        self.mayaversion_combo.addItems(CFG.getoptions("maya","versions"))
         self.mayaversion_combo.setMinimumWidth(_width1)
         self.mayaversion_layout = qg.QHBoxLayout()
         self.mayaversion_layout.setContentsMargins(0, 0, 0, 0)
@@ -684,7 +684,7 @@ class RendermanWidget(qg.QWidget):
 
         self.rmanversion_text_lb = qg.QLabel('RMAN VERSION:')
         self.rmanversion_combo = qg.QComboBox()
-        self.rmanversion_combo.addItems(cfg.getversions("renderman"))
+        self.rmanversion_combo.addItems(CFG.getoptions("renderman","versions"))
         self.rmanversion_combo.setMinimumWidth(_width1)
         self.rmanversion_layout = qg.QHBoxLayout()
         self.rmanversion_layout.setContentsMargins(0, 0, 0, 0)
@@ -696,7 +696,7 @@ class RendermanWidget(qg.QWidget):
 
         self.integrator_text_lb = qg.QLabel('INTEGRATOR:')
         self.integrator_combo = qg.QComboBox()
-        self.integrator_combo.addItems(cfg.getversions("rendermanintegrators"))
+        self.integrator_combo.addItems(CFG.getoptions("renderman","integrators"))
         self.integrator_combo.setMinimumWidth(_width1)
         self.integrator_combo.setCurrentIndex(0)
         self.integrator_layout = qg.QHBoxLayout()
@@ -709,7 +709,7 @@ class RendermanWidget(qg.QWidget):
 
         self.maxsamples_text_lb = qg.QLabel('MAX SAMPLES:')
         self.maxsamples_combo = qg.QComboBox()
-        self.maxsamples_combo.addItems(cfg.getversions("rendermaxsamples"))
+        self.maxsamples_combo.addItems(CFG.getoptions("render","maxsamples"))
         self.maxsamples_combo.setMinimumWidth(_width1)
 
         self.maxsamples_combo.setCurrentIndex(3)
@@ -956,7 +956,7 @@ class NukeWidget(qg.QWidget):
 
         self.version_text_lb = qg.QLabel('NUKE VERSION:')
         self.version_combo = qg.QComboBox()
-        self.version_combo.addItems(cfg.getversions("nuke"))
+        self.version_combo.addItems(CFG.getoptions("nuke","versions"))
         self.version_combo.setMinimumWidth(_width1)
         self.version_layout = qg.QHBoxLayout()
         self.version_layout.setContentsMargins(0, 0, 0, 0)
@@ -1017,7 +1017,7 @@ class TractorWidget(qg.QWidget):
         self.project_group_layout.setSpacing(0)
         self.project_group_text_lb = qg.QLabel('PROJECT GROUP:')
         self.project_group_combo = qg.QComboBox()
-        self.project_group_combo.addItems(cfg.getversions("projectgroup"))
+        self.project_group_combo.addItems(CFG.getoptions("renderjob","projectgroup"))
         self.project_group_combo.setCurrentIndex(0)
         self.project_group_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.project_group_layout.addWidget(self.project_group_text_lb)

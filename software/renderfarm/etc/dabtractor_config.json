@@ -1,78 +1,66 @@
 {
   "configpath": "/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr/software/renderfarm/dabtractor/factories/configuration_factory.py",
-  "dabusr": "",
-  "dabwork": "",
-  "dabrender": {
-    "path":"/Volumes/dabrender",
-    "usermapfile":"etc/map/user_map.json",
-    "mapfilepickle": "etc/map/user_map.pickle",
+
+  "dabusr": {
+    "path"            : "/Volumes/dabrender"
+  },
+
+  "dabwork" : {
+    "path"            : "/Volumes/dabrender",
+    "envtype"         : [ "user_work", "project_work" ]
+  },
+
+  "dabrender" : {
+    "path"            : "/Volumes/dabrender",
+    "usermapfile"     : "etc/map/user_map.json",
+    "mapfilepickle"   : "etc/map/user_map.pickle",
     "tractorcrewlist" : "etc/map/tractor_crew_list.txt",
-    "backuppath": "etc/map/backup"
+    "backuppath"      : "etc/map/backup"
   },
+
+  "farm": {
+    "version"      : "2.0",
+    "build"        : "201608"
+  },
+
   "tractor": {
-    "engine": "tractor-engine",
-    "port": "5600",
-    "username": "pixar"
+    "engine"       : "tractor-engine",
+    "port"         : "5600",
+    "username"     : "pixar"
   },
+
   "maya": {
-    "versions": [ "2016.5", "2016"],
-    "defaultversionindex": 0
+    "versions"     : [ "2016.5", "2016"],
+    "mayarenderer" : [ "mr", "sw"]
   },
-  "mayarenderer": {
-    "versions": [ "mr", "sw"],
-    "defaultversionindex": 0
-  },
+
   "nuke": {
-    "versions": [ "10.0v2", "9.0v8"],
-    "defaultversionindex": 0
+    "versions"     : [ "10.0v2", "9.0v8"]
   },
+
   "houdini": {
-    "versions": [ "15.5" ],
-    "defaultversionindex": 0
+    "versions"     : [ "15.5.480" ]
   },
+
   "renderman": {
-    "versions": [ "20.10" ],
-    "defaultversionindex": 0
+    "versions"     : [ "20.10" ],
+    "integrators"  : [ "FROMFILE", "pxr", "vcm", "visualiser"]
   },
-  "rendertier": {
-    "versions": [ "batch", "rush", "admin" ],
-    "defaultversionindex": 0
+
+  "renderjob": {
+    "rendertier"   : [ "batch", "rush", "admin" ],
+    "projectgroup" : [ "yr1", "yr2", "yr3", "yr4", "masters", "personal", "admin" ]
   },
-  "renderthreads": {
-    "versions": [ "16", "8", "4", "2", "1" ],
-    "defaultversionindex": 2
-  },
-  "renderchunks": {
-    "versions": [ "16", "8", "4", "2", "1" ],
-    "defaultversionindex": 4
-  },
-  "rendermaxsamples": {
-    "versions": [ "FROMFILE", "1024", "512", "256", "128", "64", "32", "16" ],
-    "defaultversionindex": 3
-  },
-  "rendermemory": {
-    "versions": [ "8000", "4000", "2000" ],
-    "defaultversionindex": 1
-  },
-  "envtype": {
-    "versions": [ "user_work", "project_work" ],
-    "defaultversionindex": 0
-  },
-  "outformat": {
-    "versions": [ "exr", "png", "jpg", "iff", "tif" ],
-    "defaultversionindex": 0
-  },
-  "resolution": {
-    "versions": [ "FROMFILE", "1080p", "720p", "540p", "108p" ],
-    "defaultversionindex": 2
-  },
-  "projectgroup": {
-    "versions": [ "yr1", "yr2", "yr3", "yr4", "masters", "personal", "admin" ],
-    "defaultversionindex": 0
-  },
-  "rendermanintegrators": {
-    "versions": [ "FROMFILE", "pxr", "vcm", "visualiser"],
-    "defaultversionindex": 0
+
+  "render": {
+    "threads"      : [ "4", "16", "8", "2", "1" ],
+    "chunks"       : [ "4", "16", "8", "2", "1" ],
+    "maxsamples"   : [ "256", "FROMFILE", "1024", "512", "128", "64", "32", "16" ],
+    "rendermemory" : [ "4000", "8000", "2000" ],
+    "resolution"   : [ "720p", "FROMFILE", "1080p", "540p", "108p" ],
+    "outformat"    : [ "exr", "png", "jpg", "iff", "tif" ]
   }
+
+
 }
 

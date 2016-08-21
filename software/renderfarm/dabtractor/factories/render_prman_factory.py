@@ -33,13 +33,13 @@ from software.renderfarm.dabtractor.factories import environment_factory as env
 
 cfg = env.ConfigBase()
 
-author.setEngineClientParam(hostname=cfg.getdefault("tractorengine"),
-                            port=cfg.getdefault("tractorengineport"),
-                            user=cfg.getdefault("tractorusername"),
+author.setEngineClientParam(hostname=cfg.getdefault("tractor","engine"),
+                            port=cfg.getdefault("tractor","port"),
+                            user=cfg.getdefault("tractor","username"),
                             debug=True)
-tq.setEngineClientParam(hostname=cfg.getdefault("tractorengine"),
-                            port=cfg.getdefault("tractorengineport"),
-                            user=cfg.getdefault("tractorusername"),
+tq.setEngineClientParam(hostname=cfg.getdefault("tractor","engine"),
+                            port=cfg.getdefault("tractor","port"),
+                            user=cfg.getdefault("tractor","username"),
                             debug=True)
 
 class RenderBase(object):

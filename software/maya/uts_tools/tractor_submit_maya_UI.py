@@ -37,13 +37,14 @@ logger.addHandler(sh)
 import PySide.QtCore as qc
 import PySide.QtGui as qg
 import sys
+import os
 # from software.renderfarm.dabtractor.factories.legacy import configuration_factory as config
 from software.renderfarm.dabtractor.factories import interface_factory as ifac
 from software.renderfarm.dabtractor.factories import render_prman_factory as rmsfac
 from software.renderfarm.dabtractor.factories import render_mr_factory as mrfac
 from software.renderfarm.dabtractor.factories import render_nuke_factory as nukefac
 from software.renderfarm.dabtractor.factories import command_factory as cmdfac
-from software.renderfarm.dabtractor.factories import environment_factory as env
+from software.renderfarm.dabtractor.factories import environment_factory as envfac
 from functools import partial
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -53,9 +54,10 @@ TRACTOT_SUBMIT_DIALOG = None
 MAYA_PRESENT = False
 COL1 = "background-color:lightgrey;color:black"
 COL2 = "background-color:lightgreen;color:darkblue"
-cfg = env.ConfigBase()
-VERSION = cfg.getdefault("farmversion")
-BUILD = cfg.getdefault("farmbuild")
+CFG = envfac.ConfigBase()
+ENV = envfac.Environment()
+VERSION = CFG.getdefault("farm","version")
+BUILD = CFG.getdefault("farm","build")
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmit(qg.QDialog):
@@ -72,13 +74,13 @@ class TractorSubmit(qg.QDialog):
             logger.info("Maya NOT Present")
 
         ###########
-        # try:
-        #     if not os.path.isdir(env.Environment().dabrender):
-        #         raise("Cant find dabrender")
-        # except Exception,err:
-        #     sys.exit(err)
+        try:
+            if not os.path.isdir(ENV.dabrender):
+                raise("Cant find dabrender")
+        except Exception,err:
+            sys.exit(err)
 
-        self.setWindowTitle('UTS FARM SUBMIT BLD{} {}'.format(BUILD, VERSION))
+        self.setWindowTitle('UTS FARM SUBMIT BLD {} {}'.format(VERSION, BUILD))
         self.setObjectName('UTS_FARM_SUBMIT')
         self.setWindowFlags(qc.Qt.WindowStaysOnTopHint)
         self.main_widget = TractorSubmitWidget(self.job,self.maya)
@@ -103,10 +105,10 @@ class Maya(object):
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
-class Job(env.Environment):
+class Job(envfac.Environment):
     def __init__(self):
         super(Job, self).__init__()
-        self.env=env.Environment()
+        self.env=ENV
         self.dabrender=self.env.dabrender
         self.usernumber = None
         self.username = None
@@ -128,12 +130,21 @@ class Job(env.Environment):
         self.startdirectory = None,
         self.bashcommand = None,
         self.bashoptions = None,
+        self.projectpath = None,
+        self.scenefullpath = None,
+        self.mayaversion = None,
+        self.rmanversion = None,
+        self.resolution = None,
+        self.rms_maxsamples = None
+        self.renderer = None
+        self.version = None
 
-    def printme(self):
-        logger.info("\n\n{:_^80}\n".format(" job attributes "))
-        for i,key in enumerate(self.__dict__.keys()):
-            logger.info("Job Attribute {} : {}={}".format( i, key, self.__dict__[key]))
-        logger.info("\n\n{:_^80}\n".format(" job attributes "))
+    #  moved to utils_factory
+    # def printme(self):
+    #     logger.info("\n\n{:_^80}\n".format(" job attributes "))
+    #     for i,key in enumerate(self.__dict__.keys()):
+    #         logger.info("Job Attribute {} : {}={}".format( i, key, self.__dict__[key]))
+    #     logger.info("\n\n{:_^80}\n".format(" job attributes "))
 
     def rmsvalidate(self):
         try:
@@ -425,4 +436,7 @@ def main():
 
 
 if __name__ == '__main__':
+
+    sh.setLevel(logging.DEBUG)
+
     main()

@@ -23,6 +23,7 @@ logger.addHandler(sh)
 # ##############################################################
 
 import tractor.api.author as author
+import tractor.api.query as tq
 import os
 import sys
 from software.renderfarm.dabtractor.factories import user_factory as ufac
@@ -30,14 +31,14 @@ from software.renderfarm.dabtractor.factories import utils_factory as utils
 from software.renderfarm.dabtractor.factories import environment_factory as env
 
 cfg=env.ConfigBase()
-author.setEngineClientParam(hostname=cfg.getfromgroup("tractor","engine"),
-                            port=cfg.getfromgroup("tractor","port"),
-                            user=cfg.getfromgroup("tractor","username"),
+author.setEngineClientParam(hostname=cfg.getdefault("tractor","engine"),
+                            port=cfg.getdefault("tractor","port"),
+                            user=cfg.getdefault("tractor","username"),
                             debug=True)
-# tq.setEngineClientParam(hostname=cfg.getfromgroup("tractor","engine"),
-#                             port=cfg.getfromgroup("tractor","port"),
-#                             user=cfg.getfromgroup("tractor","username"),
-#                             debug=True)
+tq.setEngineClientParam(hostname=cfg.getdefault("tractor","engine"),
+                            port=cfg.getdefault("tractor","port"),
+                            user=cfg.getdefault("tractor","username"),
+                            debug=True)
 
 class RenderBase(object):
     """
