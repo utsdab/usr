@@ -150,7 +150,7 @@ class ConfigBase(object):
         return _defaults
 
 
-class Environment(object):
+class Environment(ConfigBase):
     """
     This class is the project structure base
     $DABRENDER/$TYPE/$SHOW/$PROJECT/$SCENE
@@ -167,29 +167,32 @@ class Environment(object):
     """
 
     def __init__(self):
-        self.dabrender = self.alreadyset("DABRENDER", "")
-        self.dabwork = self.alreadyset("DABWORK", "")
-        self.dabsoftware = self.alreadyset("DABSOFTWARE", "")
-        self.dabusr = self.alreadyset("DABUSR", "")
-        self.dabassets = self.alreadyset("DABASSETS", "")
-        self.type = self.alreadyset("TYPE", "user_work")
-        self.show = self.alreadyset("SHOW", "")
-        self.project = self.alreadyset("PROJECT", "")
-        self.scene = self.alreadyset("SCENE", "")
-        self.user = self.alreadyset("USER", "")
-        self.username = self.alreadyset("USERNAME", "")
+        super(Environment, self).__init__()
+        self.dabrender = self.alreadyset("DABRENDER", "DABRENDER","path")
+        self.dabwork = self.alreadyset("DABWORK", "DABWORK","path")
+        self.dabsoftware = self.alreadyset("DABSOFTWARE", "DABSOFTWARE", "path")
+        self.dabusr = self.alreadyset("DABUSR", "DABUSR", "path")
+        self.dabassets = self.alreadyset("DABASSETS", "DABASSETS", "path")
+        self.type = self.alreadyset("TYPE","DABWORK","envtype")
+        self.show = self.alreadyset("SHOW", "","")
+        self.project = self.alreadyset("PROJECT", "","")
+        self.scene = self.alreadyset("SCENE", "","")
+        self.user = self.alreadyset("USER", "","")
+        self.username = self.alreadyset("USERNAME", "","")
 
-    def alreadyset(self, envar, default):
+    def alreadyset(self, envar, defaultgroup, defaultkey):
         #  look to see if an environment variable is already define an if not check th e dabtractor config else return
         #  the default
         try:
             env = os.environ
             val = env[envar]
         except Exception, err:
-            logger.debug("{} :: not found in environment, setting to default: {}".format(envar, default))
+            cfg=ConfigBase()
+            default=cfg.getdefault(defaultgroup,defaultkey)
+            logger.info("{} :: not found in environment, setting to default: {}".format(envar, default))
             return default
         else:
-            logger.debug("{} :: found in environment as {}".format(envar, val))
+            logger.info("{} :: found in environment as {}".format(envar, val))
             return val
 
     def setfromscenefile(self, mayascenefilefullpath):
@@ -201,8 +204,8 @@ class Environment(object):
             for i, bit in enumerate(_dirbits):
                 if bit == "project_work" or bit == "user_work":
                     logger.debug("")
-                    self.dabrender="/".join(_dirbits[0:i])
-                    logger.debug("DABRENDER: {}".format(self.dabrender))
+                    self.dabwork="/".join(_dirbits[0:i])
+                    logger.debug("DABWORK: {}".format(self.dabwork))
                     self.type=bit
                     logger.debug("TYPE: {}".format(self.type))
                     self.show=_dirbits[i+1]
@@ -215,7 +218,7 @@ class Environment(object):
             logger.warn("Cant set from file. Not a file: {}".format(mayascenefilefullpath))
 
     def putback(self):
-        os.environ["DABRENDER"] = self.dabrender
+        os.environ["DABWORK"] = self.dabwork
         os.environ["TYPE"] = self.type
         os.environ["SHOW"] = self.show
         os.environ["PROJECT"] = self.project
@@ -228,30 +231,24 @@ if __name__ == '__main__':
     sh.setLevel(logging.DEBUG)
     logger.debug("-------- PROJECT FACTORY TEST ------------")
 
-    # e = Environment()
-    # logger.debug("{}".format(utils.printdict(e.__dict__)))
-    #
-    # e.setfromscenefile("/Volumes/dabrender/user_work/matthewgidney/testFarm/scenes/maya2016_rms_20_8_textured_cubes.ma")
-    # logger.debug("{}".format(utils.printdict(e.__dict__)))
+    JJ = Environment()
 
-    JJ = ConfigBase()
-
-    print "GROUPS = ", JJ.getgroups()
+    logger.debug("GROUPS = %s"% JJ.getgroups())
     group = "maya"
     attribute = "versions"
 
-    print "ATTRIBUTES = ", JJ.getattributes(group)
-    print "ATTRIBUTE VALUES = ", JJ.getoptions(group,attribute)
-    print "DEFAULT VALUE = ",JJ.getdefault(group,attribute)
+    logger.debug( "ATTRIBUTES = %s"% JJ.getattributes(group))
+    logger.debug( "ATTRIBUTE VALUES =  %s"%  JJ.getoptions(group,attribute))
+    logger.debug( "DEFAULT VALUE =  %s"% JJ.getdefault(group,attribute))
 
     group = "nuke"
     attribute = "versions"
-    print "ATTRIBUTES = ", JJ.getattributes(group)
-    print "ATTRIBUTE VALUES = ", JJ.getoptions(group,attribute)
-    print "DEFAULT VALUE = ",JJ.getdefault(group,attribute)
+    logger.debug( "ATTRIBUTES =  %s"%  JJ.getattributes(group))
+    logger.debug( "ATTRIBUTE VALUES =  %s"%  JJ.getoptions(group,attribute))
+    logger.debug( "DEFAULT VALUE =  %s"% JJ.getdefault(group,attribute))
 
     group = "renderman"
     attribute = "versions"
-    print "ATTRIBUTES = ", JJ.getattributes(group)
-    print "ATTRIBUTE VALUES = ", JJ.getoptions(group,attribute)
-    print "DEFAULT VALUE = ",JJ.getdefault(group,attribute)
+    logger.debug( "ATTRIBUTES =  %s"%  JJ.getattributes(group))
+    logger.debug( "ATTRIBUTE VALUES =  %s"%  JJ.getoptions(group,attribute))
+    logger.debug( "DEFAULT VALUE =  %s"% JJ.getdefault(group,attribute))

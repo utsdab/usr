@@ -109,7 +109,7 @@ class Job(envfac.Environment):
     def __init__(self):
         super(Job, self).__init__()
         self.env=ENV
-        self.dabrender=self.env.dabrender
+        self.dabwork=self.env.dabwork
         self.usernumber = None
         self.username = None
         self.projectgroup = None
@@ -140,16 +140,16 @@ class Job(envfac.Environment):
         self.version = None
 
     #  moved to utils_factory
-    # def printme(self):
-    #     logger.info("\n\n{:_^80}\n".format(" job attributes "))
-    #     for i,key in enumerate(self.__dict__.keys()):
-    #         logger.info("Job Attribute {} : {}={}".format( i, key, self.__dict__[key]))
-    #     logger.info("\n\n{:_^80}\n".format(" job attributes "))
+    def printme(self):
+        logger.info("\n\n{:_^80}\n".format(" job attributes "))
+        for i,key in enumerate(self.__dict__.keys()):
+            logger.info("Job Attribute {} : {}={}".format( i, key, self.__dict__[key]))
+        logger.info("\n\n{:_^80}\n".format(" job attributes "))
 
     def rmsvalidate(self):
         try:
             self.tractorjob = rmsfac.RenderPrman(
-                 envdabrender=self.dabrender,
+                 envdabwork=self.dabwork,
                  envtype=self.type,
                  envshow=self.show,
                  envproject=self.project,
@@ -185,7 +185,7 @@ class Job(envfac.Environment):
         if self.renderer == "mr":
             try:
                 self.tractorjob = mrfac.RenderMentalray(
-                    envdabrender=self.dabrender,
+                    envdabwork=self.dabwork,
                     envtype=self.type,
                     envshow=self.show,
                     envproject=self.project,
@@ -221,7 +221,7 @@ class Job(envfac.Environment):
     def nukevalidate(self):
         try:
             self.tractorjob=nukefac.NukeJob(
-                envdabrender=self.dabrender,
+                envdabwork=self.dabwork,
                 envtype=self.type,
                 envshow=self.show,
                 envproject=self.project,

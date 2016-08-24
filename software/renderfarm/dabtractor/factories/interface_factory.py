@@ -81,22 +81,22 @@ class ProjectWidget(qg.QWidget):
 
         _width=127
 
-        # $DABRENDER ------------------------------------------------------------------------------------ #
-        self.dabrender_text_lb = qg.QLabel('$DABRENDER:')
-        self.dabrender_text_lb.setMinimumWidth(_width)
-        self.dabrender_text_le = qg.QLineEdit(self.job.dabrender)
-        self.dabrender_text_le.setReadOnly(True)
-        self.dabrender_text_layout = qg.QHBoxLayout()
-        self.dabrender_text_layout.setSpacing(0)
-        self.dabrender_text_layout.setContentsMargins(0, 0, 0, 0)
-        self.dabrender_text_layout.addWidget(self.dabrender_text_lb)
-        self.dabrender_text_layout.addWidget(self.dabrender_text_le)
-        self.layout().addLayout(self.dabrender_text_layout)
+        # $DABWORK ------------------------------------------------------------------------------------ #
+        self.dabwork_text_lb = qg.QLabel('$DABWORK:')
+        self.dabwork_text_lb.setMinimumWidth(_width)
+        self.dabwork_text_le = qg.QLineEdit(self.job.dabwork)
+        self.dabwork_text_le.setReadOnly(True)
+        self.dabwork_text_layout = qg.QHBoxLayout()
+        self.dabwork_text_layout.setSpacing(0)
+        self.dabwork_text_layout.setContentsMargins(0, 0, 0, 0)
+        self.dabwork_text_layout.addWidget(self.dabwork_text_lb)
+        self.dabwork_text_layout.addWidget(self.dabwork_text_le)
+        self.layout().addLayout(self.dabwork_text_layout)
 
-        self.dabrender_text_le.setMinimumHeight(25)
-        _dabrender = "border:1px solid rgba(0,0,0,190);background-color:rgb(100, 255, 100);color:rgb(0, 30, 0)"
-        self.dabrender_text_le.setStyleSheet(_dabrender)
-        # self.job.dabrenderpath=self.job.dabrender
+        self.dabwork_text_le.setMinimumHeight(25)
+        _dabwork = "border:1px solid rgba(0,0,0,190);background-color:rgb(100, 255, 100);color:rgb(0, 30, 0)"
+        self.dabwork_text_le.setStyleSheet(_dabwork)
+        self.job.dabworkpath=self.job.dabwork
 
         #  $TYPE  ---------------------------------------
         self.type_text_lb = qg.QLabel('$TYPE:')
@@ -117,7 +117,6 @@ class ProjectWidget(qg.QWidget):
         self.type_combo.setMinimumHeight(25)
         _type = "background-color:rgb(190, 255, 190);color:rgb(30, 0, 0)"
         self.type_combo.setStyleSheet(_type)
-
 
         self.type_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.layout().addLayout(self.type_layout)
@@ -167,7 +166,7 @@ class ProjectWidget(qg.QWidget):
 
     def _type_change(self):
         _type = self.type_combo.currentText()
-        self.job.typepath=os.path.join(self.job.dabrender, _type)
+        self.job.typepath=os.path.join(self.job.dabwork, _type)
         self.job.type=_type
 
         if _type=="user_work":
@@ -181,10 +180,9 @@ class ProjectWidget(qg.QWidget):
         logger.info("Type changed to {}".format(_type))
         self._show_change()
 
-
     def _show_change(self):
         _show=self.show_combo.currentText()
-        self.job.showpath = os.path.join(self.job.dabrender, self.job.type, _show)
+        self.job.showpath = os.path.join(self.job.dabwork, self.job.type, _show)
         self.job.show = _show
         self._combo_from_path(self.project_combo, self.job.showpath)
         logger.info("Show changed to {}".format(_show))
@@ -196,12 +194,12 @@ class ProjectWidget(qg.QWidget):
         self.job.project = _project
         logger.info("Project changed to {}".format(_project))
 
-    def _get_dabrender(self):
-        _dabrender = os.getenv("DABRENDER")
-        self.dabrender = _dabrender
-        self.job.dabrender = self.dabrender
-        logger.info("$DABRENDER is {}".format(_dabrender))
-        return _dabrender
+    # def _get_dabrender(self):
+    #     _dabrender = os.getenv("DABRENDER")
+    #     self.dabrender = _dabrender
+    #     self.job.dabrender = self.dabrender
+    #     logger.info("$DABRENDER is {}".format(_dabrender))
+    #     return _dabrender
 
     def _combo_from_path(self, _combobox, _dirpath):
         # rebuild a combobox list from the contents of a path
@@ -346,7 +344,7 @@ class OutputWidget(qg.QWidget):
         self.resolution_combo.addItems(CFG.getoptions("render","resolution"))
         self.resolution_combo.setMinimumWidth(_width1)
         self.resolution_layout = qg.QHBoxLayout()
-        self.resolution_combo.setCurrentIndex(2)
+        self.resolution_combo.setCurrentIndex(0)
         self.resolution_layout.setContentsMargins(0, 0, 0, 0)
         self.resolution_layout.setSpacing(0)
         self.resolution_layout.addWidget(self.resolution_text_lb)
@@ -562,7 +560,7 @@ class ThreadMemoryWidget(qg.QWidget):
         self.threads_combo.setMinimumWidth(_width)
         self.threads_combo.addItems(CFG.getoptions("render","threads"))
 
-        self.threads_combo.setCurrentIndex(2)
+        self.threads_combo.setCurrentIndex(0)
         self.threads_layout.addWidget(self.threads_text_lb)
         self.threads_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.threads_layout.addWidget(self.threads_combo)
@@ -577,7 +575,7 @@ class ThreadMemoryWidget(qg.QWidget):
         self.threadmemory_combo = qg.QComboBox()
         self.threadmemory_combo.setMinimumWidth(_width)
         self.threadmemory_combo.addItems(CFG.getoptions("render","rendermemory"))
-        self.threadmemory_combo.setCurrentIndex(1)
+        self.threadmemory_combo.setCurrentIndex(0)
         self.threadmemory_layout.addWidget(self.threadmemory_text_lb)
         self.threadmemory_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.threadmemory_layout.addWidget(self.threadmemory_combo)
@@ -585,8 +583,8 @@ class ThreadMemoryWidget(qg.QWidget):
         self.threadmemory_combo.activated.connect(lambda: self._memory(self.threadmemory_combo.currentText()))
         self.layout().addLayout(self.threadmemory_layout)
 
-        self.threadmemory_combo.setCurrentIndex(1)
-        self.threads_combo.setCurrentIndex(2)
+        self.threadmemory_combo.setCurrentIndex(0)
+        self.threads_combo.setCurrentIndex(0)
 
     def _threads(self, _value):
         self.job.threads = _value
@@ -712,7 +710,7 @@ class RendermanWidget(qg.QWidget):
         self.maxsamples_combo.addItems(CFG.getoptions("render","maxsamples"))
         self.maxsamples_combo.setMinimumWidth(_width1)
 
-        self.maxsamples_combo.setCurrentIndex(3)
+        self.maxsamples_combo.setCurrentIndex(0)
 
         self.maxsamples_layout = qg.QHBoxLayout()
         self.maxsamples_layout.setContentsMargins(0, 0, 0, 0)
@@ -820,7 +818,7 @@ class BashWidget(qg.QWidget):
         self.commandtext.setReadOnly(False)
         self.layout().addWidget(self.commandtext)
         self.bashcommand_combo.addItems(list(self.defaults.keys()))
-        self.bashcommand_combo.setCurrentIndex(1)
+        self.bashcommand_combo.setCurrentIndex(0)
 
         # set initial values
         self._options(self.bashcommand_combo.currentText())

@@ -33,14 +33,17 @@ from software.renderfarm.dabtractor.factories import environment_factory as env
 
 cfg = env.ConfigBase()
 
-author.setEngineClientParam(hostname=cfg.getdefault("tractor","engine"),
-                            port=cfg.getdefault("tractor","port"),
-                            user=cfg.getdefault("tractor","username"),
-                            debug=True)
-tq.setEngineClientParam(hostname=cfg.getdefault("tractor","engine"),
-                            port=cfg.getdefault("tractor","port"),
-                            user=cfg.getdefault("tractor","username"),
-                            debug=True)
+print "ccc", int(cfg.getdefault("tractor","port"))
+
+author.setEngineClientParam(hostname = str(cfg.getdefault("tractor","engine")),
+                            # port = str(cfg.getdefault("tractor","port")),
+                            port = 5600,
+                            user = str(cfg.getdefault("tractor","jobowner")),
+                            debug = True)
+tq.setEngineClientParam(hostname = str(cfg.getdefault("tractor","engine")),
+                            port = str(cfg.getdefault("tractor","port")),
+                            user = str(cfg.getdefault("tractor","jobowner")),
+                            debug = True)
 
 class RenderBase(object):
     ''' Base class for all batch jobs'''
@@ -55,30 +58,30 @@ class RenderBase(object):
             ru = ufac.FARMuser()
             self.renderusernumber = ru.number
             self.renderusername = ru.name
-            self.dabrender = ru.dabrender
-            self.dabrenderworkpath = ru.dabuserworkpath
-            self.initialProjectPath = ru.dabuserworkpath
+            # self.dabrender = ru.dabrender
+            # self.dabrenderworkpath = ru.dabuserworkpath
+            # self.initialProjectPath = ru.dabuserworkpath
 
         except Exception, erroruser:
             logger.warn("Cant get the users name and number back %s" % erroruser)
             sys.exit("Cant get the users name")
 
-        if os.path.ismount(self.dabrender):
-            logger.info("Found mount %s" % self.dabrender)
+        # if os.path.ismount(self.dabrender):
+        #     logger.info("Found mount %s" % self.dabrender)
 
-        if os.path.isdir(self.dabrender):
-            logger.info("Yet found directory %s" % self.dabrender)
-        else:
-            self.initialProjectPath = None
-            logger.critical("Cant find central filer mounted %s" % self.dabrender)
-            raise Exception, "dabrender not a valid mount point"
+        # if os.path.isdir(self.dabrender):
+        #     logger.info("Yet found directory %s" % self.dabrender)
+        # else:
+        #     self.initialProjectPath = None
+        #     logger.critical("Cant find central filer mounted %s" % self.dabrender)
+        #     raise Exception, "dabrender not a valid mount point"
 
 
 class RenderPrman(RenderBase):
     ''' Renderman job defined using the tractor api '''
 
     def __init__(self,
-                 envdabrender="",
+                 envdabwork="",
                  envtype="",        # user_work
                  envshow="",        # matthewgidney
                  envproject="",     # mayaproject
@@ -105,22 +108,22 @@ class RenderPrman(RenderBase):
                  email=[]
     ):
         super(RenderPrman, self).__init__()
-        self.envdabrender = envdabrender
+        self.envdabwork = envdabwork
         self.envtype=envtype
         self.envproject=envproject
         self.envshow=envshow
         self.envscene=envscene
         self.mayaprojectpathalias = "$DABRENDER/$TYPE/$SHOW/$PROJECT"
-        self.mayaprojectpath = os.path.join(self.envdabrender, self.envtype, self.envshow, self.envproject)
+        self.mayaprojectpath = os.path.join(self.envdabwork, self.envtype, self.envshow, self.envproject)
         self.mayaprojectnamealias = "$PROJECT"
         self.mayaprojectname = envproject
         self.mayascenefilefullpathalias = "$DABRENDER/$TYPE/$SHOW/$PROJECT/$SCENE"
-        self.mayascenefilefullpath = os.path.join( self.envdabrender, self.envtype, self.envshow, self.envproject,
+        self.mayascenefilefullpath = os.path.join( self.envdabwork, self.envtype, self.envshow, self.envproject,
                                                    self.envscene)
         self.scenename = os.path.split(envscene)[-1:][0]
         self.scenebasename = os.path.splitext(self.scenename)[0]
         self.sceneext = os.path.splitext(self.scenename)[1]
-        self.rendermanpath = os.path.join( self.envdabrender, self.envtype, self.envshow, self.envproject,
+        self.rendermanpath = os.path.join( self.envdabwork, self.envtype, self.envshow, self.envproject,
                                            "renderman", self.scenebasename)
         self.rendermanpathalias = "$DABRENDER/$TYPE/$SHOW/$PROJECT/renderman/$SCENENAME"
         self.renderdirectory = os.path.join(self.rendermanpath,"images")
@@ -153,7 +156,6 @@ class RenderPrman(RenderBase):
         Main method to build the job
         :return:
         '''
-
         # ################ 0 JOB ################
         self.job = author.Job(title="RM: {} {} {}-{}".format(
               self.renderusername,self.scenename,self.startframe,self.endframe),
@@ -168,7 +170,7 @@ class RenderPrman(RenderBase):
                                                                    self.renderusernumber),
               comment="LocalUser is {} {} {}".format(self.user,self.renderusername,self.renderusernumber),
               projects=[str(self.projectgroup)],
-              tier=config.ConfigBase.getdefault("defaultrendertier"),
+              tier=str(cfg.getdefault("renderjob","rendertier")),
               tags=["theWholeFarm", ],
               service="")
 
@@ -419,7 +421,8 @@ class RenderPrman(RenderBase):
             try:
                 logger.info("Spooled correctly")
                 # all jobs owner by pixar user on the farm
-                self.job.spool(owner="pixar")
+                self.job.spool(owner=cfg.getdefault("tractor","jobowner"),
+                               port=int(cfg.getdefault("tractor","port")))
             except Exception, spoolerr:
                 logger.warn("A spool error %s" % spoolerr)
         else:
@@ -438,7 +441,7 @@ if __name__ == "__main__":
     logger.info("START TESTING")
 
     TEST = RenderPrman(
-                       envdabrender="/Volumes/dabrender",
+                       envdabwork="/Volumes/dabrender/work",
                        envproject="testFarm",
                        envshow="matthewgidney",
                        envscene="dottyrms.ma",

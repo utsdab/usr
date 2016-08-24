@@ -1,16 +1,24 @@
 {
   "configpath": "/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr/software/renderfarm/dabtractor/factories/configuration_factory.py",
 
-  "dabusr": {
+  "DABUSR": {
     "path"            : "/Volumes/dabrender"
   },
 
-  "dabwork" : {
-    "path"            : "/Volumes/dabrender",
+  "DABWORK" : {
+    "path"            : "/Volumes/dabrender/work",
     "envtype"         : [ "user_work", "project_work" ]
   },
 
-  "dabrender" : {
+  "DABASSETS" : {
+    "path"            : "/Volumes/dabrender/assets"
+  },
+
+  "DABSOFTWARE" : {
+    "path"            : "/Volumes/dabrender/usr/software"
+  },
+
+  "DABRENDER" : {
     "path"            : "/Volumes/dabrender",
     "usermapfile"     : "etc/map/user_map.json",
     "mapfilepickle"   : "etc/map/user_map.pickle",
@@ -26,7 +34,7 @@
   "tractor": {
     "engine"       : "tractor-engine",
     "port"         : "5600",
-    "username"     : "pixar"
+    "jobowner"     : "pixar"
   },
 
   "maya": {

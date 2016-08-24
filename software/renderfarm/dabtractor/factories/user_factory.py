@@ -37,11 +37,12 @@ class Map(object):
     This class is the mapping of students
     """
     def __init__(self):
-        self.dabrender = cfg.getdefault("dabrender","path")
-        self.mapfilejson = cfg.getdefault("dabrender","usermapfile")
-        self.tractorcrewlist = cfg.getdefault("dabrender","tractorcrewlist")
-        self.mapfilepickle = cfg.getdefault("dabrender","mapfilepickle")
-        self.backuppath = cfg.getdefault("dabrender","backuppath")
+        self.dabrender = cfg.getdefault("DABRENDER","path")
+        self.dabwork = cfg.getdefault("DABWORK","path")
+        self.mapfilejson = cfg.getdefault("DABRENDER","usermapfile")
+        self.tractorcrewlist = cfg.getdefault("DABRENDER","tractorcrewlist")
+        self.mapfilepickle = cfg.getdefault("DABRENDER","mapfilepickle")
+        self.backuppath = cfg.getdefault("DABRENDER","backuppath")
 
         try:
             self.mapfilejson = os.path.join(self.dabrender, self.mapfilejson)
@@ -181,7 +182,7 @@ class Map(object):
 class EnvType(object):
     # this is the user work area either work/number or projects/projectname
     def __init__(self,userid=None,projectname=None):
-        self.dabrenderpath=cfg.getdefault("dabrender")
+        self.dabrenderpath=cfg.getdefault("DABRENDER","path")
 
         if userid:
             self.envtype="user_work"
@@ -348,34 +349,37 @@ if __name__ == '__main__':
         logger.warn(err)
 
 
-    logger.debug("-------- TEST adduser ------------")
-    try:
-        # m.getallusers()
-        m.backup()
-        m.adduser("1209880","mattgidney","2020")
-        m.adduser("0000000","nextyearstudent","2016")
-        m.adduser("9999999","neveryearstudent","2016")
-
-    except Exception, err:
-        logger.warn(err)
-
-
-    logger.debug("-------- TEST getuser ------------")
-    try:
-        m.getuser("9999999")
-    except Exception, err:
-        logger.warn(err)
-
-    logger.debug("-------- TEST removeuser ------------")
-    try:
-        m.removeuser("9999999")
-        m.getuser("9999999")
-    except Exception, err:
-        logger.warn(err)
+    # logger.debug("-------- TEST adduser ------------")
+    # try:
+    #     # m.getallusers()
+    #     m.backup()
+    #     m.adduser("1209880","mattgidney","2020")
+    #     m.adduser("0000000","nextyearstudent","2016")
+    #     m.adduser("9999999","neveryearstudent","2016")
+    #
+    # except Exception, err:
+    #     logger.warn(err)
+    #
+    #
+    # logger.debug("-------- TEST getuser ------------")
+    # try:
+    #     m.getuser("9999999")
+    # except Exception, err:
+    #     logger.warn(err)
+    #
+    # logger.debug("-------- TEST removeuser ------------")
+    # try:
+    #     m.removeuser("9999999")
+    #     m.getuser("9999999")
+    # except Exception, err:
+    #     logger.warn(err)
 
 
     u = FARMuser()
     print u.name
+    print u.number
+    print u.year
+    print u.user
     # uts = UTSuser()
     # print uts.name
     # print uts.number
