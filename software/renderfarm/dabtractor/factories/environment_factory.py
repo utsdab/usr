@@ -63,8 +63,8 @@ class ConfigBase(object):
         try:
             _type = type(self.groups.get(group).get(key))
         except Exception, err:
-            logger.warn("Group %s or Attribute %s not in config.json file, %s" % (group,key,err))
-            logger.info("ALL DEFAULTS = %s" % self.getalldefaults())
+            logger.warn("Options - Group %s or Attribute %s not in config.json file, %s" % (group,key,err))
+            logger.debug("ALL DEFAULTS = %s" % self.getalldefaults())
         else:
             if _type==type([]):
                 _return = self.groups.get(group).get(key)
@@ -76,11 +76,12 @@ class ConfigBase(object):
     def getdefault(self, group, key):
         # returns the first index if a list or just the vale if not a list
         _return = None
+        logger.debug("try %s %s"%(group,key))
         try:
             _type = type(self.groups.get(group).get(key))
         except Exception, err:
-            logger.warn("Group %s or Attribute %s not in config.json file, %s" % (group,key,err))
-            logger.info("ALL DEFAULTS = %s" % self.getalldefaults())
+            logger.warn("Default - Group %s or Attribute %s not in config.json file, %s" % (group,key,err))
+            logger.debug("ALL DEFAULTS = %s" % self.getalldefaults())
         else:
             if _type==type([]):
                 _return = self.groups.get(group).get(key)[0]
@@ -89,7 +90,7 @@ class ConfigBase(object):
             else:
                 logger.warn("%s not a list or a string" % key)
         finally:
-            return _return
+            return str(_return)
 
     def getgroups(self):
         # returns all attribute groups
@@ -99,7 +100,7 @@ class ConfigBase(object):
         except Exception, err:
             logger.warn("Groups not defined, %s" % (err))
         finally:
-            return _return
+            return str(_return)
 
     def getattributes(self,group):
         # return a groups attributes
@@ -108,27 +109,10 @@ class ConfigBase(object):
             _return =  self.groups.get(group).keys()
         except Exception, err:
             logger.warn("Group %s not in config.json file, %s" % (group,err))
-            logger.info("ALL DEFAULTS = %s" % self.getalldefaults())
+            logger.debug("ALL DEFAULTS = %s" % self.getalldefaults())
         finally:
             return _return
 
-    # def getalldefaults(self):
-    #     _defaults = []
-    #     # print self.groups
-    #     for group in self.groups.keys():
-    #         for attribute in self.groups.get(group).keys():
-    #
-    #             if type(self.groups.get(group).get(attribute))==type([]):
-    #                 default = self.groups.get(group).get(attribute)[0]
-    #             elif type(self.groups.get(group).get(attribute))==type(""):
-    #                 default = self.groups.get(group).get(attribute)
-    #             else:
-    #                 print "%s not a list or a string" % attribute
-    #                 default = None
-    #
-    #             _defaults.append((group,attribute,default))
-    #
-    #     return _defaults
 
     def getalldefaults(self):
         # returns a dict with key (group,attribute) and value is the default
@@ -174,11 +158,11 @@ class Environment(ConfigBase):
         self.dabusr = self.alreadyset("DABUSR", "DABUSR", "path")
         self.dabassets = self.alreadyset("DABASSETS", "DABASSETS", "path")
         self.type = self.alreadyset("TYPE","DABWORK","envtype")
-        self.show = self.alreadyset("SHOW", "","")
-        self.project = self.alreadyset("PROJECT", "","")
-        self.scene = self.alreadyset("SCENE", "","")
-        self.user = self.alreadyset("USER", "","")
-        self.username = self.alreadyset("USERNAME", "","")
+        # self.show = self.alreadyset("SHOW", "","")
+        # self.project = self.alreadyset("PROJECT", "","")
+        # self.scene = self.alreadyset("SCENE", "","")
+        # self.user = self.alreadyset("USER", "","")
+        # self.username = self.alreadyset("USERNAME", "","")
 
     def alreadyset(self, envar, defaultgroup, defaultkey):
         #  look to see if an environment variable is already define an if not check th e dabtractor config else return
@@ -187,12 +171,11 @@ class Environment(ConfigBase):
             env = os.environ
             val = env[envar]
         except Exception, err:
-            cfg=ConfigBase()
-            default=cfg.getdefault(defaultgroup,defaultkey)
-            logger.info("{} :: not found in environment, setting to default: {}".format(envar, default))
+            default=self.getdefault(defaultgroup,defaultkey)
+            logger.debug("{} :: not found in environment, setting to default: {}".format(envar, default))
             return default
         else:
-            logger.info("{} :: found in environment as {}".format(envar, val))
+            logger.debug("{} :: found in environment as {}".format(envar, val))
             return val
 
     def setfromscenefile(self, mayascenefilefullpath):

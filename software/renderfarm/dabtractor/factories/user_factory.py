@@ -247,7 +247,7 @@ class UTSuser(object):
 
     def addtomap(self):
 
-        if self.number in cfg.getdefault("superuser"):
+        if self.number in cfg.getdefault("DABRENDER","superuser"):
             logger.info("Your are a superuser - yay")
         else:
             logger.warn("You need to be a superuser to mess with the map file sorry")

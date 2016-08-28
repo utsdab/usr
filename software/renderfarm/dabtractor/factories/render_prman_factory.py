@@ -33,8 +33,6 @@ from software.renderfarm.dabtractor.factories import environment_factory as env
 
 cfg = env.ConfigBase()
 
-print "ccc", int(cfg.getdefault("tractor","port"))
-
 author.setEngineClientParam(hostname = str(cfg.getdefault("tractor","engine")),
                             # port = str(cfg.getdefault("tractor","port")),
                             port = 5600,

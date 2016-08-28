@@ -23,7 +23,14 @@
     "usermapfile"     : "etc/map/user_map.json",
     "mapfilepickle"   : "etc/map/user_map.pickle",
     "tractorcrewlist" : "etc/map/tractor_crew_list.txt",
-    "backuppath"      : "etc/map/backup"
+    "backuppath"      : "etc/map/backup",
+    "superuser"       : "120988"
+  },
+
+  "shotgun" : {
+    "serverpath"      : "https://utsanim.shotgunstudio.com",
+    "scriptname"      : "shotgun_factory",
+    "scriptkey"       : "694d48107fc5d7a05652afb060babff34bdfe99b4a2ea47d2adf718fc0a7745f"
   },
 
   "farm": {

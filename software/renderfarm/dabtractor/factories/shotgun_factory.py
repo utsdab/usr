@@ -1,58 +1,167 @@
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
+#!/usr/bin/env rmanpy
 import pprint
 import sys
 from software.shotgun_api3 import Shotgun
+from software.renderfarm.dabtractor.factories import environment_factory as envfac
+
+# ##############################################################
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+sh = logging.StreamHandler()
+sh.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(levelname)5.5s \t%(name)s \t%(message)s')
+sh.setFormatter(formatter)
+logger.addHandler(sh)
+# ##############################################################
+
+cfg = envfac.Environment()
+
+class ShotgunBase(object):
+    # base object
+    def __init__(self):
+        self.serverpath = str(cfg.getdefault("shotgun", "serverpath"))
+        self.scriptname = str(cfg.getdefault("shotgun", "scriptname"))
+        self.scriptkey  = str(cfg.getdefault("shotgun", "scriptkey"))
+        self.sg = Shotgun( self.serverpath, self.scriptname, self.scriptkey)
+        logger.info("SHOTGUN: talking to shotgun ...... %s" % self.serverpath)
 
 
-###########################  test code snippet
-SERVER_PATH = "https://utsanim.shotgunstudio.com"
-SCRIPT_NAME = 'shotgun_factory'
-SCRIPT_KEY  = '694d48107fc5d7a05652afb060babff34bdfe99b4a2ea47d2adf718fc0a7745f'
 
-sg = Shotgun(SERVER_PATH, SCRIPT_NAME, SCRIPT_KEY,True)
-# pprint.pprint([symbol for symbol in sorted(dir(sg)) if not symbol.startswith('_')])
+class Projects(ShotgunBase):
+    def __init__(self):
+        super(Projects, self).__init__()
+        __fields = ['id', 'name']
+        __filters = [['id','greater_than',0]]
 
-project = {'type': 'Project', 'id': 89}  ## projectx is 89
-shotname = 'tractortesting'
-taskname = 'layout'
-versioncode = 'from tractor 1'
-versiondescription = 'test version using shotgun api'
-owner = {'type':'HumanUser', 'id':38}
-tag = "RenderFarm Proxy"
-quicktime = '/Users/Shared/UTS_Dev/test_RMS_aaocean.0006.mov'
+        try:
+            self.projects=self.sg.find("Project",__filters,__fields)
+        except Exception, err:
+            logger.warn("%s"%err)
+        else:
+            logger.info("Found %d Projects" % (len(self.projects)))
+            # logger.debug(self.projects)
+            for project in self.projects:
+                logger.info("   %s %s"%(project['id'],project['name']))
 
-filters = [ ['project','is', project],
-            ['code', 'is', shotname] ]
-shot    = sg.find_one('Shot',filters)
+    def assets(self):
+        pass
+    def type(self):
+        pass
 
-filters = [ ['project','is', project],
-            ['entity','is',{'type':'Shot','id':shot['id']}],
-            ['content','is',taskname] ]
-task = sg.find_one('Task',filters)
+    def sequences(self, projectid):
+        # returns a list of dicts  [ {code:, type:, id: } ] of sequences for a given projectid
+        fields = ['id', 'code']
+        filters = [['project', 'is', {'type': 'Project', 'id': projectid}]]
+        sequences= self.sg.find("Sequence",filters,fields)
 
-data = { 'project': project,
-         'code': versioncode,
-         'description': versiondescription,
-         'sg_status_list': 'rev',
-         'entity': {'type':'Shot', 'id':shot['id']},
-         'sg_task': {'type':'Task', 'id':task['id']},
-         'user': owner }
-version_result = sg.create('Version', data)
-print "New Version Created"
-pprint.pprint(version_result)
-print "Sending then transcoding......."
+        if len(sequences) < 1:
+            print "couldn't find any Sequences"
+        else:
+            print "Found %d Sequences" % (len(sequences))
+            print sequences
 
 
-# ----------------------------------------------
-# Upload Latest Quicktime
-# ----------------------------------------------
-version_id = version_result.get('id')
-result = sg.upload("Version",version_id,quicktime,"sg_uploaded_movie",tag)
-print "Success Number is:",result
+    def shots(self, projectid, sequenceid):
+        # returns a list of dicts  [ {code:, type:, id: } ] of sequences for a given projectid
+        _fields  = ['id', 'code', 'shots']
+        _filters = [
+                     ['project',   'is', {'type': 'Project',  'id': projectid}],
+                     # ['sequences', 'is', {'type': 'Sequence', 'id': sequenceid }]
+                  ]
+        shots = self.sg.find("Sequence", _filters, _fields)
 
-sys.exit("exit here")
+
+        if len(shots) < 1:
+            print "couldn't find any shots"
+        else:
+            print "Found %d shots" % (len(shots))
+            print shots
+
+    def tasks(self):
+        pass
+
+
+class NewVersion(ShotgunBase):
+    # new version object
+    def __init__(self, media = None,
+                 projectid = 89,
+                 shotname = 'shot',
+                 taskname = 'task',
+                 versioncode = 'From Tractor',
+                 description = 'Created from Farm Job',
+                 ownerid = 38,
+                 tag = "RenderFarm Proxy"
+                 ):
+        super(NewVersion, self).__init__()
+        self.project = {'type': 'Project', 'id': projectid}
+        self.shotname = shotname
+        self.taskname = taskname
+        self.versioncode = versioncode
+        self.description = description
+        self.owner = {'type':'HumanUser', 'id': ownerid}
+        self.tag = tag
+        self.media = media
+        logger.info("SHOTGUN: File to upload ...... %s"%self.media)
+
+        self.shotfilters = [ ['project','is', self.project],['code', 'is', self.shotname] ]
+        self.shot = self.sg.find_one('Shot', self.shotfilters)
+
+        self.taskfilters = [ ['project','is', self.project],
+                    ['entity','is',{'type':'Shot','id': self.shot['id']}],
+                    ['content','is',self.taskname] ]
+        self.task = self.sg.find_one('Task',self.taskfilters)
+
+        self.data = { 'project': self.project,
+                 'code': self.versioncode,
+                 'description': self.description,
+                 'sg_status_list': 'rev',
+                 'entity': {'type':'Shot', 'id':self.shot['id']},
+                 'sg_task': {'type':'Task', 'id':self.task['id']},
+                 'user': self.owner }
+        self.version_result = self.sg.create('Version', self.data)
+        logger.info("SHOTGUN: New Version Created : %s" % self.version_result)
+        logger.info("SHOTGUN: Sending then transcoding.......")
+
+        # ----------------------------------------------
+        # Upload Latest Quicktime
+        # ----------------------------------------------
+        self.version_id = self.version_result.get('id')
+        __result = self.sg.upload("Version", self.version_id, self.media, "sg_uploaded_movie", self.tag)
+        logger.info ("SHOTGUN: Done uploading, upload reference is: %s"%__result)
+
+
+    def test(self):
+        pass
+
+
+
+# ##############################################################################
+
+if __name__ == "__main__":
+    logger.setLevel(logging.DEBUG)
+    logger.info("------------------------------START TESTING")
+
+    #  upload a movie
+    # a = ShotgunBase()
+    # b=NewVersion(projectid=89,
+    #              shotname="tractortesting",
+    #              taskname='layout',
+    #              versioncode='from tractor 1',
+    #              description='test version using shotgun api',
+    #              ownerid=38,
+    #              media='/Users/Shared/UTS_Dev/test_RMS_aaocean.0006.mov')
+
+    # query projects shots etc
+    c=Projects()
+    c.sequences(89)
+    c.shots(89,48)
+
+    logger.info("-------------------------------FINISHED TESTING")
+
+
+'''
 
 # ----------------------------------------------
 # Find Character Assets in Sequence WRF_03 in projectX
@@ -92,3 +201,5 @@ else:
 
 ####  make playlist
 ####  add version to playlist
+
+'''
