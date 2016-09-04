@@ -14,7 +14,7 @@ import time
 
 from software.renderfarm.dabtractor import proxys as pt
 from software.renderfarm.dabtractor.factories import utils_factory as utils
-from software.renderfarm.dabtractor.factories import environment_factory as env
+from software.renderfarm.dabtractor.factories import environment_factory as envfac
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -51,6 +51,7 @@ class ImageSequence(object):
     '''
 
     def __init__(self, inputthing):
+        self.env=envfac.Environment()
         try:
             if os.path.isdir(inputthing):
                 self.startingpath = inputthing
@@ -84,11 +85,11 @@ class ImageSequence(object):
 
     def buildcommand(self, proxytemplate, commandprefixlist=[], commansuffixlist=[]):
         # prepend and post pend more list items to build up a full command to pass to tractor
-        self.dabrender = config.CurrentConfiguration().dabrender
+        self.dabrender = self.env.getdefault("dabrender","path")
 
         _nuke_proxy_template_path = Proxytemplate("nuke_proxy_720p_prores_v003.py").proxytouse
 
-        _nuke_version = "Nuke{}".format(config.CurrentConfiguration().nukeversion)
+        _nuke_version = "Nuke{}".format(self.env.getdefault("nuke","version"))
         _nuke_executable = "/Applications/{n}/{n}.app/Contents/MacOS/{n}".format(n=_nuke_version)
         _date = time.strftime("%Y_%m_%d__%H-%M")
 

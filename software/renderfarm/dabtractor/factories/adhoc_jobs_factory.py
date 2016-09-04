@@ -22,12 +22,10 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
-import tractor.api.author as author
 import os
 import sys
 from software.renderfarm.dabtractor.factories import user_factory as ufac
-
-author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
+from software.renderfarm.dabtractor.factories import environment_factory as envfac
 
 class JobBase(object):
     """
@@ -37,6 +35,7 @@ class JobBase(object):
     def __init__(self):
         self.user = os.getenv("USER")
         self.spooljob = False
+        self.env=envfac.Environment()
 
         try:
             # get the names of the central render location for the user
@@ -95,7 +94,7 @@ class SendMail(JobBase):
             _tier="batch"
 
         # ################ 0 JOB ################
-        self.job = author.Job(title="MAIL: {}".format(self.renderusername),
+        self.job = self.env.author.Job(title="MAIL: {}".format(self.renderusername),
                               priority=10,
                               envkey=["ShellServices"],
                               metadata="user={} username={} usernumber={}".format(self.user, self.renderusername,
@@ -108,13 +107,13 @@ class SendMail(JobBase):
                               service=_service_Testing)
 
         # ############## 0 ThisJob #################
-        task_thisjob = author.Task(title="Adhoc Job")
+        task_thisjob = self.env.author.Task(title="Adhoc Job")
         task_thisjob.serialsubtasks = 1
 
 
         # ############## 5 NOTIFY ###############
         # logger.info("email = {}".format(self.email))
-        task_notify = author.Task(title="Notify", service="ShellServices")
+        task_notify = self.env.author.Task(title="Notify", service="ShellServices")
         task_notify.addCommand(self.bugreport("BUG", self.mailbody))
         task_thisjob.addChild(task_notify)
 
@@ -127,7 +126,7 @@ class SendMail(JobBase):
     def mail(self, level="Level", trigger="Trigger", body="Render Progress Body"):
         bodystring = "Prman Render Progress: \nLevel: {}\nTrigger: {}\n\n{}".format(level, trigger, body)
         subjectstring = "FARM JOB: %s %s" % (str(self.scenebasename), self.renderusername)
-        mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
+        mailcmd = self.env.author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
                                        "-b", bodystring, "-s", subjectstring], service="ShellServices")
 
         return mailcmd
@@ -135,9 +134,9 @@ class SendMail(JobBase):
     def bugreport(self, level="BUG", body="Bug report details"):
         _bodystring = "LEVEL: {}\n\n\nDETAILS: \n\n{}".format(level, body)
         _subjectstring = "BUG REPORT: From {} {}\n".format(str(self.renderusername),str(self.renderusernumber))
-        mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % "120988",
+        mailcmd = self.env.author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % "120988",
                                        "-b", _bodystring, "-s", _subjectstring], service="ShellServices")
-        cccmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
+        cccmd = self.env.author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
                                        "-b", _bodystring, "-s", _subjectstring], service="ShellServices")
         return mailcmd
 

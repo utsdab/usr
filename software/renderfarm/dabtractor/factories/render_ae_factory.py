@@ -1,3 +1,4 @@
+import os
 '''
 DABMLB0606627MG:testProject01 120988$ /Applications/Adobe\ After\ Effects\ CC\ 2015/aerender -help
 aerender version 13.5.1x48

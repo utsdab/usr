@@ -38,11 +38,11 @@ import PySide.QtCore as qc
 import PySide.QtGui as qg
 import sys
 import os
-# from software.renderfarm.dabtractor.factories.legacy import configuration_factory as config
 from software.renderfarm.dabtractor.factories import interface_factory as ifac
 from software.renderfarm.dabtractor.factories import render_prman_factory as rmsfac
 from software.renderfarm.dabtractor.factories import render_mr_factory as mrfac
 from software.renderfarm.dabtractor.factories import render_nuke_factory as nukefac
+from software.renderfarm.dabtractor.factories import render_houdini_factory as houdinifac
 from software.renderfarm.dabtractor.factories import command_factory as cmdfac
 from software.renderfarm.dabtractor.factories import environment_factory as envfac
 from functools import partial
@@ -122,6 +122,8 @@ class Job(envfac.Environment):
         self.threadmemory = None
         self.makeproxy = None
         self.sendmail= None
+        self.sendtoshotgun = None
+        self.cleanup = None
         self.email = None
         self.fb = None
         self.email = None
@@ -167,6 +169,8 @@ class Job(envfac.Environment):
                  skipframes=0,
                  makeproxy=self.makeproxy,
                  sendmail=self.sendmail,
+                 sendtoshotgun=self.sendtoshotgun,
+                 cleanup=self.cleanup,
                  options=self.options,
                  threadmemory=self.threadmemory,
                  threads=self.threads,
@@ -204,6 +208,8 @@ class Job(envfac.Environment):
                     skipframes=0,
                     makeproxy=self.makeproxy,
                     sendmail=self.sendmail,
+                    sendtoshotgun=self.sendtoshotgun,
+                    cleanup=self.cleanup,
                     options="",
                     threads=self.threads,
                     threadmemory=self.threadmemory,
@@ -217,6 +223,34 @@ class Job(envfac.Environment):
                 self.fb.write("Validate Fail: {}".format(err))
         else:
             logger.warn("not mr: ")
+
+
+    def houdinivalidate(self):
+        try:
+            self.tractorjob=houdinifac.RenderMantra(
+                envdabwork=self.dabwork,
+                envtype=self.type,
+                envshow=self.show,
+                envproject=self.project,
+                envscene=self.scene,
+                scenefullpath=self.scenefullpath,
+                framechunks=int(self.chunks),
+                startframe=int(self.startframe),
+                endframe=int(self.endframe),
+                byframe=int(self.byframe),
+                options=self.options,
+                version=self.version,
+                threads=self.threads,
+                threadmemory=self.threadmemory,
+                projectgroup=self.projectgroup,
+                email=[1, 0, 0, 0, 1, 0],
+            )
+            self.tractorjob.build()
+            self.tractorjob.validate()
+            self.fb.write("Validate OK")
+        except Exception, err:
+            logger.warn("houdinivalidate error: {}".format(err))
+            self.fb.write("Validate Fail: {}".format(err))
 
     def nukevalidate(self):
         try:
@@ -314,6 +348,7 @@ class TractorSubmitWidget(qg.QFrame):
         self.layout_4_bttn = qg.QPushButton('Bash Cmd')
         self.layout_5_bttn = qg.QPushButton('Diagnostics')
         self.layout_6_bttn = qg.QPushButton('Bug Report')
+        self.layout_7_bttn = qg.QPushButton('Houdini')
 
         self.grid_widget.layout().addWidget(self.layout_1_bttn, 0, 0)
         self.grid_widget.layout().addWidget(self.layout_2_bttn, 0, 1)
@@ -321,6 +356,7 @@ class TractorSubmitWidget(qg.QFrame):
         self.grid_widget.layout().addWidget(self.layout_4_bttn, 1, 0)
         self.grid_widget.layout().addWidget(self.layout_5_bttn, 1, 1)
         self.grid_widget.layout().addWidget(self.layout_6_bttn, 1, 2)
+        self.grid_widget.layout().addWidget(self.layout_7_bttn, 2, 0)
 
         self.layout().addWidget(self.grid_widget)
 
@@ -332,6 +368,7 @@ class TractorSubmitWidget(qg.QFrame):
         self.tractor_widget   = ifac.TractorWidget(self.job)
         self.farmjob_widget   = ifac.FarmJobExtraWidget(self.job)
         self.bug_widget       = ifac.BugWidget(self.job)
+        self.houdini_widget   = ifac.HoudiniWidget(self.job)
 
         self.stacked_layout.addWidget(self.maya_widget)
         self.stacked_layout.addWidget(self.renderman_widget)
@@ -339,6 +376,7 @@ class TractorSubmitWidget(qg.QFrame):
         self.stacked_layout.addWidget(self.bash_widget)
         self.stacked_layout.addWidget(self.diag_widget)
         self.stacked_layout.addWidget(self.bug_widget)
+        self.stacked_layout.addWidget(self.houdini_widget)
 
         self._stackchange(1)
 
@@ -348,7 +386,7 @@ class TractorSubmitWidget(qg.QFrame):
         self.layout_4_bttn.clicked.connect(partial(self._stackchange, 3))
         self.layout_5_bttn.clicked.connect(partial(self._stackchange, 4))
         self.layout_6_bttn.clicked.connect(partial(self._stackchange, 5))
-        # self.layout_7_bttn.clicked.connect(partial(self._stackchange, 6))
+        self.layout_7_bttn.clicked.connect(partial(self._stackchange, 6))
 
         self.stacked_layout.setCurrentIndex(1)
 
@@ -364,11 +402,12 @@ class TractorSubmitWidget(qg.QFrame):
         # FEEDBACK WIDGET------------------------------------------------------------------------------------ #
         self.layout().addWidget(self.feedback_widget)
 
+
     def closeWidget(self):
         self.emit(qc.SIGNAL('CLOSE'), self)
 
     def _stackchange(self,index):
-        widgets=["maya", "rms", "nuke", "bash", "diag", "bug"]
+        widgets=["maya", "rms", "nuke", "bash", "diag", "bug","houdini"]
         self.feedback_widget.write("MODE changed to {}".format(widgets[index]))
         self.job.mode=widgets[index]
         self.stacked_layout.setCurrentIndex(index)
@@ -383,6 +422,7 @@ class TractorSubmitWidget(qg.QFrame):
         self.layout_3_bttn.setStyleSheet(_default)
         self.layout_4_bttn.setStyleSheet(_default)
         self.layout_5_bttn.setStyleSheet(_default)
+        self.layout_7_bttn.setStyleSheet(_default)
 
         if index == 0:
             self.layout_1_bttn.setStyleSheet(_pressed)
@@ -396,6 +436,9 @@ class TractorSubmitWidget(qg.QFrame):
             self.layout_5_bttn.setStyleSheet(_pressed)
         elif index == 5:
             self.layout_6_bttn.setStyleSheet(_pressed)
+        elif index == 6:
+            self.layout_7_bttn.setStyleSheet(_pressed)
+
 
 
 def create():

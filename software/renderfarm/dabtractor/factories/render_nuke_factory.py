@@ -22,23 +22,12 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
-import tractor.api.author as author
-import tractor.api.query as tq
 import os
 import sys
 from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.renderfarm.dabtractor.factories import utils_factory as utils
-from software.renderfarm.dabtractor.factories import environment_factory as env
+from software.renderfarm.dabtractor.factories import environment_factory as envfac
 
-cfg=env.ConfigBase()
-author.setEngineClientParam(hostname=cfg.getdefault("tractor","engine"),
-                            port=cfg.getdefault("tractor","port"),
-                            user=cfg.getdefault("tractor","username"),
-                            debug=True)
-tq.setEngineClientParam(hostname=cfg.getdefault("tractor","engine"),
-                            port=cfg.getdefault("tractor","port"),
-                            user=cfg.getdefault("tractor","username"),
-                            debug=True)
 
 class RenderBase(object):
     """
@@ -49,6 +38,8 @@ class RenderBase(object):
         self.user = os.getenv("USER")
         self.spooljob = False
         self.testing = False
+        self.env=envfac.Environment()
+
         try:
             # get the names of the central render location for the user
             ru = ufac.FARMuser()
@@ -131,7 +122,7 @@ class NukeJob(RenderBase):
             _service_Testing=""
             _tier="batch"
 
-        self.job = author.Job(title="NK: {} {}".format(self.renderusername, _nukescriptbaseonly),
+        self.job = self.env.author.Job(title="NK: {} {}".format(self.renderusername, _nukescriptbaseonly),
                               priority=100,
                               envkey=[_nuke_envkey,"ProjectX",
                                     "TYPE={}".format(self.envtype),
@@ -148,7 +139,7 @@ class NukeJob(RenderBase):
                               service=_service_Testing)
 
         # ############## 1 NUKE RENDER ###############
-        parent = author.Task(title="Nuke Rendering",service="NukeRender")
+        parent = self.env.author.Task(title="Nuke Rendering",service="NukeRender")
         parent.serialsubtasks = 0
 
         _totalframes=int(self.endframe-self.startframe+1)
@@ -169,7 +160,7 @@ class NukeJob(RenderBase):
                 _chunkend = self.endframe
 
             t1 = "{}  {}-{}".format("Nuke Batch Render", _chunkstart, _chunkend)
-            thischunk = author.Task(title=t1, service="NukeRender")
+            thischunk = self.env.author.Task(title=t1, service="NukeRender")
 
             commonargs = [_nuke_executable]
             filespecificargs = ["-x", self.nukescriptfullpath, "{}-{}".format( _chunkstart, _chunkend)]
@@ -179,7 +170,7 @@ class NukeJob(RenderBase):
             else:
                 finalargs = commonargs + filespecificargs
 
-            render = author.Command(
+            render = self.env.author.Command(
                                     argv=finalargs,
                                     service="NukeRender",
                                     tags=["nuke",],
@@ -200,7 +191,7 @@ class NukeJob(RenderBase):
         bodystring = "{}  Progress: \nLevel: {}\nTrigger: {}\n\n{}".format(
                 self.envproject,level,trigger,body)
         subjectstring = "FARM JOB: %s %s" % (str(self.envscene), self.renderusername)
-        mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
+        mailcmd = self.env.author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
                                        "-b", bodystring, "-s", subjectstring], service="ShellServices")
         return mailcmd
 

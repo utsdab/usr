@@ -14,6 +14,8 @@ from software.renderfarm.dabtractor.factories import utils_factory as utils
 # from software.renderfarm.dabtractor.factories import user_factory as ufac
 import software.renderfarm.dabtractor as dt
 import software.renderfarm as rf
+import tractor.api.author as author
+import tractor.api.query as tq
 
 # ##############################################################
 import logging
@@ -163,6 +165,17 @@ class Environment(ConfigBase):
         # self.scene = self.alreadyset("SCENE", "","")
         # self.user = self.alreadyset("USER", "","")
         # self.username = self.alreadyset("USERNAME", "","")
+        cfg=ConfigBase()
+        self.author=author
+        self.tq=tq
+        self.author.setEngineClientParam(hostname = str(cfg.getdefault("tractor","engine")),
+                            port = int(str(cfg.getdefault("tractor","port"))),
+                            user = str(cfg.getdefault("tractor","jobowner")),
+                            debug = True)
+        self.tq.setEngineClientParam(hostname = str(cfg.getdefault("tractor","engine")),
+                            port = str(cfg.getdefault("tractor","port")),
+                            user = str(cfg.getdefault("tractor","jobowner")),
+                            debug = True)
 
     def alreadyset(self, envar, defaultgroup, defaultkey):
         #  look to see if an environment variable is already define an if not check th e dabtractor config else return
@@ -235,3 +248,4 @@ if __name__ == '__main__':
     logger.debug( "ATTRIBUTES =  %s"%  JJ.getattributes(group))
     logger.debug( "ATTRIBUTE VALUES =  %s"%  JJ.getoptions(group,attribute))
     logger.debug( "DEFAULT VALUE =  %s"% JJ.getdefault(group,attribute))
+

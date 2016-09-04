@@ -12,10 +12,10 @@ d=`date`
 
 case ${OSTYPE:0:5} in
 linux)
-    file="/dabrender/work/matthewgidney/farmreport"
+    file="/dabrender/work/user_work/matthewgidney/farmreport"
 ;;
 darwi)
-    file="/Volumes/dabrender/work/matthewgidney/farmreport"
+    file="/Volumes/dabrender/work/user_work/matthewgidney/farmreport"
 ;;
 *)
     exit 1

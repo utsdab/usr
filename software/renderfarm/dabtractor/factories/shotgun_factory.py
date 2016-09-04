@@ -16,14 +16,13 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
-cfg = envfac.Environment()
-
 class ShotgunBase(object):
     # base object
     def __init__(self):
-        self.serverpath = str(cfg.getdefault("shotgun", "serverpath"))
-        self.scriptname = str(cfg.getdefault("shotgun", "scriptname"))
-        self.scriptkey  = str(cfg.getdefault("shotgun", "scriptkey"))
+        self.env=envfac.Environment()
+        self.serverpath = str(self.env.getdefault("shotgun", "serverpath"))
+        self.scriptname = str(self.env.getdefault("shotgun", "scriptname"))
+        self.scriptkey  = str(self.env.getdefault("shotgun", "scriptkey"))
         self.sg = Shotgun( self.serverpath, self.scriptname, self.scriptkey)
         logger.info("SHOTGUN: talking to shotgun ...... %s" % self.serverpath)
 

@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
-"""
+'''
     Useful user functions
-"""
+'''
 
 import datetime
 import os
@@ -67,25 +67,25 @@ def getfrompathlist(filetoget, iconpath="ICONPATH"):
     return _icon
 
 
-def frompathgetuserhome(inputpath):
-    try:
-        dabrender = config.ConfigBase.getdefault("dabrender")
-
-    except:
-        print "err"
-
-    _pathbits = inputpath.split("/")
-    _testbits = os.path.join(dabrender, "work").split("/")
-
-
-    for i, bit in enumerate(_pathbits):
-        # print i, bit, _testbits[i]
-        try:
-            # print i, bit, _testbits[i]
-            if not bit == _testbits[i]:
-                pass
-        except:
-            return os.path.join(dabrender,"work",bit)
+# def frompathgetuserhome(inputpath):
+#     try:
+#         dabrender = config.ConfigBase.getdefault("dabrender")
+#
+#     except:
+#         print "err"
+#
+#     _pathbits = inputpath.split("/")
+#     _testbits = os.path.join(dabrender, "work").split("/")
+#
+#
+#     for i, bit in enumerate(_pathbits):
+#         # print i, bit, _testbits[i]
+#         try:
+#             # print i, bit, _testbits[i]
+#             if not bit == _testbits[i]:
+#                 pass
+#         except:
+#             return os.path.join(dabrender,"work",bit)
 
 
 def getvalues(entries):
@@ -221,7 +221,5 @@ if __name__ == "__main__":
     N._runlsseq()
     print getnow()
 
-    me = frompathgetuserhome('/Volumes/dabrender/work/matthewgidney/testshite/file.001.exr')
-    print "my work directory is",me
 
 

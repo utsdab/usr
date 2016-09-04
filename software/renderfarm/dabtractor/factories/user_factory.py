@@ -30,19 +30,19 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
-cfg = envfac.ConfigBase()
 
 class Map(object):
     """
     This class is the mapping of students
     """
     def __init__(self):
-        self.dabrender = cfg.getdefault("DABRENDER","path")
-        self.dabwork = cfg.getdefault("DABWORK","path")
-        self.mapfilejson = cfg.getdefault("DABRENDER","usermapfile")
-        self.tractorcrewlist = cfg.getdefault("DABRENDER","tractorcrewlist")
-        self.mapfilepickle = cfg.getdefault("DABRENDER","mapfilepickle")
-        self.backuppath = cfg.getdefault("DABRENDER","backuppath")
+        self.env=envfac.Environment()
+        self.dabrender = self.env.getdefault("DABRENDER","path")
+        self.dabwork = self.env.getdefault("DABWORK","path")
+        self.mapfilejson = self.env.getdefault("DABRENDER","usermapfile")
+        self.tractorcrewlist = self.env.getdefault("DABRENDER","tractorcrewlist")
+        self.mapfilepickle = self.env.getdefault("DABRENDER","mapfilepickle")
+        self.backuppath = self.env.getdefault("DABRENDER","backuppath")
 
         try:
             self.mapfilejson = os.path.join(self.dabrender, self.mapfilejson)
@@ -136,10 +136,7 @@ class Map(object):
             with open(self.mapfilejson) as json_data:
                 all = json.load(json_data)
 
-            # print all.keys()
             all.pop(usernumber, None)
-            # print all.keys()
-
             with open(self.mapfilejson, 'w') as outfile:
                 json.dump(all, outfile, sort_keys = True, indent = 4,)
 
@@ -182,7 +179,8 @@ class Map(object):
 class EnvType(object):
     # this is the user work area either work/number or projects/projectname
     def __init__(self,userid=None,projectname=None):
-        self.dabrenderpath=cfg.getdefault("DABRENDER","path")
+        self.env=envfac.Environment()
+        self.dabrenderpath=self.env.getdefault("DABRENDER","path")
 
         if userid:
             self.envtype="user_work"
@@ -225,6 +223,7 @@ class UTSuser(object):
         self.name=None
         self.number = os.getenv("USER")
         self.job=None
+        self.env=envfac.Environment()
 
         try:
             p = subprocess.Popen(["ldapsearch", "-h", "moe-ldap1.itd.uts.edu.au", "-LLL", "-D",
@@ -247,20 +246,18 @@ class UTSuser(object):
 
     def addtomap(self):
 
-        if self.number in cfg.getdefault("DABRENDER","superuser"):
+        if self.number in self.env.getdefault("DABRENDER","superuser"):
             logger.info("Your are a superuser - yay")
         else:
             logger.warn("You need to be a superuser to mess with the map file sorry")
             # sys.exit("You need to be a superuser to mess with the map file sorry")
 
         try:
-            author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
-
             # ################ TRACTOR JOB ################
             self.base = ["bash", "-c","add_farm_user.py",]
             self.args = ["-n",self.number,"-u",self.name,"-y","2016"]
             self.command = self.base+self.args
-            self.job = author.Job(title="New User Request: {}".format(self.name),
+            self.job = self.env.author.Job(title="New User Request: {}".format(self.name),
                                   priority=100,
                                   metadata="user={} realname={}".format(self.number, self.name),
                                   comment="New User Request is {} {} {}".format(self.number,
@@ -271,15 +268,15 @@ class UTSuser(object):
                                   tags=["theWholeFarm"],
                                   service="ShellServices")
             # ############## 2  RUN COMMAND ###########
-            task_parent = author.Task(title="Parent")
+            task_parent = self.env.author.Task(title="Parent")
             task_parent.serialsubtasks = 1
-            task_bash = author.Task(title="Command")
+            task_bash = self.env.author.Task(title="Command")
             bashcommand = author.Command(argv=self.command)
             task_bash.addCommand(bashcommand)
             task_parent.addChild(task_bash)
 
             # ############## 7 NOTIFY ###############
-            task_notify = author.Task(title="Notify")
+            task_notify = self.env.author.Task(title="Notify")
             task_notify.addCommand(self.mail("JOB", "COMPLETE", "blah"))
             task_parent.addChild(task_notify)
             self.job.addChild(task_parent)
@@ -293,7 +290,7 @@ class UTSuser(object):
     def mail(self, level="Level", trigger="Trigger", body="Render Progress Body"):
         bodystring = "Add New User: \nLevel: {}\nTrigger: {}\n\n{}".format(level, trigger, body)
         subjectstring = "FARM JOB: %s " % (self.command)
-        mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.number,
+        mailcmd = self.env.author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.number,
                                        "-b", bodystring, "-s", subjectstring])
         return mailcmd
 
@@ -376,13 +373,13 @@ if __name__ == '__main__':
 
 
     u = FARMuser()
-    print u.name
-    print u.number
-    print u.year
-    print u.user
+    logger.debug( u.name )
+    logger.debug( u.number)
+    logger.debug( u.year)
+    logger.debug( u.user)
     # uts = UTSuser()
-    # print uts.name
-    # print uts.number
+    # logger.debug( uts.name)
+    # logger.debug( uts.number)
 
 
     '''

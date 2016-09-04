@@ -998,6 +998,87 @@ class NukeWidget(qg.QWidget):
         logger.info("Version changed to {}".format(self.job.version))
 
 # -------------------------------------------------------------------------------------------------------------------- #
+class HoudiniJobWidget(qg.QWidget):
+    def __init__(self,job):
+        super(HoudiniJobWidget, self).__init__()
+        self.job=job
+        self.setLayout(qg.QVBoxLayout())
+        self.layout().setSpacing(0)
+        self.layout().setContentsMargins(0, 0, 0, 0)
+        self.layout().setAlignment(qc.Qt.AlignTop)
+        self.setSizePolicy(qg.QSizePolicy.Minimum, qg.QSizePolicy.Fixed)
+
+        # NUKE WIDGET
+        self.houdini_widget = HoudiniWidget(self.job)
+        self.layout().addWidget(self.houdini_widget)
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+class HoudiniWidget(qg.QWidget):
+    def __init__(self,job):
+        super(HoudiniWidget, self).__init__()
+        _width1=180
+        self.job=job
+        self.setLayout(qg.QVBoxLayout())
+        self.layout().setSpacing(0)
+        self.layout().setContentsMargins(0, 0, 0, 0)
+        self.setSizePolicy(qg.QSizePolicy.Minimum, qg.QSizePolicy.Fixed)
+
+        self.layout().addWidget(Splitter("HOUDINI OPTIONS"))
+
+        self.version_layout = qg.QHBoxLayout()
+        self.version_layout.setContentsMargins(0, 0, 0, 0)
+        self.version_layout.setSpacing(0)
+        self.layout().addLayout(self.version_layout)
+
+        self.version_text_lb = qg.QLabel('HOUDINI VERSION:')
+        self.version_combo = qg.QComboBox()
+        self.version_combo.addItems(CFG.getoptions("houdini","versions"))
+        self.version_combo.setMinimumWidth(_width1)
+        self.version_layout = qg.QHBoxLayout()
+        self.version_layout.setContentsMargins(0, 0, 0, 0)
+        self.version_layout.setSpacing(0)
+        self.version_layout.addWidget(self.version_text_lb)
+        self.version_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
+        self.version_layout.addWidget(self.version_combo)
+        self.layout().addLayout(self.version_layout)
+
+        self.options_text_lb = qg.QLabel('OPTIONS:')
+        self.options_combo = qg.QComboBox()
+        self.options_combo.setToolTip("Select from presets or edit yourself")
+        self.options_combo.addItem("")
+        self.options_combo.addItem("-V 2")
+        self.options_combo.addItem("-V 2 -F 1-10 -F 20 -F 50-80x10")
+        self.options_combo.setEditable(True)
+        self.options_combo.setMinimumWidth(180)
+        self.options_layout = qg.QHBoxLayout()
+        self.options_layout.setContentsMargins(0, 0, 0, 0)
+        self.options_layout.setSpacing(0)
+        self.options_layout.addWidget(self.options_text_lb)
+        self.options_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
+        self.options_layout.addWidget(self.options_combo)
+        self.layout().addLayout(self.options_layout)
+
+        # set initial values
+        self._version(self.version_combo.currentText())
+        self._options(self.options_combo.currentText())
+
+        # connect vlaues to widget
+        self.version_combo.activated.connect(lambda: self._rms_version(self.version_combo.currentText()))
+        self.options_combo.editTextChanged.connect(lambda: self._options(self.options_combo.currentText()))
+
+    def _options(self, _value):
+        self.job.options = _value
+        logger.info("Options changed to {}".format(self.job.options))
+
+
+    def _version(self, _value):
+        self.job.version = _value
+        logger.info("Version changed to {}".format(self.job.version))
+
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
 class TractorWidget(qg.QWidget):
     def __init__(self,job):
         super(TractorWidget, self).__init__()
@@ -1136,10 +1217,10 @@ class FarmJobExtraWidget(qg.QWidget):
 
         self.farm_group_box = qg.QGroupBox("Farm Options")
         self.farm_group_box_layout = qg.QGridLayout()
-        self.farm_radio_box1 = qg.QRadioButton("Send Email")
+        self.farm_radio_box1 = qg.QRadioButton("Notify by Email")
         self.farm_radio_box2 = qg.QRadioButton("Make Edit Proxy")
-        self.farm_radio_box3 = qg.QRadioButton("Make Perfect")
-        self.farm_radio_box4 = qg.QRadioButton("Wipe My Ass")
+        self.farm_radio_box3 = qg.QRadioButton("Send Proxy to Shotgun")
+        self.farm_radio_box4 = qg.QRadioButton("Cleanup Render Trash")
 
         self.farm_radio_box1.setCheckable(True)
         self.farm_radio_box1.setAutoExclusive(False)
@@ -1166,12 +1247,12 @@ class FarmJobExtraWidget(qg.QWidget):
         # set initial
         self.farm_radio_box1.setChecked(True)
         self.farm_radio_box2.setChecked(True)
-        self.farm_radio_box3.setChecked(True)
-        self.farm_radio_box4.setChecked(True)
+        self.farm_radio_box3.setChecked(False)
+        self.farm_radio_box4.setChecked(False)
         self._box1(True)
         self._box2(True)
-        self._box3(True)
-        self._box4(True)
+        self._box3(False)
+        self._box4(False)
 
     def _box2(self, _value):
         self.job.makeproxy = _value
@@ -1182,10 +1263,10 @@ class FarmJobExtraWidget(qg.QWidget):
         logger.info("Options - Send mail changed to {}".format(self.job.sendmail))
 
     def _box3(self, _value):
-        self.job.makeperfect = _value
-        logger.info("Options - Make perfect changed to {}".format(self.job.makeperfect))
+        self.job.sendtoshotgun = _value
+        logger.info("Options - Send to Shotgun changed to {}".format(self.job.sendtoshotgun))
 
     def _box4(self, _value):
-        self.job.wipeass = _value
-        logger.info("Options - Wipe my ass changed to {}".format(self.job.wipeass))
+        self.job.cleanup = _value
+        logger.info("Options - Cleanup changed to {}".format(self.job.cleanup))
 

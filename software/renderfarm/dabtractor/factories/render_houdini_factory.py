@@ -41,22 +41,10 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
-import tractor.api.author as author
-import tractor.api.query as tq
 import os
 import sys
 from software.renderfarm.dabtractor.factories import user_factory as ufac
-from software.renderfarm.dabtractor.factories import environment_factory as env
-
-cfg = env.ConfigBase()
-author.setEngineClientParam(hostname=cfg.getfromgroup("tractor","engine"),
-                            port=cfg.getfromgroup("tractor","port"),
-                            user=cfg.getfromgroup("tractor","username"),
-                            debug=True)
-tq.setEngineClientParam(hostname=cfg.getfromgroup("tractor","engine"),
-                            port=cfg.getfromgroup("tractor","port"),
-                            user=cfg.getfromgroup("tractor","username"),
-                            debug=True)
+from software.renderfarm.dabtractor.factories import environment_factory as envfac
 
 
 class RenderBase(object):
@@ -66,6 +54,7 @@ class RenderBase(object):
         self.user = os.getenv("USER")
         self.spooljob = False
         self.testing=False
+        self.env=envfac.Environment()
 
         try:
             # get the names of the central render location for the user
@@ -170,7 +159,7 @@ class RenderMantra(RenderBase):
         '''
 
         # ################ 0 JOB ################
-        self.job = author.Job(title="RM: {} {} {}-{}".format(
+        self.job = self.env.author.Job(title="MAN: {} {} {}-{}".format(
               self.renderusername,self.scenename,self.startframe,self.endframe),
               priority=10,
               envkey=[self.envkey_mantra,"ProjectX",
@@ -193,7 +182,7 @@ class RenderMantra(RenderBase):
     def mail(self, level="Level", trigger="Trigger", body="Render Progress Body"):
         bodystring = "Prman Render Progress: \nLevel: {}\nTrigger: {}\n\n{}".format(level, trigger, body)
         subjectstring = "FARM JOB: %s %s" % (str(self.scenebasename), self.renderusername)
-        mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
+        mailcmd = self.env.author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
                                        "-b", bodystring, "-s", subjectstring], service="ShellServices")
         return mailcmd
 

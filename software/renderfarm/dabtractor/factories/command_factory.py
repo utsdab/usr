@@ -16,23 +16,22 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 # ##############################################################
 
-import tractor.api.author as author
 import os
 import sys
 from software.renderfarm.dabtractor.factories import user_factory as ufac
 # from software.renderfarm.dabtractor.factories import utils_factory as utils
-
+from software.renderfarm.dabtractor.factories import environment_factory as envfac
 
 
 class CommandBase(object):
     """
     Base class for all batch jobs
     """
-
     def __init__(self):
         self.user = os.getenv("USER")
         self.spooljob = False
         self.testing = False
+        self.env=envfac.Environment()
 
         try:
             # get the names of the central render location for the user
@@ -79,7 +78,7 @@ class Bash(CommandBase):
             _tier="batch"
 
         # ################ 0 JOB ################
-        self.job = author.Job(title="Bash Job: {}".format(self.renderusername),
+        self.job = self.env.author.Job(title="Bash Job: {}".format(self.renderusername),
                               priority=10,
                               metadata="user={} realname={}".format(self.user,
                                                                     self.renderusername),
@@ -93,11 +92,11 @@ class Bash(CommandBase):
 
 
         # ############## 2  BASH ###########
-        task_parent = author.Task(title="Parent")
+        task_parent = self.env.author.Task(title="Parent")
         task_parent.serialsubtasks = 1
-        task_bash = author.Task(title="Command")
+        task_bash = self.env.author.Task(title="Command")
 
-        bashcommand = author.Command(argv=["bash","-c",self.command])
+        bashcommand = self.env.author.Command(argv=["bash","-c",self.command])
         task_bash.addCommand(bashcommand)
         task_parent.addChild(task_bash)
 
@@ -111,7 +110,7 @@ class Bash(CommandBase):
         window.emailcompletion.get(),
         window.emailerror.get()
         """
-        task_notify = author.Task(title="Notify")
+        task_notify = self.env.author.Task(title="Notify")
         task_notify.addCommand(self.mail("JOB", "COMPLETE", "blah"))
         task_parent.addChild(task_notify)
         self.job.addChild(task_parent)
@@ -123,7 +122,7 @@ class Bash(CommandBase):
     def mail(self, level="Level", trigger="Trigger", body="Render Progress Body"):
         bodystring = "Bash Progress: \nLevel: {}\nTrigger: {}\n\n{}".format(level, trigger, body)
         subjectstring = "FARM JOB: %s " % (self.command)
-        mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
+        mailcmd = self.env.author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
                                        "-b", bodystring, "-s", subjectstring])
         return mailcmd
 
@@ -171,7 +170,7 @@ class Rsync(CommandBase):
         logger.info("Spool Ip Address:{}".format(self.spoolipaddress))
         logger.info("Options: {}".format(self.options))
 
-        self.job = author.Job(title="Rsync Job: {}".format(self.renderusername),
+        self.job = self.env.author.Job(title="Rsync Job: {}".format(self.renderusername),
                               priority=100,
                               # envkey=["maya{}".format(self.mayaversion)],
                               metadata="user={} realname={}".format(self.user,
@@ -185,15 +184,15 @@ class Rsync(CommandBase):
         self.job.newDirMap("/dabrender", "/Volumes/dabrender", "osx")
 
         # ############## general commands ############
-        env = author.Command(argv=["printenv"], samehost=1)
-        pwd = author.Command(argv=["pwd"], samehost=1)
+        env = self.env.author.Command(argv=["printenv"], samehost=1)
+        pwd = self.env.author.Command(argv=["pwd"], samehost=1)
 
         # ############## PARENT #################
-        parent = author.Task(title="Parent Task")
+        parent = self.env.author.Task(title="Parent Task")
         parent.serialsubtasks = 1
 
         # ############## 2  RSYNC ###########
-        task_loadon = author.Task(title="Rsync", service="ShellServices")
+        task_loadon = self.env.author.Task(title="Rsync", service="ShellServices")
         _sourceproject = self.sourcedirectory
         _targetproject = self.targetdirectory
 
@@ -205,7 +204,7 @@ class Rsync(CommandBase):
             _loadontarget = self.targetdirectory
             logger.info("Loadon Project Source: %s" % _loadonsource)
             logger.info("Loadon Project Target: %s" % _loadontarget)
-            loadon = author.Command(argv=["rsync", "-au", _loadonsource, _loadontarget])
+            loadon = self.env.author.Command(argv=["rsync", "-au", _loadonsource, _loadontarget])
             task_loadon.addCommand(loadon)
             parent.addChild(task_loadon)
 
@@ -219,7 +218,7 @@ class Rsync(CommandBase):
         window.emailcompletion.get(),
         window.emailerror.get()
         """
-        task_notify = author.Task(title="Notify", service="ShellServices")
+        task_notify = self.env.author.Task(title="Notify", service="ShellServices")
         task_notify.addCommand(self.mail("JOB", "COMPLETE", "blah"))
         parent.addChild(task_notify)
         self.job.addChild(parent)
@@ -230,7 +229,7 @@ class Rsync(CommandBase):
     def mail(self, level="Level", trigger="Trigger", body="Render Progress Body"):
         bodystring = "Rsync Progress: \nLevel: {}\nTrigger: {}\n\n{}".format(level, trigger, body)
         subjectstring = "FARM JOB: %s %s" % (str(self.sourcedirectory), self.targetdirectory)
-        mailcmd = author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
+        mailcmd = self.env.author.Command(argv=["sendmail.py", "-t", "%s@uts.edu.au" % self.user,
                                        "-b", bodystring, "-s", subjectstring], service="ShellServices")
         return mailcmd
 
@@ -254,7 +253,7 @@ if __name__ == '__main__':
 
     rs=Rsync()
 
-    author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
+    self.env.author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
 
     logger.setLevel(logging.DEBUG)
     logger.info("Running test for {}".format(__name__))
