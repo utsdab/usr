@@ -6,7 +6,7 @@ import PySide.QtGui as qg
 
 from software.renderfarm.dabtractor.factories import adhoc_jobs_factory as adhoc
 from software.renderfarm.dabtractor.factories import user_factory as ufac
-from software.renderfarm.dabtractor.factories import environment_factory as env
+from software.renderfarm.dabtractor.factories import environment_factory as envfac
 from software.renderfarm.dabtractor.utils.sendmail import Mail
 
 # ##############################################################
@@ -22,8 +22,21 @@ logger.addHandler(sh)
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
-
-CFG = env.ConfigBase()
+CFG = envfac.Environment()
+WIDTH = 400
+WIDTH_SMALL = WIDTH*0.3
+WIDTH_HALF = WIDTH*0.5
+WIDTH_MID = WIDTH*0.7
+MIN_WIDTH = WIDTH*0.4
+MIN_HEIGHT=25
+STYLE_PRESSED = "background-color:lightgreen;color:darkblue"
+STYLE_BG1     = "background-color:rgb(190, 255, 190);color:rgb(30, 0, 0)"
+STYLE_BG2     = "background-color:rgb(210, 255, 210);color:rgb(0, 30, 0)"
+STYLE_BG3     = "border:1px solid rgba(0,0,0,190);background-color:rgb(100, 255, 100);color:rgb(0, 30, 0)"
+SPACING0=0
+SPACING1=0
+SPACING2=2
+SPACING3=6
 
 
 class UserWidget(qg.QWidget):
@@ -31,14 +44,13 @@ class UserWidget(qg.QWidget):
         super(UserWidget, self).__init__()
         self.job = job
         self.setLayout(qg.QVBoxLayout())
-        self.layout().setSpacing(2)
+        self.layout().setSpacing(SPACING1)
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.setSizePolicy(qg.QSizePolicy.Minimum, qg.QSizePolicy.Fixed)
 
         self.layout().addWidget(Splitter("USER DETAILS"))
-
         self.usernumber_text_layout = qg.QHBoxLayout()
-        self.usernumber_text_layout.setSpacing(6)
+        self.usernumber_text_layout.setSpacing(SPACING3)
         self.usernumber_text_layout.setContentsMargins(0, 0, 0, 0)
         self.usernumber_text_layout.addSpacerItem(qg.QSpacerItem(5,0, qg.QSizePolicy.Fixed))
 
@@ -47,7 +59,7 @@ class UserWidget(qg.QWidget):
         self.layout().addLayout(self.usernumber_text_layout)
 
         self.username_text_layout = qg.QHBoxLayout()
-        self.username_text_layout.setSpacing(2)
+        self.username_text_layout.setSpacing(SPACING2)
         self.username_text_layout.setContentsMargins(0, 0, 0, 0)
         self.username_text_layout.addSpacerItem(qg.QSpacerItem(5,0, qg.QSizePolicy.Fixed))
         self.username_text_lb = qg.QLabel('$USERNAME:  {}'.format(self._getusername(self._getuser())))
@@ -69,100 +81,76 @@ class UserWidget(qg.QWidget):
         return self.usernumber
 
 # -------------------------------------------------------------------------------------------------------------------- #
-class ProjectWidget(qg.QWidget):
+class ShowWidget(qg.QWidget):
     def __init__(self, job):
-        super(ProjectWidget, self).__init__()
+        super(ShowWidget, self).__init__()
         self.job = job
         self.setLayout(qg.QVBoxLayout())
-        self.layout().setSpacing(0)
+        self.layout().setSpacing(SPACING0)
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.setSizePolicy(qg.QSizePolicy.Minimum, qg.QSizePolicy.Fixed)
-        # self.layout().addWidget(Splitter("ENVIRONMENT"))
-
-        _width=127
 
         # $DABWORK ------------------------------------------------------------------------------------ #
         self.dabwork_text_lb = qg.QLabel('$DABWORK:')
-        self.dabwork_text_lb.setMinimumWidth(_width)
+        self.dabwork_text_lb.setMinimumWidth(WIDTH_SMALL)
         self.dabwork_text_le = qg.QLineEdit(self.job.dabwork)
         self.dabwork_text_le.setReadOnly(True)
         self.dabwork_text_layout = qg.QHBoxLayout()
-        self.dabwork_text_layout.setSpacing(0)
+        self.dabwork_text_layout.setSpacing(SPACING1)
         self.dabwork_text_layout.setContentsMargins(0, 0, 0, 0)
         self.dabwork_text_layout.addWidget(self.dabwork_text_lb)
         self.dabwork_text_layout.addWidget(self.dabwork_text_le)
         self.layout().addLayout(self.dabwork_text_layout)
 
-        self.dabwork_text_le.setMinimumHeight(25)
-        _dabwork = "border:1px solid rgba(0,0,0,190);background-color:rgb(100, 255, 100);color:rgb(0, 30, 0)"
-        self.dabwork_text_le.setStyleSheet(_dabwork)
+        self.dabwork_text_le.setMinimumHeight(MIN_HEIGHT)
+        self.dabwork_text_le.setStyleSheet(STYLE_BG3)
         self.job.dabworkpath=self.job.dabwork
 
         #  $TYPE  ---------------------------------------
         self.type_text_lb = qg.QLabel('$TYPE:')
-        self.type_text_lb.setMinimumWidth(_width)
+        self.type_text_lb.setMinimumWidth(WIDTH_SMALL)
         self.type_combo = qg.QComboBox()
-        self.type_combo.setMinimumWidth(200)
+        self.type_combo.setMinimumWidth(WIDTH_MID)
         self.type_combo.setEditable(False)
         self.type_combo.addItem('user_work')
         self.type_combo.addItem('project_work')
         self.type_combo.setCurrentIndex(0)
         self.type_layout = qg.QHBoxLayout()
-        self.type_layout.setSpacing(0)
+        self.type_layout.setSpacing(SPACING1)
         self.type_layout.setContentsMargins(0, 0, 0, 0)
         self.type_combo.activated.connect(lambda: self._type_change())
         self.type_layout.addWidget(self.type_text_lb)
         self.type_layout.addWidget(self.type_combo)
 
-        self.type_combo.setMinimumHeight(25)
-        _type = "background-color:rgb(190, 255, 190);color:rgb(30, 0, 0)"
-        self.type_combo.setStyleSheet(_type)
+        self.type_combo.setMinimumHeight(MIN_HEIGHT)
+        self.type_combo.setStyleSheet(STYLE_BG1)
 
         self.type_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.layout().addLayout(self.type_layout)
 
         #  $SHOW  ---------------------------------------
         self.show_text_lb = qg.QLabel('$SHOW:')
-        self.show_text_lb.setMinimumWidth(_width)
+        self.show_text_lb.setMinimumWidth(WIDTH_SMALL)
         self.show_combo = qg.QComboBox()
-        self.show_combo.setMinimumWidth(200)
+        self.show_combo.setMinimumWidth(WIDTH_MID)
         self.show_combo.setEditable(False)
         self.show_combo.addItem(self.job.username)
         self.show_combo.setCurrentIndex(0)
         self.show_layout = qg.QHBoxLayout()
-        self.show_layout.setSpacing(0)
+        self.show_layout.setSpacing(SPACING1)
         self.show_layout.setContentsMargins(0, 0, 0, 0)
         self.show_combo.activated.connect(lambda: self._show_change())
         self.show_layout.addWidget(self.show_text_lb)
         self.show_layout.addWidget(self.show_combo)
-        self.show_combo.setMinimumHeight(25)
-        _show = "background-color:rgb(210, 255, 210);color:rgb(0, 30, 0)"
-        self.show_combo.setStyleSheet(_show)
+        self.show_combo.setMinimumHeight(MIN_HEIGHT)
+        self.show_combo.setStyleSheet(STYLE_BG1)
         self.show_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.layout().addLayout(self.show_layout)
-
-        #  $PROJECT ---------------------------------------
-        self.project_text_lb = qg.QLabel('$PROJECT:')
-        self.project_text_lb.setMinimumWidth(_width)
-        self.project_combo = qg.QComboBox()
-        self.project_combo.setMinimumWidth(200)
-        self.project_combo.setEditable(False)
-        self.project_layout = qg.QHBoxLayout()
-        self.project_layout.setSpacing(0)
-        self.project_layout.setContentsMargins(0, 0, 0, 0)
-        self.project_combo.activated.connect(lambda: self._project_change())
-        self.project_layout.addWidget(self.project_text_lb)
-        self.project_layout.addWidget(self.project_combo)
-        self.project_combo.setMinimumHeight(25)
-        _project = "background-color:rgb(230, 255, 230);color:rgb(0, 0, 30)"
-        self.project_combo.setStyleSheet(_project)
-        self.project_layout.addSpacerItem(qg.QSpacerItem(0,12, qg.QSizePolicy.Expanding))
-        self.layout().addLayout(self.project_layout)
 
         # set initial values
         self._type_change()
         self._show_change()
-        self._project_change()
+        # self._project_change()
 
     def _type_change(self):
         _type = self.type_combo.currentText()
@@ -172,10 +160,10 @@ class ProjectWidget(qg.QWidget):
         if _type=="user_work":
             self._combo_from_path(self.show_combo, self.job.username)
             self.job.showpath = os.path.join(self.job.typepath, self.job.username)
-            self._combo_from_path(self.project_combo, self.job.showpath)
+            # self._combo_from_path(self.project_combo, self.job.showpath)
         elif _type=="project_work":
             self._combo_from_path(self.show_combo, self.job.typepath)
-            self._combo_from_path(self.project_combo, "")
+            # self._combo_from_path(self.project_combo, "")
 
         logger.info("Type changed to {}".format(_type))
         self._show_change()
@@ -184,22 +172,8 @@ class ProjectWidget(qg.QWidget):
         _show=self.show_combo.currentText()
         self.job.showpath = os.path.join(self.job.dabwork, self.job.type, _show)
         self.job.show = _show
-        self._combo_from_path(self.project_combo, self.job.showpath)
         logger.info("Show changed to {}".format(_show))
-        self._project_change()
 
-    def _project_change(self):
-        _project=self.project_combo.currentText()
-        self.job.projectpath = os.path.join(self. job.showpath, _project)
-        self.job.project = _project
-        logger.info("Project changed to {}".format(_project))
-
-    # def _get_dabrender(self):
-    #     _dabrender = os.getenv("DABRENDER")
-    #     self.dabrender = _dabrender
-    #     self.job.dabrender = self.dabrender
-    #     logger.info("$DABRENDER is {}".format(_dabrender))
-    #     return _dabrender
 
     def _combo_from_path(self, _combobox, _dirpath):
         # rebuild a combobox list from the contents of a path
@@ -220,7 +194,6 @@ class ProjectWidget(qg.QWidget):
                 elif os.path.isdir(os.path.join(_dirpath, _item)):
                     _dirs.append(_item)
         else:
-            # just pass thru the string
             _dirs = [_dirpath]
 
         for i, _item in enumerate(_dirs):
@@ -234,41 +207,78 @@ class SceneWidget(qg.QWidget):
     def __init__(self,job):
         super(SceneWidget, self).__init__()
         self.job=job
-        _width=220
         self.setLayout(qg.QVBoxLayout())
         self.setSizePolicy(qg.QSizePolicy.Minimum, qg.QSizePolicy.Fixed)
-        self.layout().setSpacing(0)
+        self.layout().setSpacing(SPACING0)
         self.layout().setContentsMargins(0, 0, 0, 0)
-        # self.layout().addWidget(Splitter("SCENE FILE"))
-        self.scene_text_lb = qg.QLabel('SCENE FILE:')
-        self.scene_file_lb = qg.QPushButton("select scene file")
-        self.scene_file_lb.setMinimumWidth(_width)
+        self.scene_file_lb = qg.QPushButton("Then Select Scene File")
+        self.scene_file_lb.setMinimumWidth(MIN_WIDTH)
         # self.scene_file_le.setReadOnly(True)
         self.scene_file_layout = qg.QHBoxLayout()
-        self.scene_file_layout.setSpacing(0)
+        self.scene_file_layout.setSpacing(SPACING1)
         self.scene_file_layout.setContentsMargins(0, 0, 0, 0)
-        self.scene_file_layout.addWidget(self.scene_text_lb)
         self.scene_file_layout.addWidget(self.scene_file_lb)
-
-        _pressed = "background-color:lightgreen;color:darkblue"
-        self.scene_file_lb.setStyleSheet(_pressed)
+        self.scene_file_lb.setStyleSheet(STYLE_PRESSED)
 
         self.layout().addLayout(self.scene_file_layout)
         self.scene_file_lb.clicked.connect(lambda : self._get_scene())
 
     def _get_scene(self):
-        f = File(startplace = self.job.projectpath)
-        self.job.scenefullpath = f.fullpath
-        self.job.scenerelpath = f.relpath
-        self.job.scene = f.relpath
-        self.scene_file_lb.setText(f.relpath)
+        try:
+            f = File(startplace = self.job.projfullpath)
+        except Exception, err:
+            logger.warn("Project full path not found %s"%err)
+        else:
+            self.job.scenefullpath = f.fullpath
+            self.job.scenerelpath = f.relpath
+            self.job.scene = f.relpath
+            self.scene_file_lb.setText("SCENE: %s"%f.relpath)
         try:
             self.job.setfromscenefile(self.job.scenefullpath)
             self.job.putback()
             logger.info("Scene changed to {}".format(self.job.scene))
         except Exception,err:
-            logger.info("Environment vars not put back")
-            self.scene_file_lb.setText("select scene file")
+            logger.warn("Environment vars not put back %s"%err)
+            self.scene_file_lb.setText("Then Select Scene File")
+
+# -------------------------------------------------------------------------------------------------------------------- #
+class ProjWidget(qg.QWidget):
+    def __init__(self,job):
+        super(ProjWidget, self).__init__()
+        self.job=job
+        self.setLayout(qg.QVBoxLayout())
+        self.setSizePolicy(qg.QSizePolicy.Minimum, qg.QSizePolicy.Fixed)
+        self.layout().setSpacing(SPACING1)
+        self.layout().setContentsMargins(0, 0, 0, 0)
+        self.proj_file_lb = qg.QPushButton("Select Project Root First")
+        self.proj_file_lb.setMinimumWidth(MIN_WIDTH)
+        # self.scene_file_le.setReadOnly(True)
+        self.proj_file_layout = qg.QHBoxLayout()
+        self.proj_file_layout.setSpacing(SPACING1)
+        self.proj_file_layout.setContentsMargins(0, 0, 0, 0)
+        # self.proj_file_layout.addWidget(self.proj_text_lb)
+        self.proj_file_layout.addWidget(self.proj_file_lb)
+
+        _pressed = "background-color:lightgreen;color:darkblue"
+        self.proj_file_lb.setStyleSheet(_pressed)
+
+        self.layout().addLayout(self.proj_file_layout)
+        self.proj_file_lb.clicked.connect(lambda : self._get_proj())
+
+    def _get_proj(self):
+        f = Directory(startplace = self.job.showpath)
+        self.job.projfullpath = f.fullpath
+        self.job.projrelpath = f.relpath
+        self.job.proj = f.relpath
+        self.proj_file_lb.setText("PROJECT: %s" % f.relpath)
+        try:
+            self.job.setfromprojroot(self.job.projfullpath)
+            self.job.putback()
+            logger.info("Proj changed to {}".format(self.job.proj))
+        except Exception,err:
+            logger.info("Environment vars not put back %s",err)
+            self.proj_file_lb.setText("Select Project Root First")
+
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -284,12 +294,12 @@ class SubmitWidget(qg.QWidget):
         self.submit_layout_3_bttn = qg.QPushButton('SUBMIT')
         self.button_group=qg.QWidget()
         self.button_group.setLayout(qg.QHBoxLayout())
-        self.button_group.layout().setSpacing(0)
+        self.button_group.layout().setSpacing(SPACING1)
         self.button_group.layout().setContentsMargins(0, 0, 0, 0)
         self.button_group.layout().addWidget(self.submit_layout_1_bttn)
         self.button_group.layout().addWidget(self.submit_layout_2_bttn)
         self.button_group.layout().addWidget(self.submit_layout_3_bttn)
-        self.layout().setSpacing(0)
+        self.layout().setSpacing(SPACING1)
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.layout().addWidget(Splitter("SUBMIT JOB"))
         self.layout().addWidget(self.button_group)
@@ -334,19 +344,18 @@ class OutputWidget(qg.QWidget):
         super(OutputWidget, self).__init__()
         self.job=job
         self.setLayout(qg.QVBoxLayout())
-        self.layout().setSpacing(0)
+        self.layout().setSpacing(SPACING1)
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.setSizePolicy(qg.QSizePolicy.Minimum, qg.QSizePolicy.Fixed)
-        _width1 = 180
 
         self.resolution_text_lb = qg.QLabel('RESOLUTION:')
         self.resolution_combo = qg.QComboBox()
         self.resolution_combo.addItems(CFG.getoptions("render","resolution"))
-        self.resolution_combo.setMinimumWidth(_width1)
+        self.resolution_combo.setMinimumWidth(WIDTH_HALF)
         self.resolution_layout = qg.QHBoxLayout()
         self.resolution_combo.setCurrentIndex(0)
         self.resolution_layout.setContentsMargins(0, 0, 0, 0)
-        self.resolution_layout.setSpacing(0)
+        self.resolution_layout.setSpacing(SPACING1)
         self.resolution_layout.addWidget(self.resolution_text_lb)
         self.resolution_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.resolution_layout.addWidget(self.resolution_combo)
@@ -355,10 +364,10 @@ class OutputWidget(qg.QWidget):
         self.outformat_text_lb = qg.QLabel('OUTPUT:')
         self.outformat_combo = qg.QComboBox()
         self.outformat_combo.addItems(CFG.getoptions("render","outformat"))
-        self.outformat_combo.setMinimumWidth(_width1)
+        self.outformat_combo.setMinimumWidth(WIDTH_HALF)
         self.outformat_layout = qg.QHBoxLayout()
         self.outformat_layout.setContentsMargins(0, 0, 0, 0)
-        self.outformat_layout.setSpacing(0)
+        self.outformat_layout.setSpacing(SPACING1)
         self.outformat_layout.addWidget(self.outformat_text_lb)
         self.outformat_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.outformat_layout.addWidget(self.outformat_combo)
@@ -384,15 +393,14 @@ class RangeWidget(qg.QWidget):
     def __init__(self,job):
         super(RangeWidget, self).__init__()
         self.job=job
-        _width1 = 180
         self.setLayout(qg.QVBoxLayout())
-        self.layout().setSpacing(0)
+        self.layout().setSpacing(SPACING1)
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.setSizePolicy(qg.QSizePolicy.Minimum, qg.QSizePolicy.Fixed)
 
         self.framerange_layout = qg.QGridLayout()
         self.framerange_layout.setContentsMargins(0, 0, 0, 0)
-        self.framerange_layout.setSpacing(0)
+        self.framerange_layout.setSpacing(SPACING1)
 
         self.framerange_start_text_lb = qg.QLabel('START:')
         self.framerange_start_text_lb.setMinimumWidth(20)
@@ -426,10 +434,10 @@ class RangeWidget(qg.QWidget):
         self.chunks_combo = qg.QComboBox()
 
         self.chunks_combo.addItems(CFG.getoptions("render","chunks"))
-        self.chunks_combo.setMinimumWidth(_width1)
+        self.chunks_combo.setMinimumWidth(WIDTH_HALF)
         self.chunks_layout = qg.QHBoxLayout()
         self.chunks_layout.setContentsMargins(0, 0, 0, 0)
-        self.chunks_layout.setSpacing(0)
+        self.chunks_layout.setSpacing(SPACING1)
         self.chunks_layout.addWidget(self.chunks_text_lb)
         self.chunks_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.chunks_layout.addWidget(self.chunks_combo)
@@ -472,9 +480,8 @@ class MayaJobWidget(qg.QWidget):
     def __init__(self, job):
         super(MayaJobWidget, self).__init__()
         self.job=job
-        _width1=180
         self.setLayout(qg.QVBoxLayout())
-        self.layout().setSpacing(0)
+        self.layout().setSpacing(SPACING1)
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.layout().setAlignment(qc.Qt.AlignTop)
         self.setSizePolicy(qg.QSizePolicy.Minimum, qg.QSizePolicy.Fixed)
@@ -485,10 +492,10 @@ class MayaJobWidget(qg.QWidget):
         self.mayaversion_text_lb = qg.QLabel('MAYA VERSION:')
         self.mayaversion_combo = qg.QComboBox()
         self.mayaversion_combo.addItems(CFG.getoptions("maya","versions"))
-        self.mayaversion_combo.setMinimumWidth(_width1)
+        self.mayaversion_combo.setMinimumWidth(WIDTH_HALF)
         self.mayaversion_layout = qg.QHBoxLayout()
         self.mayaversion_layout.setContentsMargins(0, 0, 0, 0)
-        self.mayaversion_layout.setSpacing(0)
+        self.mayaversion_layout.setSpacing(SPACING1)
         self.mayaversion_layout.addWidget(self.mayaversion_text_lb)
         self.mayaversion_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.mayaversion_layout.addWidget(self.mayaversion_combo)
@@ -497,10 +504,10 @@ class MayaJobWidget(qg.QWidget):
         self.renderer_text_lb = qg.QLabel('RENDERER:')
         self.renderer_combo = qg.QComboBox()
         self.renderer_combo.addItems(CFG.getoptions("maya","mayarenderer"))
-        self.renderer_combo.setMinimumWidth(_width1)
+        self.renderer_combo.setMinimumWidth(WIDTH_HALF)
         self.renderer_layout = qg.QHBoxLayout()
         self.renderer_layout.setContentsMargins(0, 0, 0, 0)
-        self.renderer_layout.setSpacing(0)
+        self.renderer_layout.setSpacing(SPACING1)
         self.renderer_layout.addWidget(self.renderer_text_lb)
         self.renderer_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.renderer_layout.addWidget(self.renderer_combo)
@@ -510,11 +517,10 @@ class MayaJobWidget(qg.QWidget):
         self.options_combo = qg.QComboBox()
         self.options_combo.addItem("")
         self.options_combo.setEditable(True)
-        self.options_combo.setMinimumWidth(220)
-        self.options_combo.setMinimumWidth(_width1)
+        self.options_combo.setMinimumWidth(WIDTH_SMALL)
         self.options_layout = qg.QHBoxLayout()
         self.options_layout.setContentsMargins(0, 0, 0, 0)
-        self.options_layout.setSpacing(0)
+        self.options_layout.setSpacing(SPACING0)
         self.options_layout.addWidget(self.options_text_lb)
         self.options_layout.addSpacerItem(qg.QSpacerItem(0, 5, qg.QSizePolicy.Expanding))
         self.options_layout.addWidget(self.options_combo)
@@ -545,19 +551,18 @@ class MayaJobWidget(qg.QWidget):
 class ThreadMemoryWidget(qg.QWidget):
     def __init__(self,job):
         super(ThreadMemoryWidget, self).__init__()
-        _width = 180
         self.job = job
         self.setLayout(qg.QVBoxLayout())
         self.setSizePolicy(qg.QSizePolicy.Minimum, qg.QSizePolicy.Fixed)
-        self.layout().setSpacing(0)
+        self.layout().setSpacing(SPACING0)
         self.layout().setContentsMargins(0, 0, 0, 0)
 
         self.threads_layout = qg.QHBoxLayout()
         self.threads_layout.setContentsMargins(0, 0, 0, 0)
-        self.threads_layout.setSpacing(0)
+        self.threads_layout.setSpacing(SPACING0)
         self.threads_text_lb = qg.QLabel('THREADS:')
         self.threads_combo = qg.QComboBox()
-        self.threads_combo.setMinimumWidth(_width)
+        self.threads_combo.setMinimumWidth(WIDTH_HALF)
         self.threads_combo.addItems(CFG.getoptions("render","threads"))
 
         self.threads_combo.setCurrentIndex(0)
@@ -573,7 +578,7 @@ class ThreadMemoryWidget(qg.QWidget):
         self.threadmemory_layout.setSpacing(0)
         self.threadmemory_text_lb = qg.QLabel('THREAD MEMORY MB:')
         self.threadmemory_combo = qg.QComboBox()
-        self.threadmemory_combo.setMinimumWidth(_width)
+        self.threadmemory_combo.setMinimumWidth(WIDTH_HALF)
         self.threadmemory_combo.addItems(CFG.getoptions("render","rendermemory"))
         self.threadmemory_combo.setCurrentIndex(0)
         self.threadmemory_layout.addWidget(self.threadmemory_text_lb)
@@ -605,11 +610,14 @@ class CommonRenderOptionsWidget(qg.QWidget):
         self.layout().setAlignment(qc.Qt.AlignTop)
         self.setSizePolicy(qg.QSizePolicy.Minimum, qg.QSizePolicy.Fixed)
 
-        # PROJECT WIDGET
-        self.project_widget = ProjectWidget(self.job)
-        self.layout().addWidget(self.project_widget)
+        # SHOW WIDGET
+        self.show_widget = ShowWidget(self.job)
+        self.layout().addWidget(self.show_widget)
         # COMMON RENDER OPTIONS
         self.layout().addWidget(Splitter("COMMON RENDER OPTIONS"))
+        # PROJ WIDGET
+        self.proj_widget = ProjWidget(self.job)
+        self.layout().addWidget(self.proj_widget)
         # SCENE WIDGET
         self.scene_widget = SceneWidget(self.job)
         self.layout().addWidget(self.scene_widget)
@@ -660,7 +668,6 @@ class RendermanWidget(qg.QWidget):
     def __init__(self, job):
         super(RendermanWidget, self).__init__()
         self.job=job
-        _width1 = 180
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
         self.layout().setContentsMargins(0, 0, 0, 0)
@@ -671,7 +678,7 @@ class RendermanWidget(qg.QWidget):
         self.mayaversion_text_lb = qg.QLabel('MAYA VERSION:')
         self.mayaversion_combo = qg.QComboBox()
         self.mayaversion_combo.addItems(CFG.getoptions("maya","versions"))
-        self.mayaversion_combo.setMinimumWidth(_width1)
+        self.mayaversion_combo.setMinimumWidth(WIDTH_HALF)
         self.mayaversion_layout = qg.QHBoxLayout()
         self.mayaversion_layout.setContentsMargins(0, 0, 0, 0)
         self.mayaversion_layout.setSpacing(0)
@@ -683,7 +690,7 @@ class RendermanWidget(qg.QWidget):
         self.rmanversion_text_lb = qg.QLabel('RMAN VERSION:')
         self.rmanversion_combo = qg.QComboBox()
         self.rmanversion_combo.addItems(CFG.getoptions("renderman","versions"))
-        self.rmanversion_combo.setMinimumWidth(_width1)
+        self.rmanversion_combo.setMinimumWidth(WIDTH_HALF)
         self.rmanversion_layout = qg.QHBoxLayout()
         self.rmanversion_layout.setContentsMargins(0, 0, 0, 0)
         self.rmanversion_layout.setSpacing(0)
@@ -695,7 +702,7 @@ class RendermanWidget(qg.QWidget):
         self.integrator_text_lb = qg.QLabel('INTEGRATOR:')
         self.integrator_combo = qg.QComboBox()
         self.integrator_combo.addItems(CFG.getoptions("renderman","integrators"))
-        self.integrator_combo.setMinimumWidth(_width1)
+        self.integrator_combo.setMinimumWidth(WIDTH_HALF)
         self.integrator_combo.setCurrentIndex(0)
         self.integrator_layout = qg.QHBoxLayout()
         self.integrator_layout.setContentsMargins(0, 0, 0, 0)
@@ -708,7 +715,7 @@ class RendermanWidget(qg.QWidget):
         self.maxsamples_text_lb = qg.QLabel('MAX SAMPLES:')
         self.maxsamples_combo = qg.QComboBox()
         self.maxsamples_combo.addItems(CFG.getoptions("render","maxsamples"))
-        self.maxsamples_combo.setMinimumWidth(_width1)
+        self.maxsamples_combo.setMinimumWidth(WIDTH_HALF)
 
         self.maxsamples_combo.setCurrentIndex(0)
 
@@ -725,7 +732,7 @@ class RendermanWidget(qg.QWidget):
         self.options_combo.addItem("-v")
         self.options_combo.addItem("-binary")
         self.options_combo.setEditable(True)
-        self.options_combo.setMinimumWidth(220)
+        self.options_combo.setMinimumWidth(WIDTH_HALF)
         self.options_layout = qg.QHBoxLayout()
         self.options_layout.setContentsMargins(0, 0, 0, 0)
         self.options_layout.setSpacing(0)
@@ -787,7 +794,6 @@ class BashJobWidget(qg.QWidget):
 class BashWidget(qg.QWidget):
     def __init__(self,job):
         super(BashWidget, self).__init__()
-        _width1=250
         _target = "120988@uts.edu.au"
         self.defaults={
             "custon":"",
@@ -806,7 +812,7 @@ class BashWidget(qg.QWidget):
         self.bashcommand_text_lb = qg.QLabel('COMMAND:')
         self.bashcommand_combo = qg.QComboBox()
         self.bashcommand_combo.setEditable(False)
-        self.bashcommand_combo.setMinimumWidth(_width1)
+        self.bashcommand_combo.setMinimumWidth(WIDTH_MID)
         self.bashcommand_layout = qg.QHBoxLayout()
         self.bashcommand_layout.setContentsMargins(0, 0, 0, 0)
         self.bashcommand_layout.setSpacing(0)
@@ -938,7 +944,6 @@ class NukeJobWidget(qg.QWidget):
 class NukeWidget(qg.QWidget):
     def __init__(self,job):
         super(NukeWidget, self).__init__()
-        _width1=180
         self.job=job
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
@@ -955,7 +960,7 @@ class NukeWidget(qg.QWidget):
         self.version_text_lb = qg.QLabel('NUKE VERSION:')
         self.version_combo = qg.QComboBox()
         self.version_combo.addItems(CFG.getoptions("nuke","versions"))
-        self.version_combo.setMinimumWidth(_width1)
+        self.version_combo.setMinimumWidth(WIDTH_HALF)
         self.version_layout = qg.QHBoxLayout()
         self.version_layout.setContentsMargins(0, 0, 0, 0)
         self.version_layout.setSpacing(0)
@@ -971,7 +976,7 @@ class NukeWidget(qg.QWidget):
         self.options_combo.addItem("-V 2")
         self.options_combo.addItem("-V 2 -F 1-10 -F 20 -F 50-80x10")
         self.options_combo.setEditable(True)
-        self.options_combo.setMinimumWidth(180)
+        self.options_combo.setMinimumWidth(MIN_WIDTH)
         self.options_layout = qg.QHBoxLayout()
         self.options_layout.setContentsMargins(0, 0, 0, 0)
         self.options_layout.setSpacing(0)
@@ -1017,7 +1022,6 @@ class HoudiniJobWidget(qg.QWidget):
 class HoudiniWidget(qg.QWidget):
     def __init__(self,job):
         super(HoudiniWidget, self).__init__()
-        _width1=180
         self.job=job
         self.setLayout(qg.QVBoxLayout())
         self.layout().setSpacing(0)
@@ -1034,7 +1038,7 @@ class HoudiniWidget(qg.QWidget):
         self.version_text_lb = qg.QLabel('HOUDINI VERSION:')
         self.version_combo = qg.QComboBox()
         self.version_combo.addItems(CFG.getoptions("houdini","versions"))
-        self.version_combo.setMinimumWidth(_width1)
+        self.version_combo.setMinimumWidth(WIDTH_SMALL)
         self.version_layout = qg.QHBoxLayout()
         self.version_layout.setContentsMargins(0, 0, 0, 0)
         self.version_layout.setSpacing(0)
@@ -1050,7 +1054,7 @@ class HoudiniWidget(qg.QWidget):
         self.options_combo.addItem("-V 2")
         self.options_combo.addItem("-V 2 -F 1-10 -F 20 -F 50-80x10")
         self.options_combo.setEditable(True)
-        self.options_combo.setMinimumWidth(180)
+        self.options_combo.setMinimumWidth(WIDTH_SMALL)
         self.options_layout = qg.QHBoxLayout()
         self.options_layout.setContentsMargins(0, 0, 0, 0)
         self.options_layout.setSpacing(0)
@@ -1121,15 +1125,23 @@ class Directory(qg.QFileDialog):
         super(Directory, self).__init__()
         self.setWindowTitle(title)
         self.setModal(True)
+        self.fullpath = None
+        self.relpath = None
         self.setDirectory(startplace)
         self.directory = self.getExistingDirectory(self,title)
-        if self.directory:
-            print self.directory
 
+        try:
+            if self.directory:
+                logger.info( "proj root: {}".format(self.directory))
+                self.relpath= os.path.relpath(self.directory,startplace)
+                self.fullpath=self.directory
+                logger.info( "proj root rel: {}".format(self.relpath))
+        except Exception, err:
+            logger.warn( "directory: {}".format(err))
 
 # -------------------------------------------------------------------------------------------------------------------- #
 class File(qg.QFileDialog):
-    def __init__(self,startplace=None,title='Select a File Please',filetypes=["*.ma","*.mb","*.nk"]):
+    def __init__(self,startplace=None,title='Select a File Please',filetypes=["*.ma","*.mb","*.nk","*.hip"]):
         super(File, self).__init__()
         # self.setWindowTitle(title)
         '''
@@ -1140,14 +1152,12 @@ class File(qg.QFileDialog):
         self.setFilter('*.ma')
         self.fullpath = None
         self.relpath = None
-        self.fileName = self.getOpenFileName(self,
-            title, startplace,
-            "Files (%s)" % " ".join(filetypes))
+        self.fileName = self.getOpenFileName(self,title, startplace, "Files (%s)" % " ".join(filetypes))
         try:
             if self.fileName:
                 logger.info( "scene file: {}".format(self.fileName))
-                self.relpath= os.path.join(os.path.relpath(os.path.dirname(self.fileName[0]),startplace),os.path.basename(
-                    self.fileName[0]))
+                self.relpath= os.path.join(os.path.relpath(os.path.dirname(self.fileName[0]),startplace),
+                                           os.path.basename(self.fileName[0]))
                 self.fullpath=self.fileName[0]
         except Exception, err:
             logger.warn( "file: {}".format(err))

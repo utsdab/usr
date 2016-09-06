@@ -54,11 +54,11 @@ TRACTOT_SUBMIT_DIALOG = None
 MAYA_PRESENT = False
 COL1 = "background-color:lightgrey;color:black"
 COL2 = "background-color:lightgreen;color:darkblue"
-CFG = envfac.ConfigBase()
 ENV = envfac.Environment()
-VERSION = CFG.getdefault("farm","version")
-BUILD = CFG.getdefault("farm","build")
-
+VERSION = ENV.getdefault("farm","version")
+BUILD = ENV.getdefault("farm","build")
+WIDTH = 430
+HEIGHT = 950
 # -------------------------------------------------------------------------------------------------------------------- #
 class TractorSubmit(qg.QDialog):
     def __init__(self,mayapresent=False):
@@ -85,8 +85,8 @@ class TractorSubmit(qg.QDialog):
         self.setWindowFlags(qc.Qt.WindowStaysOnTopHint)
         self.main_widget = TractorSubmitWidget(self.job,self.maya)
         self.setLayout(qg.QVBoxLayout())
-        self.setFixedWidth(350)
-        self.setMinimumHeight(900)
+        self.setFixedWidth(WIDTH)
+        self.setMinimumHeight(HEIGHT)
         self.scroll_area = qg.QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setFocusPolicy(qc.Qt.NoFocus)

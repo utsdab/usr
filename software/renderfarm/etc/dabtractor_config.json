@@ -2,7 +2,7 @@
   "configpath": "/Users/Shared/UTS_Dev/gitRepositories/utsdab/usr/software/renderfarm/dabtractor/factories/configuration_factory.py",
 
   "DABUSR": {
-    "path"            : "/Volumes/dabrender"
+    "path"            : "/Volumes/dabrender/usr"
   },
 
   "DABWORK" : {

@@ -191,35 +191,65 @@ class Environment(ConfigBase):
             logger.debug("{} :: found in environment as {}".format(envar, val))
             return val
 
-    def setfromscenefile(self, mayascenefilefullpath):
-        if os.path.isfile(mayascenefilefullpath):
-            _dirname=os.path.dirname(mayascenefilefullpath)
-            _basename=os.path.basename(mayascenefilefullpath)
+    def setfromscenefile(self, scenefilefullpath):
+        try:
+            os.path.isfile(scenefilefullpath)
+        except Exception, err:
+            logger.warn("Cant set from file.{} {}".format(scenefilefullpath, err))
+        else:
+            _dirname=os.path.dirname(scenefilefullpath)
+            _basename=os.path.basename(scenefilefullpath)
             _dirbits=os.path.normpath(_dirname).split("/")
-            _fullpath=os.path.normpath(mayascenefilefullpath).split("/")
+            _fullpath=os.path.normpath(scenefilefullpath).split("/")
             for i, bit in enumerate(_dirbits):
                 if bit == "project_work" or bit == "user_work":
                     logger.debug("")
                     self.dabwork="/".join(_dirbits[0:i])
-                    logger.debug("DABWORK: {}".format(self.dabwork))
+                    logger.info("DABWORK: {}".format(self.dabwork))
                     self.type=bit
-                    logger.debug("TYPE: {}".format(self.type))
+                    logger.info("TYPE: {}".format(self.type))
                     self.show=_dirbits[i+1]
-                    logger.debug("SHOW: {}".format( self.show))
+                    logger.info("SHOW: {}".format( self.show))
                     self.project=_dirbits[i+2]
-                    logger.debug("PROJECT: {}".format( self.project))
+                    logger.info("PROJECT: {}".format( self.project))
                     self.scene="/".join(_fullpath[i+3:])
-                    logger.debug("SCENE: {}".format( self.scene))
+                    logger.info("SCENE: {}".format( self.scene))
+
+
+    def setfromprojroot(self, dirfullpath):
+        try:
+            os.path.isdir(dirfullpath)
+        except Exception, err:
+            logger.warn("Cant set from dir: {} {}".format( dirfullpath,err))
         else:
-            logger.warn("Cant set from file. Not a file: {}".format(mayascenefilefullpath))
+            _dirname=os.path.dirname(dirfullpath)
+            _basename=os.path.basename(dirfullpath)
+            _dirbits=os.path.normpath(_dirname).split("/")
+            _fullpath=os.path.normpath(dirfullpath).split("/")
+            for i, bit in enumerate(_dirbits):
+                if bit == "project_work" or bit == "user_work":
+                    logger.info("")
+                    self.dabwork="/".join(_dirbits[0:i])
+                    logger.info("DABWORK: {}".format(self.dabwork))
+                    self.type=bit
+                    logger.info("TYPE: {}".format(self.type))
+                    self.show=_dirbits[i+1]
+                    logger.info("SHOW: {}".format( self.show))
+                    self.project="/".join(_dirbits[i+1:])
+                    logger.info("PROJECT: {}".format( self.project))
+
 
     def putback(self):
-        os.environ["DABWORK"] = self.dabwork
-        os.environ["TYPE"] = self.type
-        os.environ["SHOW"] = self.show
-        os.environ["PROJECT"] = self.project
-        os.environ["SCENE"] = self.scene
-        logger.info("Putback main environment variables")
+        try:
+            os.environ["DABWORK"] = self.dabwork
+            os.environ["TYPE"] = self.type
+            os.environ["SHOW"] = self.show
+            os.environ["PROJECT"] = self.project
+            os.environ["SCENE"] = self.scene
+        except Exception,err:
+            logger.warn("Putback failed %s"%err)
+        else:
+            logger.info("Putback main environment variables")
 
 
 if __name__ == '__main__':
