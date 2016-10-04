@@ -23,10 +23,10 @@ This is to be run by the farm as pixar user to add a new entry into the json map
 
 '''
 
-def main(n="120988",u="matthewgidney",y="staff"):
+def main(number,username,year):
     try:
         usermap=uf.Map()
-        usermap.adduser(n, u, y)
+        usermap.adduser(number, username, year)
 
     except Exception,err:
         logger.warn("Cant add user to map, {}".format(err))
@@ -40,16 +40,12 @@ def main(n="120988",u="matthewgidney",y="staff"):
 
     try:
         logger.info("Adding your working directory in dabrender")
-        env = uf.EnvType(userid=n)
+        env = uf.EnvType(userid=number)
         env.makedirectory()
     except Exception,err:
         logger.info("Cant make directory {}".format(err))
         raise
 
-
-###### do this as pixa and a farm job
-# m.adduser("88888","pyschokid","2016")
-# print m.getuser("88888")
 
 def parseArguments():
     parser = argparse.ArgumentParser(description="Add user to the Json Map list",
@@ -65,20 +61,24 @@ def parseArguments():
                         action="append",
                         help="year you started")
 
-
     return parser.parse_args()
 
 # #####################################################################################################
 if __name__ == '__main__':
 
-    arguments = parseArguments()
-    logger.debug("%s" % arguments)
     try:
-        if not (parseArguments()):
-            logger.critical("Cant parse args %s" % (arguments))
-            sys.exit("ERROR Cant parse arguments")
-        else:
-            # main(n=arguments.number,u=arguments.username,y=arguments.year)
-            main(n="120988",u="matthewgidney",y="staff")
+        arguments = parseArguments()
+        logger.info("Arguments: %s" % arguments)
     except Exception, exitstatus:
-        sys.exit(exitstatus)
+        logger.critical("Cant parse args %s" % (arguments))
+        sys.exit("ERROR Cant parse arguments %s" % exitstatus)
+    try:
+        n=arguments.number[0]
+        u=arguments.username[0]
+        y=arguments.year[0]
+    except Exception, exitstatus:
+        logger.critical("Cant parse specific number username or year")
+        sys.exit("ERROR Cant parse specific arguments %s" % exitstatus)
+    else:
+        logger.info("number={} username={} year={}".format(n,u,y))
+        main(n,u,y)

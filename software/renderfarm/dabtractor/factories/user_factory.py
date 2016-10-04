@@ -14,6 +14,7 @@ import sys
 import json
 import shutil
 import string
+import time
 import subprocess
 from software.renderfarm.dabtractor.factories import utils_factory as utils
 from software.renderfarm.dabtractor.factories import environment_factory as envfac
@@ -90,8 +91,7 @@ class Map(object):
 
         _crewlist = open(self.tractorcrewlist, 'w')
         for i, student in enumerate(allkeys):
-            _line='"{number}", # {index} {student} {name} {year}'.format(index= i,
-                                                               student = student,
+            _line='"{number}", # {student} {name} {year}'.format(student = student,
                                                                number=all[student].get("number","NONE"),
                                                                name=all[student].get("name","NONE"),
                                                                year=all[student].get("year","NONE"))
@@ -106,8 +106,7 @@ class Map(object):
 
         ###  print for crews.config file
         for i, student in enumerate(allkeys):
-            logger.info('"{number}", # {index} {student} {name} {year}'.format(index= i,
-                                                               student = student,
+            logger.info('"{number}", # {student} {name} {year}'.format(student = student,
                                                                number=all[student].get("number","NONE"),
                                                                name=all[student].get("name","NONE"),
                                                                year=all[student].get("year","NONE")))
@@ -181,6 +180,7 @@ class EnvType(object):
     def __init__(self,userid=None,projectname=None):
         self.env=envfac.Environment()
         self.dabrenderpath=self.env.getdefault("DABRENDER","path")
+        self.dabwork=self.env.getdefault("DABWORK","path")
 
         if userid:
             self.envtype="user_work"
@@ -197,14 +197,14 @@ class EnvType(object):
             self.projectname=projectname
 
     def makedirectory(self):
-        #
+        # attempts to make the user_work directory for the user or the project under project_work
         try:
             if self.envtype == "user_work":
-                os.mkdir( os.path.join(self.dabrenderpath,self.envtype,self.username))
+                os.mkdir( os.path.join(self.dabwork,self.envtype,self.username))
                 logger.info("Made {} under user_work".format(self.username))
-            elif self.envtype == "projects":
-                os.mkdir( os.path.join(self.dabrenderpath,self.envtype,self.projectname))
-                logger.info("Made {} under user_projects".format(self.projectname))
+            elif self.envtype == "project_work":
+                os.mkdir( os.path.join(self.dabwork,self.envtype,self.projectname))
+                logger.info("Made {} under project_work".format(self.projectname))
             else:
                 logger.info("Made no directories")
                 raise
@@ -224,6 +224,9 @@ class UTSuser(object):
         self.number = os.getenv("USER")
         self.job=None
         self.env=envfac.Environment()
+        self.year=time.strftime("%Y")
+        logger.info("Current Year is %s" % self.year)
+
 
         try:
             p = subprocess.Popen(["ldapsearch", "-h", "moe-ldap1.itd.uts.edu.au", "-LLL", "-D",
@@ -254,14 +257,13 @@ class UTSuser(object):
 
         try:
             # ################ TRACTOR JOB ################
-            self.base = ["bash", "-c","add_farm_user.py",]
-            self.args = ["-n",self.number,"-u",self.name,"-y","2016"]
-            self.command = self.base+self.args
+            self.command = ["bash", "-c", "add_farmuser.py -n {} -u {} -y {}".format(self.number,self.name,self.year)]
+            # self.args = ["-n",self.number,"-u",self.name,"-y",]
+            # self.command = self.base+self.ar
             self.job = self.env.author.Job(title="New User Request: {}".format(self.name),
                                   priority=100,
                                   metadata="user={} realname={}".format(self.number, self.name),
-                                  comment="New User Request is {} {} {}".format(self.number,
-                                                self.name,self.number),
+                                  comment="New User Request is {} {} {}".format(self.number, self.name,self.number),
                                   projects=["admin"],
                                   tier="admin",
                                   envkey=["default"],
@@ -334,6 +336,9 @@ class FARMuser(object):
 
 if __name__ == '__main__':
 
+    ##### all this is testing
+    ##### this  is a factory and shouldnt be called as 'main'
+
     sh.setLevel(logging.DEBUG)
     logger.setLevel(logging.DEBUG)
 
@@ -346,16 +351,16 @@ if __name__ == '__main__':
         logger.warn(err)
 
 
-    # logger.debug("-------- TEST adduser ------------")
-    # try:
-    #     # m.getallusers()
-    #     m.backup()
-    #     m.adduser("1209880","mattgidney","2020")
-    #     m.adduser("0000000","nextyearstudent","2016")
-    #     m.adduser("9999999","neveryearstudent","2016")
-    #
-    # except Exception, err:
-    #     logger.warn(err)
+    logger.debug("-------- TEST adduser ------------")
+    try:
+        # m.getallusers()
+        m.backup()
+        m.adduser("1209880","mattgidney","2020")
+        m.adduser("0000000","nextyearstudent","2016")
+        m.adduser("9999999","neveryearstudent","2016")
+
+    except Exception, err:
+        logger.warn(err)
     #
     #
     # logger.debug("-------- TEST getuser ------------")
@@ -372,14 +377,14 @@ if __name__ == '__main__':
     #     logger.warn(err)
 
 
-    u = FARMuser()
-    logger.debug( u.name )
-    logger.debug( u.number)
-    logger.debug( u.year)
-    logger.debug( u.user)
-    # uts = UTSuser()
-    # logger.debug( uts.name)
-    # logger.debug( uts.number)
+    # u = FARMuser()
+    # logger.debug( u.name )
+    # logger.debug( u.number)
+    # logger.debug( u.year)
+    # logger.debug( u.user)
+    uts = UTSuser()
+    logger.debug( uts.name)
+    logger.debug( uts.number)
 
 
     '''
