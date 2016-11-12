@@ -26,6 +26,7 @@ logger.addHandler(sh)
 import tractor.api.author as author
 import tractor.api.query as tq
 import os
+import time
 import sys
 from software.renderfarm.dabtractor.factories import user_factory as ufac
 from software.renderfarm.dabtractor.factories import utils_factory as utils
@@ -139,6 +140,8 @@ class RenderPrman(RenderBase):
         self.ribpath = "{}/rib".format(self.rendermanpath)
         self.finaloutputimagebase = "{}/{}".format(self.rendermanpath,self.scenebasename)
         # self.proxyoutput = "$DABRENDER/$TYPE/$SHOW/$PROJECT/movies/$SCENENAME_{}.mov".format("datehere")
+        self.thedate=time.strftime("%d-%B-%Y")
+
 
     def build(self):
         '''
@@ -360,7 +363,17 @@ class RenderPrman(RenderBase):
                            start=self.startframe,
                            end=self.endframe)
                 _option2 = "-out8 -outgamma 2.2"
-                _option3 = "-overlay frameburn 0.5 1.0 30 -leader simpleslate UTS_BDES_ANIMATION Student={}".format(self.user)
+                _option3 = "-overlay frameburn 0.5 1.0 30 -leader simpleslate UTS_BDES_ANIMATION Type={} Show={} Project={} File={} Student={}-{} Group={} Date={}".format(
+                                                                      self.envtype,
+                                                                      self.envshow,
+                                                                      self.envproject,
+                                                                      self.scenebasename,
+                                                                      self.user,
+                                                                      self.renderusername,
+                                                                      self.projectgroup,
+                                                                      self.thedate)
+
+
                 _output = "-o %s" % _outmov
 
                 _rvio_cmd = [ utils.expandargumentstring("rvio %s %s %s %s %s" % (_seq, _option1, _option2, _option3, _output)) ]
@@ -410,8 +423,11 @@ class RenderPrman(RenderBase):
             try:
                 logger.info("Spooled correctly")
                 # all jobs owner by pixar user on the farm
-                self.job.spool(owner=env.getdefault("tractor","jobowner"),
-                               port=int(env.getdefault("tractor","port")))
+                self.job.spool(owner=self.env.getdefault("tractor","jobowner"),
+                               port=int(self.env.getdefault("tractor","port")))
+                # self.job.spool(owner=self.user,
+                #                port=int(self.env.getdefault("tractor","port")))
+
             except Exception, spoolerr:
                 logger.warn("A spool error %s" % spoolerr)
         else:

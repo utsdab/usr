@@ -10,12 +10,12 @@ if __name__=="__main__":
 
     # something could be done to determine which image to return
     # for now just return a test image in /tmp of the engine host
-    filename = "/tmp/image.jpg"
+    filename = "/Volumes/dabrender/etc/pixar/Pixar_renderman_logo.png"
 
     # return the image; it will be displayed in a new browser window
     with open(filename, "rb") as content_file:
         content = content_file.read()
     #sys.stdout.write("Content-type: image/jpg\n\n")
-    sys.stdout.write("Content-type: image/jpg")
+    sys.stdout.write("Content-type: image/png\n\n")
     sys.stdout.write(content)
 

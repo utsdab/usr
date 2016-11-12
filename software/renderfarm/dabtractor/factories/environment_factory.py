@@ -259,6 +259,7 @@ if __name__ == '__main__':
 
     JJ = Environment()
 
+
     logger.debug("GROUPS = %s"% JJ.getgroups())
     group = "maya"
     attribute = "versions"

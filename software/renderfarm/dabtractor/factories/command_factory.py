@@ -36,11 +36,12 @@ class CommandBase(object):
         try:
             # get the names of the central render location for the user
             ru = ufac.FARMuser()
+            env=envfac.Environment()
             self.renderusernumber = ru.number
             self.renderusername = ru.name
-            self.dabrender = ru.dabrender
-            self.dabrenderworkpath = ru.dabuserworkpath
-            self.initialProjectPath = ru.dabuserworkpath
+            self.dabrender = env.dabrender
+            self.dabrenderworkpath = env.dabwork
+            self.initialProjectPath = env.dabwork
 
         except Exception, erroruser:
             logger.warn("Cant get the users name and number back %s" % erroruser)
@@ -69,14 +70,6 @@ class Bash(CommandBase):
         Main method to build the job
         """
 
-        if self.testing:
-            _service_Testing="Testing"
-            _tier="admin"
-
-        else:
-            _service_Testing=""
-            _tier="batch"
-
         # ################ 0 JOB ################
         self.job = self.env.author.Job(title="Bash Job: {}".format(self.renderusername),
                               priority=10,
@@ -86,7 +79,7 @@ class Bash(CommandBase):
                                                                      self.renderusername,
                                                                      self.renderusernumber),
                               projects=[str(self.projectgroup)],
-                              tier=_tier,
+                              # tier=_tier,
                               tags=["theWholeFarm"],
                               service="ShellServices")
 
@@ -128,9 +121,12 @@ class Bash(CommandBase):
 
     def spool(self):
         try:
-            self.job.spool(owner="pixar")
             logger.info("Spooled correctly")
-
+            # all jobs owner by pixar user on the farm
+            self.job.spool(
+                # owner=self.env.getdefault("tractor","jobowner"),
+                port=int(self.env.getdefault("tractor","port"))
+            )
         except Exception, spoolerr:
             logger.warn("A spool error %s" % spoolerr)
 
@@ -234,13 +230,23 @@ class Rsync(CommandBase):
         return mailcmd
 
     def spool(self):
+
+        logger.info( ">>>{}<<<").format(self.env.getdefault("tractor","port"))
+
+
         if os.path.exists(self.sourcedirectory):
+
             try:
                 logger.info("Spooled correctly")
                 # all jobs owner by pixar user on the farm
-                self.job.spool(owner="pixar")
+                self.job.spool(owner=self.env.getdefault("tractor","jobowner"),
+                               port=int(self.env.getdefault("tractor","port")))
             except Exception, spoolerr:
                 logger.warn("A spool error %s" % spoolerr)
+
+
+
+
         else:
             message = "Cant find source %s" % self.sourcedirectory
             logger.critical(message)
@@ -253,7 +259,7 @@ if __name__ == '__main__':
 
     rs=Rsync()
 
-    self.env.author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
+    # self.env.author.setEngineClientParam(hostname="tractor-engine", port=5600, user="pixar", debug=True)
 
     logger.setLevel(logging.DEBUG)
     logger.info("Running test for {}".format(__name__))
@@ -267,7 +273,7 @@ if __name__ == '__main__':
 
     TEST = Bash(
                # startdirectory="/var/tmp",
-               command="check_farmuser.py",
+               command="check_farmuser.py > out.txt",
                # options="",
                email=[0,0,0,0,0,0]
     )
