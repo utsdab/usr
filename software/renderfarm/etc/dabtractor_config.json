@@ -6,12 +6,12 @@
   },
 
   "DABWORK" : {
-    "path"            : "/Volumes/dabrender/work",
+    "path"            : "/Volumes/dabrender/work/dab",
     "envtype"         : [ "user_work", "project_work" ]
   },
 
   "DABASSETS" : {
-    "path"            : "/Volumes/dabrender/assets"
+    "path"            : "/Volumes/dabrender/work/assets"
   },
 
   "DABSOFTWARE" : {
@@ -35,7 +35,7 @@
 
   "farm": {
     "version"      : "2.0",
-    "build"        : "201608"
+    "build"        : "201702"
   },
 
   "tractor": {
@@ -45,12 +45,12 @@
   },
 
   "maya": {
-    "versions"     : [ "2016.5", "2016"],
-    "mayarenderer" : [ "mr", "sw"]
+    "versions"     : [ "2017" ],
+    "mayarenderer" : [ "sw"]
   },
 
   "nuke": {
-    "versions"     : [ "10.0v2", "9.0v8"]
+    "versions"     : [ "10.0v5" ]
   },
 
   "houdini": {
@@ -58,7 +58,7 @@
   },
 
   "renderman": {
-    "versions"     : [ "20.10" ],
+    "versions"     : [ "21.2" ],
     "integrators"  : [ "FROMFILE", "pxr", "vcm", "visualiser"]
   },
 

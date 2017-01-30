@@ -85,7 +85,7 @@ class TractorSubmit(qg.QDialog):
         self.setWindowFlags(qc.Qt.WindowStaysOnTopHint)
         self.main_widget = TractorSubmitWidget(self.job,self.maya)
         self.setLayout(qg.QVBoxLayout())
-        self.setFixedWidth(WIDTH)
+        self.setMinimumWidth(WIDTH)
         self.setMinimumHeight(HEIGHT)
         self.scroll_area = qg.QScrollArea()
         self.scroll_area.setWidgetResizable(True)
