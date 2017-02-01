@@ -121,6 +121,7 @@ class RenderPrman(RenderBase):
         self.mayaversion = mayaversion,
         self.rendermanversion = rendermanversion,
         self.envkey_rms = "rms-{}-maya-{}".format(self.rendermanversion[0], self.mayaversion[0])
+        self.envkey_rfm = "rfm-{}-maya-{}".format(self.rendermanversion[0], self.mayaversion[0])
         self.startframe = int(startframe)
         self.endframe = int(endframe)
         self.byframe = int(byframe)
@@ -152,7 +153,7 @@ class RenderPrman(RenderBase):
         self.job = self.env.author.Job(title="RM: {} {} {}-{}".format(
               self.renderusername,self.scenename,self.startframe,self.endframe),
               priority=10,
-              envkey=[self.envkey_rms,"ProjectX",
+              envkey=[self.envkey_rfm,"ProjectX",
                     "TYPE={}".format(self.envtype),
                     "SHOW={}".format(self.envshow),
                     "PROJECT={}".format(self.envproject),
