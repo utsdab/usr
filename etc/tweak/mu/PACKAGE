@@ -1,0 +1,24 @@
+package: UTS_RVIO_SCRIPTS
+author: Matt Gidney
+contact: mgidney@gmail.com
+organization: Animal Logic
+version: 1.0
+rv: 3.12.13
+requires: ''
+url: http://www.uts.edu.au
+
+description: |
+
+  <p> This package contains the basic rvio scripts 
+  for proxy generation at UTS. 
+  <ul> 
+  <li>   mgBug </li>
+  <li>   mgFrameBurn </li>
+  <li>   mgMatte </li>
+  <li>   mgProxyBurner </li>
+  <li>   mgProxyData </li>
+  <li>   mgSlateSimple </li>
+  <li>   mgTimecode </li>
+  <li>   mgWatermark </li>
+  </ul>
+

@@ -1,0 +1,20 @@
+rvio \
+/depts/rnd/dev/mattg/tools/tdApps/src/AL/apps/Binocular/test_data/short_stereo.mov \
+-flags ModeManagerLoad=mgProxyBurn \
+-o /var/tmp/short_stereo_proxy.mov \
+-comment "testing by mattg" \
+-copyright "UTS" \
+-outres 1280 720 \
+\
+-overlay mgMatte 2.39 1.0 \
+\
+-overlay mgBug nil 1.0 92 \
+\
+-overlay mgFrameBurn 1.0 1.0 30.0 \
+\
+-outparams timecode/start=11 timecode/rate=24 timecode/flags=drop \
+-outstereo
+
+
+;-overlay mgBug nil 1.0 92 \
+;-overlay mgProxyBurner \
