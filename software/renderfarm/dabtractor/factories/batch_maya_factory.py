@@ -1,3 +1,0 @@
-'''
-run solvers like bifrost
-'''

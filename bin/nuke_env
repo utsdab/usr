@@ -11,9 +11,9 @@ export DYLD_LIBRARY_PATH=${NUKE_LOCATION}/MacOS:${DYLD_LIBRARY_PATH}
 export DYLD_LIBRARY_PATH=${MAYA_LOCATION}/MacOS:${DYLD_LIBRARY_PATH}
 NEW_PATH=
 
-for i in $(echo $DYLD_LIBRARY_PATH | sed -e 's/\:/\ /g' ); 
+for i in $(echo $DYLD_LIBRARY_PATH | sed -e 's/\:/\ /g' );
 
-do 
+do
 
 case "$i" in
   *Maya*) echo "Maya present, removed";;
@@ -31,4 +31,4 @@ echo "INFO: DYLD_LIBRARY_PATH  ${DYLD_LIBRARY_PATH}"
 
 ###  add the NUKE_PATH
 
-export NUKE_PATH=/Volumes/dabrender/usr/etc/nuke/Bokeh/Bokeh-v1.4.2_Nuke9.0-darwin64:${NUKE_PATH}
+#export NUKE_PATH=$DABRENDER/usr/etc/nuke/Bokeh/Bokeh-v1.4.2_Nuke9.0-darwin64:${NUKE_PATH}

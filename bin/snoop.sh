@@ -10,17 +10,9 @@ touch /tmp/xx_$h
 mkdir -p /tmp/mm_$h
 d=`date`
 
-case ${OSTYPE:0:5} in
-linux)
-    file="/dabrender/work/matthewgidney/farmreport"
-;;
-darwi)
-    file="/Volumes/dabrender/work/matthewgidney/farmreport"
-;;
-*)
-    exit 1
-;;
-esac
+
+file="/Volumes/dabrender/work/matthewgidney/farmreport"
+
 
 if [ -e $file ]
 then
