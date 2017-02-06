@@ -3,10 +3,11 @@
 use Cwd qw/abs_path getcwd/;
 use File::Basename;
 use Data::Dumper;
+use Math::BigInt;
 
 ########################################
 # Justen Marshall's "lsq" script       #
-# Animal Logic (c) 1999-2004           #
+# Animal Logic (c) 1999-2007           #
 #                                      #
 # This script is a replacement for lsf #
 # (a custom list-frames script). This  #
@@ -39,8 +40,10 @@ my $singlesasclips;
 my $listgood;
 my $debug;
 my $showfirstframe = 0;
+my $quietmode = 0;
+my $quietexit = 0;
 
-my $version = "1.17";
+my $version = "1.19";
 
 # This has to be something that'll NEVER be used in real file names.
 my $SPLITSTR = "@@%--%@@";
@@ -49,7 +52,7 @@ my $SPLITSTR = "@@%--%@@";
 my $useage =<<EOF;
 lsq v$version Useage:
 
-  lsq [options] [PATH [PATH...]]
+  lsq [options] [PATH [PATH...]] 
 
 Options are any of the following:
 
@@ -63,6 +66,7 @@ Options are any of the following:
   -m        : Show a list of missing or empty frames, if any.
   -e        : Explicitly list files that DO exist.
   -q        : Quiet mode. Output is easier to parse in scripts.
+  -Q        : Quiet mode, no exit value changes.
   -R        : Recursively run lsq on sub-directories.
   -a days   : Indicate if the clip has been accessed recently.
   -c days   : Indicate if the clip has been changed recently.
@@ -78,7 +82,7 @@ EOF
 my $long_useage =<<EOF;
 lsq v$version Useage:
 
-  lsq [-h] [-s] [-i|-m] [-q] [-R] [-a|-c days] [PATH [PATH...]]
+  lsq [-h] [-s] [-i|-m] [-q] [-R] [-a|-c days] [PATH [PATH...]] 
 
 Options:
 
@@ -122,7 +126,12 @@ Options:
 
   -q
     Quiet mode. Don't print directory names or anything else other
-    than the output, tab-separated.
+    than the output, tab-separated. Exit value of lsq is set to the
+    number of clips listed.
+
+  -Q
+    Just like -q except that the exit value of lsq is set to show
+    success (0), rather than the number of clips found.
 
   -R
     Recursively run lsq on sub-directories.
@@ -204,6 +213,15 @@ Note About Damaged Clips
 
 EOF
 
+sub deBigInt {
+  # If we have to use min, it's a BigInt and will come with a
+  # superfluous "+" sign that we want to get rid of.
+  my ($num) = @_;
+  $num =~ s/^\+//;
+  return $num;
+}
+
+
 # This sub formats an integer size as a nice number of bytes/kb/Mb/Gb.
 sub formatsize {
   my ($size) = @_;
@@ -269,7 +287,7 @@ sub SplitFilename {
   # Count the number of digits, if it starts with a 0 or #.
   # Otherwise, the number can be matched with a single # and
   # so we return 0.
-  my $nd = ($2 =~ /^-?[0#]/ ? length($number)==1 ? 0 : length($number) : 0);
+  my $nd = ($2 =~ /^-?[0#]/ ? (length($number)==1 ? ($number eq '#' ? 1 : 0) : length($number)) : 0);
 
   # Send it back.
   print "Sending back '".$lhs.$SPLITSTR.$nd.$rhs."'\n" if $debug;
@@ -312,6 +330,12 @@ sub ParseArgs {
     }
     if ( $arg =~ /^-q$/ ) {
       $quietmode = 1;
+      $quietexit = 0;
+      next arg;
+    }
+    if ( $arg =~ /^-Q$/ ) {
+      $quietmode = 1;
+      $quietexit = 1;
       next arg;
     }
     if ( $arg =~ /^-R$/ ) {
@@ -373,11 +397,6 @@ sub ParseArgs {
     die "Unknown flag: $arg\n";
   }
   while ( $#ARGV>=0 ) {
-
-    open( my $fh, '>>/usr/local/tmp/lsq.txt');
-	print $fh "parse : ".$ARGV[0]." \n";
-    close($fh);
-
     if ( -d $ARGV[0] ) {
       push( @thedirs, shift(@ARGV) );
     } else {
@@ -414,7 +433,7 @@ sub eatchunk {
   my ($max,$min);
   my $step = min(max(1, @$vals[1]-@$vals[0]),10);
 
-  if ( @$vals[2] != @$vals[1]+$step ||
+  if ( @$vals[2] != @$vals[1]+$step || 
        @$vals[3] != @$vals[2]+$step ) {
     $step = 1;
   }
@@ -424,7 +443,7 @@ sub eatchunk {
   my @orig = @$vals;
 
   $max = $min = shift( @$vals );
-  while ( ($#{$vals}>=0)  &&
+  while ( ($#{$vals}>=0)  && 
 	  (@$vals[0]==$max+$step)  ) {
     $max = shift( @$vals );
   }
@@ -453,7 +472,7 @@ sub lsq {
        ) unless $quietmode;
 
   # Start by opening the current directory.
-  opendir( DIR, $thedir ) || die "Couldn't open directory: ($thedir)\n";
+  opendir( DIR, $thedir ) || die "Couldn't open directory: $thedir\n";
 
   my @debug_bits = sort(readdir(DIR));
   rewinddir(DIR);
@@ -524,9 +543,10 @@ sub lsq {
 
     # If we're looking for specific clips, check if this is one.
     if ( $#only >= 0 ) {
-      my @cands = grep { $key eq $_->{pattern} &&
-				    ( $seqs{$key}->{digits} == $_->{digits} ||
-				      $seqs{$key}->{digits} == 0 ) } @only;
+      my @cands = grep { $key =~ /$_->{pattern}/ && 
+                           ( $seqs{$key}->{digits} == $_->{digits} ||
+                             $seqs{$key}->{digits} == 0 ||
+                             $_->{digits} == 0 ) } @only;
       next filename unless $#cands>=0;
     }
 
@@ -552,10 +572,11 @@ sub lsq {
   foreach $k ( sort(keys(%seqs)) ) {
     # If we're looking for specific clips, check if this is one.
     if ( $#only >= 0 ) {
-      my @cands = grep { $k eq $_->{pattern} &&
+      my @cands = grep { $k =~ /$_->{pattern}/ && 
 			   ( $seqs{$k}->{digits} == $_->{digits} ||
-			     ( $seqs{$k}->{digits} == 0 &&
-			       $seqs{$k}->{mindigits} >= $_->{digits} ) ) } @only;
+			     ( $seqs{$k}->{digits} == 0 && 
+			       $seqs{$k}->{mindigits} >= $_->{digits} ) ||
+                             $_->{digits} == 0) } @only;
       next key unless $#cands>=0;
     }
 
@@ -579,8 +600,8 @@ sub lsq {
     # values (note we need to do something special to do a numerical
     # sort).
     my (@frames) = sort {$a <=> $b} @{$seqs{$k}->{frames}};
-    my $min = $frames[0];
-    my $max = $frames[$#frames];
+    my $min = Math::BigInt->new($frames[0]);
+    my $max = Math::BigInt->new($frames[$#frames]);
 
     next key if ( $showclipsonly &&
 		  ((!$hasnumeric || $min==$max) && !$singlesasclips) );
@@ -604,10 +625,15 @@ sub lsq {
     # Loop over the numbers (if there are any).
     my $fn;
     if ( $#frames>=0 ) {
-      if ( $max-$min>50000 ) {
+      if ( $max-$min>100000 ) {
         $msg .= "(Too Many Frames - Info Not Complete!)";
       } else {
         for ( $fn=$min ; $fn<=$max ; ++$fn ) {
+          if (($min+1) == $min) {
+            warn "lsq: Frame number too big: $min\n";
+            next key;
+          }
+
           my $ffn;
           if ( $hasnumeric ) {
             $ffn = sprintf( "%0${numdigits}d", ${fn} );
@@ -721,20 +747,20 @@ sub lsq {
 	# need to display the missing frame list.
 	$msg .= ($#missing>=0 ? "(Incomplete)" :
 		 $#shortframes>=0 ? "(Some Damaged Files)" :
-		 "(Complete)") if $checkcomplete;
+		 "(Complete)") if $checkcomplete;	
       }
     } else {
       # Only one frame, so just reassemble the original frame name.
       # If it's a single frame, and it has a numeric component,
       # show it with hash signs.
       $out = ( $start.
-	       ($singlesasclips && $hasnumeric ? "#" x ($numdigits||1) : $min).
+	       ($singlesasclips && $hasnumeric ? "#" x ($numdigits||1) : deBigInt($min)).
 	       $end );
     }
 
     # Add the base path if we're in quiet mode.
     $out = "$thedir/$out" if $quietmode;
-
+    
     # Do some stuff with the sequence size. Format it, and also adjust
     # the dir and grand total values. We only need to do this if we're
     # checking sizes at all..
@@ -766,8 +792,8 @@ sub lsq {
     $mask = "%s\t%s\t%s\t%s\t%s\t%s\n" if $quietmode;
     printf( $mask,
 	    $out,
-	    (($#frames>0 || $singlesasclips) ? $min : undef),
-	    (($#frames>0 || $singlesasclips) ? $max : undef),
+	    (($#frames>0 || $singlesasclips) ? deBigInt($min) : undef),
+	    (($#frames>0 || $singlesasclips) ? deBigInt($max) : undef),
 	    $length,
 	    $fmtsize,
 	    $msg,
@@ -815,9 +841,6 @@ push( @thedirs, getcwd ) if $#thedirs<0;
 # Run the lsq on the directories...
 my $d;
 foreach $d ( @thedirs ) {
-  open( my $fh, '>>/usr/local/tmp/lsq.txt');
-  print $fh "thedir: $d \n";
-  close($fh);
   lsq( $d );
 }
 
@@ -843,6 +866,6 @@ if ( $checksize && ( $#thedirs>0 || $recursive ) ) {
 }
 
 # Set the exit value to the number of clips, if that makes sense.
-if ( $quietmode ) {
+if ( $quietmode && !$quietexit ) {
   exit $numclips;
 }
