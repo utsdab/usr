@@ -62,7 +62,7 @@ class FarmUser(object):
                 self.dabrendermount = "/Volumes/dabrender"
             elif self.platform == "Linux":
                 self.dabrendermount = "/dabrender"
-                # this could be set as env var in profile.d script
+                # this could be set as farmjob var in profile.d script
 
         except Exception, err:
             logger.warn("Cant figure out the dabrendermount: %s" % err)
@@ -90,7 +90,7 @@ class FarmUser(object):
                     logger.info("Created %s" % self.renderhome)
                 except Exception, err:
                     logger.info("Didnt make directory: %s" % self.renderhome)
-		
+
                 try:
 		    os.chown(self.renderhome,710,20)
                     logger.info("Changed ownership %s" % self.renderhome)
@@ -130,7 +130,7 @@ class FarmUser(object):
             p = subprocess.Popen(["ldapsearch", "-h", "moe-ldap1.itd.uts.edu.au", "-LLL", "-D",
                                   "uid=%s,ou=people,dc=uts,dc=edu,dc=au" % self.renderusernumber,
                                   "-Z", "-b", "dc=uts,dc=edu,dc=au", "-s", "sub", "-W",
-                                  "uid=%s" % self.renderusernumber, "uid", "cn"], 
+                                  "uid=%s" % self.renderusernumber, "uid", "cn"],
                                   stdout=subprocess.PIPE)
             result = p.communicate()[0].splitlines()
             logger.debug(">>>%s<<<<" % result)
