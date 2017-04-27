@@ -5,19 +5,6 @@ use File::Basename;
 use Data::Dumper;
 use Math::BigInt;
 
-########################################
-# Justen Marshall's "lsq" script       #
-# Animal Logic (c) 1999-2007           #
-#                                      #
-# This script is a replacement for lsf #
-# (a custom list-frames script). This  #
-# does the same thing but is geared to #
-# handle any numbering format. It will #
-# show missing frames and calculate    #
-# clip sizes. Unfortunately, it does   #
-# not make coffee (yet).               #
-########################################
-
 # Variable declarations.
 my @thedirs = ();
 my @only = ();
@@ -52,7 +39,7 @@ my $SPLITSTR = "@@%--%@@";
 my $useage =<<EOF;
 lsq v$version Useage:
 
-  lsq [options] [PATH [PATH...]] 
+  lsq [options] [PATH [PATH...]]
 
 Options are any of the following:
 
@@ -82,7 +69,7 @@ EOF
 my $long_useage =<<EOF;
 lsq v$version Useage:
 
-  lsq [-h] [-s] [-i|-m] [-q] [-R] [-a|-c days] [PATH [PATH...]] 
+  lsq [-h] [-s] [-i|-m] [-q] [-R] [-a|-c days] [PATH [PATH...]]
 
 Options:
 
@@ -433,7 +420,7 @@ sub eatchunk {
   my ($max,$min);
   my $step = min(max(1, @$vals[1]-@$vals[0]),10);
 
-  if ( @$vals[2] != @$vals[1]+$step || 
+  if ( @$vals[2] != @$vals[1]+$step ||
        @$vals[3] != @$vals[2]+$step ) {
     $step = 1;
   }
@@ -443,7 +430,7 @@ sub eatchunk {
   my @orig = @$vals;
 
   $max = $min = shift( @$vals );
-  while ( ($#{$vals}>=0)  && 
+  while ( ($#{$vals}>=0)  &&
 	  (@$vals[0]==$max+$step)  ) {
     $max = shift( @$vals );
   }
@@ -543,7 +530,7 @@ sub lsq {
 
     # If we're looking for specific clips, check if this is one.
     if ( $#only >= 0 ) {
-      my @cands = grep { $key =~ /$_->{pattern}/ && 
+      my @cands = grep { $key =~ /$_->{pattern}/ &&
                            ( $seqs{$key}->{digits} == $_->{digits} ||
                              $seqs{$key}->{digits} == 0 ||
                              $_->{digits} == 0 ) } @only;
@@ -572,9 +559,9 @@ sub lsq {
   foreach $k ( sort(keys(%seqs)) ) {
     # If we're looking for specific clips, check if this is one.
     if ( $#only >= 0 ) {
-      my @cands = grep { $k =~ /$_->{pattern}/ && 
+      my @cands = grep { $k =~ /$_->{pattern}/ &&
 			   ( $seqs{$k}->{digits} == $_->{digits} ||
-			     ( $seqs{$k}->{digits} == 0 && 
+			     ( $seqs{$k}->{digits} == 0 &&
 			       $seqs{$k}->{mindigits} >= $_->{digits} ) ||
                              $_->{digits} == 0) } @only;
       next key unless $#cands>=0;
@@ -747,7 +734,7 @@ sub lsq {
 	# need to display the missing frame list.
 	$msg .= ($#missing>=0 ? "(Incomplete)" :
 		 $#shortframes>=0 ? "(Some Damaged Files)" :
-		 "(Complete)") if $checkcomplete;	
+		 "(Complete)") if $checkcomplete;
       }
     } else {
       # Only one frame, so just reassemble the original frame name.
@@ -760,7 +747,7 @@ sub lsq {
 
     # Add the base path if we're in quiet mode.
     $out = "$thedir/$out" if $quietmode;
-    
+
     # Do some stuff with the sequence size. Format it, and also adjust
     # the dir and grand total values. We only need to do this if we're
     # checking sizes at all..
