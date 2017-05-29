@@ -4,11 +4,16 @@ try:
         from sstk.libs.libQt import QtCore, QtGui
         from sstk.libs import libSerialization
     except:
-        from PySide import QtCore, QtGui
+        ##### from PySide import QtCore, QtGui
+        # from PySide2 import QtGui
+        from PySide2 import QtGui, QtCore, QtWidgets
+        ######
         from ..Modules.Library import libSerialization
     from Ui import PoseReader as poseReaderUI
     reload(poseReaderUI)
-    import shiboken
+    # import shiboken
+    import shiboken2
+    ####
     from maya import OpenMayaUI
     from functools import partial
     import maya.cmds as cmds
@@ -45,7 +50,10 @@ class PoseReaderData(object):
 def getMayaWindow():
     OpenMayaUI.MQtUtil.mainWindow()
     ptr = OpenMayaUI.MQtUtil.mainWindow()
-    return shiboken.wrapInstance(long(ptr), QtGui.QWidget)
+    ###
+    # return shiboken2.wrapInstance(long(ptr), QtGui.QWidget)
+    return shiboken2.wrapInstance(long(ptr), QtGui.QWidget)
+    ###
 
 
 class PoseReaderDialog(QtGui.QMainWindow):
@@ -209,14 +217,14 @@ class PoseReaderDialog(QtGui.QMainWindow):
         pData.nChildLoc.angleMaxValue.set(args[0])
 
     def on_action_textChange(self, *args):
-        sName = self.ui.edtNewName.text()
+        sName = self.ui.edtNewName.toPlainText()
         if sName:
             self.ui.btnCreate.setEnabled(True)
         else:
             self.ui.btnCreate.setEnabled(False)
 
     def on_action_create(self, *args):
-        sName = self.ui.edtNewName.text()
+        sName = self.ui.edtNewName.toPlainText()
 
         # loading Maya matrix node
         if not (cmds.pluginInfo("decomposeMatrix", query=True, loaded=True)):
@@ -227,7 +235,7 @@ class PoseReaderDialog(QtGui.QMainWindow):
                     cmds.loadPlugin("matrixNodes.mll")
                 except:
                     print self.langDic[self.langName]['e002_decomposeMatrixNotFound']
-                    
+
         aSel = pymel.selected()
         if (len(aSel) == 2):
             #Create the container of the system data
@@ -256,8 +264,8 @@ class PoseReaderDialog(QtGui.QMainWindow):
 
                 #Setup the rotation extaction
                 pData.nMultM = pymel.createNode("multMatrix", name=sName+"_ExtactAngle_MM")
-                pymel.connectAttr(pData.nChildLoc.worldMatrix[0], pData.nMultM.matrixIn[0])
-                pymel.connectAttr(pData.nParentLoc.worldInverseMatrix[0], pData.nMultM.matrixIn[1])
+                pymel.connectAttr(pData.nParentLoc.worldMatrix[0], pData.nMultM.matrixIn[0])
+                pymel.connectAttr(pData.nChildLoc.worldInverseMatrix[0], pData.nMultM.matrixIn[1])
                 pData.nDecM = pymel.createNode("decomposeMatrix", name=sName+"_ExtractAngle_DM")
                 pymel.connectAttr(pData.nMultM.matrixSum, pData.nDecM.inputMatrix)
 

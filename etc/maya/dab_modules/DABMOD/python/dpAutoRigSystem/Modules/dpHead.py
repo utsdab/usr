@@ -254,7 +254,6 @@ class Head(Base.StartClass, Layout.LayoutClass):
                 cmds.scaleConstraint(self.rLipCtrl, self.rLipJnt, maintainOffset=False, name=self.rLipJnt+"_ScaleConstraint")
                 cmds.delete(cmds.parentConstraint(self.cvEndJoint, self.endJnt, maintainOffset=False))
                 cmds.setAttr(self.jawJnt+".segmentScaleCompensate", 0)
-                cmds.setAttr(self.chinJnt+".segmentScaleCompensate", 0)
 
                 # create interations between neck and head:
                 self.grpNeck = cmds.group(self.zeroCtrlList[0], name=self.neckCtrl+"_Grp")
@@ -375,11 +374,6 @@ class Head(Base.StartClass, Layout.LayoutClass):
                 utils.addHook(objName=self.grpHead, hookType='rootHook')
                 utils.addHook(objName=self.toScalableHookGrp, hookType='scalableHook')
                 utils.addHook(objName=self.toStaticHookGrp, hookType='staticHook')
-
-                #Ensure head Jxt matrix
-                mHead = cmds.getAttr(self.headCtrl + ".worldMatrix")
-                cmds.xform(self.headJxt, m=mHead, ws=True)
-
                 if hideJoints:
                     cmds.setAttr(self.toScalableHookGrp+".visibility", 0)
                 

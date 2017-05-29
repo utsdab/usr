@@ -1,8 +1,8 @@
-//CopyRight Dustin Nelson 2010-2016. Please do not distribute
-//http://www.creativecrash.com/maya/script/-rapid-rig-modular-procedural-auto-rig-for-maya
+//CopyRight Dustin Nelson 2010-2017. Please do not distribute
+//https://www.highend3d.com/maya/script/rapid-rig-modular-procedural-auto-rig-for-maya
 //Script for Modular Character Rigging.
-//VERSION 2.0.9
-//January 17, 2017
+//VERSION 2.1.6
+//May 22, 2017
 //FILE IS NOT INTENDED TO BE HARMFUL, HOWEVER USE AT YOUR OWN RISK
 /*/////////////////////////////////////////////////////////////////////////////
 // 
@@ -510,9 +510,6 @@ global proc RRM_PrefixPrompt(int $checkTemplate, int $ea)
 
 global proc RRM_CreateProxyMainProxy(int $checkTemplate, string $lPrfx, string $rPrfx)
 {
-	//print $lPrfx;
-	//print $rPrfx;
-	
 	if (`objExists "RRM_MAIN"`)
 	{
 		string $selectControl = `confirmDialog
@@ -527,12 +524,6 @@ global proc RRM_CreateProxyMainProxy(int $checkTemplate, string $lPrfx, string $
 		$prefixDialog = `confirmDialog -title "Invalid Prefix(es)" -message "Prefixes must be unique, have no special characters, and begin with a letter."
 		-button "OK" -defaultButton "OK"
 		-cancelButton "OK" -dismissString "OK"`;
-		//if ($prefixDialog == "OK")
-		//{
-		//	//RRM_CreateProxyMainProxy($checkTemplate, $lPrfx, $rPrfx);
-		//	$ea = 0;
-		//	RRM_PrefixPrompt($checkTemplate, $ea);
-		//}
     }
 	else
 	{
@@ -654,7 +645,7 @@ global proc RRM_CreateProxyMainProxy(int $checkTemplate, string $lPrfx, string $
 				RRM_CreateProxySpline("Neck", 2, 2, 0, $lPrfx, $rPrfx);
 				move -r -os -wd 0 -4.5 0 RRM_Neck_Top;
 				select RRM_Neck_Top;
-				RRM_CreateProxyHead("Head", 1, 0, $lPrfx, $rPrfx);
+				RRM_CreateProxyHead("Head", 1, 2, 0, $lPrfx, $rPrfx);
 				select RRM_Head_Top;
 				RRM_CreateProxyLookAt("Eye", 1, 3, 0, 1, $lPrfx, $rPrfx);
 				move -r -os -wd 0 -1 0 ("RRM_" + $lPrfx + "Eye_Parent") ("RRM_" + $rPrfx + "Eye_Parent");
@@ -688,7 +679,7 @@ global proc RRM_CreateProxyMainProxy(int $checkTemplate, string $lPrfx, string $
 				rotate -r -90 0 0 RRM_Neck_Parent;
 				move -r 0 -4 0 RRM_Neck_Top;
 				select RRM_Neck_Top;
-				RRM_CreateProxyHead("Head", 1, 0, $lPrfx, $rPrfx);
+				RRM_CreateProxyHead("Head", 1, 2, 0, $lPrfx, $rPrfx);
 				select RRM_Head_Top;
 				RRM_CreateProxyLookAt("Eye", 1, 3, 0, 1, $lPrfx, $rPrfx);
 				move -r -os -wd 0 -1 0 ("RRM_" + $lPrfx + "Eye_Parent") ("RRM_" + $rPrfx + "Eye_Parent");	
@@ -908,7 +899,7 @@ global proc RRM_CreateProxyMainProxy(int $checkTemplate, string $lPrfx, string $
 				
 				//HEAD
 				select "RRM_Neck_Top";
-				RRM_CreateProxyHead("Head", 1, 0, $lPrfx, $rPrfx);
+				RRM_CreateProxyHead("Head", 1, 2, 0, $lPrfx, $rPrfx);
 				setAttr ("RRM_Head_Top.translate", 0, 2, 0);
 				setAttr ("RRM_Head_Jaw.translate", 0, 0.5, 0.4);
 				setAttr ("RRM_Head_JawEnd.translate", 0, 0, 2.5);
@@ -1607,8 +1598,10 @@ global proc RRM_CreateProxyArm2(string $modName, int $upperArmNum, int $lowerArm
 		pointConstraint ("RRM_" + $prfx + $modName + "_Shoulder") ("RRM_" + $prfx + $modName + "_AimLctr");
 	
 		pointConstraint ("RRM_" + $prfx + $modName + "_Shoulder") ("RRM_" + $prfx + $modName + "_Wrist") ("RRM_" + $prfx + $modName + "_ElbowAimLctrGrp");
-		aimConstraint -aimVector ($multiplier * 1) 0 0 -upVector 0 1 0 -worldUpType "none" ("RRM_" + $prfx + $modName + "_Wrist") ("RRM_" + $prfx + $modName + "_AimLctr");
+		aimConstraint -aimVector ($multiplier * 1) 0 0 -upVector 0 1 0 -worldUpType "objectrotation" -worldUpObject ("RRM_" + $prfx + $modName + "_Shoulder") -worldUpVector 0 1 0
+		("RRM_" + $prfx + $modName + "_Wrist") ("RRM_" + $prfx + $modName + "_AimLctr");
 		parent ("RRM_" + $prfx + $modName + "_AimLctr") ("RRM_" + $prfx + $modName + "_Shoulder");
+		setAttr (("RRM_" + $prfx + $modName + "_AimLctr.scale"), 1, 1, 1);
 		orientConstraint ("RRM_" + $prfx + $modName + "_AimLctr") ("RRM_" + $prfx + $modName + "_ElbowGrp");
 		
 		pointConstraint -skip y -skip z ("RRM_" + $prfx + $modName + "_Elbow") ("RRM_" + $prfx + $modName + "_ElbowAimLctr");
@@ -2459,8 +2452,10 @@ global proc RRM_CreateProxyLeg2(string $modName, int $upperLegNum, int $lowerLeg
 		pointConstraint ("RRM_" + $prfx + $modName + "_Hip") ("RRM_" + $prfx + $modName + "_AimLctr");
 	
 		pointConstraint ("RRM_" + $prfx + $modName + "_Hip") ("RRM_" + $prfx + $modName + "_Ankle") ("RRM_" + $prfx + $modName + "_KneeAimLctrGrp");
-		aimConstraint -aimVector 0 -1 0 -upVector 0 1 0 -worldUpType "none" ("RRM_" + $prfx + $modName + "_Ankle") ("RRM_" + $prfx + $modName + "_AimLctr");
+		aimConstraint -aimVector 0 -1 0 -upVector 0 0 1 -worldUpType "objectrotation" -worldUpObject ("RRM_" + $prfx + $modName + "_Hip") -worldUpVector 0 0 1
+		("RRM_" + $prfx + $modName + "_Ankle") ("RRM_" + $prfx + $modName + "_AimLctr");
 		parent ("RRM_" + $prfx + $modName + "_AimLctr") ("RRM_" + $prfx + $modName + "_Hip");
+		setAttr (("RRM_" + $prfx + $modName + "_AimLctr.scale"), 1, 1, 1);
 		orientConstraint ("RRM_" + $prfx + $modName + "_AimLctr") ("RRM_" + $prfx + $modName + "_KneeGrp");
 		
 		pointConstraint -skip x -skip z ("RRM_" + $prfx + $modName + "_Knee") ("RRM_" + $prfx + $modName + "_KneeAimLctr");
@@ -3935,8 +3930,6 @@ global proc RRM_CreateProxyFkChain(string $modName, int $chainsNum, int $jointsN
 		}
 	else if (`objExists ("RRM_" + $modName + "_Parent")`)
 		{select ("RRM_" + $modName + "_Parent");}
-
-
 }
 
 global proc RRM_FkChainPrompts(string $modName, int $chainsNum, int $jointsNum, int $enableIk, int $mirrorMod, int $modDirection, int $modDirection2)
@@ -4133,10 +4126,11 @@ global proc RRM_FkChainPrompts(string $modName, int $chainsNum, int $jointsNum, 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////HEAD///////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-global proc RRM_CreateProxyHead(string $modName, int $RRM_Jaw, int $mirrorMod, string $lPrfx, string $rPrfx)
+global proc RRM_CreateProxyHead(string $modName, int $RRM_Jaw, int $twistAxis, int $mirrorMod, string $lPrfx, string $rPrfx)
 {
 	string $crntUnit = `currentUnit -query -linear`;
 
+	print ("twistAxis is " + $twistAxis + "\n");
 
 	string $prfx = $lPrfx;
 	string $oppPrfx = $rPrfx;
@@ -4163,6 +4157,15 @@ global proc RRM_CreateProxyHead(string $modName, int $RRM_Jaw, int $mirrorMod, s
 		
 		RRM_CreateProxyParentProxy($crntUnit, $crntSide, ("RRM_" + $prfx + $modName + "_Parent"));
 		group -n ("RRM_" + $prfx + $modName) ("RRM_" + $prfx + $modName + "_Parent"); xform -os -piv 0 0 0;
+		
+		//SET TWIST AXIS IN PARENT NODE
+		if (!`objExists ("RRM_" + $prfx + $modName + "_Parent.twistAxis")`)
+		{
+			addAttr -ln "twistAxis" -at "enum" -en "X-axis:Y-axis:" -k 1 ("RRM_" + $prfx + $modName + "_Parent");
+		}
+		setAttr -l false ("RRM_" + $prfx + $modName + "_Parent.twistAxis");
+		setAttr ("RRM_" + $prfx + $modName + "_Parent.twistAxis") ($twistAxis - 1);
+		setAttr -l true ("RRM_" + $prfx + $modName + "_Parent.twistAxis");
 		
 		setAttr -type "string" ("RRM_" + $prfx + $modName + "_Parent.parent") "head";
 		setAttr -l true ("RRM_" + $prfx + $modName + "_Parent.parent");
@@ -4254,7 +4257,16 @@ global proc RRM_CreateProxyHead(string $modName, int $RRM_Jaw, int $mirrorMod, s
 			setAttr -e -k 1 ("RRM_" + $prfx + $modName + "_Parent.opposite");
 			setAttr -type "string" ("RRM_" + $prfx + $modName + "_Parent.opposite") ($oppPrfx + $modName + "_Parent");
 			setAttr -l true ("RRM_" + $prfx + $modName + "_Parent.opposite");
-				
+					
+			//SET TWIST AXIS IN TOP NODE
+			if (!`objExists ("RRM_" + $modName + ".twistAxis")`)
+			{
+				addAttr -ln "twistAxis" -at "enum" -en "X-axis:Y-axis:" ("RRM_" + $modName);
+			}
+			setAttr -l false ("RRM_" + $modName + ".twistAxis");
+			setAttr ("RRM_" + $modName + ".twistAxis") ($twistAxis - 1);
+			setAttr -l true ("RRM_" + $modName + ".twistAxis");
+		
 			if ($RRM_Jaw == 1)
 			{
 				addAttr -ln "pair" -dt "string" ("RRM_" + $prfx + $modName + "_Jaw");
@@ -4379,8 +4391,9 @@ global proc RRM_CreateProxyHead(string $modName, int $RRM_Jaw, int $mirrorMod, s
 		{select ("RRM_" + $modName + "_Parent");}
 }
 
-global proc RRM_HeadPrompts(string $modName, int $RRM_Jaw, int $mirrorMod)
+global proc RRM_HeadPrompts(string $modName, int $RRM_Jaw, int $twistAxis, int $mirrorMod)
 {
+	print ("twistAxis is " + $twistAxis + "\n");
 	//string $modName = `textField -q -text RRM_TextFieldHeadName`;
 	if (`size $modName` == "0")
 	{
@@ -4483,7 +4496,8 @@ global proc RRM_HeadPrompts(string $modName, int $RRM_Jaw, int $mirrorMod)
 							$lPrfx = `getAttr RRM_MAIN.lPrfx`;
 							$rPrfx = `getAttr RRM_MAIN.rPrfx`;
 						}
-						RRM_CreateProxyHead($modName, $RRM_Jaw, $mirrorMod, $lPrfx, $rPrfx);
+						print ("twistAxis is " + $twistAxis + "\n");
+						RRM_CreateProxyHead($modName, $RRM_Jaw, $twistAxis, $mirrorMod, $lPrfx, $rPrfx);
 					}
 				}
 			}
@@ -4508,7 +4522,7 @@ global proc RRM_HeadPrompts(string $modName, int $RRM_Jaw, int $mirrorMod)
 							$lPrfx = `getAttr RRM_MAIN.lPrfx`;
 							$rPrfx = `getAttr RRM_MAIN.rPrfx`;
 						}
-					RRM_CreateProxyHead($modName, $RRM_Jaw, $mirrorMod, $lPrfx, $rPrfx);
+					RRM_CreateProxyHead($modName, $RRM_Jaw, $twistAxis, $mirrorMod, $lPrfx, $rPrfx);
 				}
 			}
 		}
@@ -6471,6 +6485,8 @@ global proc RRM_EditHead()
 	//GET INFO ON SELECTION
 	$crntSelection = `ls -sl`;
 
+	int $twistAxis = `radioButtonGrp -q -select RRM_HeadEditTwistAxis`;
+	$twistAxis = ($twistAxis - 1);
 	int $mirrorMod = 1;
 	string $prfx = $lPrfx;
 	string $oppPrfx = $rPrfx;
@@ -6481,6 +6497,7 @@ global proc RRM_EditHead()
 	
 	int $i;
 	
+	
 	//CHECK FOR PAIRING
 	if (!`objExists ("RRM_" + $modName + ".pair")`)
 	{
@@ -6488,9 +6505,21 @@ global proc RRM_EditHead()
 		$oppPrfx = "";
 		$mirrorMod = 0;
 	}
+	
+	if (`getAttr ("RRM_" + $prfx + $modName + "_Parent.twistAxis")` != $twistAxis)
+	{
+		lockNode -l off ("RRM_" + $prfx + $modName + "_Parent");
+		setAttr -l false ("RRM_" + $prfx + $modName + "_Parent.twistAxis");
+		setAttr ("RRM_" + $prfx + $modName + "_Parent.twistAxis") $twistAxis;
+		setAttr -l true ("RRM_" + $prfx + $modName + "_Parent.twistAxis");
+		lockNode -l on ("RRM_" + $prfx + $modName + "_Parent");		
+	}
+
+
 	while ($i <= $mirrorMod)
 	{
-		if (`objExists ("RRM_" + $prfx + $modName + "_Jaw")`)
+		if (`checkBox -q -v RRM_EditJaw` == 0 && `objExists ("RRM_" + $prfx + $modName + "_Jaw")`) 
+		//if (`objExists ("RRM_" + $prfx + $modName + "_Jaw")`)
 		{
 			//SET JAW ON IN PARENT NODE
 			lockNode -l off ("RRM_" + $prfx + $modName + "_Parent");
@@ -6517,7 +6546,7 @@ global proc RRM_EditHead()
 			lockNode -l off $jawHierarchy;
 			delete $jawHierarchy;
 		}
-		else
+		else if (`checkBox -q -v RRM_EditJaw` == 1 && !`objExists ("RRM_" + $prfx + $modName + "_Jaw")`)
 		{
 			//SET JAW ON IN PARENT NODE
 			lockNode -l off ("RRM_" + $prfx + $modName + "_Parent");
@@ -7853,7 +7882,8 @@ global proc RRM_Clone_Head(string $name, string $modName, string $attachNode, in
 	//GET NUMBER OF JOINTS
 	int $jaw = `getAttr ("RRM_" + $modName + ".jaw")`;
 	int $i = 0;
-	
+	int $twistAxis = 2;
+	string $twistString = "Y-axis";	
 	$lPrfx = "l_";
 	$rPrfx = "r_";
 	if (`objExists RRM_MAIN.lPrfx`)
@@ -7861,7 +7891,15 @@ global proc RRM_Clone_Head(string $name, string $modName, string $attachNode, in
 		$lPrfx = `getAttr RRM_MAIN.lPrfx`;
 		$rPrfx = `getAttr RRM_MAIN.rPrfx`;
 	}
-
+	if (`objExists ("RRM_" + $modName + ".twistAxis")`)
+	{
+		int $twistAxis = `getAttr ("RRM_" + $modName + ".twistAxis")`;
+		if ($twistAxis == 1)
+		{
+			$twistString = "X-axis";
+		}
+	}
+	
 	while ($i <= $mirrorMod)
 	{
 		//CREATE LOCATORS FOR LOCATIONS
@@ -7914,7 +7952,7 @@ global proc RRM_Clone_Head(string $name, string $modName, string $attachNode, in
 	
 	//GENERATE NEW HEAD
 	select ("RRM_" + $attachNode);
-	RRM_CreateProxyHead($name, $jaw, $mirrorMod, $lPrfx, $rPrfx);
+	RRM_CreateProxyHead($name, $jaw, $mirrorMod, $twistAxis, $lPrfx, $rPrfx);
 	$clonedParentNodes = `ls -sl`;
 	//RESET VARIABLES
 	$i = 0;
@@ -9964,7 +10002,13 @@ global proc RRM_SaveProxySetup(string $mayaFolder, string $result, string $type)
 		if ($modType == "head")
 		{
 			$jaw = `getAttr ($each + ".jaw")`;
-			fprint $fileID ("RRM_CreateProxyHead(\"" + $modName + "\"," + $jaw + "," + $mirror + ", \"" + $lPrfx + "\", \"" + $rPrfx + "\");\n");
+			$twistAxis = 2;
+			if (`objExists ($each + ".twistAxis")`)
+			{
+				$twistAxis = `getAttr ($each + ".twistAxis")`;
+				$twistAxis++;
+			}
+			fprint $fileID ("RRM_CreateProxyHead(\"" + $modName + "\"," + $jaw + "," + $twistAxis + "," + $mirror + ", \"" + $lPrfx + "\", \"" + $rPrfx + "\");\n");
 		}
 		if ($modType == "lookAt")
 		{
@@ -10776,7 +10820,7 @@ global proc RRM_GenerateRigRoot(string $modRigName, string $rigGrp, string $lPrf
 		{
 			circle -n ($modRigName + "ROOT_Ctrl") -nr 1 0 0 -r 4.6 -ch 0;
 			circle -n ($modRigName + "ROOT_Ctrl2") -nr 1 0 0 -sw 315 -r 4.8 -ch 0;
-			rotate -r -157.5 0 0 ($modRigName + "ROOT_Ctrl");
+			rotate -r -157.5 0 0 ($modRigName + "ROOT_Ctrl2");
 			makeIdentity -apply true -r 1 ($modRigName + "ROOT_Ctrl2");
 			curve -n ($modRigName + "ROOT_Ctrl3") -d 1 -p 0 -4.434622 -1.83688 -p 0 -4.92918 -1.836992 -p 0 -5.819856 0 -p 0 -4.92918 1.836992 -p 0 -4.434622 1.83688 -k 0 -k 1 -k 2 -k 3 -k 4 ;
 			rename `listRelatives -c ($modRigName + "ROOT_Ctrl3")` ($modRigName + "ROOT_Ctrl3Shape");
@@ -10977,7 +11021,7 @@ global proc RRM_GenerateRigRoot(string $modRigName, string $rigGrp, string $lPrf
 	//ADD VERSION NUMBER
 	addAttr -ln "versionNumber" -dt "string" ($modRigName + "MAIN_Ctrl");
 	setAttr -e -k 1 ($modRigName + "MAIN_Ctrl.versionNumber");
-	setAttr -type "string" ($modRigName + "MAIN_Ctrl.versionNumber") "2.0.9";
+	setAttr -type "string" ($modRigName + "MAIN_Ctrl.versionNumber") "2.1.6";
 	setAttr -e-l 1 ($modRigName + "MAIN_Ctrl.versionNumber");
 
 	addAttr -ln "leftPrefix" -dt "string" ($modRigName + "MAIN_Ctrl");
@@ -11697,7 +11741,6 @@ global proc RRM_GenerateRigSpline(string $modRigName, string $rigGrp, string $mo
 				parent $rightLctr[0] $prevRightLctr;
 				setAttr (($leftLctr[0] + ".scale"), 1, 1, 1); 
 				setAttr (($rightLctr[0] + ".scale"), 1, 1, 1);
-				//print ("splineSize is " + $splineSize);
 				if ($splineSize != 1)
 				{
 					$leftEnd  = `getAttr ($prevLeftLctr + ".translate")`;
@@ -11756,9 +11799,6 @@ global proc RRM_GenerateRigSpline(string $modRigName, string $rigGrp, string $mo
 			}
 			
 			$mag = `mag($pos1-$pos2)`;
-			//print "mag is ";
-			//print $mag;
-			//print "\n";
 			if ($i <= $splineSize)
 			{
 				if ($mag < .01)
@@ -12000,7 +12040,6 @@ global proc RRM_GenerateRigSpline(string $modRigName, string $rigGrp, string $mo
 		{
 			$curveGen = ($curveGen + " -k " + $i + " -k " + $i + " -k " + $i + ";");
 		}
-		//print ("\n" + $curveGen + "\n");
 		eval $curveGen;
 
 		rename `listRelatives -c ($ribbonLenCrv)` ($modCore + "_Length_CurveShape");
@@ -12019,14 +12058,15 @@ global proc RRM_GenerateRigSpline(string $modRigName, string $rigGrp, string $mo
 				$nPd = "_";
 			}
 			spaceLocator -n ($modCore + $nPd + $i + "CurveLctr");
+			group -n ($modCore + $nPd + $i + "CurveLctrTangentGrp");
 			group -n ($modCore + $nPd + $i + "CurveLctrGrp");
 
 			parentConstraint ($modCore + $nPd + $i + "F") ($modCore + $nPd + $i + "CurveLctrGrp");
 			connectAttr -f ($modRigName + "MAIN_Ctrl.scale") ($modCore + $nPd + $i + "CurveLctrGrp.scale");
 			parent ($modCore + $nPd + $i + "CurveLctrGrp") ($modCore + "Grp");
-			delete `parentConstraint ($modCore + $nPd + $i + "Fk_Ctrl") ($modCore + $nPd + $i + "CurveLctr")`;
 			tangentConstraint -weight 1 -aimVector 0 1 0 -upVector 0 0 1 -worldUpType "objectrotation"-worldUpVector 0 0 1
-			-worldUpObject ($modCore + $nPd + $i + "CurveLctrGrp") ($modCore + "_LengthCurve") ($modCore + $nPd + $i + "CurveLctr");
+			-worldUpObject ($modCore + $nPd + $i + "CurveLctrGrp") ($modCore + "_LengthCurve") ($modCore + $nPd + $i + "CurveLctrTangentGrp");
+			delete `parentConstraint ($modCore + $nPd + $i + "Fk_Ctrl") ($modCore + $nPd + $i + "CurveLctr")`;
 
 			$i++;
 		}
@@ -12877,6 +12917,7 @@ global proc RRM_ToonLimbs(string $modRigName, string $rigGrp, string $limbType, 
 				makeIdentity -apply true -t 1 -r 1 -s 1 ($modCore + $segEnd + "_Curve_Ctrl");
 	
 				group -n ($modCore + $segEnd + "_Curve_CtrlGrp") ($modCore + $segEnd + "_Curve_Ctrl");
+				setAttr ($modCore + $segEnd + "_Curve_CtrlGrp.rotateOrder") 1;
 				parent ($modCore + $segEnd + "_Curve_CtrlGrp") ($modCore + "_curveNodesGrp");
 				pointConstraint ($modCore + $segEnd + "Jnt") ($modCore + $segEnd + "_Curve_CtrlGrp");
 				delete `orientConstraint ($modCore + $segStart + "Jnt") ($modCore + $segEnd + "Jnt") ($modCore + $segEnd + "_Curve_CtrlGrp")`;
@@ -12901,6 +12942,7 @@ global proc RRM_ToonLimbs(string $modRigName, string $rigGrp, string $limbType, 
 				makeIdentity -apply true -t 1 -r 1 -s 1 ($modCore + $segStart + "_Curve_Ctrl");
 	
 				group -n ($modCore + $segStart + "_Curve_CtrlGrp") ($modCore + $segStart + "_Curve_Ctrl");
+				setAttr ($modCore + $segStart + "_Curve_CtrlGrp.rotateOrder") 1;
 				parent ($modCore + $segStart + "_Curve_CtrlGrp") ($modCore + "_curveNodesGrp");
 				pointConstraint ($modCore + $segStart + "Jnt") ($modCore + $segStart + "_Curve_CtrlGrp");
 				$topJnt = `listRelatives -p -type "joint" ($modCore + $segStart + "Jnt")`;
@@ -12926,6 +12968,7 @@ global proc RRM_ToonLimbs(string $modRigName, string $rigGrp, string $limbType, 
 				makeIdentity -apply true -t 1 -r 1 -s 1 ($modCore + $segStart + "_Curve_Ctrl");
 	
 				group -n ($modCore + $segStart + "_Curve_CtrlGrp") ($modCore + $segStart + "_Curve_Ctrl");
+				setAttr ($modCore + $segStart + "_Curve_CtrlGrp.rotateOrder") 1;
 				parent ($modCore + $segStart + "_Curve_CtrlGrp") ($modCore + "_curveNodesGrp");
 				pointConstraint ($modCore + $segStart + "Jnt") ($modCore + $segStart + "_Curve_CtrlGrp");
 				delete `orientConstraint ($modCore + $elbow1 + "Jnt") ($modCore + $segStart + "Jnt") ($modCore + $segStart + "_Curve_CtrlGrp")`;
@@ -13061,7 +13104,7 @@ global proc RRM_ToonLimbs(string $modRigName, string $rigGrp, string $limbType, 
 			joint -n ($modCore + $seg + $segStart + "_TwistStartJnt");
 			setAttr ($modCore + $seg + $segStart + "_TwistStartJnt.v") 0;
 			delete `parentConstraint ($modCore + $segStart + "Jnt") ($modCore + $seg + $segStart + "_TwistStartJnt")`;
-			if ($prfx == $rPrfx && $limbType == "arm")
+			if ($prfx == $rPrfx && $limbType == "arm" && $crntSide == "right")
 			{
 				rotate -r -os 0 180 0 ($modCore + $seg + $segStart + "_TwistStartJnt");
 			}
@@ -13447,6 +13490,7 @@ global proc RRM_ToonLimbs(string $modRigName, string $rigGrp, string $limbType, 
 			{
 				select -cl;
 				joint -n ($modCore + $segStart + "_CurveJnt");
+				setAttr ($modCore + $segStart + "_CurveJnt.rotateOrder") 1;
 				delete `parentConstraint ($modCore + $segStart + "Jnt") ($modCore + $segStart + "_CurveJnt")`;
 				makeIdentity -apply true -r 1 ($modCore + $segStart + "_CurveJnt");
 				if ($segInteger == 1)
@@ -13496,6 +13540,7 @@ global proc RRM_ToonLimbs(string $modRigName, string $rigGrp, string $limbType, 
 			{
 				select -cl;
 				joint -n ($modCore + $segEnd + "_CurveJnt");
+				setAttr ($modCore + $segEnd + "_CurveJnt.rotateOrder") 1;
 				delete `parentConstraint ($modCore + $segEnd + "Jnt") ($modCore + $segEnd + "_CurveJnt")`;
 				makeIdentity -apply true -r 1 ($modCore + $segEnd + "_CurveJnt");
 				if ($segInteger == 1)
@@ -13626,6 +13671,7 @@ global proc RRM_TwistLimbs(string $modRigName, string $rigGrp, string $limbType,
 		select -cl;
 		joint -n ($modCore + $shoulder + "_CurveJnt");
 		setAttr ($modCore + $shoulder + "_CurveJnt.radius") 2;
+		setAttr ($modCore + $shoulder + "_CurveJnt.rotateOrder") 1;
 		delete `parentConstraint ($modCore + $shoulder + "Jnt") ($modCore + $shoulder + "_CurveJnt")`;
 		parent ($modCore + $shoulder + "_CurveJnt") $parentNode;
 		makeIdentity -apply 1 -r 1 ($modCore + $shoulder + "_CurveJnt");
@@ -13635,6 +13681,7 @@ global proc RRM_TwistLimbs(string $modRigName, string $rigGrp, string $limbType,
 		select -cl;
 		joint -n ($modCore + $shoulder + "_CurveEndJnt");
 		setAttr ($modCore + $shoulder + "_CurveEndJnt.radius") 2;
+		setAttr ($modCore + $shoulder + "_CurveEndJnt.rotateOrder") 1;
 		delete `parentConstraint ($modCore + $elbow1 + "Jnt") ($modCore + $shoulder + "_CurveEndJnt")`;
 		parent ($modCore + $shoulder + "_CurveEndJnt") ($modCore + $shoulder + "_CurveJnt");
 		makeIdentity -apply 1 -r 1 ($modCore + $shoulder + "_CurveEndJnt"); 
@@ -13647,12 +13694,14 @@ global proc RRM_TwistLimbs(string $modRigName, string $rigGrp, string $limbType,
 		shadingNode -asUtility multiplyDivide -n ($modCore + $shoulder + "Curve_MD");
 		setAttr ($modCore + $shoulder + "Curve_MD.operation") 2;
 		setAttr ($modCore + $shoulder + "Curve_MD.input2X") `size $upperArmCurve`;
-		connectAttr -f ($modCore + $shoulder + "Jnt.rotateX") ($modCore + $shoulder + "Curve_MD.input1X");
+		//connectAttr -f ($modCore + $shoulder + "Jnt.rotateX") ($modCore + $shoulder + "Curve_MD.input1X");
+		connectAttr -f ($modCore + $shoulder + "_CurveJnt.rotateX") ($modCore + $shoulder + "Curve_MD.input1X");
 		
 		for ($each in $upperArmCurve)
 		{
 			select -cl;
 			joint -n ($modCore + "_Upper_Curve" + $i + "Jnt");
+			setAttr ($modCore + "_Upper_Curve" + $i + "Jnt.rotateOrder") 1;
 			delete `parentConstraint ("RRM_" + $prfx + $core + "_Upper" + $i) ($modCore + "_Upper_Curve" + $i + "Jnt")`;
 			if ($prev == 0)
 			{
@@ -13716,6 +13765,7 @@ global proc RRM_TwistLimbs(string $modRigName, string $rigGrp, string $limbType,
 		{
 			select -cl;
 			joint -n ($modCore + "_Middle_Curve" + $i + "Jnt");
+			setAttr ($modCore + "_Middle_Curve" + $i + "Jnt.rotateOrder") 1;
 			delete `parentConstraint ("RRM_" + $prfx + $core + "_Middle" + $i) ($modCore + "_Middle_Curve" + $i + "Jnt")`;
 			if ($prev == 0)
 			{
@@ -13753,6 +13803,7 @@ global proc RRM_TwistLimbs(string $modRigName, string $rigGrp, string $limbType,
 		{
 			select -cl;
 			joint -n ($modCore + "_Lower_Curve" + $i + "Jnt");
+			setAttr ($modCore + "_Lower_Curve" + $i + "Jnt.rotateOrder") 1;
 			delete `parentConstraint ("RRM_" + $prfx + $core + "_Lower" + $i) ($modCore + "_Lower_Curve" + $i + "Jnt")`;
 			if ($prev == 0)
 			{
@@ -14396,7 +14447,7 @@ global proc RRM_GenerateRigArm(string $modRigName, string $rigGrp, string $modul
 		$lPrfx = "";
 		$rPrfx = "";
 	}
-	else if (`objExists ("RRM_" + $rPrfx + $core + "_Parent.mirrorType")`)
+	if (`objExists ("RRM_" + $rPrfx + $core + "_Parent.mirrorType")`)
 	{
 		if (`getAttr ("RRM_" + $rPrfx + $core + "_Parent.mirrorType")` == 0)
 		{	
@@ -14413,7 +14464,7 @@ global proc RRM_GenerateRigArm(string $modRigName, string $rigGrp, string $modul
 		{
 			$prfx = "";
 			$oppPrfx = "";
-			$prfx = "";
+			$rPrfx = "";
 			$oppPrfx = "";
 			select $topNode;
 			
@@ -14427,7 +14478,7 @@ global proc RRM_GenerateRigArm(string $modRigName, string $rigGrp, string $modul
 		
 		if ($crntSide == "right" && `objExists ("RRM_" + $rPrfx + $core + "_Parent.mirrorType")`)
 		{
-			if (`getAttr ("RRM_" + $rPrfx + $core + "_Parent.mirrorType")` == 0)
+			if (`getAttr ("RRM_" + $prfx + $core + "_Parent.mirrorType")` == 0)
 			{	
 				$behaviorMultiplier = -1;
 			}
@@ -14612,10 +14663,6 @@ global proc RRM_GenerateRigArm(string $modRigName, string $rigGrp, string $modul
 		}
 		else
 		{
-			//spaceLocator -n ($modCore + "_StartLctr") -p 0 0 0;
-			//spaceLocator -n ($modCore + "_EndLctr") -p 0 0 0;
-			//parent ($modCore + "_EndLctr") ($modCore + "_StartLctr");
-
 			delete `pointConstraint ("RRM_" + $prfx + $core + "_Shoulder") ($modCore + "_StartLctr")`;
 			delete `aimConstraint -aimVector 1 0 0 -upVector 0 1 0 -worldUpType "objectrotation" -worldUpVector 0 1 0 -worldUpObject ($modRigName + "MAIN_Ctrl")
 			("RRM_" + $prfx + $core + "_Elbow1") ($modCore + "_StartLctr")`;
@@ -14639,14 +14686,6 @@ global proc RRM_GenerateRigArm(string $modRigName, string $rigGrp, string $modul
 		delete ($modCore + "_StartLctr");
 		
 		//CLAVICLE CONTROL
-		//circle -n ($modCore + "_Clavicle_Ctrl") -nr 0 1 0 -r 1 -ch 0;
-		//setAttr ($modCore + "_Clavicle_Ctrl.rotateOrder") 1;
-		//move -r ($multiplier * 1.35) 2 0 ($modCore + "_Clavicle_Ctrl.cv[3]") ($modCore + "_Clavicle_Ctrl.cv[7]") ;
-		//move -r ($multiplier * 0.5) 1.25 0 ($modCore + "_Clavicle_Ctrl.cv[2]") ($modCore + "_Clavicle_Ctrl.cv[4]") ($modCore + "_Clavicle_Ctrl.cv[0]") ($modCore + "_Clavicle_Ctrl.cv[6]") ;
-		//group -n ($modCore + "_Clavicle_CtrlGrp") ($modCore + "_Clavicle_Ctrl"); xform -os -piv 0 0 0;
-		//setAttr ($modCore + "_Clavicle_CtrlGrp.rotateOrder") 1;
-		//delete `parentConstraint ("RRM_" + $prfx + $core + "_Clavicle") ($modCore + "_Clavicle_CtrlGrp")`;
-
 		circle -n ($modCore + "_Clavicle_Ctrl") -c 0 0 0 -nr 1 0 0 -r 1 -sw 150 -ch 0;
 		circle -n ($modCore + "_Clavicle_Ctrl2") -c ($multiplier * 1) 0 0 -nr 1 0 0 -r 1 -sw 150 -ch 0;
 		rotate -r -os -75 0 0 ($modCore + "_Clavicle_Ctrl") ($modCore + "_Clavicle_Ctrl2");		
@@ -14664,27 +14703,36 @@ global proc RRM_GenerateRigArm(string $modRigName, string $rigGrp, string $modul
 		group -n ($modCore + "_Clavicle_CtrlGrp") ($modCore + "_Clavicle_Ctrl"); xform -os -piv 0 0 0;
 		setAttr ($modCore + "_Clavicle_CtrlGrp.rotateOrder") 1;
 		delete `parentConstraint ("RRM_" + $prfx + $core + "_Clavicle") ($modCore + "_Clavicle_CtrlGrp")`;
-    
+		
 		if ($crntSide == "right" && $behavior == 0)
 		{
-			$rz = `getAttr ($modCore + "_Clavicle_CtrlGrp.rz")`;
-			rotate -r -os 180 0 ($rz * -1) ($modCore + "_Clavicle_CtrlGrp");
-			rotate -r -os 180 0 ($rz * -1) ($modCore + "_Clavicle_Ctrl");
+			//$rz = `getAttr ($modCore + "_Clavicle_CtrlGrp.rz")`;
+			rotate -r -os 180 0 0 ($modCore + "_Clavicle_CtrlGrp");
+			rotate -r -os 180 0 0 ($modCore + "_Clavicle_Ctrl");
 			makeIdentity -apply true -r 1 ($modCore + "_Clavicle_Ctrl");
 		}
 			
 		setAttr (($modCore + "_Clavicle_CtrlGrp.scale"), (($ShoulderLength[0]) * 1), (($ArmLength/2) * .9), (($ArmLength/2) * .9));
 		
 		makeIdentity -apply true -t 0 -s 1 ($modCore + "_Clavicle_CtrlGrp");
-		
+
 		//SHOULDER FK CONTROL
 		RRM_BasicControl(($modCore + "_ShoulderFk_Ctrl"), "x", ($ArmLength/3), 1, ($elbowLength[0] * $multiplier));
+
 		rotate -r -90 0 0 ($modCore + "_ShoulderFk_Ctrl");
 		makeIdentity -apply true -r 1 ($modCore + "_ShoulderFk_Ctrl");
 		setAttr ($modCore + "_ShoulderFk_Ctrl.rotateOrder") 1;
 		group -n ($modCore + "_ShoulderFk_CtrlGrp") ($modCore + "_ShoulderFk_Ctrl"); xform -os -piv 0 0 0; 
 		group -n ($modCore + "_ShoulderFk_CtrlGrp2") ($modCore + "_ShoulderFk_CtrlGrp"); xform -os -piv 0 0 0; 
 		delete `parentConstraint ("RRM_" + $prfx + $core + "_Shoulder") ($modCore + "_ShoulderFk_CtrlGrp2")`;
+
+		//if ($crntSide == "right" && $behavior == 0 &&  !`objExists ($topNode + ".pair")`)
+		//{
+		//	$rz = `getAttr ($modCore + "_ShoulderFk_CtrlGrp.rz")`;
+		//	rotate -r -os 180 0 ($rz * -1) ($modCore + "_ShoulderFk_CtrlGrp");
+		//	rotate -r -os 180 0 ($rz * -1) ($modCore + "_ShoulderFk_Ctrl");
+		//	makeIdentity -apply true -r 1 ($modCore + "_ShoulderFk_Ctrl");
+		//}
 
 		float $upVector = 1;
 		float $elbowLocCheck;
@@ -14725,10 +14773,11 @@ global proc RRM_GenerateRigArm(string $modRigName, string $rigGrp, string $modul
 		{
 			RRM_BasicControl(($modCore + "_ElbowFk_Ctrl"), "x", ($ArmLength/3), 1, ($wristLength[0] * $multiplier));
 			rotate -r ($multiplier * -90) 0 0 ($modCore + "_ElbowFk_Ctrl");
-			if ($crntSide == "right" && $behavior == 1)
+			if ($crntSide == "right" && $behavior == 1 && `objExists ($topNode + ".pair")`)
 			{
 				rotate -r -os 180 0 0 ($modCore + "_ElbowFk_Ctrl");
 			}
+
 			makeIdentity -apply true -r 1 ($modCore + "_ElbowFk_Ctrl");
 			group -n ($modCore + "_ElbowFk_CtrlGrp") ($modCore + "_ElbowFk_Ctrl"); xform -os -piv 0 0 0;
 			
@@ -14736,12 +14785,17 @@ global proc RRM_GenerateRigArm(string $modRigName, string $rigGrp, string $modul
 			delete `aimConstraint -aimVector ($multiplier * 1) 0 0 -upVector 0 $behaviorMultiplier 0 -worldUpType "objectrotation"
 			-worldUpVector 0 $upVector 0 -worldUpObject ("RRM_" + $prfx + $core + "_Elbow")
 			("RRM_" + $prfx + $core + "_Wrist") ($modCore + "_ElbowFk_CtrlGrp")`;
+			
+			//if ($crntSide == "right" && $behavior == 0 &&  !`objExists ($topNode + ".pair")`)
+			//{
+			//	rotate -r -os 180 0 0 ($modCore + "_ElbowFk_CtrlGrp");
+			//}
 		}
 		else
 		{
 			RRM_BasicControl(($modCore + "_Elbow1Fk_Ctrl"), "x", ($ArmLength/3), 1, ($elbow2Length[0] * $multiplier));
 			rotate -r ($multiplier * -90) 0 0 ($modCore + "_Elbow1Fk_Ctrl");
-			if ($crntSide == "right" && $behavior == 1)
+			if ($crntSide == "right" && $behavior == 1 && `objExists ($topNode + ".pair")`)
 			{
 				rotate -r -os 180 0 0 ($modCore + "_Elbow1Fk_Ctrl");
 			}
@@ -14753,15 +14807,19 @@ global proc RRM_GenerateRigArm(string $modRigName, string $rigGrp, string $modul
 			-worldUpVector 0 $upVector 0 -worldUpObject ("RRM_" + $prfx + $core + "_Elbow1")
 			("RRM_" + $prfx + $core + "_Elbow2") ($modCore + "_Elbow1Fk_CtrlGrp")`;
 
-			scale -r-os 0.8 0.8 0.8 ($modCore + "_Elbow1Fk_CtrlGrp");
+			//if ($crntSide == "right" && $behavior == 0 &&  !`objExists ($topNode + ".pair")`)
+			//{
+			//	rotate -r -os 180 0 0 ($modCore + "_Elbow1Fk_CtrlGrp");
+			//}
+			scale -r -os 0.8 0.8 0.8 ($modCore + "_Elbow1Fk_CtrlGrp");
 			makeIdentity -apply true -s 1 ($modCore + "_Elbow1Fk_CtrlGrp");
 			
 			RRM_BasicControl(($modCore + "_Elbow2Fk_Ctrl"), "x", ($ArmLength/3), 1, ($wristLength[0] * $multiplier));
 			rotate -r ($multiplier * -90) 0 0 ($modCore + "_Elbow2Fk_Ctrl");
-			if ($crntSide == "right" && $behavior == 1)
-			{
-				rotate -r -os 180 0 0 ($modCore + "_Elbow2Fk_Ctrl");
-			}
+			//if ($crntSide == "right" && $behavior == 1 && `objExists ($topNode + ".pair")`)
+			//{
+			//	rotate -r -os 180 0 0 ($modCore + "_Elbow2Fk_Ctrl");
+			//}
 			makeIdentity -apply true -r 1 ($modCore + "_Elbow2Fk_Ctrl");
 			group -n ($modCore + "_Elbow2Fk_CtrlGrp") ($modCore + "_Elbow2Fk_Ctrl"); xform -os -piv 0 0 0;
 
@@ -14769,6 +14827,11 @@ global proc RRM_GenerateRigArm(string $modRigName, string $rigGrp, string $modul
 			delete `aimConstraint -aimVector $multiplier 0 0 -upVector 0 1 0 -worldUpType "objectrotation"
 			-worldUpVector 0 1 0 -worldUpObject ($modCore + "_Elbow1Fk_Ctrl")
 			("RRM_" + $prfx + $core + "_Wrist") ($modCore + "_Elbow2Fk_CtrlGrp")`;
+
+			//if ($crntSide == "right" && $behavior == 0 &&  !`objExists ($topNode + ".pair")`)
+			//{
+			//	rotate -r -os 180 0 0 ($modCore + "_Elbow2Fk_CtrlGrp");
+			//}
 		}
 
 		//WRIST FK CONTROL
@@ -14801,7 +14864,7 @@ global proc RRM_GenerateRigArm(string $modRigName, string $rigGrp, string $modul
 		
 		select -cl;
 		joint -n ($modCore + "_ShoulderJnt");
-		//setAttr ($modCore + "_ShoulderJnt.rotateOrder") 1;
+		setAttr ($modCore + "_ShoulderJnt.rotateOrder") 1;
 		delete `parentConstraint ($modCore + "_ShoulderFk_Ctrl") ($modCore + "_ShoulderJnt")`;
 		
 		if (!`objExists ("RRM_" + $prfx + $core + "_Elbow1")`)
@@ -15859,10 +15922,6 @@ global proc RRM_GenerateRigArm(string $modRigName, string $rigGrp, string $modul
 		//($modCore + "_WristJntFk")
 		($modCore + "_ScaleGrp");
 			
-		//if (`objExists ("RRM_" + $prfx + $core + "_Elbow1")`)
-		//{
-		//	parent ($modCore + "_Elbow1JntFkGrp2") ($modCore + "_Elbow2JntFkGrp2") ($modCore + "_LowerArmIkHandle") ($modCore + "_ScaleGrp");
-		//}
 
 		//CREATE CONSTRAINT FOR WRIST Ik_CtrlGrp
 		//CHECK IF ATTACHED TO ROOT
@@ -15944,22 +16003,6 @@ global proc RRM_GenerateRigArm(string $modRigName, string $rigGrp, string $modul
 			parent ($modCore + "_ElbowIkToFkAimLctr") ($modCore + "_ElbowIk_CtrlGrp");
 			makeIdentity -apply true -t 1 -r 1 -s 1 ($modCore + "_ElbowIkToFkAimLctr");
 			parentConstraint -mo ($modCore + "_ElbowFk_Ctrl") ($modCore + "_ShoulderFk_Ctrl") ($modCore + "_ElbowIkToFkAimLctr");
-
-			////WRIST Fk TO Ik LOCATOR
-			//spaceLocator -n ($modCore + "_WristFkToIkLctr");
-			//setAttr ($modCore + "_WristFkToIkLctr.rotateOrder") 1;
-			//delete `parentConstraint ($modCore + "_WristFk_CtrlGrp") ($modCore + "_WristFkToIkLctr")`;
-			//parent ($modCore + "_WristFkToIkLctr") ($modCore + "_WristFk_CtrlGrp");
-			//orientConstraint -mo ($modCore + "_WristIk_Ctrl") ($modCore + "_WristFkToIkLctr");
-			//setAttr ($modCore + "_WristFkToIkLctr_orientConstraint1.interpType") 2;
-
-			
-			////SHOULDER Fk TO Ik LOCATOR
-			//spaceLocator -n ($modCore + "_ShoulderFkToIkOrientLctr");
-			//setAttr ($modCore + "_ShoulderFkToIkOrientLctr.rotateOrder") 1;
-			//delete `parentConstraint ($modCore + "_ShoulderJnt") ($modCore + "_ShoulderFkToIkOrientLctr")`;
-			//parent ($modCore + "_ShoulderFkToIkOrientLctr") ($modCore + "_ShoulderFk_CtrlGrp");
-			//orientConstraint -mo ($modCore + "_ShoulderJntIk") ($modCore + "_ShoulderFkToIkOrientLctr");
 		}
 		else
 		{
@@ -18206,7 +18249,6 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 		{
 			if (`getAttr ("RRM_" + $rPrfx + $core + "_Parent.mirrorType")` == 0)
 			{	
-				//print "behavior\n";
 				$behaviorMultiplier = -1;
 			}
 		}
@@ -18544,7 +18586,7 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 			setAttr -e -k 1 ($modCore + $nPdCh + $crntCh + "_Ctrl.curl");
 			
 
-			if (`size $fkChains` > 1 && $fKJointSize > 1)
+			if (`size $fkChains`)
 			{
 				addAttr -ln "spread1" -at double -dv 0 ($modCore + $nPdCh + $crntCh + "_Ctrl");
 				setAttr -e -k 1 ($modCore + $nPdCh + $crntCh + "_Ctrl.spread1");
@@ -18614,11 +18656,8 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 			setAttr -l 1 -k 0 ($modCore + $nPdCh + $crntCh + "_Ctrl.sz");
 			setAttr -l 1 -k 0 ($modCore + $nPdCh + $crntCh + "_Ctrl.v");
 
-
-
 			for ($crntFkJoint in $fKJoints)
 			{
-				//print $crntFkJoint;
 				string $nPd = "";
 				if ($crntJnt < 10)
 				{
@@ -18636,7 +18675,6 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 				{
 					$nPdPrev = "0";
 				}
-
 
 				select -cl;
 				joint -n ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "Jnt");
@@ -18782,21 +18820,19 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 							$length = `mag <<$dif[0],$dif[1],$dif[2]>>`;
 
 							RRM_BasicControl(($modCore + $nPdCh + $fKChainSize + "_" + $nPd + $crntJnt + "_Ctrl"), "x", 1, 1, $length);
-							//circle -n ($modCore + $nPdCh + $fKChainSize + "_" + $nPd + $crntJnt + "_Ctrl") -nr 1 0 0 -r 1 -ch 0;
 						}
 						else
 						{
 							RRM_BasicControl(($modCore + $nPdCh + $fKChainSize + "_" + $nPd + $crntJnt + "_Ctrl"), "x", 1, 0, 1);
-							//circle -n ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Ctrl") -nr 1 0 0 -r 1 -ch 0;							
 						}
 					}
 					else
 					{
 						if ($crntJnt < $fKJointSize)
 						{
-							$child = `listRelatives -c -type "transform"  ("RRM_" + $prfx + $core + $fKChainSize + "_" + $nPd + $crntJnt)`;
+							$child = `listRelatives -c -type "transform"  ("RRM_" + $prfx + $core + "_" + $fKChainSize + "_" + $nPd + $crntJnt)`;
 							//GET DISTANCE bETWEEN FOR LENGTH
-							$loc1 = `xform -q -ws -rp  ("RRM_" + $prfx + $core + $fKChainSize + "_" + $nPd + $crntJnt)`;
+							$loc1 = `xform -q -ws -rp  ("RRM_" + $prfx + $core + "_" + $fKChainSize + "_" + $nPd + $crntJnt)`;
 							$loc2 = `xform -q -ws -rp $child[0]`;
 
 							float $dif[];
@@ -18805,19 +18841,16 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 							$dif[2] = $loc1[2] - $loc2[2];
 							$length = `mag <<$dif[0],$dif[1],$dif[2]>>`;
 
-							RRM_BasicControl(($modCore + $fKChainSize + "_" + $nPd + $crntJnt + "_Ctrl"), "x", 1, 1, $length);
-							//circle -n ($modCore + $fKChainSize + "_" + $nPd + $crntJnt + "_Ctrl") -nr 1 0 0 -r 1 -ch 0;
+							RRM_BasicControl(($modCore + "_" + $fKChainSize + "_" + $nPd + $crntJnt + "_Ctrl"), "x", 1, 1, $length);
 						}
 						else
 						{
-							RRM_BasicControl(($modCore + $fKChainSize + "_" + $nPd + $crntJnt + "_Ctrl"), "x", 1, 0, 1);
-							//circle -n ($modCore + $crntCh + "_" + $nPd + $crntJnt + "_Ctrl") -nr 1 0 0 -r 1 -ch 0;							
+							RRM_BasicControl(($modCore + "_" + $fKChainSize + "_" + $nPd + $crntJnt + "_Ctrl"), "x", 1, 0, 1);
 						}
 					}
 				}
 				rotate -r -os -90 0 0 ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Ctrl");
 				makeIdentity -apply true -r 1 ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Ctrl");
-				//scale -r 1 1 0.667 ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Ctrl.cv[3]") ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Ctrl.cv[7]") ;
 	
 				scale -r 1 ($controllerSize * 3) ($controllerSize * 0.8) ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Ctrl");
 				makeIdentity -apply true -s 1 ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Ctrl");
@@ -18845,7 +18878,6 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 						//SPLINE CONTROL
 						if ($crntCh != $fKChainSize || $fKChainSize == 1)
 						{
-
 							curve -n ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl") -d 1 -p -0.7 3.4 0 -p 0.7 3.4 0 -p 0.7 2.6 0 -p -0.7 2.6 0 -p -0.7 3.4 0 -k 0 -k 1 -k 2 -k 3 -k 4 ;
                             rename `listRelatives ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl")` ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_CtrlShape");
 							
@@ -18854,17 +18886,6 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 							parent -r -s ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl1Shape") ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl");
 							//setAttr ("_Spline_Ctrl1Shape.template") 1;
 							delete ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl1");
-
-
-							//circle -n ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl") -nr 0 0 1 -r 1 -ch 0;
-							//scale -r 0.25 0.9 0.9 ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl.cv[3]") ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl.cv[7]") ;
-							//
-							//move -r -os -wd 0 3 0 ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl.cv[0:7]");
-							//curve -n ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl1") -d 1 -p 0 0 0 -p 0 2 0 -k 0 -k 1 ;
-							//rename `listRelatives -c ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl1")` ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl1Shape");
-							//parent -r -s ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl1Shape") ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl");
-							//setAttr ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl1Shape.template") 1;
-							//delete ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl1");
 
 							scale -r ($controllerSize * $multiplier) ($controllerSize * $multiplier) 1 ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl");
 							if ($crntSide == "right" && $behavior == 0)
@@ -18881,7 +18902,7 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 							}
 							else
 							{
-								duplicate -n ($modCore + $fKChainSize + "_" + $nPd + $crntJnt + "_Spline_Ctrl") ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl");
+								duplicate -n ($modCore + "_" + $fKChainSize + "_" + $nPd + $crntJnt + "_Spline_Ctrl") ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl");
 							}
 						}
 
@@ -18957,8 +18978,8 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 						}
 						else
 						{
-							connectAttr -f ($modCore + $fKChainSize + "_" + $nPd + $crntJnt + $type + "_Ctrl.translate") ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Translate" + $type + "_Spread_Blnd.color1");
-							connectAttr -f ($modCore + $fKChainSize + "_" + $nPd + $crntJnt + $type + "_Ctrl.rotate") ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Rotate" + $type + "_Spread_Blnd.color1");
+							connectAttr -f ($modCore + "_" + $fKChainSize + "_" + $nPd + $crntJnt + $type + "_Ctrl.translate") ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Translate" + $type + "_Spread_Blnd.color1");
+							connectAttr -f ($modCore + "_" + $fKChainSize + "_" + $nPd + $crntJnt + $type + "_Ctrl.rotate") ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Rotate" + $type + "_Spread_Blnd.color1");
 							//connectAttr -f ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Translate" + $type + "_Spread_Blnd.output") ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Translate" + $type + "_Spread_MD.input2")
 						}
 
@@ -19175,7 +19196,7 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 							//ORIENT SPLINE CONTROLS
 							delete `parentConstraint ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_CtrlGrp") ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_CtrlGrp")`;
 							parentConstraint -mo ($modRigName + "MAIN_Inner_Ctrl") ($modCore + "_ScaleGrp") ($modCore + $nPdCh + $crntCh + "_" + $nPdPrev + $previousJnt + "_Spline_Ctrl") ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_CtrlGrp");
-	
+							setAttr  ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_CtrlGrp_parentConstraint1." + $modRigName + "MAIN_Inner_CtrlW0") 0.99;
 							if ($crntJnt != 1)
 							{
 								//ADD ATTRIBUTES TO THE CONTROLS
@@ -19210,8 +19231,14 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 							if ($crntCh == 1 || $crntCh == $fKChainSize)
 							{
 								parentConstraint -mo ($modRigName + "MAIN_Inner_Ctrl") ($modCore + "_ScaleGrp") ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_CtrlGrp");
+								setAttr ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_CtrlGrp_parentConstraint1." + $modRigName + "MAIN_Inner_CtrlW0") 0.99;
 							}
+							setAttr (($modCore + $nPdCh + $crntCh + "JntIkGrp.rotate"), 0, 0, 0);
 							parentConstraint -mo ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl") ($modCore + $nPdCh + $crntCh + "JntIkGrp");
+							if (`objExists "r_toeFwd_01JntIkGrp"`)
+							{
+								select "break";
+							}
 		
 							//ADD ATTRIBUTES TO THE FIRST CONTROL
 							addAttr -ln "localSpace" -at double -min 0 -max 1 -dv 1 ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl");
@@ -19916,7 +19943,9 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 global proc RRM_GenerateRigHead(string $modRigName, string $rigGrp, string $moduleName, string $topNode, string $lPrfx, string $rPrfx, int $ea)
 {
 	//GET MOD TYPE
-	$modType = `getAttr ($topNode + ".parent")`;  
+	$modType = `getAttr ($topNode + ".parent")`;
+	
+	
 
 	//INTEGER FOR LOOP
 	$mirrorInt = 2;
@@ -19929,6 +19958,11 @@ global proc RRM_GenerateRigHead(string $modRigName, string $rigGrp, string $modu
 	float $behavior = 1;
 	float $behaviorMultiplier = 1;
 
+	$twistAxis = 1;
+	if (`objExists ($topNode + ".twistAxis")`)
+	{
+		$twistAxis = `getAttr ($topNode + ".twistAxis")`;
+	}
 	if (`objExists ($topNode + ".pair")`)
 	{
 		$prfx = $lPrfx;
@@ -20081,17 +20115,38 @@ global proc RRM_GenerateRigHead(string $modRigName, string $rigGrp, string $modu
 		group -n ($modCore + "_Master_CtrlGrp") ($modCore + "_Master_Ctrl");
 		parent ($modCore + "_Master_CtrlGrp") ($modCore + "_ScaleGrp");
 		delete `parentConstraint ("RRM_" + $prfx + $core + "_Parent") ($modCore + "_Master_CtrlGrp")`;
-		if ($crntSide == "right" && $behavior == 0)
+		if ($twistAxis == 0)
 		{
-			$rz = `getAttr ($modCore + "_Master_CtrlGrp.rz")`;
-			rotate -r -os 180 0 ($rz * -1) ($modCore + "_Master_CtrlGrp");
-			rotate -r -os -180 0 0 ($modCore + "_Master_Ctrl");
+			rotate -r -os -90 0 90 ($modCore + "_Master_CtrlGrp");
+			rotate -r -os 0 90 -90 ($modCore + "_Master_Ctrl");
+			makeIdentity -apply true-r 1 ($modCore + "_Master_Ctrl");
+			move -r -os -wd ($scale * 1.3) 0 0 ($modCore + "_Master_Ctrl.cv[0:24]");
+			if ($crntSide == "right" && $behavior == 0)
+			{
+				print ($modCore + " behaviour is on on x\n");
+				$rz = `getAttr ($modCore + "_Master_CtrlGrp.rz")`;
+				//rotate -r -os 180 0 ($rz * -1) ($modCore + "_Master_CtrlGrp");
+				rotate -r -os 0 0 180 ($modCore + "_Master_CtrlGrp");
+				rotate -r -os 0 0 -180 ($modCore + "_Master_Ctrl");
+			}
+		}
+		else
+		{
+			move -r -os -wd 0 ($scale * 1.3) 0 ($modCore + "_Master_Ctrl.cv[0:24]");		
+		
+			if ($crntSide == "right" && $behavior == 0)
+			{
+				print ($modCore + " behaviour is on on y\n");
+				$rz = `getAttr ($modCore + "_Master_CtrlGrp.rz")`;
+				rotate -r -os 180 0 ($rz * -1) ($modCore + "_Master_CtrlGrp");
+				rotate -r -os -180 0 0 ($modCore + "_Master_Ctrl");
+			}
 		}
 		//makeIdentity -apply false -t 1 -r 1 ($modCore + "_Master_CtrlGrp");
-		move -r -os -wd 0 ($scale * 1.3) 0 ($modCore + "_Master_Ctrl.cv[0:24]");
+		//move -r -os -wd 0 ($scale * 1.3) 0 ($modCore + "_Master_Ctrl.cv[0:24]");
 		makeIdentity -apply true -t 1 -r 1 -s 1 ($modCore + "_Master_Ctrl");
 		parentConstraint -mo ($modCore + "_Module") ($modCore + "_Master_CtrlGrp");
-		 
+		
 		//PARENT ORIENT
 		$parentOrient = ($modCore + "_Master_Ctrl");
 		RRM_ParentOrient($modRigName, $modCore, $modAttachNode, $parentOrient);
@@ -20156,6 +20211,7 @@ global proc RRM_GenerateRigHead(string $modRigName, string $rigGrp, string $modu
 		rotate -r -os  -90 0 90 ($modCore + "_TopJnt");
 		
 		parent ($modCore + "_TopJnt") ($modCore + "_Master_CtrlScaleGrp");
+		makeIdentity -apply true -r 1 ($modCore + "_TopJnt");
 		
 		//SET JAW AND END NODES TO SCALE WITH MASTER CTRL
 		scaleConstraint ($modCore + "_Master_Ctrl") ($modCore + "_Master_CtrlScaleGrp");
@@ -20507,7 +20563,7 @@ global proc RRM_GenerateRigLookAt(string $modRigName, string $rigGrp, string $mo
 		{
 			addAttr -ln "modCoreName" -dt "string" $crntModControl;
 			setAttr -e -k 1 ($crntModControl + ".modCoreName");
-			setAttr -type "string" ($crntModControl + ".modCoreName") ("" + $prfx + $core);
+			setAttr -type "string" ($crntModControl + ".modCoreName") ($prfx + $core);
 			setAttr -e-l 1 ($crntModControl + ".modCoreName");
 			
 			//ADD MODULE TYPE
@@ -20556,9 +20612,11 @@ global proc RRM_GenerateRigLookAt(string $modRigName, string $rigGrp, string $mo
 	makeIdentity -apply true -r 1 -s 1 ($modRigName + $core + "_LookAt_CtrlGrp") ;
 	
 	//MOVE INTO POSITION
-	select ($modRigName + "*" + $core + "_??_Ctrl");
-	select -d ($modRigName + $core + "_LookAt_Ctrl");
-	$eyeControls = `ls -sl`;
+	$eyeControls = `ls ($modRigName + $prfx + $core + "_??_Ctrl") ($modRigName + $oppPrfx + $core + "_??_Ctrl")`;
+	if (`size $eyeControls` == 0)
+	{
+		$eyeControls = `ls ($modRigName + $core + "_??_Ctrl")`;
+	}
 	$eyeControlsGrp = `listRelatives -p $eyeControls`;
 	
 	delete `pointConstraint $eyeControls ($modRigName + $core + "_LookAt_CtrlGrp")`;
@@ -20567,15 +20625,11 @@ global proc RRM_GenerateRigLookAt(string $modRigName, string $rigGrp, string $mo
 	//AIM CONSTRAINT
 	$eyeControlsGrp2 = `ls ($modRigName + "*" + $core + "_??Grp2")`;
 	
-	//aimConstraint -aimVector 0 0 -1 -upVector 0 1 0 -worldUpType "none"
-	//$eyeControlsGrp2 ($modRigName + $core + "_LookAt_Ctrl");
-	
 	setAttr -l 1 -k 0 ($modRigName + $core + "_LookAt_Ctrl.rx");
 	setAttr -l 1 -k 0 ($modRigName + $core + "_LookAt_Ctrl.ry");
 	setAttr -l 1 -k 0 ($modRigName + $core + "_LookAt_Ctrl.rz");
 	setAttr -l 1 -k 0 ($modRigName + $core + "_LookAt_Ctrl.v");	
 	
-	string $each;
 	for ($each in $eyeControlsGrp)
 	{
 		parentConstraint -mo ($modRigName + $core + "_LookAt_Ctrl") $each;
@@ -22205,6 +22259,8 @@ global proc RRM_MirrorAttributes(string $modRigName, string $rigGrp, string $mod
 				addAttr -ln "leftControl" -dt "string" $rControls[$i];
 				setAttr -e -k 1 ($rControls[$i]  + ".leftControl");
 				connectAttr -f ($rControls[$i] + ".leftControl") ($lControls[$i] + ".rightControl");
+				setAttr -l 1 ($rControls[$i] + ".leftControl");
+				setAttr -l 1 ($lControls[$i] + ".rightControl");
 			}			
 			$i++;
 		}
@@ -22687,7 +22743,6 @@ global proc RRM_SingleHierarchyInterface(string $modRigName, string $rigGrp, int
 					//CREATE TEXT CURVE
 				    $textGen = `textCurves -t $pJnt`;
 				    $text = `listRelatives -ad $textGen`;
-				    //print $text;
 				    rename $text[1] ($modRigName + "Root_Prop_0" + $pJnt + "_Ctrl7");
 				    rename `listRelatives -c ($modRigName + "Root_Prop_0" + $pJnt + "_Ctrl7")` ($modRigName + "Root_Prop_0" + $pJnt + "_Ctrl7Shape");
 				    xform -cp ($modRigName + "Root_Prop_0" + $pJnt + "_Ctrl7");
@@ -23141,8 +23196,6 @@ global proc RRM_GenerateRigPrompts(int $useName, string $modRigName, int $ea)
 			{
 				if ( 0 < `tokenize $control "|" $tokens` )
 				{
-					//print ( "Window for Node Editor: " + $tokens[0] + "\n" );
-				 
 					string $NodeEditorUI = `confirmDialog
 						-title "Close Node Editor Before Proceeding?"
 						-message "The Node Editor is open.\nGenerating a rig with the node editor opened will cause the rig to take much longer to RRM_Generate \n"
@@ -23325,11 +23378,8 @@ global proc RRM_DeleteProxyRig()
 global proc RRM_SelectStandardJoints(string $modRigName, string $rigGrp, string $modifier)
 {
 	$sel = `ls -sl`;
-	//select ($modRigName + "*Jnt");
 	select -cl;
 	$allJoints = `listRelatives -ad -type "joint" $rigGrp`;
-	//print $allJoints;
-	//string $joints[];
 	string $j;
 	for ($j in $allJoints)
 	{
@@ -23417,7 +23467,6 @@ global proc RRM_SelectJoints(string $rigGrp)
 {
 	$modifier = `getModifiers`;
 	$modRigName = `getAttr ($rigGrp + ".modRigConnection")`;
-	//print ("modRigName is " + $modRigName + "\n");
 	if (`objExists ($modRigName + "ROOTJnt.singleHierarchy")`)
 	{
 		string $returnVal_Skin = `confirmDialog
@@ -23671,36 +23720,19 @@ global proc RRM_RebuildRig(int $saveSkinning, int $saveControlShapes, int $ea)
 					if (`objExists ($modRigName + "ROOTJnt.singleHierarchy")`)
 					{
 						$connections = `listConnections -s 1 -d 0 ($modRigName + "ROOTJnt.singleHierarchy")`;
-						//print $connections;
 						if (`size $connections` > 0)
 						{
-							//string $sHJnts[];
-							//$jointParent = `listRelatives -p $connections[0]`;
-							//if (`nodeType $jointParent[0]` == "joint")
-							//{
-							//	$sHJnts = `listRelatives -ad $jointParent[0]`;
-							//	$sHJnts = `ls $jointParent[0] $sHJnts`;
-							//}
-							//else
-							//{
-							//	$sHJnts = `listRelatives -ad $connections[0]`;
-							//	$sHJnts = `ls $connections[0] $sHJnts`;
-							//}
 							$attr = `getAttr ($connections[0] + ".origName")`;
 							$prfAngle = `getAttr ($connections[0]  + ".preferredAngle")`;
 							$origName[$iOR] = ($origName[$iOR] + "if (`objExists (\"" + $attr + "\")`){rename \"" + $attr + "\" \"" + $connections[0] + "\";");
 							$origName[$iOR] = ($origName[$iOR] + " setAttr ((\"" + $connections[0] + ".preferredAngle\"), " + $prfAngle[0] + ", " + $prfAngle[1] + ", " + $prfAngle[2] + ");}");
 							$iOR++;
 							$sHJnts = `listRelatives -ad $connections[0]`;
-							//	$sHJnts = `ls $connections[0] $sHJnts`;
 
-							//print $sHJnts;
 							for ($jnt in $sHJnts)
 							{
 								if (`objExists ($jnt + ".origName")`)
 								{
-									//print "attrExists\n";
-									//print ($jnt + ".origName\n");
 									$attr = `getAttr ($jnt + ".origName")`;
 									$prfAngle = `getAttr ($jnt + ".preferredAngle")`;
 									$origName[$iOR] = ($origName[$iOR] + "if (`objExists (\"" + $attr + "\")`){rename \"" + $attr + "\" \"" + $jnt + "\";");
@@ -23894,8 +23926,6 @@ global proc RRM_RebuildRig(int $saveSkinning, int $saveControlShapes, int $ea)
 								$skinNum++;
 							}
 						}
-						//print $skinningCommand;
-						//select "break";
 					}
 					////////////////////////////////////////////////////////////////////////////
 					//SAVE REST POSE////////////////////////////////////////////////////////////////////////////
@@ -24111,21 +24141,16 @@ global proc RRM_RebuildRig(int $saveSkinning, int $saveControlShapes, int $ea)
 							}
 							if ($ctrl == "ROOT_Ctrl")
 							{}
-							//print ($rebuildShapes[$iRS] + "\n");
-							//select "break";
 							progressBar -edit -step 1 $gMainProgressBar;
 						}
 						progressBar -edit -endProgress $gMainProgressBar;
 					}
-					//print $rebuildShapes;
-					//select "break";
 
 					
 					//DELETE RIG
 					RRM_DeleteRig($modRigName, $rigGrp, 0);
 					
 					//REBUILD RIG
-
 					print "\nRebuilding Rig...\n";
 					
 					$lPrfx = "l_";
@@ -24237,7 +24262,8 @@ global proc RRM_RebuildRig(int $saveSkinning, int $saveControlShapes, int $ea)
 					//print ($pos + "\n");;
 					eval $pose[0];
 					//RRM_SavePose($modRigName);
-
+					
+					select ($modRigName + "MAIN_Ctrl");
 					print ("\nSuccess! \"" + $rigGrp + "\" has been rebuilt.\n");
 				}
 			}
@@ -24404,105 +24430,7 @@ global proc RRM_SetWorldSpaceRotation(string $xDir, string $xPosNeg, string $yDi
 		warning "No transforms selected.";
 	}
 }
-/*
-global proc RRM_SetDefaultPose(string $all)
-{
-	string $selection[] = `ls -sl -type "transform"`;
-	if (`size $selection` > 0)
-	{
 
-		if (`objExists ($selection[0] + ".modRigConnection")`)
-		{
-			$modRigName = `getAttr ($selection[0] + ".modRigConnection")`;
-			$rigGrp = `listConnections -s 1 -d 0 ($selection[0] + ".modRigConnection")`;
-			$transforms = `ls -sl`;
-			if ($all == 1)
-			{
-				$shapes = `listRelatives -ad -type "nurbsCurve" -f $rigGrp[0]`;
-				$transforms = `listRelatives -p $shapes`;
-			}
-			for ($each in $transforms)
-			{
-				if (`objExists ($each + ".modControlName")` && `objExists ($each + "_RestPoseGrp")`)
-				{
-					//print $each;
-					//print `getAttr  -l ($each + ".tx")`;
-					if (`getAttr -l ($each + ".tx")` == 0 && `getAttr -l ($each + ".ty")` == 0 && `getAttr -l ($each + ".tz")` == 0)
-					{
-						$pos = `xform -q -ws -t $each`;
-						xform -ws -t $pos[0] $pos[1] $pos[2] ($each + "_RestPoseGrp");
-						setAttr ($each + "_RestPoseGrp.TX") (`getAttr ($each + "_RestPoseGrp.tx")`);
-						setAttr ($each + "_RestPoseGrp.TY") (`getAttr ($each + "_RestPoseGrp.ty")`);
-						setAttr ($each + "_RestPoseGrp.TZ") (`getAttr ($each + "_RestPoseGrp.tz")`);
-						setAttr (($each + ".translate"), 0, 0, 0);
-					}					
-					if (`getAttr -l ($each + ".rx")` == 0)
-					{
-						setAttr ($each + "_RestPoseGrp.rx") (`getAttr ($each + ".rx")` + `getAttr ($each + "_RestPoseGrp.rx")`);
-						//setAttr ($each + "_RestPoseGrp.RX") (`getAttr ($each + ".rx")` + `getAttr ($each + "_RestPoseGrp.RX")`);
-						setAttr ($each + "_RestPoseGrp.RX") (`getAttr ($each + "_RestPoseGrp.rx")`);
-						setAttr ($each + ".rx") 0;
-					}
-					if (`getAttr -l ($each + ".ry")` == 0)
-					{
-						setAttr ($each + "_RestPoseGrp.ry") (`getAttr ($each + ".ry")` + `getAttr ($each + "_RestPoseGrp.ry")`);
-						//setAttr ($each + "_RestPoseGrp.RY") (`getAttr ($each + ".ry")` + `getAttr ($each + "_RestPoseGrp.RY")`);
-						setAttr ($each + "_RestPoseGrp.RY") (`getAttr ($each + "_RestPoseGrp.ry")`);
-						setAttr ($each + ".ry") 0;
-					}
-					if (`getAttr -l ($each + ".rz")` == 0)
-					{
-						setAttr ($each + "_RestPoseGrp.rz") (`getAttr ($each + ".rz")` + `getAttr ($each + "_RestPoseGrp.rz")`);
-						//setAttr ($each + "_RestPoseGrp.RZ") (`getAttr ($each + ".rz")` + `getAttr ($each + "_RestPoseGrp.RZ")`);
-						setAttr ($each + "_RestPoseGrp.RZ") (`getAttr ($each + "_RestPoseGrp.rz")`);
-						setAttr ($each + ".rz") 0;
-					}
-					if (`getAttr -l ($each + ".sx")` == 0)
-					{
-						setAttr ($each + "_RestPoseGrp.sx") (`getAttr ($each + ".sx")` + `getAttr ($each + "_RestPoseGrp.sx")` - 1);
-						//setAttr ($each + "_RestPoseGrp.SX") (`getAttr ($each + ".sx")` + `getAttr ($each + "_RestPoseGrp.SX")` - 1);
-						setAttr ($each + "_RestPoseGrp.SX") (`getAttr ($each + "_RestPoseGrp.sx")`);
-						setAttr ($each + ".sx") 1;
-					}
-					if (`getAttr -l ($each + ".sy")` == 0)
-					{
-						setAttr ($each + "_RestPoseGrp.sy") (`getAttr ($each + ".sy")` + `getAttr ($each + "_RestPoseGrp.sy")` - 1);
-						//setAttr ($each + "_RestPoseGrp.SY") (`getAttr ($each + ".sy")` + `getAttr ($each + "_RestPoseGrp.SY")` - 1);
-						setAttr ($each + "_RestPoseGrp.SY") (`getAttr ($each + "_RestPoseGrp.sy")`);
-						setAttr ($each + ".sy") 1;
-					}
-					if (`getAttr -l ($each + ".sz")` == 0)
-					{
-						setAttr ($each + "_RestPoseGrp.sz") (`getAttr ($each + ".sz")` + `getAttr ($each + "_RestPoseGrp.sz")` - 1);
-						//setAttr ($each + "_RestPoseGrp.SZ") (`getAttr ($each + ".sz")` + `getAttr ($each + "_RestPoseGrp.SZ")` - 1);
-						setAttr ($each + "_RestPoseGrp.SZ") (`getAttr ($each + "_RestPoseGrp.sz")`);
-						setAttr ($each + ".sz") 1;
-					}
-				}
-			}
-			//SET PREFERRED ANGLE ON SH JOINTS
-			if (`objExists ($modRigName + "ROOTJnt.singleHierarchy")`)
-			{
-				$shRoot = `listConnections -s 1 -d 0 ($modRigName + "ROOTJnt.singleHierarchy")`;
-				$sHJnts = `listRelatives -ad -f -type "joint" $shRoot[0]`;
-				$sHJnts = `ls -l $sHJnts $shRoot[0]`;
-
-				for ($jnt in $sHJnts)
-				{
-
-					setAttr ($jnt + ".preferredAngleX") (`getAttr ($jnt + ".rotateX")`);
-					setAttr ($jnt + ".preferredAngleY") (`getAttr ($jnt + ".rotateY")`);
-					setAttr ($jnt + ".preferredAngleZ") (`getAttr ($jnt + ".rotateZ")`);
-				}
-			}
-		}
-	}
-	else
-	{
-		warning "Nothing Selected. No action taken.";
-	}
-}
-*/
 global proc RRM_SetDefaultPose(string $all)
 {
 	string $selection[] = `ls -sl -type "transform"`;
@@ -24618,7 +24546,6 @@ global proc RRM_GoToBindPose()
 		if (`objExists ($sel[0] + ".modRigConnection")`)
 		{
 			string $modRigName = `getAttr ($sel[0] + ".modRigConnection")`;
-			//print $modRigName;
 			for ($grp in `ls ($modRigName + "*_RestPoseGrp")`)
 			{
 				setAttr -l 0 ($grp + ".translate");
@@ -24753,7 +24680,6 @@ global proc RRM_ControlScale(float $RRM_ControlScaleChange, int $selectionType, 
 	string $tempControls[];
 	string $modRigName;
 	string $each;
-	print ("modScaleMirror is " + $modScaleMirror + "\n");
 	if (`size $selection` > 0)
 	{
 		for ($each in $selection)
@@ -25519,7 +25445,6 @@ global proc RRM_SH_RenameArm(string $side, int $ea)
 											//TWIST JOINTS
 											rename $foreArmChild ("RM_" + $side + "ForeArmTwist" + $i2);
 											rename `listRelatives -c -type "joint" ("RM_" + $side + "ForeArmTwist" + $i2)` ($side + "ForeArmTwist" + $i2);
-											//print ($side + "ForeArmTwist1\n");
 											$i2++;
 										}
 									}
@@ -25527,14 +25452,10 @@ global proc RRM_SH_RenameArm(string $side, int $ea)
 								else if (`objExists ($armChild + ".arm")`)
 								{
 									//Twist JOINTS
-									
 									if ($i1 <= 4)
 									{
-										//print ("armChild is " + $armChild + "\n");
 										rename $armChild ("RM_" + $side + "ArmTwist" + $i1);
 										rename `listRelatives -c -type "joint" ("RM_" + $side + "ArmTwist" + $i1)` ($side + "ArmTwist" + $i1);
-										//print ($side + "ArmTwist" + $i1 + "\n");
-										//print ($i2 + "\n");
 										$i1++;
 									}
 									else
@@ -25718,8 +25639,6 @@ global proc RRM_SH_RenameLeg(string $side, int $ea)
 					$i2 = 1;
 					for ($upLegChild in $upLegChildren)
 					{
-						//print $upLegChild;
-						//print "\n";
 						//LEG
 						if (`objExists ($upLegChild + ".leg")`)
 						{
@@ -25750,7 +25669,6 @@ global proc RRM_SH_RenameLeg(string $side, int $ea)
 									else if (`objExists ($legChild + ".kneeOut")`)
 									{
 										rename $legChild ("RM_" + $side + "Knee");
-										//rename `listRelatives -c -type "joint" ("RM_" + $side + "Knee")` ($side + "Knee");
 									}
 									else
 									{
@@ -26260,6 +26178,9 @@ global proc RRM_CreateProxyMainGUI(int $ea)
 			-value 1
 			RRM_Jaw;
 			
+	radioButtonGrp -numberOfRadioButtons 2
+		-labelArray2 "X-axis twist" "Y-Axis twist" -sl 2 RRM_HeadTwistAxis;
+
 		columnLayout -cw 200 -cat "left" -1;
 	 checkBox
 			-label "Mirror Module"
@@ -26274,6 +26195,7 @@ global proc RRM_CreateProxyMainGUI(int $ea)
 		-command "RRM_HeadPrompts(\
 		`textField -q -text RRM_TextFieldHeadName`,\
 		`checkBox -q -v RRM_Jaw`,\
+		`radioButtonGrp -q -select RRM_HeadTwistAxis`,\
 		`checkBox -q -v RRM_HeadMirror`);"
 		RRM_HeadButton;
 		
@@ -26595,8 +26517,18 @@ global proc RRM_CreateProxyMainGUI(int $ea)
 	columnLayout;
 	textFieldButtonGrp -label " Head Name:" -buttonLabel "Load" -cal 1 "left" -columnWidth3 95 205 50 -bc "RRM_EditLoadParent(\"head\" )" RRM_EditLoadheadTextField;
 
-		button -label "Toggle Jaw" -w 340 -bgc 0.529 0.162 0.199 -command RRM_EditHead;
+	 checkBox
+			-label "Jaw"
+			-value 1
+			RRM_EditJaw;
 		
+			//button -label "Toggle Jaw" -w 340 -bgc 0.529 0.162 0.199 -command RRM_EditHead;
+		
+		radioButtonGrp -numberOfRadioButtons 2
+			-labelArray2 "X-axis twist" "Y-Axis twist" -sl 2 RRM_HeadEditTwistAxis;
+
+		button -w 340 -label "Apply Edits to Loaded Head" -bgc 0.529 0.162 0.199 -command RRM_EditHead;
+
 		setParent RRM_EditScrollColumnLayout;
 	
 		
@@ -27372,7 +27304,7 @@ global proc RapidRig_Modular_V2()
 	{
 		deleteUI RRM_PrefixPromptWindow;
 	}
-	window -title "Rapid Rig: Modular 2.0.9"
+	window -title "Rapid Rig: Modular 2.1.6"
 		-wh 778 686
 		-rtf on
 		-mnb true

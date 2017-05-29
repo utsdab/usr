@@ -68,6 +68,18 @@ global proc shelf_DAB () {
         -commandRepeatable 1
         -flat 1
     ;
+    separator
+        -enable 1
+        -width 34
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -style "shelf" 
+        -horizontal 0
+    ;
     shelfButton
         -enableCommandRepeat 1
         -enable 1
@@ -76,7 +88,7 @@ global proc shelf_DAB () {
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "skin transfer" 
+        -annotation "write skin transfer" 
         -enableBackground 0
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
@@ -107,7 +119,7 @@ global proc shelf_DAB () {
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "skin transfer" 
+        -annotation "read skin transfer" 
         -enableBackground 0
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
@@ -126,6 +138,38 @@ global proc shelf_DAB () {
         -marginWidth 1
         -marginHeight 1
         -command "if (!`pluginInfo -q -l \"transferSkinCluster.py\"`) loadPlugin( \"transferSkinCluster.py\" );\nicTransferSkinCluster 1 0; // change the first argument to 1 for read mode" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "djRivet" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "djRivet" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "RIV" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "djRivet.png" 
+        -image1 "djRivet.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "source djRivet.mel; djRivet;" 
         -sourceType "mel" 
         -commandRepeatable 1
         -flat 1
@@ -164,19 +208,7 @@ global proc shelf_DAB () {
     ;
     separator
         -enable 1
-        -width 12
-        -height 35
-        -manage 1
-        -visible 1
-        -preventOverride 0
-        -enableBackground 0
-        -highlightColor 0.321569 0.521569 0.65098 
-        -style "shelf" 
-        -horizontal 0
-    ;
-    separator
-        -enable 1
-        -width 12
+        -width 34
         -height 35
         -manage 1
         -visible 1

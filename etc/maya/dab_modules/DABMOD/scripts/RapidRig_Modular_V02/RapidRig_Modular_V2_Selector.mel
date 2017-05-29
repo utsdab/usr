@@ -1,8 +1,8 @@
-//CopyRight Dustin Nelson 2010-2016. Please do not distribute
-//http://www.creativecrash.com/maya/script/-rapid-rig-modular-procedural-auto-rig-for-maya
+//CopyRight Dustin Nelson 2010-2017. Please do not distribute
+//https://www.highend3d.com/maya/script/rapid-rig-modular-procedural-auto-rig-for-maya
 //Script for selecting controls on Rapid Rig: Modular rigs.
-//VERSION 2.0.9
-//January 17, 2017
+//VERSION 2.1.6
+//May 22, 2017
 //FILE IS NOT INTENDED TO BE HARMFUL, HOWEVER USE AT YOUR OWN RISK
 /*/////////////////////////////////////////////////////////////////////////////
 // 
@@ -235,7 +235,25 @@ global proc modIkToFk(string $button)
 		setAttr ($modControl + "_ToePivotIk_Ctrl.rotateZ") `getAttr ($modControl + "_BallFk_Ctrl.rotateZ")`;
 	}
 }
-
+global proc modFkToIkConstraint(string $bodyPart, string $axis)
+{
+	$lctr = `spaceLocator`;
+	delete `orientConstraint ($bodyPart + "JntIk") $lctr`;
+	if ($axis == "all")
+	{
+		$constraint = `orientConstraint $lctr ($bodyPart + "Fk_Ctrl")`;
+		$IK_Rot = `getAttr ($bodyPart + "Fk_Ctrl.rotate")`;
+		delete $constraint $lctr;
+		setAttr (($bodyPart + "Fk_Ctrl.rotate"), $IK_Rot[0], $IK_Rot[1], $IK_Rot[2]);
+	}
+	else
+	{
+		$constraint = `orientConstraint -skip x -skip z $lctr ($bodyPart + "Fk_Ctrl")`;
+		$IK_Rot = `getAttr ($bodyPart + "Fk_Ctrl.rotate")`;
+		delete $constraint $lctr;
+		setAttr ($bodyPart + "Fk_Ctrl.rotateY") ($IK_Rot[1] * 1);	
+	}
+}
 global proc modFkToIk(string $button)
 {
 	string $modControl = `button -q -ann $button`;
@@ -243,35 +261,18 @@ global proc modFkToIk(string $button)
 	$branchType = `getAttr ($modControl + "Grp.topNode")`;
 	if ($branchType == "arm")
 	{
-
-		$ShldrJntIkRot = `xform -q -ws -a -ro ($modControl + "_ShoulderJntIk")`;
-		xform -ws -a -ro $ShldrJntIkRot[0] $ShldrJntIkRot[1] $ShldrJntIkRot[2] ($modControl + "_ShoulderFk_Ctrl");
-		setAttr ($modControl + "_ShoulderFk_Ctrl.sx") `getAttr ($modControl + "_ShoulderJntIk.sx")`;
+		modFkToIkConstraint(($modControl + "_Shoulder"), "all");
 		
 		if (`getAttr ($modControl + "Grp.elbowNum")` == 1)
 		{
-			$constraint = `orientConstraint -skip x -skip z ($modControl + "_ElbowJntIk") ($modControl + "_ElbowFk_Ctrl")`;
-			$ElbowIk_RY = `getAttr ($modControl + "_ElbowFk_Ctrl.ry")`;
-			setAttr ($modControl + "_ElbowFk_Ctrl.rotateY") ($ElbowIk_RY * 1);
-			delete $constraint;
+			modFkToIkConstraint(($modControl + "_Elbow"), "y");
 		}
 		else
 		{
-			$constraint = `orientConstraint -skip x -skip z ($modControl + "_Elbow1JntIk") ($modControl + "_Elbow1Fk_Ctrl")`;
-			$Elbow1Ik_RY = `getAttr ($modControl + "_Elbow1Fk_Ctrl.ry")`;
-			setAttr ($modControl + "_Elbow1Fk_Ctrl.rotateY") ($Elbow1Ik_RY * 1);
-			delete $constraint;
-			
-			$constraint = `orientConstraint ($modControl + "_Elbow2JntIk") ($modControl + "_Elbow2Fk_Ctrl")`;
-			$Elbow2Ik_RY = `getAttr ($modControl + "_Elbow2Fk_Ctrl.ry")`;
-			setAttr ($modControl + "_Elbow2Fk_Ctrl.rotateY") ($Elbow2Ik_RY * 1);
-			delete $constraint;
+			modFkToIkConstraint(($modControl + "_Elbow1"), "y");
+			modFkToIkConstraint(($modControl + "_Elbow2"), "y");
 		}
-		$constraint = `orientConstraint ($modControl + "_WristJntIk") ($modControl + "_WristFk_Ctrl")`;
-		$WristIk_Rot = `getAttr ($modControl + "_WristFk_Ctrl.rotate")`;
-		setAttr (($modControl + "_WristFk_Ctrl.rotate"), $WristIk_Rot[0], $WristIk_Rot[1], $WristIk_Rot[2]);
-		delete $constraint;
-		
+		modFkToIkConstraint(($modControl + "_Wrist"), "all");
 		setAttr ($modControl + "_WristFk_Ctrl.sx") `getAttr ($modControl + "_WristIk_Ctrl.sx")`;
 		setAttr ($modControl + "_WristFk_Ctrl.sy") `getAttr ($modControl + "_WristIk_Ctrl.sy")`;
 		setAttr ($modControl + "_WristFk_Ctrl.sz") `getAttr ($modControl + "_WristIk_Ctrl.sz")`;
@@ -280,119 +281,25 @@ global proc modFkToIk(string $button)
 	}
 	else if ($branchType == "leg")
 	{
-		$HipJntIkRot = `xform -q -ws -a -ro ($modControl + "_HipJntIk")`;
-		xform -ws -a -ro $HipJntIkRot[0] $HipJntIkRot[1] $HipJntIkRot[2] ($modControl + "_HipFk_Ctrl");
-		setAttr ($modControl + "_HipFk_Ctrl.sx") `getAttr ($modControl + "_HipJntIk.sx")`;
-		
+		modFkToIkConstraint(($modControl + "_Hip"), "all");
+
 		if (`getAttr ($modControl + "Grp.kneeNum")` == 1)
 		{
-			$constraint = `orientConstraint -skip x -skip z ($modControl + "_KneeJntIk") ($modControl + "_KneeFk_Ctrl")`;
-			$KneeIk_RY = `getAttr ($modControl + "_KneeFk_Ctrl.ry")`;
-			setAttr ($modControl + "_KneeFk_Ctrl.rotateY") ($KneeIk_RY * 1);
-			delete $constraint;
+			modFkToIkConstraint(($modControl + "_Knee"), "y");
 		}
 		else
 		{
-			$constraint = `orientConstraint -skip x -skip z ($modControl + "_Knee1JntIk") ($modControl + "_Knee1Fk_Ctrl")`;
-			$Knee1Ik_RY = `getAttr ($modControl + "_Knee1Fk_Ctrl.ry")`;
-			setAttr ($modControl + "_Knee1Fk_Ctrl.rotateY") ($Knee1Ik_RY * 1);
-			delete $constraint;
-			
-			$constraint = `orientConstraint ($modControl + "_Knee2JntIk") ($modControl + "_Knee2Fk_Ctrl")`;
-			$Knee2Ik_RY = `getAttr ($modControl + "_Knee2Fk_Ctrl.ry")`;
-			setAttr ($modControl + "_Knee2Fk_Ctrl.rotateY") ($Knee2Ik_RY * 1);
-			delete $constraint;
+			modFkToIkConstraint(($modControl + "_Knee1"), "y");
+			modFkToIkConstraint(($modControl + "_Knee2"), "y");
 		}
-		$AnkleJntIkRot = `xform -q -ws -a -ro ($modControl + "_AnkleJntIk")`;
-		xform -ws -a -ro $AnkleJntIkRot[0] $AnkleJntIkRot[1] $AnkleJntIkRot[2] ($modControl + "_AnkleFk_Ctrl");
-
-		$ballJntR = `getAttr ($modControl + "_BallJntIk.rotate")`;
-		setAttr (($modControl + "_BallFk_Ctrl.rotate"), $ballJntR[0], $ballJntR[1], $ballJntR[2]);
-		
-		$toeJntR = `getAttr ($modControl + "_ToeJntIk.rotate")`;
-		setAttr (($modControl + "_ToeFk_Ctrl.rotate"), $toeJntR[0], $toeJntR[1], $toeJntR[2]);
+		modFkToIkConstraint(($modControl + "_Ankle"), "all");
+		modFkToIkConstraint(($modControl + "_Ball"), "all");
+		modFkToIkConstraint(($modControl + "_Ankle"), "all");
 		
 		setAttr ($modControl + "_Switch_Ctrl.switchIkFk") 1;
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////
-//BOTTOM BUTTONS////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-
-
-global proc modSelectAll(string $modRigName, string $rigGrp, string $lPrfx, string $rPrfx)
-{
-	select ($modRigName + "*_Ctrl");
-}
-
-
-global proc modResetTransforms(string $modRigName, string $rigGrp, string $lPrfx, string $rPrfx)
-{
-	$initialSelection = `ls -sl`;
-	string $modControls[];
-	if (`getModifiers` == 1)
-	{//SHIFT
-		select ($modRigName + "*_Ctrl");
-		$modControls = `ls -sl`;
-	}
-	else
-	{
-		$modControls = `ls -sl`;
-	}
-	
-	for ($each in $modControls)
-	{
-		if (`objExists ($each + ".modCoreName")`||`objExists ($each + ".isCOG_Ctrl")`)
-		{
-			$channels = `listAttr -k -u -v -s $each`;
-			string $eachChannel;
-			for ($eachChannel in $channels)
-			{
-				if ($eachChannel=="translateX"||$eachChannel=="translateY" || $eachChannel=="translateZ" || 
-				$eachChannel=="rotateX" || $eachChannel=="rotateY" || $eachChannel=="rotateZ" || 
-				$eachChannel=="scaleX" || $eachChannel=="scaleY" || $eachChannel=="scaleZ")
-				{
-					float $defaultVal[] = `attributeQuery -node $each -ld $eachChannel`;
-					setAttr ($each + "." + $eachChannel) $defaultVal[0];
-				}
-			}
-		}
-	}
-}
-
-global proc modResetExtras(string $modRigName, string $rigGrp, string $lPrfx, string $rPrfx)
-{
-	$initialSelection = `ls -sl`;
-	string $modControls[];
-	if (`getModifiers` == 1)
-	{//SHIFT
-		select ($modRigName + "*_Ctrl");
-		$modControls = `ls -sl`;
-	}
-	else
-	{
-		$modControls = `ls -sl`;
-	}
-	for ($each in $modControls)
-	{
-		if (`objExists ($each + ".modCoreName")`)
-		{
-			$channels = `listAttr -k -u -v -s $each`;
-			string $eachChannel;
-			for ($eachChannel in $channels)
-			{
-				if ($eachChannel!="translateX"&&$eachChannel!="translateY" && $eachChannel!="translateZ" && 
-				$eachChannel!="rotateX" && $eachChannel!="rotateY" && $eachChannel!="rotateZ" && 
-				$eachChannel!="scaleX" && $eachChannel!="scaleY" && $eachChannel!="scaleZ")
-				{
-					float $defaultVal[] = `attributeQuery -node $each -ld $eachChannel`;
-					setAttr ($each + "." + $eachChannel) $defaultVal[0];
-				}
-			}
-		}
-	}
-}
 
 global proc modSideToSidePose(string $modRigName, string $rigGrp, string $lPrfx, string $rPrfx, string $modSide)
 {
@@ -500,7 +407,8 @@ global proc modSideToSidePose(string $modRigName, string $rigGrp, string $lPrfx,
 				//ARM/LEG
 				else if ($moduleType == "arm" || $moduleType == "leg" || $moduleType == "fkChain" || $moduleType == "head" || $moduleType == "auxiliary")
 				{
-					if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0 && !`gmatch $each "*Ik_Ctrl"`)
+					if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0 && !`gmatch $each "*KneeIk_Ctrl"`
+					&& !`gmatch $each "*FootIk_Ctrl"` && !`gmatch $each "*ElbowIk_Ctrl"` && !`gmatch $each "*WristIk_Ctrl"`)
 					{
 						if ($eachChannel == "rotateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
 						{
@@ -568,6 +476,7 @@ global proc modMirrorPose(string $modRigName, string $rigGrp, string $lPrfx, str
 	
 	//DEFINE STRINGS
 	string $modCoreName;
+	string $twistAxis;
 
 	//RANDOM VALUE TO CHECK MIRRORING
 	float $randVal = (rand (10,15));
@@ -586,18 +495,15 @@ global proc modMirrorPose(string $modRigName, string $rigGrp, string $lPrfx, str
 		{
 			if (`objExists ($each + ".rightControl")`)
 			{
-				select $leftControls $each;
-				$leftControls = `ls -sl`;
+				$leftControls = `ls $leftControls $each`;
 			}
 			else if (`objExists ($each + ".leftControl")`)
 			{
-				select $rightControls $each;
-				$rightControls = `ls -sl`;
+				$rightControls = `ls $rightControls $each`;
 			}
 			else
 			{
-				select $centerControls $each;
-				$centerControls = `ls -sl`;
+				$centerControls = `ls -sl $centerControls $each`;
 			}
 		}
 	}
@@ -606,29 +512,59 @@ global proc modMirrorPose(string $modRigName, string $rigGrp, string $lPrfx, str
 	for ($eachCenterControl in $centerControls)
 	{
 		string $modType;
-		if (`objExists ($eachCenterControl + ".moduleType")`)
+        if (`objExists ($eachCenterControl + ".moduleType")`)
 		{
 			$modType = `getAttr ($eachCenterControl + ".moduleType")`;
 		}
-		$channels = `listAttr -k -u -v -s $eachCenterControl`;
-		for ($eachChannel in $channels)
+		if (`objExists ($eachCenterControl + ".modCoreName")`)
 		{
-			//print ($eachChannel + "\n");
-			float $channelVal = `getAttr ($eachCenterControl + "." + $eachChannel)`;
-			
-			if ($modType != "fkChain")
+		    $modCoreName = `getAttr ($eachCenterControl + ".modCoreName")`;
+		    
+            if (`objExists ($modCoreName + "Grp.twistAxis")`)
+            {
+                $twistAxis = `getAttr ($modCoreName + "Grp.twistAxis")`;
+            }
+		}
+
+		if ($modType != "arm")
+		{
+			$channels = `listAttr -k -u -v -s $eachCenterControl`;
+			for ($eachChannel in $channels)
 			{
-				if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ" ||
-				$eachChannel == "footTilt" || $eachChannel == "ballSwivel")
+				float $channelVal = `getAttr ($eachCenterControl + "." + $eachChannel)`;
+				
+				if ($twistAxis != "x")
 				{
-					setAttr ($eachCenterControl + "." + $eachChannel) ($channelVal * -1);
-				}
+                    if ($modType != "fkChain")
+                    {
+                        if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ" ||
+                        $eachChannel == "footTilt" || $eachChannel == "ballSwivel")
+                        {
+                            setAttr ($eachCenterControl + "." + $eachChannel) ($channelVal * -1);
+                        }
+                    }
+                    else if ($eachChannel == "rotateX" || $eachChannel == "rotateY")
+                    {
+                        setAttr ($eachCenterControl + "." + $eachChannel) ($channelVal * -1);
+                    }
+                }
+                else
+                {
+                    if ($modType != "fkChain")
+                    {
+                        if ($eachChannel == "translateZ" || $eachChannel == "rotateY" || $eachChannel == "rotateX" ||
+                        $eachChannel == "footTilt" || $eachChannel == "ballSwivel")
+                        {
+                            setAttr ($eachCenterControl + "." + $eachChannel) ($channelVal * -1);
+                        }
+                    }
+                    else if ($eachChannel == "rotateZ" || $eachChannel == "rotateY")
+                    {
+                        setAttr ($eachCenterControl + "." + $eachChannel) ($channelVal * -1);
+                    }                    
+                }
 			}
-			else if ($eachChannel == "rotateX" || $eachChannel == "rotateY")
-			{
-				setAttr ($eachCenterControl + "." + $eachChannel) ($channelVal * -1);
-			}
-		}		
+		}
 	}
 	
 	//MIRROR LEFT TO RIGHT
@@ -711,7 +647,8 @@ global proc modMirrorPose(string $modRigName, string $rigGrp, string $lPrfx, str
 				//ARM LEG FK HEAD AND AUX
 				else if ($moduleType == "arm" || $moduleType == "leg" || $moduleType == "fkChain" || $moduleType == "head" || $moduleType == "auxiliary" )
 				{
-					if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0 && !`gmatch $eachLeftControl "*Ik_Ctrl"`)
+					if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0 && !`gmatch $eachLeftControl "*KneeIk_Ctrl"`
+					&& !`gmatch $eachLeftControl "*FootIk_Ctrl"` && !`gmatch $eachLeftControl "*ElbowIk_Ctrl"` && !`gmatch $eachLeftControl "*WristIk_Ctrl"`)
 					{
 						if ($eachSideChannel == "rotateX" || $eachSideChannel == "rotateY" || $eachSideChannel == "rotateZ")
 						{
@@ -842,7 +779,8 @@ global proc modMirrorPose(string $modRigName, string $rigGrp, string $lPrfx, str
 					//ARM LEG FK HEAD AND AUX
 					else if ($moduleType == "arm" || $moduleType == "leg" || $moduleType == "fkChain" || $moduleType == "head" || $moduleType == "auxiliary" )
 					{
-						if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0 && !`gmatch $eachLeftControl "*Ik_Ctrl"`)
+						if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0 && !`gmatch $eachLeftControl "*KneeIk_Ctrl"`
+						&& !`gmatch $eachLeftControl "*FootIk_Ctrl"` && !`gmatch $eachLeftControl "*ElbowIk_Ctrl"` && !`gmatch $eachLeftControl "*WristIk_Ctrl"`)
 						{
 							if ($eachSideChannel == "rotateX" || $eachSideChannel == "rotateY" || $eachSideChannel == "rotateZ")
 							{
@@ -905,6 +843,86 @@ global proc modMirrorPose(string $modRigName, string $rigGrp, string $lPrfx, str
 	select $initialSelection;
 }
 
+
+////////////////////////////////////////////////////////////////////////////
+//BOTTOM BUTTONS////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+
+global proc modSelectAll(string $modRigName, string $rigGrp, string $lPrfx, string $rPrfx)
+{
+	select ($modRigName + "*_Ctrl");
+}
+
+
+global proc modResetTransforms(string $modRigName, string $rigGrp, string $lPrfx, string $rPrfx)
+{
+	$initialSelection = `ls -sl`;
+	string $modControls[];
+	if (`getModifiers` == 1)
+	{//SHIFT
+		select ($modRigName + "*_Ctrl");
+		$modControls = `ls -sl`;
+	}
+	else
+	{
+		$modControls = `ls -sl`;
+	}
+	
+	for ($each in $modControls)
+	{
+		if (`objExists ($each + ".modCoreName")`||`objExists ($each + ".isCOG_Ctrl")`)
+		{
+			$channels = `listAttr -k -u -v -s $each`;
+			string $eachChannel;
+			for ($eachChannel in $channels)
+			{
+				if ($eachChannel=="translateX"||$eachChannel=="translateY" || $eachChannel=="translateZ" || 
+				$eachChannel=="rotateX" || $eachChannel=="rotateY" || $eachChannel=="rotateZ" || 
+				$eachChannel=="scaleX" || $eachChannel=="scaleY" || $eachChannel=="scaleZ")
+				{
+					float $defaultVal[] = `attributeQuery -node $each -ld $eachChannel`;
+					setAttr ($each + "." + $eachChannel) $defaultVal[0];
+				}
+			}
+		}
+	}
+}
+
+global proc modResetExtras(string $modRigName, string $rigGrp, string $lPrfx, string $rPrfx)
+{
+	$initialSelection = `ls -sl`;
+	string $modControls[];
+	if (`getModifiers` == 1)
+	{//SHIFT
+		select ($modRigName + "*_Ctrl");
+		$modControls = `ls -sl`;
+	}
+	else
+	{
+		$modControls = `ls -sl`;
+	}
+	for ($each in $modControls)
+	{
+		if (`objExists ($each + ".modCoreName")`)
+		{
+			$channels = `listAttr -k -u -v -s $each`;
+			string $eachChannel;
+			for ($eachChannel in $channels)
+			{
+				if ($eachChannel!="translateX"&&$eachChannel!="translateY" && $eachChannel!="translateZ" && 
+				$eachChannel!="rotateX" && $eachChannel!="rotateY" && $eachChannel!="rotateZ" && 
+				$eachChannel!="scaleX" && $eachChannel!="scaleY" && $eachChannel!="scaleZ")
+				{
+					float $defaultVal[] = `attributeQuery -node $each -ld $eachChannel`;
+					setAttr ($each + "." + $eachChannel) $defaultVal[0];
+				}
+			}
+		}
+	}
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////
 //BATCH MIRRORING///////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -960,7 +978,7 @@ global proc modCreateBatchMirrorLctrs(string $modRigName, string $rigGrp, string
 			$channels = `listAttr -k -u $currentC`;
 			for ($eachChannel in $channels)
 			{
-				if ($eachChannel!="translateX" && $eachChannel!= "translateY" && $eachChannel!="translateZ" &&
+				if (`objExists ($currentC + "." + $eachChannel)` && $eachChannel!="translateX" && $eachChannel!= "translateY" && $eachChannel!="translateZ" &&
 				$eachChannel!="rotateX" && $eachChannel!="rotateY" && $eachChannel!="rotateZ" &&
 				$eachChannel!="scaleX" && $eachChannel!="scaleY" && $eachChannel!="scaleZ" && $eachChannel !="visibility")
 				{
@@ -977,8 +995,11 @@ global proc modCreateBatchMirrorLctrs(string $modRigName, string $rigGrp, string
 					{
 						addAttr -ln $eachChannel  -at $channelType -en "v1:v2:v3:v4:v5:v6:v7:v8" ($currentC + "_modLctr_Frame" + $currentFrame);
 					}
-					setAttr -e-keyable true ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel);
-					setAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel) $val;					
+					if (`objExists ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`)
+					{
+						setAttr -e-keyable true ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel);
+						setAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel) $val;
+					}
 				}
 			}
 			//ADD CUSTOM FRAME ATTRIBUTE
@@ -1004,7 +1025,12 @@ global proc modSetToBatchMirrorLocatorChannelsCenter(string $modRigName, string 
 	if ($applyTo == "all")
 	{
 		select ($modRigName + "*_Ctrl");
-		select -d ($modRigName + "MAIN_Ctrl") ($modRigName + $lPrfx + "*_Ctrl") ($modRigName + $rPrfx + "*_Ctrl");
+		select -d ($modRigName + "MAIN_Ctrl");
+		$leftRightCtrls = `ls -type "transform" ($modRigName + $lPrfx + "*_Ctrl") ($modRigName + $rPrfx + "*_Ctrl")`;
+		if (`size $leftRightCtrls` > 0)
+		{
+		    select -d ($modRigName + $lPrfx + "*_Ctrl") ($modRigName + $rPrfx + "*_Ctrl");
+		}
 		$rigControls = `ls -sl`;
 	}
 
@@ -1037,7 +1063,12 @@ global proc modSetToBatchMirrorLocatorChannelsSide(string $modRigName, string $r
 	string $rigControls[] = `ls -sl`;
 	if ($applyTo == "all")
 	{
-		select ($modRigName + $side + "*_Ctrl");
+		$leftRightCtrls = `ls -type "transform" ($modRigName + $lPrfx + "*_Ctrl") ($modRigName + $rPrfx + "*_Ctrl")`;
+		if (`size $leftRightCtrls` > 0)
+		{
+		    select ($modRigName + $side + "*_Ctrl");
+		}
+		else
 		$rigControls = `ls -sl`;
 	}
 
@@ -1049,8 +1080,11 @@ global proc modSetToBatchMirrorLocatorChannelsSide(string $modRigName, string $r
 			$numChannels = `size $channels`;
 			for ($eachChannel in $channels)
 			{
-				$channel = `getAttr ($currentC + "." + $eachChannel)`;
-				setAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel) $channel;
+				if (`objExists ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`)
+				{
+					$channel = `getAttr ($currentC + "." + $eachChannel)`;
+					setAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel) $channel;
+				}
 			}
 		}
 	}
@@ -1064,12 +1098,20 @@ global proc modSetFromBatchMirrorLocatorChannelsCenter(string $modRigName, strin
 	$autoKey = `autoKeyframe -q -state`;
 	autoKeyframe -state false;
 	float $currentFrame = `currentTime -q`;
+	
+	string $modCoreName;
+	string $twistAxis;
 
 	string $rigControls[] = `ls -sl`;
 	if ($applyTo == "all")
 	{
 		select ($modRigName + "*_Ctrl");
-		select -d ($modRigName + "MAIN_Ctrl") ($modRigName + $lPrfx + "*_Ctrl") ($modRigName + $rPrfx + "*_Ctrl");
+		select -d ($modRigName + "MAIN_Ctrl");
+		$leftRightCtrls = `ls -type "transform" ($modRigName + $lPrfx + "*_Ctrl") ($modRigName + $rPrfx + "*_Ctrl")`;
+		if (`size $leftRightCtrls` > 0)
+		{
+		    select -d ($modRigName + $lPrfx + "*_Ctrl") ($modRigName + $rPrfx + "*_Ctrl");
+		}
 		$rigControls = `ls -sl`;
 	}
 	string $currentC;
@@ -1080,20 +1122,45 @@ global proc modSetFromBatchMirrorLocatorChannelsCenter(string $modRigName, strin
 		{
 			if (!`gmatch $currentC ($modRigName + "_[l,r]*C")`)
 			{
+                if (`objExists ($currentC + ".modCoreName")`)
+                {
+                    $modCoreName = `getAttr ($currentC + ".modCoreName")`;
+                    
+                    if (`objExists ($modCoreName + "Grp.twistAxis")`)
+                    {
+                        $twistAxis = `getAttr ($modCoreName + "Grp.twistAxis")`;
+                    }
+                }			    
 				$channels = `listAttr -k -u $currentC`;
 				$numChannels = `size $channels`;
 				int $i=0;
 				while ($i < $numChannels)
 				{
-					if ($channels[$i] == "translateX"||$channels[$i] == "rotateY"||$channels[$i] == "rotateZ")
-					{
-						$channelVal = `getAttr -t $currentFrame ($currentC + "_modLctr_Frame" + $currentFrame + "." + $channels[$i])`;
-						setAttr ($currentC + "." + $channels[$i]) ($channelVal*-1);
-					}
-					else
-					{
-						$channelVal = `getAttr -t $currentFrame ($currentC + "_modLctr_Frame" + $currentFrame + "." + $channels[$i])`;
-						setAttr ($currentC + "." + $channels[$i]) $channelVal;
+				    if ($twistAxis != "x")
+				    {
+                        if ($channels[$i] == "translateX"||$channels[$i] == "rotateY"||$channels[$i] == "rotateZ")
+                        {
+                            $channelVal = `getAttr -t $currentFrame ($currentC + "_modLctr_Frame" + $currentFrame + "." + $channels[$i])`;
+                            setAttr ($currentC + "." + $channels[$i]) ($channelVal*-1);
+                        }
+                        else
+                        {
+                            $channelVal = `getAttr -t $currentFrame ($currentC + "_modLctr_Frame" + $currentFrame + "." + $channels[$i])`;
+                            setAttr ($currentC + "." + $channels[$i]) $channelVal;
+                        }
+                    }
+                    else
+                    {
+                        if ($channels[$i] == "translateZ"||$channels[$i] == "rotateY"||$channels[$i] == "rotateX")
+                        {
+                            $channelVal = `getAttr -t $currentFrame ($currentC + "_modLctr_Frame" + $currentFrame + "." + $channels[$i])`;
+                            setAttr ($currentC + "." + $channels[$i]) ($channelVal*-1);
+                        }
+                        else
+                        {
+                            $channelVal = `getAttr -t $currentFrame ($currentC + "_modLctr_Frame" + $currentFrame + "." + $channels[$i])`;
+                            setAttr ($currentC + "." + $channels[$i]) $channelVal;
+                        }                        
 					}
 				$i++;
 				}
@@ -1130,122 +1197,125 @@ global proc modSetFromBatchMirrorLocatorChannelsSide(string $modRigName, string 
 			int $i=0;
 			for ($eachChannel in $channels)
 			{
-				//ONLY MIRROR NON-KEYED ATTRIBUTES ONCE
-				string $connectionsTA[]= `listConnections -source 1 -destination 0 -type "animCurveTA" ($each + "." + $channels[$i])`;
-				string $connectionsTL[]= `listConnections -source 1 -destination 0 -type "animCurveTL" ($each + "." + $channels[$i])`;
-				string $connectionsTU []= `listConnections -source 1 -destination 0 -type "animCurveTU" ($each + "." + $channels[$i])`;
-				$connections = `ls $connectionsTA $connectionsTL $connectionsTU`;
-				
-				if ($once == 0 || `size $connections` > 0)
+				if (`objExists ($each + "." + $eachChannel)`)
 				{
-					$oppChannel = "rightControl";
-					if ($side == $rPrfx)
-					{
-						$oppChannel = "leftControl";
-					}
+					//ONLY MIRROR NON-KEYED ATTRIBUTES ONCE
+					string $connectionsTA[]= `listConnections -source 1 -destination 0 -type "animCurveTA" ($each + "." + $channels[$i])`;
+					string $connectionsTL[]= `listConnections -source 1 -destination 0 -type "animCurveTL" ($each + "." + $channels[$i])`;
+					string $connectionsTU []= `listConnections -source 1 -destination 0 -type "animCurveTU" ($each + "." + $channels[$i])`;
+					$connections = `ls $connectionsTA $connectionsTL $connectionsTU`;
 					
-					$moduleType = `getAttr ($each + ".moduleType")`;
-					string $modCoreName;
-					if ($moduleType != "auxiliary")
+					if ($once == 0 || `size $connections` > 0)
 					{
-						$modCoreName = `getAttr ($each + ".modCoreName")`;	
-					}
-					else
-					{
-						$modCoreName = (`getAttr ($each + ".modCoreName")` + "_Aux");	
-					}
-					float $channelVal = `getAttr ($each + "." + $eachChannel)`;
-					$oppControlConnections = `listConnections ($each + "." + $oppChannel)`;
-					$oppControl = $oppControlConnections[0];
-				
-					//SPLINE
-					if ($moduleType == "spline")
-					{
-						if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0)
+						$oppChannel = "rightControl";
+						if ($side == $rPrfx)
 						{
-							if ($eachChannel == "rotateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
-							{
-								setAttr ($oppControl + "." + $eachChannel) $channelVal;
-							}
-							else if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "translateZ")
-							{
-								setAttr ($oppControl + "." + $eachChannel) ($channelVal * -1);
-							}
+							$oppChannel = "leftControl";
 						}
-						else if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 1)
+						
+						$moduleType = `getAttr ($each + ".moduleType")`;
+						string $modCoreName;
+						if ($moduleType != "auxiliary")
 						{
-							if (`getAttr ($modRigName + $modCoreName + "Grp.twistAxis")`== "x")
-							{
-								if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "rotateZ")
-								{
-									setAttr ($oppControl + "." + $eachChannel) $channelVal;
-								}
-								else if ($eachChannel == "translateZ" || $eachChannel == "rotateX" || $eachChannel == "rotateY")
-								{
-									setAttr ($oppControl + "." + $eachChannel) ($channelVal * -1);
-								}							
-							}
-							if (`getAttr ($modRigName + $modCoreName + "Grp.twistAxis")`== "y")
-							{
-								if ($eachChannel == "translateY" || $eachChannel == "translateZ" || $eachChannel == "rotateX")
-								{
-									setAttr ($oppControl + "." + $eachChannel) $channelVal;
-								}
-								else if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
-								{
-									setAttr ($oppControl + "." + $eachChannel) ($channelVal * -1);
-								}							
-							}
-	
-						}					
-					}				
-					//ARM/LEG
-					else if ($moduleType == "arm" || $moduleType == "leg" || $moduleType == "fkChain" || $moduleType == "head" || $moduleType == "auxiliary")
-					{
-						if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0 && !`gmatch $each "*Ik_Ctrl"`)
-						{
-							if ($eachChannel == "rotateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
-							{
-								setAttr ($oppControl + "." + $eachChannel) $channelVal;
-							}
-							else if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "translateZ")
-							{
-								setAttr ($oppControl + "." + $eachChannel) ($channelVal * -1);
-							}
-							else
-							{
-								setAttr ($oppControl + "." + $eachChannel) $channelVal;
-							}
-						}
-						else 
-						{
-							if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
-							{
-								setAttr ($oppControl + "." + $eachChannel) ($channelVal * -1);
-							}
-							else
-							{
-								setAttr ($oppControl + "." + $eachChannel) $channelVal;
-							}
-						}
-					}
-	
-					//EYE
-					else if ($moduleType == "lookAt")
-					{
-						if ($eachChannel == "translateX" || $eachChannel == "translateY")
-						{
-							setAttr ($oppControl + "." + $eachChannel) $channelVal;
-						}
-						else if ($eachChannel == "translateZ")
-						{
-							setAttr ($oppControl + "." + $eachChannel) ($channelVal * -1);
+							$modCoreName = `getAttr ($each + ".modCoreName")`;	
 						}
 						else
 						{
-							setAttr ($oppControl + "." + $eachChannel) $channelVal;
+							$modCoreName = (`getAttr ($each + ".modCoreName")` + "_Aux");	
 						}
-					}					
+						float $channelVal = `getAttr ($each + "." + $eachChannel)`;
+						$oppControlConnections = `listConnections ($each + "." + $oppChannel)`;
+						$oppControl = $oppControlConnections[0];
+					
+						//SPLINE
+						if ($moduleType == "spline")
+						{
+							if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0)
+							{
+								if ($eachChannel == "rotateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
+								{
+									setAttr ($oppControl + "." + $eachChannel) $channelVal;
+								}
+								else if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "translateZ")
+								{
+									setAttr ($oppControl + "." + $eachChannel) ($channelVal * -1);
+								}
+							}
+							else if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 1)
+							{
+								if (`getAttr ($modRigName + $modCoreName + "Grp.twistAxis")`== "x")
+								{
+									if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "rotateZ")
+									{
+										setAttr ($oppControl + "." + $eachChannel) $channelVal;
+									}
+									else if ($eachChannel == "translateZ" || $eachChannel == "rotateX" || $eachChannel == "rotateY")
+									{
+										setAttr ($oppControl + "." + $eachChannel) ($channelVal * -1);
+									}							
+								}
+								if (`getAttr ($modRigName + $modCoreName + "Grp.twistAxis")`== "y")
+								{
+									if ($eachChannel == "translateY" || $eachChannel == "translateZ" || $eachChannel == "rotateX")
+									{
+										setAttr ($oppControl + "." + $eachChannel) $channelVal;
+									}
+									else if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
+									{
+										setAttr ($oppControl + "." + $eachChannel) ($channelVal * -1);
+									}							
+								}
+		
+							}					
+						}				
+						//ARM/LEG
+						else if ($moduleType == "arm" || $moduleType == "leg" || $moduleType == "fkChain" || $moduleType == "head" || $moduleType == "auxiliary")
+						{
+							if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0 && !`gmatch $each "*Ik_Ctrl"`)
+							{
+								if ($eachChannel == "rotateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
+								{
+									setAttr ($oppControl + "." + $eachChannel) $channelVal;
+								}
+								else if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "translateZ")
+								{
+									setAttr ($oppControl + "." + $eachChannel) ($channelVal * -1);
+								}
+								else if (`objExists ($oppControl + "." + $eachChannel)`)
+								{
+									setAttr ($oppControl + "." + $eachChannel) $channelVal;
+								}
+							}
+							else 
+							{
+								if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
+								{
+									setAttr ($oppControl + "." + $eachChannel) ($channelVal * -1);
+								}
+								else if (`objExists ($oppControl + "." + $eachChannel)`)
+								{
+									setAttr ($oppControl + "." + $eachChannel) $channelVal;
+								}
+							}
+						}
+		
+						//EYE
+						else if ($moduleType == "lookAt")
+						{
+							if ($eachChannel == "translateX" || $eachChannel == "translateY")
+							{
+								setAttr ($oppControl + "." + $eachChannel) $channelVal;
+							}
+							else if ($eachChannel == "translateZ")
+							{
+								setAttr ($oppControl + "." + $eachChannel) ($channelVal * -1);
+							}
+							else if (`objExists ($oppControl + "." + $eachChannel)`)
+							{
+								setAttr ($oppControl + "." + $eachChannel) $channelVal;
+							}
+						}
+					}
 				}
 			$i++;
 			}
@@ -1254,7 +1324,6 @@ global proc modSetFromBatchMirrorLocatorChannelsSide(string $modRigName, string 
 	autoKeyframe -state $autoKey;	
 	select $Controls;
 }
-
 
 //SET TO BATCH LOCATOR KEYS////////////////////////////////////////////////////////////
 global proc modSetToBatchMirrorLocatorKeysCenter(string $modRigName, string $rigGrp, string $lPrfx, string $rPrfx, string $applyTo, string $mirroringSelection[], float $startFrame, float $endFrame)
@@ -1265,7 +1334,12 @@ global proc modSetToBatchMirrorLocatorKeysCenter(string $modRigName, string $rig
 	if ($applyTo == "all")
 	{
 		select ($modRigName + "*_Ctrl");
-		select -d ($modRigName + "MAIN_Ctrl") ($modRigName + $lPrfx + "*_Ctrl") ($modRigName + $rPrfx + "*_Ctrl");
+		select -d ($modRigName + "MAIN_Ctrl");
+		$leftRightCtrls = `ls -type "transform" ($modRigName + $lPrfx + "*_Ctrl") ($modRigName + $rPrfx + "*_Ctrl")`;
+		if (`size $leftRightCtrls` > 0)
+		{
+		    select -d ($modRigName + $lPrfx + "*_Ctrl") ($modRigName + $rPrfx + "*_Ctrl");
+		}
 		$rigControls = `ls -sl`;
 	}
 
@@ -1447,11 +1521,19 @@ global proc modSetFromBatchMirrorLocatorKeysCenter(string $modRigName, string $r
 	autoKeyframe -state false;
 	float $currentFrame    = `currentTime -q`;
 
+	string $twistAxis;
+	
 	string $rigControls[] = `ls -sl`;
 	if ($applyTo == "all")
 	{
 		select ($modRigName + "*_Ctrl");
-		select -d ($modRigName + "MAIN_Ctrl")  ($modRigName + $lPrfx + "*_Ctrl") ($modRigName + $rPrfx + "*_Ctrl");
+		select -d ($modRigName + "MAIN_Ctrl");
+		$leftRightCtrls = `ls -type "transform" ($modRigName + $lPrfx + "*_Ctrl") ($modRigName + $rPrfx + "*_Ctrl")`;
+		if (`size $leftRightCtrls` > 0)
+		{
+		    select -d ($modRigName + $lPrfx + "*_Ctrl") ($modRigName + $rPrfx + "*_Ctrl");
+		}
+		$rigControls = `ls -sl`;
 	}
 	$rigControls = `ls -sl -type "transform"`;
 	
@@ -1460,6 +1542,16 @@ global proc modSetFromBatchMirrorLocatorKeysCenter(string $modRigName, string $r
 	{
 		if (`gmatch $currentC ($modRigName + "*_Ctrl")` && !`gmatch $currentC ($modRigName + "_[l,r]*C")`)
 		{
+            if (`objExists ($currentC + ".modCoreName")`)
+            {
+                $modCoreName = `getAttr ($currentC + ".modCoreName")`;
+                
+                if (`objExists ($modCoreName + "Grp.twistAxis")`)
+                {
+                    $twistAxis = `getAttr ($modCoreName + "Grp.twistAxis")`;
+                }
+            }
+                
 			//REMOVE NAMESPACE IF EXISTS
 			string $noNameSpaceControl = $currentC;
 			if (`gmatch $currentC ("*:*")`)
@@ -1527,43 +1619,86 @@ global proc modSetFromBatchMirrorLocatorKeysCenter(string $modRigName, string $r
 							keyTangent -e -a -t $currentFrame -inTangentType $inTangentTypeCurrentC[0]
 							-outTangentType $outTangentTypeCurrentC[0] $AnimConnection;
 
-							if ($inTangentTypeCurrentC[0]=="fixed"||$inTangentTypeCurrentC[0]=="plateau")
+							if ($twistAxis != "x")
 							{
-								if ($eachChannel == "translateX"||$eachChannel == "rotateY"||$eachChannel == "rotateZ")
-								{
-									keyTangent -e -a -t $currentFrame -inAngle ($inTangentCurrentC[0]*-1)
-									-inWeight $inWeightCurrentC[0] -lock 0 $AnimConnection;
-								}
-								else
-								{
-									keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
-									-inWeight $inWeightCurrentC[0] -lock 0 $AnimConnection;
-								}
-							}
-							if ($outTangentTypeCurrentC[0]=="fixed"||$outTangentTypeCurrentC[0]=="plateau")
-							{
-								if ($eachChannel == "translateX"||$eachChannel == "rotateY"||$eachChannel == "rotateZ")
-								{
-									keyTangent -e -a -t $currentFrame -outAngle ($inTangentCurrentC[0]*-1)
-									-outWeight $inWeightCurrentC[0] -lock 0 $AnimConnection;
-								}
-								else
-								{
-									keyTangent -e -a -t $currentFrame -outAngle $inTangentCurrentC[0]
-									-outWeight $inWeightCurrentC[0] -lock 0 $AnimConnection;
-								}
-							}
-							//KEY ATTRIBUTE	
-							if ($eachChannel == "translateX"||$eachChannel == "rotateY"||$eachChannel == "rotateZ")
-							{
-								$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
-								keyframe -e -a -t $currentFrame -vc ($currentVal*-1) $AnimConnection;
-							}
-							else
-							{
-								$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
-								keyframe -e -a -t $currentFrame -vc $currentVal $AnimConnection;
-							}
+                                if ($inTangentTypeCurrentC[0]=="fixed"||$inTangentTypeCurrentC[0]=="plateau")
+                                {
+                                    if ($eachChannel == "translateX"||$eachChannel == "rotateY"||$eachChannel == "rotateZ")
+                                    {
+                                        keyTangent -e -a -t $currentFrame -inAngle ($inTangentCurrentC[0]*-1)
+                                        -inWeight $inWeightCurrentC[0] -lock 0 $AnimConnection;
+                                    }
+                                    else
+                                    {
+                                        keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
+                                        -inWeight $inWeightCurrentC[0] -lock 0 $AnimConnection;
+                                    }
+                                }
+                                if ($outTangentTypeCurrentC[0]=="fixed"||$outTangentTypeCurrentC[0]=="plateau")
+                                {
+                                    if ($eachChannel == "translateX"||$eachChannel == "rotateY"||$eachChannel == "rotateZ")
+                                    {
+                                        keyTangent -e -a -t $currentFrame -outAngle ($inTangentCurrentC[0]*-1)
+                                        -outWeight $inWeightCurrentC[0] -lock 0 $AnimConnection;
+                                    }
+                                    else
+                                    {
+                                        keyTangent -e -a -t $currentFrame -outAngle $inTangentCurrentC[0]
+                                        -outWeight $inWeightCurrentC[0] -lock 0 $AnimConnection;
+                                    }
+                                }
+                                //KEY ATTRIBUTE	
+                                if ($eachChannel == "translateX"||$eachChannel == "rotateY"||$eachChannel == "rotateZ")
+                                {
+                                    $currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+                                    keyframe -e -a -t $currentFrame -vc ($currentVal*-1) $AnimConnection;
+                                }
+                                else
+                                {
+                                    $currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+                                    keyframe -e -a -t $currentFrame -vc $currentVal $AnimConnection;
+                                }
+                            }
+                            else
+                            {
+                                if ($inTangentTypeCurrentC[0]=="fixed"||$inTangentTypeCurrentC[0]=="plateau")
+                                {
+                                    if ($eachChannel == "translateZ"||$eachChannel == "rotateY"||$eachChannel == "rotateX")
+                                    {
+                                        keyTangent -e -a -t $currentFrame -inAngle ($inTangentCurrentC[0]*-1)
+                                        -inWeight $inWeightCurrentC[0] -lock 0 $AnimConnection;
+                                    }
+                                    else
+                                    {
+                                        keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
+                                        -inWeight $inWeightCurrentC[0] -lock 0 $AnimConnection;
+                                    }
+                                }
+                                if ($outTangentTypeCurrentC[0]=="fixed"||$outTangentTypeCurrentC[0]=="plateau")
+                                {
+                                    if ($eachChannel == "translateZ"||$eachChannel == "rotateY"||$eachChannel == "rotateX")
+                                    {
+                                        keyTangent -e -a -t $currentFrame -outAngle ($inTangentCurrentC[0]*-1)
+                                        -outWeight $inWeightCurrentC[0] -lock 0 $AnimConnection;
+                                    }
+                                    else
+                                    {
+                                        keyTangent -e -a -t $currentFrame -outAngle $inTangentCurrentC[0]
+                                        -outWeight $inWeightCurrentC[0] -lock 0 $AnimConnection;
+                                    }
+                                }
+                                //KEY ATTRIBUTE	
+                                if ($eachChannel == "translateZ"||$eachChannel == "rotateY"||$eachChannel == "rotateX")
+                                {
+                                    $currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+                                    keyframe -e -a -t $currentFrame -vc ($currentVal*-1) $AnimConnection;
+                                }
+                                else
+                                {
+                                    $currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+                                    keyframe -e -a -t $currentFrame -vc $currentVal $AnimConnection;
+                                }                                
+                            }
 							keyTangent -e -a -t $currentFrame -lock $lockCurrentC[0] $AnimConnection;						
 						}
 						else 
@@ -1637,96 +1772,310 @@ global proc modSetFromBatchMirrorLocatorKeysSide(string $modRigName, string $rig
 			$numChannels = `size $channels`;
 			for ($eachChannel in $channels)
 			{
-				//GET PREVIOUS TIME
-				//CHECK FOR LOCATOR KEYFRAME
-				$KeyCheck[0] = `keyframe -t $currentFrame -q -keyframeCount ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
-				if ($KeyCheck[0] > 0)
+				if (`objExists ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`)
 				{
-					//CHECK IF CONTROLLER IS ANIMATED
-					if (`connectionInfo -isDestination ($currentC + "." + $eachChannel)` == 1)
+					//GET PREVIOUS TIME
+					//CHECK FOR LOCATOR KEYFRAME
+					$KeyCheck[0] = `keyframe -t $currentFrame -q -keyframeCount ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+					if ($KeyCheck[0] > 0)
 					{
-						//CHECK WHAT IS ANIMATING IT
-						string $AnimConnection = `connectionInfo -sourceFromDestination ($currentC + "." + $eachChannel)`;
-						//CHECK FOR ANIM CURVE
-						$AnimCurve = `nodeType $AnimConnection`;
-						//string $AnimCurveString = $AnimCurve;
-						if ($AnimCurve=="animCurveTA"||$AnimCurve=="animCurveTL"||$AnimCurve=="animCurveTU"||$AnimCurve=="character")
+						//CHECK IF CONTROLLER IS ANIMATED
+						if (`connectionInfo -isDestination ($currentC + "." + $eachChannel)` == 1)
 						{
-							string $oppositeAnimConnection;
-							
-							if ($AnimCurve=="character")
+							//CHECK WHAT IS ANIMATING IT
+							string $AnimConnection = `connectionInfo -sourceFromDestination ($currentC + "." + $eachChannel)`;
+							//CHECK FOR ANIM CURVE
+							$AnimCurve = `nodeType $AnimConnection`;
+							//string $AnimCurveString = $AnimCurve;
+							if ($AnimCurve=="animCurveTA"||$AnimCurve=="animCurveTL"||$AnimCurve=="animCurveTU"||$AnimCurve=="character")
 							{
-								$charSetName = `listConnections -d off -s on ($currentC + "." + $eachChannel)`;
-								$charSetConnections = `listConnections -d off -s on -t clipScheduler $charSetName`;
-								$sizeCharSet = `size $charSetConnections`;
-								if ($sizeCharSet > 0)
+								string $oppositeAnimConnection;
+								
+								if ($AnimCurve=="character")
 								{
-									string $IncomingConnection[] = `listConnections -d off -s on ($currentC + "." + $eachChannel)`;
-									$AnimConnection = `substitute ($IncomingConnection[0] + ".") $AnimConnection ($IncomingConnection[0] + "_")`;
+									$charSetName = `listConnections -d off -s on ($currentC + "." + $eachChannel)`;
+									$charSetConnections = `listConnections -d off -s on -t clipScheduler $charSetName`;
+									$sizeCharSet = `size $charSetConnections`;
+									if ($sizeCharSet > 0)
+									{
+										string $IncomingConnection[] = `listConnections -d off -s on ($currentC + "." + $eachChannel)`;
+										$AnimConnection = `substitute ($IncomingConnection[0] + ".") $AnimConnection ($IncomingConnection[0] + "_")`;
+									}
+									//GET OPPOSITE
+									string $buffer[];
+									$numTokens = `tokenize $AnimConnection "_" $buffer`;
+									$oppositeAnimConnection = `substitute ($buffer[($numTokens-3)] + $side) $AnimConnection ($buffer[($numTokens-3)] + $oppSide)`;
+									if (!`objExists $oppositeAnimConnection`)
+									{
+										$oppositeAnimConnection = `substitute ("_" + $eachChannel) $oppositeAnimConnection ("." + $eachChannel)`;
+									}
 								}
-								//GET OPPOSITE
-								string $buffer[];
-								$numTokens = `tokenize $AnimConnection "_" $buffer`;
-								$oppositeAnimConnection = `substitute ($buffer[($numTokens-3)] + $side) $AnimConnection ($buffer[($numTokens-3)] + $oppSide)`;
+								else if ($AnimCurve=="animCurveTA"||$AnimCurve=="animCurveTL"||$AnimCurve=="animCurveTU")
+								{
+									$AnimConnection = ($noNameSpaceControl + "_" + $eachChannel);
+									$oppositeAnimConnection = ($noNameSpaceOppControl + "." + $eachChannel);
+								}
+						
+								$inTangentCurrentC     = `keyTangent -t $currentFrame -q -inAngle ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
+								$outTangentCurrentC    = `keyTangent -t $currentFrame -q -outAngle ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
+								$inWeightCurrentC      = `keyTangent -t $currentFrame -q -inWeight ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
+								$outWeightCurrentC     = `keyTangent -t $currentFrame -q -outWeight ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
+								$inTangentTypeCurrentC = `keyTangent -t $currentFrame -q -inTangentType ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
+								$outTangentTypeCurrentC= `keyTangent -t $currentFrame -q -outTangentType ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
+								$lockCurrentC          = `keyTangent -t $currentFrame -q -lock ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
+								$weightedCurrentC      = `keyTangent -t $currentFrame -q -weightedTangents ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
+								
 								if (!`objExists $oppositeAnimConnection`)
 								{
-									$oppositeAnimConnection = `substitute ("_" + $eachChannel) $oppositeAnimConnection ("." + $eachChannel)`;
+									$oppositeAnimConnection = ($oppositeC + "." + $eachChannel);
 								}
-							}
-							else if ($AnimCurve=="animCurveTA"||$AnimCurve=="animCurveTL"||$AnimCurve=="animCurveTU")
-							{
-								$AnimConnection = ($noNameSpaceControl + "_" + $eachChannel);
-								$oppositeAnimConnection = ($noNameSpaceOppControl + "." + $eachChannel);
-							}
-                	
-							$inTangentCurrentC     = `keyTangent -t $currentFrame -q -inAngle ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
-							$outTangentCurrentC    = `keyTangent -t $currentFrame -q -outAngle ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
-							$inWeightCurrentC      = `keyTangent -t $currentFrame -q -inWeight ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
-							$outWeightCurrentC     = `keyTangent -t $currentFrame -q -outWeight ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
-							$inTangentTypeCurrentC = `keyTangent -t $currentFrame -q -inTangentType ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
-							$outTangentTypeCurrentC= `keyTangent -t $currentFrame -q -outTangentType ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
-							$lockCurrentC          = `keyTangent -t $currentFrame -q -lock ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
-							$weightedCurrentC      = `keyTangent -t $currentFrame -q -weightedTangents ($noNameSpaceControl + "_modLctr_Frame" + $currentFrame + "_" + $eachChannel)`;
-							
-							if (!`objExists $oppositeAnimConnection`)
-							{
-								$oppositeAnimConnection = ($oppositeC + "." + $eachChannel);
-							}
-							//SET KEY
-							setKeyframe -t $currentFrame $oppositeAnimConnection;
-							keyTangent -e -a -t $currentFrame -weightedTangents $weightedCurrentC[0]
-							$oppositeAnimConnection;
-							keyTangent -e -a -t $currentFrame -inTangentType $inTangentTypeCurrentC[0]
-							-outTangentType $outTangentTypeCurrentC[0] $oppositeAnimConnection;
-
-							$moduleType = `getAttr ($currentC + ".moduleType")`;
-							string $modCoreName;
-							if ($moduleType != "auxiliary")
-							{
-								$modCoreName = `getAttr ($currentC + ".modCoreName")`;	
-							}
-							else
-							{
-								$modCoreName = (`getAttr ($currentC + ".modCoreName")` + "_Aux");	
-							}
-
-							//IN TANGENTS
-							//SPLINE
-							if ($inTangentTypeCurrentC[0]=="fixed"||$inTangentTypeCurrentC[0]=="plateau")
-							{
+								//SET KEY
+								setKeyframe -t $currentFrame $oppositeAnimConnection;
+								keyTangent -e -a -t $currentFrame -weightedTangents $weightedCurrentC[0]
+								$oppositeAnimConnection;
+								keyTangent -e -a -t $currentFrame -inTangentType $inTangentTypeCurrentC[0]
+								-outTangentType $outTangentTypeCurrentC[0] $oppositeAnimConnection;
+	
+								$moduleType = `getAttr ($currentC + ".moduleType")`;
+								string $modCoreName;
+								if ($moduleType != "auxiliary")
+								{
+									$modCoreName = `getAttr ($currentC + ".modCoreName")`;	
+								}
+								else
+								{
+									$modCoreName = (`getAttr ($currentC + ".modCoreName")` + "_Aux");	
+								}
+	
+								//IN TANGENTS
+								//SPLINE
+								if ($inTangentTypeCurrentC[0]=="fixed"||$inTangentTypeCurrentC[0]=="plateau")
+								{
+									if ($moduleType == "spline")
+									{
+										if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0)
+										{
+											if ($eachChannel == "rotateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
+											{
+												keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
+												-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											}
+											else if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "translateZ")
+											{
+												keyTangent -e -a -t $currentFrame -inAngle ($inTangentCurrentC[0]*-1)
+												-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											}
+										}
+										else if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 1)
+										{
+											if (`getAttr ($modRigName + $modCoreName + "Grp.twistAxis")`== "x")
+											{
+												if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "rotateZ")
+												{
+												keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
+												-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+												}
+												else if ($eachChannel == "translateZ" || $eachChannel == "rotateX" || $eachChannel == "rotateY")
+												{
+												keyTangent -e -a -t $currentFrame -inAngle ($inTangentCurrentC[0]*-1)
+												-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+												}							
+											}
+											if (`getAttr ($modRigName + $modCoreName + "Grp.twistAxis")`== "y")
+											{
+												if ($eachChannel == "translateY" || $eachChannel == "translateZ" || $eachChannel == "rotateX")
+												{
+												keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
+												-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+												}
+												else if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
+												{
+												keyTangent -e -a -t $currentFrame -inAngle ($inTangentCurrentC[0]*-1)
+												-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+												}							
+											}
+					
+										}					
+									}
+									//ARM/LEG
+									else if ($moduleType == "arm" || $moduleType == "leg" || $moduleType == "fkChain" || $moduleType == "head" || $moduleType == "auxiliary")
+									{
+										if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0 && !`gmatch $currentC "*Ik_Ctrl"`)
+										{
+											if ($eachChannel == "rotateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
+											{
+												keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
+												-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											}
+											else if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "translateZ")
+											{
+												keyTangent -e -a -t $currentFrame -inAngle ($inTangentCurrentC[0]*-1)
+												-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											}
+											else
+											{
+												keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
+												-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											}
+										}
+										else 
+										{
+											if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
+											{
+												keyTangent -e -a -t $currentFrame -inAngle ($inTangentCurrentC[0]*-1)
+												-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											}
+											else
+											{
+												keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
+												-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											}
+										}
+									}
+					
+									//EYE
+									else if ($moduleType == "lookAt")
+									{
+										if ($eachChannel == "translateX" || $eachChannel == "translateY")
+										{
+											keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
+											-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+										}
+										else if ($eachChannel == "translateZ")
+										{
+												keyTangent -e -a -t $currentFrame -inAngle ($inTangentCurrentC[0]*-1)
+												-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+										}
+										else
+										{
+											keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
+											-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+										}
+									}
+								}
+	
+								//OUT TANGENTS
+								//SPLINE
+								if ($outTangentTypeCurrentC[0]=="fixed"||$outTangentTypeCurrentC[0]=="plateau")
+								{
+									if ($moduleType == "spline")
+									{
+										if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0)
+										{
+											if ($eachChannel == "rotateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
+											{
+												keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
+												-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											}
+											else if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "translateZ")
+											{
+												keyTangent -e -a -t $currentFrame -outAngle ($outTangentCurrentC[0]*-1)
+												-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											}
+										}
+										else if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 1)
+										{
+											if (`getAttr ($modRigName + $modCoreName + "Grp.twistAxis")`== "x")
+											{
+												if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "rotateZ")
+												{
+												keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
+												-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+												}
+												else if ($eachChannel == "translateZ" || $eachChannel == "rotateX" || $eachChannel == "rotateY")
+												{
+												keyTangent -e -a -t $currentFrame -outAngle ($outTangentCurrentC[0]*-1)
+												-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+												}							
+											}
+											if (`getAttr ($modRigName + $modCoreName + "Grp.twistAxis")`== "y")
+											{
+												if ($eachChannel == "translateY" || $eachChannel == "translateZ" || $eachChannel == "rotateX")
+												{
+												keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
+												-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+												}
+												else if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
+												{
+												keyTangent -e -a -t $currentFrame -outAngle ($outTangentCurrentC[0]*-1)
+												-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+												}							
+											}
+					
+										}					
+									}				
+									//ARM/LEG
+									else if ($moduleType == "arm" || $moduleType == "leg" || $moduleType == "fkChain" || $moduleType == "head" || $moduleType == "auxiliary")
+									{
+										if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0 && !`gmatch $currentC "*Ik_Ctrl"`)
+										{
+											if ($eachChannel == "rotateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
+											{
+												keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
+												-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											}
+											else if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "translateZ")
+											{
+												keyTangent -e -a -t $currentFrame -outAngle ($outTangentCurrentC[0]*-1)
+												-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											}
+											else
+											{
+												keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
+												-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											}
+										}
+										else 
+										{
+											if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
+											{
+												keyTangent -e -a -t $currentFrame -outAngle ($outTangentCurrentC[0]*-1)
+												-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											}
+											else
+											{
+												keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
+												-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											}
+										}
+									}
+					
+									//EYE
+									else if ($moduleType == "lookAt")
+									{
+										if ($eachChannel == "translateX" || $eachChannel == "translateY")
+										{
+											keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
+											-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+										}
+										else if ($eachChannel == "translateZ")
+										{
+												keyTangent -e -a -t $currentFrame -outAngle ($outTangentCurrentC[0]*-1)
+												-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+										}
+										else
+										{
+											keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
+											-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+										}
+									}
+								}
+								
+								//EDIT KEY VALUE
+								//SPLINE
 								if ($moduleType == "spline")
 								{
 									if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0)
 									{
 										if ($eachChannel == "rotateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
 										{
-											keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
-											-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+											keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
 										}
 										else if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "translateZ")
 										{
-											keyTangent -e -a -t $currentFrame -inAngle ($inTangentCurrentC[0]*-1)
-											-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+											keyframe -e -a -t $currentFrame -vc ($currentVal*-1) $oppositeAnimConnection;
 										}
 									}
 									else if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 1)
@@ -1735,133 +2084,26 @@ global proc modSetFromBatchMirrorLocatorKeysSide(string $modRigName, string $rig
 										{
 											if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "rotateZ")
 											{
-											keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
-											-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+												$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+												keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
 											}
 											else if ($eachChannel == "translateZ" || $eachChannel == "rotateX" || $eachChannel == "rotateY")
 											{
-											keyTangent -e -a -t $currentFrame -inAngle ($inTangentCurrentC[0]*-1)
-											-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+												$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+												keyframe -e -a -t $currentFrame -vc ($currentVal*-1) $oppositeAnimConnection;
 											}							
 										}
 										if (`getAttr ($modRigName + $modCoreName + "Grp.twistAxis")`== "y")
 										{
 											if ($eachChannel == "translateY" || $eachChannel == "translateZ" || $eachChannel == "rotateX")
 											{
-											keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
-											-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+												$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+												keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
 											}
 											else if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
 											{
-											keyTangent -e -a -t $currentFrame -inAngle ($inTangentCurrentC[0]*-1)
-											-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-											}							
-										}
-				
-									}					
-								}
-								//ARM/LEG
-								else if ($moduleType == "arm" || $moduleType == "leg" || $moduleType == "fkChain" || $moduleType == "head" || $moduleType == "auxiliary")
-								{
-									if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0 && !`gmatch $currentC "*Ik_Ctrl"`)
-									{
-										if ($eachChannel == "rotateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
-										{
-											keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
-											-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-										}
-										else if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "translateZ")
-										{
-											keyTangent -e -a -t $currentFrame -inAngle ($inTangentCurrentC[0]*-1)
-											-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-										}
-										else
-										{
-											keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
-											-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-										}
-									}
-									else 
-									{
-										if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
-										{
-											keyTangent -e -a -t $currentFrame -inAngle ($inTangentCurrentC[0]*-1)
-											-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-										}
-										else
-										{
-											keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
-											-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-										}
-									}
-								}
-				
-								//EYE
-								else if ($moduleType == "lookAt")
-								{
-									if ($eachChannel == "translateX" || $eachChannel == "translateY")
-									{
-										keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
-										-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-									}
-									else if ($eachChannel == "translateZ")
-									{
-											keyTangent -e -a -t $currentFrame -inAngle ($inTangentCurrentC[0]*-1)
-											-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-									}
-									else
-									{
-										keyTangent -e -a -t $currentFrame -inAngle $inTangentCurrentC[0]
-										-inWeight $inWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-									}
-								}
-							}
-
-							//OUT TANGENTS
-							//SPLINE
-							if ($outTangentTypeCurrentC[0]=="fixed"||$outTangentTypeCurrentC[0]=="plateau")
-							{
-								if ($moduleType == "spline")
-								{
-									if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0)
-									{
-										if ($eachChannel == "rotateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
-										{
-											keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
-											-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-										}
-										else if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "translateZ")
-										{
-											keyTangent -e -a -t $currentFrame -outAngle ($outTangentCurrentC[0]*-1)
-											-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-										}
-									}
-									else if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 1)
-									{
-										if (`getAttr ($modRigName + $modCoreName + "Grp.twistAxis")`== "x")
-										{
-											if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "rotateZ")
-											{
-											keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
-											-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-											}
-											else if ($eachChannel == "translateZ" || $eachChannel == "rotateX" || $eachChannel == "rotateY")
-											{
-											keyTangent -e -a -t $currentFrame -outAngle ($outTangentCurrentC[0]*-1)
-											-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-											}							
-										}
-										if (`getAttr ($modRigName + $modCoreName + "Grp.twistAxis")`== "y")
-										{
-											if ($eachChannel == "translateY" || $eachChannel == "translateZ" || $eachChannel == "rotateX")
-											{
-											keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
-											-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-											}
-											else if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
-											{
-											keyTangent -e -a -t $currentFrame -outAngle ($outTangentCurrentC[0]*-1)
-											-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+												$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+												keyframe -e -a -t $currentFrame -vc ($currentVal*-1) $oppositeAnimConnection;
 											}							
 										}
 				
@@ -1874,116 +2116,44 @@ global proc modSetFromBatchMirrorLocatorKeysSide(string $modRigName, string $rig
 									{
 										if ($eachChannel == "rotateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
 										{
-											keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
-											-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+											keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
 										}
 										else if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "translateZ")
 										{
-											keyTangent -e -a -t $currentFrame -outAngle ($outTangentCurrentC[0]*-1)
-											-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+											keyframe -e -a -t $currentFrame -vc ($currentVal*-1) $oppositeAnimConnection;
 										}
 										else
 										{
-											keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
-											-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+											keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
 										}
 									}
 									else 
 									{
 										if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
 										{
-											keyTangent -e -a -t $currentFrame -outAngle ($outTangentCurrentC[0]*-1)
-											-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+											keyframe -e -a -t $currentFrame -vc ($currentVal*-1) $oppositeAnimConnection;
 										}
 										else
 										{
-											keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
-											-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+											$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+											keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
 										}
 									}
 								}
-				
 								//EYE
 								else if ($moduleType == "lookAt")
 								{
 									if ($eachChannel == "translateX" || $eachChannel == "translateY")
 									{
-										keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
-										-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
+										$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
+										keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
 									}
 									else if ($eachChannel == "translateZ")
 									{
-											keyTangent -e -a -t $currentFrame -outAngle ($outTangentCurrentC[0]*-1)
-											-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-									}
-									else
-									{
-										keyTangent -e -a -t $currentFrame -outAngle $outTangentCurrentC[0]
-										-outWeight $outWeightCurrentC[0] -lock 0 $oppositeAnimConnection;
-									}
-								}
-							}
-							
-							//EDIT KEY VALUE
-							//SPLINE
-							if ($moduleType == "spline")
-							{
-								if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0)
-								{
-									if ($eachChannel == "rotateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
-									{
-										$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
-										keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
-									}
-									else if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "translateZ")
-									{
-										$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
-										keyframe -e -a -t $currentFrame -vc ($currentVal*-1) $oppositeAnimConnection;
-									}
-								}
-								else if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 1)
-								{
-									if (`getAttr ($modRigName + $modCoreName + "Grp.twistAxis")`== "x")
-									{
-										if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "rotateZ")
-										{
-											$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
-											keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
-										}
-										else if ($eachChannel == "translateZ" || $eachChannel == "rotateX" || $eachChannel == "rotateY")
-										{
-											$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
-											keyframe -e -a -t $currentFrame -vc ($currentVal*-1) $oppositeAnimConnection;
-										}							
-									}
-									if (`getAttr ($modRigName + $modCoreName + "Grp.twistAxis")`== "y")
-									{
-										if ($eachChannel == "translateY" || $eachChannel == "translateZ" || $eachChannel == "rotateX")
-										{
-											$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
-											keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
-										}
-										else if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
-										{
-											$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
-											keyframe -e -a -t $currentFrame -vc ($currentVal*-1) $oppositeAnimConnection;
-										}							
-									}
-			
-								}					
-							}				
-							//ARM/LEG
-							else if ($moduleType == "arm" || $moduleType == "leg" || $moduleType == "fkChain" || $moduleType == "head" || $moduleType == "auxiliary")
-							{
-								if (`getAttr ($modRigName + $modCoreName + "Grp.mirror")` == 0 && !`gmatch $currentC "*Ik_Ctrl"`)
-								{
-									if ($eachChannel == "rotateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
-									{
-										$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
-										keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
-									}
-									else if ($eachChannel == "translateX" || $eachChannel == "translateY" || $eachChannel == "translateZ")
-									{
 										$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
 										keyframe -e -a -t $currentFrame -vc ($currentVal*-1) $oppositeAnimConnection;
 									}
@@ -1992,33 +2162,6 @@ global proc modSetFromBatchMirrorLocatorKeysSide(string $modRigName, string $rig
 										$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
 										keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
 									}
-								}
-								else 
-								{
-									if ($eachChannel == "translateX" || $eachChannel == "rotateY" || $eachChannel == "rotateZ")
-									{
-										$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
-										keyframe -e -a -t $currentFrame -vc ($currentVal*-1) $oppositeAnimConnection;
-									}
-									else
-									{
-										$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
-										keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
-									}
-								}
-							}
-							//EYE
-							else if ($moduleType == "lookAt")
-							{
-								if ($eachChannel == "translateX" || $eachChannel == "translateY")
-								{
-									$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
-									keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
-								}
-								else if ($eachChannel == "translateZ")
-								{
-									$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
-									keyframe -e -a -t $currentFrame -vc ($currentVal*-1) $oppositeAnimConnection;
 								}
 								else
 								{
@@ -2026,22 +2169,17 @@ global proc modSetFromBatchMirrorLocatorKeysSide(string $modRigName, string $rig
 									keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
 								}
 							}
-							else
+							else 
 							{
-								$currentVal = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + "." + $eachChannel)`;
-								keyframe -e -a -t $currentFrame -vc $currentVal $oppositeAnimConnection;
+								cutKey -t $currentFrame -attribute $eachChannel -option keys $oppositeC;
 							}
 						}
-						else 
-						{
-							cutKey -t $currentFrame -attribute $eachChannel -option keys $oppositeC;
-						}
+					}
+					else
+					{
+						cutKey -t $currentFrame -attribute $eachChannel -option keys $oppositeC;
 					}
 				}
-				else
-				{
-					cutKey -t $currentFrame -attribute $eachChannel -option keys $oppositeC;
-				}			
 			}
 		}
 	}
@@ -2313,9 +2451,13 @@ global proc modBatchMirror(string $modRigName, string $rigGrp, string $lPrfx, st
 	int $numberOfSteps = ($numberOfFrames * 17);
 		
 	currentTime $startFrame;
-	float $currentFrame = $startFrame;
-	float $previousFrame = ($currentFrame -1);
-	int $numberOfFrames = 0;
+	$currentFrame = $startFrame;
+	$previousFrame = ($currentFrame -1);
+	$numberOfFrames = 0;
+	
+	//CHECK IF THERE ARE LEFT AND RIGHT CONTROLS
+    $leftRightCtrls = `ls -type "transform" ($modRigName + $lPrfx + "*_Ctrl") ($modRigName + $rPrfx + "*_Ctrl")`;
+
 
 	//CREATE LOCATORS
 	print "SAVING ANIMATION...";
@@ -2329,44 +2471,55 @@ global proc modBatchMirror(string $modRigName, string $rigGrp, string $lPrfx, st
 	}
 
     currentTime $startFrame;
-    float $currentFrame = $startFrame;
-	float $previousFrame = ($currentFrame -1);
+    $currentFrame = $startFrame;
+	$previousFrame = ($currentFrame -1);
 
 	//RUN MIRROR
 	int $i;
 	while (($currentFrame <= $endFrame)&&($previousFrame != $currentFrame))
 	{
+		print ("Current Frame is " + $currentFrame + "\n");
 		progressBar -edit -step ($currentFrame - $previousFrame) -status ("Mirroring Animation") $gMainProgressBar;
 		
 		print "\nSAVING CHANNEL DATA...";
 		modSetToBatchMirrorLocatorChannelsCenter($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame);
 		print "...";
-		modSetToBatchMirrorLocatorChannelsSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $lPrfx);
-		print "...";
-		modSetToBatchMirrorLocatorChannelsSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $rPrfx);
-		
+		if (`size $leftRightCtrls` > 0)
+		{
+            modSetToBatchMirrorLocatorChannelsSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $lPrfx);
+            print "...";
+            modSetToBatchMirrorLocatorChannelsSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $rPrfx);
+		}
 		print "\nSAVING KEYFRAME DATA...";
 		modSetToBatchMirrorLocatorKeysCenter($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame);
 		print "...";
-		modSetToBatchMirrorLocatorKeysSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $lPrfx, $rPrfx);
-		print "...";
-		modSetToBatchMirrorLocatorKeysSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $rPrfx, $lPrfx);
+		if (`size $leftRightCtrls` > 0)
+		{
+		    modSetToBatchMirrorLocatorKeysSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $lPrfx, $rPrfx);
+		    print "...";
+		    modSetToBatchMirrorLocatorKeysSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $rPrfx, $lPrfx);
+    	}
     	
 		print "\nLOADING CHANNEL DATA...";
 		modSetFromBatchMirrorLocatorChannelsCenter($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $i);
 		print "...";
-		modSetFromBatchMirrorLocatorChannelsSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $i, $lPrfx, $rPrfx);
-		print "...";
-		modSetFromBatchMirrorLocatorChannelsSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $i, $rPrfx, $lPrfx);  
+		if (`size $leftRightCtrls` > 0)
+		{
+		    modSetFromBatchMirrorLocatorChannelsSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $i, $lPrfx, $rPrfx);
+		    print "...";
+		    modSetFromBatchMirrorLocatorChannelsSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $i, $rPrfx, $lPrfx);  
+		}
 		
 		print "\nLOADING KEYFRAME DATA...";
 		modSetFromBatchMirrorLocatorKeysCenter($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame);
 		print "...";
-		modSetFromBatchMirrorLocatorKeysSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $lPrfx, $rPrfx);
-		print "...";
-		modSetFromBatchMirrorLocatorKeysSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $rPrfx, $lPrfx);  
-
-		currentTime -edit `findKeyframe -which next`;
+		if (`size $leftRightCtrls` > 0)
+		{
+		    modSetFromBatchMirrorLocatorKeysSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $lPrfx, $rPrfx);
+		    print "...";
+		    modSetFromBatchMirrorLocatorKeysSide($modRigName, $rigGrp, $lPrfx, $rPrfx, $applyTo, $mirroringSelection, $startFrame, $endFrame, $rPrfx, $lPrfx);  
+		}
+		currentTime -edit `findKeyframe -which next $mirroringSelection`;
 		$previousFrame = $currentFrame;
 		$currentFrame = `currentTime -q`;
 		$i++;
@@ -2384,12 +2537,12 @@ global proc modBatchMirrorCheck(string $modRigName, string $rigGrp, string $lPrf
 	float $endFrame   = `textField -q -text ($modRigName + "modBatchMirrorEndTxtFld")`;
 	float $currentFrame    = `currentTime -q`;
 	
-	if ($rangeCheck == 0)
+	if ($rangeCheck == 1)
 	{
 			playButtonEnd;
-			float $endFrame = `currentTime -q`;
+			$endFrame = `currentTime -q`;
 			playButtonStart;
-			float $startFrame = `currentTime -q`;
+			$startFrame = `currentTime -q`;
 	}
 	
 	$mirroringSelection = `ls -sl`;
@@ -2590,164 +2743,167 @@ global proc CreateModuPoserGUI(string $main_Ctrls[])
 			paneLayout -configuration "horizontal2" ($modRigName + "SubModSelectionPaneLayout1");
 					
 					//ARMS///////////////////////////////////////////////////////////////////////////////////////////
-					int $i = 0;
-						frameLayout -label "ARMS";
-						scrollLayout ($modRigName + "ArmsScrollLayout");
-						columnLayout ($modRigName + "ArmsColumnLayout");
-						for ($each in $topNodes)
+					$i = 0;
+					frameLayout -label "ARMS";
+					scrollLayout ($modRigName + "ArmsScrollLayout");
+					columnLayout ($modRigName + "ArmsColumnLayout");
+					for ($each in $topNodes)
+					{
+						if (`getAttr ($each + ".topNode")` == "arm")
 						{
-							if (`getAttr ($each + ".topNode")` == "arm")
+							//GET CORE NAME
+							string $coreName = `getAttr ($each + ".coreName")`;
+							string $moduleName = `getAttr ($each + ".moduleName")`;
+							vector $buttonC1 = <<0.55, 0.55, 0.00>>;
+							vector $buttonC2 = <<0.75, 0.75, 0.00>>;
+							vector $buttonC3 = <<0.95, 0.95, 0.00>>;
+							if (`objExists ($each + ".side")`)
 							{
-								//GET CORE NAME
-								string $coreName = `getAttr ($each + ".coreName")`;
-								string $moduleName = `getAttr ($each + ".moduleName")`;
-								vector $buttonC1 = <<0.55, 0.55, 0.00>>;
-								vector $buttonC2 = <<0.75, 0.75, 0.00>>;
-								vector $buttonC3 = <<0.95, 0.95, 0.00>>;
-								if (`objExists ($each + ".side")`)
+								if (`getAttr ($each + ".side")` == "right")
 								{
-									if (`getAttr ($each + ".side")` == "right")
-									{
-										//CREATE PAIRING FRAME LAYOUT
-										frameLayout -label ($moduleName + " (pair)")
-										-bgc 0.17 0.17 0.17
-										-w 184
-										-collapsable 1 ($modRigName + $moduleName + "PairFrameLayout");
-										columnLayout ($modRigName + $moduleName + "PairColumnLayout");
+									//CREATE PAIRING FRAME LAYOUT
+									frameLayout -label ($moduleName + " (pair)")
+									-bgc 0.17 0.17 0.17
+									-w 184
+									-collapsable 1 ($modRigName + $moduleName + "PairFrameLayout");
+									columnLayout ($modRigName + $moduleName + "PairColumnLayout");
 
-										$buttonC1 = <<0.65, 0.15, 0.15>>;
-										$buttonC2 = <<0.75, 0.25, 0.25>>;
-										$buttonC3 = <<1.00, 0.45, 0.45>>;
-									}
-									if (`getAttr ($each + ".side")` == "left")
-									{
-										$buttonC1 = <<0.00, 0.20, 0.65>>;
-										$buttonC2 = <<0.12, 0.50, 0.85>>;
-										$buttonC3 = <<0.23, 0.70, 1.00>>;
-									}
-										
+									$buttonC1 = <<0.65, 0.15, 0.15>>;
+									$buttonC2 = <<0.75, 0.25, 0.25>>;
+									$buttonC3 = <<1.00, 0.45, 0.45>>;
 								}
-								frameLayout -label $coreName
-								-w 184
-								-collapsable 1 
-								-bgc ($buttonC1.x) ($buttonC1.y) ($buttonC1.z) ($modRigName + "ArmModFrameLayout" + $i);
-								columnLayout;
-								
-								string $armsFormLayout = `formLayout -numberOfDivisions 100`;
-								$elbowNum = `getAttr ($each + ".elbowNum")`;
-
-								//CLAVICLE
-								string $clavicleButton     = `button -label "Clavicle"   -w 114 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_Clavicle_Ctrl")`;
-								button -edit -command ("modSelectControl " + $clavicleButton) $clavicleButton;
-
-								//Fk
-								string $shoulderButton     = `button -label "ShldrFk"   -w 114 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_ShoulderFk_Ctrl")`;
-								string $wristFkButton = `button -label "WristFk" -w 054 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_WristFk_Ctrl")`;
-								button -edit -command ("modSelectControl " + $shoulderButton) $shoulderButton;
-								button -edit -command ("modSelectControl " + $wristFkButton) $wristFkButton;
-								//Ik
-								string $elbow1IkButton = `button -label "ElbowIk" -w 054 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_ElbowIk_Ctrl")`;
-								string $wristIkButton =  `button -label "WristIk" -w 054 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_WristIk_Ctrl")`;
-								button -edit -command ("modSelectControl " + $elbow1IkButton) $elbow1IkButton;
-								button -edit -command ("modSelectControl " + $wristIkButton) $wristIkButton;
-								
-								//ELBOWS//	
-								string $elbow1FkButton;
-								string $elbow2FkButton;
-								string $LowerArmIkButton;
-								int $elbow2Offset = 0;
-								if ($elbowNum == 1)
+								if (`getAttr ($each + ".side")` == "left")
 								{
-									$elbow1FkButton = `button -label "ElbowFk"  -w 054 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_ElbowFk_Ctrl")`;
-									button -edit -command ("modSelectControl " + $elbow1FkButton) $elbow1FkButton;
+									$buttonC1 = <<0.00, 0.20, 0.65>>;
+									$buttonC2 = <<0.12, 0.50, 0.85>>;
+									$buttonC3 = <<0.23, 0.70, 1.00>>;
 								}
+									
+							}
+							frameLayout -label $coreName
+							-w 184
+							-collapsable 1 
+							-bgc ($buttonC1.x) ($buttonC1.y) ($buttonC1.z) ($modRigName + "ArmModFrameLayout" + $i);
+							columnLayout;
+							
+							string $armsFormLayout = `formLayout -numberOfDivisions 100`;
+							$elbowNum = `getAttr ($each + ".elbowNum")`;
 
-								else
-								{
-									$elbow1FkButton = `button -label "Elbow1Fk"  -w 054 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_Elbow1Fk_Ctrl")`;
-									$elbow2FkButton = `button -label "Elbow2Fk"  -w 054 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_Elbow2Fk_Ctrl")`;
-									$LowerArmIkButton = `button -label "LwrArmIk"  -w 054 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_LowerArmIk_Ctrl")`;
-									button -edit -command ("modSelectControl " + $elbow1FkButton) $elbow1FkButton;
-									button -edit -command ("modSelectControl " + $elbow2FkButton) $elbow2FkButton;
-									button -edit -command ("modSelectControl " + $LowerArmIkButton) $LowerArmIkButton;
-									$elbow2Offset = 18;
-								}
+							//CLAVICLE
+							string $clavicleButton     = `button -label "Clavicle"   -w 114 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_Clavicle_Ctrl")`;
+							button -edit -command ("modSelectControl " + $clavicleButton) $clavicleButton;
+
+							//Fk
+							string $shoulderButton     = `button -label "ShldrFk"   -w 114 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_ShoulderFk_Ctrl")`;
+							string $wristFkButton = `button -label "WristFk" -w 054 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_WristFk_Ctrl")`;
+							button -edit -command ("modSelectControl " + $shoulderButton) $shoulderButton;
+							button -edit -command ("modSelectControl " + $wristFkButton) $wristFkButton;
+							//Ik
+							string $elbow1IkButton = `button -label "ElbowIk" -w 054 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_ElbowIk_Ctrl")`;
+							string $wristIkButton =  `button -label "WristIk" -w 054 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_WristIk_Ctrl")`;
+							button -edit -command ("modSelectControl " + $elbow1IkButton) $elbow1IkButton;
+							button -edit -command ("modSelectControl " + $wristIkButton) $wristIkButton;
+							
+							//ELBOWS//	
+							string $elbow1FkButton;
+							string $elbow2FkButton;
+							string $LowerArmIkButton;
+							int $elbow2Offset = 0;
+							if ($elbowNum == 1)
+							{
+								$elbow1FkButton = `button -label "ElbowFk"  -w 054 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_ElbowFk_Ctrl")`;
+								button -edit -command ("modSelectControl " + $elbow1FkButton) $elbow1FkButton;
+							}
+
+							else
+							{
+								$elbow1FkButton = `button -label "Elbow1Fk"  -w 054 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_Elbow1Fk_Ctrl")`;
+								$elbow2FkButton = `button -label "Elbow2Fk"  -w 054 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_Elbow2Fk_Ctrl")`;
+								$LowerArmIkButton = `button -label "LwrArmIk"  -w 054 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_LowerArmIk_Ctrl")`;
+								button -edit -command ("modSelectControl " + $elbow1FkButton) $elbow1FkButton;
+								button -edit -command ("modSelectControl " + $elbow2FkButton) $elbow2FkButton;
+								button -edit -command ("modSelectControl " + $LowerArmIkButton) $LowerArmIkButton;
+								$elbow2Offset = 18;
+							}
 
 
-								//SWITCH
-								string $armSwitch = `button -label "Switch_Ctrl" -w 054 -h 18 -bgc ($buttonC3.x) ($buttonC3.y) ($buttonC3.z) -ann ($modRigName + $coreName + "_Switch_Ctrl")`;
-								string $armIkToFk = `button -label "IkToFk"  -w 054 -h 18 -bgc ($buttonC3.x) ($buttonC3.y) ($buttonC3.z) -ann ($modRigName + $coreName)`;
-								string $armFkToIk = `button -label "FkToIk"  -w 054 -h 18 -bgc ($buttonC3.x) ($buttonC3.y) ($buttonC3.z) -ann ($modRigName + $coreName)`;
-								string $armALL    = `button -label ">ALL<"   -w 054 -h 18 -bgc .95 .95 .95 -ann ($modRigName + $coreName)`;
-								button -edit -command ("modSelectControl " + $armSwitch) $armSwitch;
-								button -edit -command ("modIkToFk " + $armIkToFk) $armIkToFk;
-								button -edit -command ("modFkToIk " + $armFkToIk) $armFkToIk;
-								button -edit -command ("modSelectAllModulesControl " + $armALL) $armALL;
+							//SWITCH
+							string $armSwitch = `button -label "Switch_Ctrl" -w 054 -h 18 -bgc ($buttonC3.x) ($buttonC3.y) ($buttonC3.z) -ann ($modRigName + $coreName + "_Switch_Ctrl")`;
+							string $armIkToFk = `button -label "IkToFk"  -w 054 -h 18 -bgc ($buttonC3.x) ($buttonC3.y) ($buttonC3.z) -ann ($modRigName + $coreName)`;
+							string $armFkToIk = `button -label "FkToIk"  -w 054 -h 18 -bgc ($buttonC3.x) ($buttonC3.y) ($buttonC3.z) -ann ($modRigName + $coreName)`;
+							string $armALL    = `button -label ">ALL<"   -w 054 -h 18 -bgc .95 .95 .95 -ann ($modRigName + $coreName)`;
+							button -edit -command ("modSelectControl " + $armSwitch) $armSwitch;
+							button -edit -command ("modIkToFk " + $armIkToFk) $armIkToFk;
+							button -edit -command ("modFkToIk " + $armFkToIk) $armFkToIk;
+							button -edit -command ("modSelectAllModulesControl " + $armALL) $armALL;
+							
+							formLayout -edit
+							//CLAVICLE
+							-attachForm $clavicleButton "left" 2
+							-attachForm $clavicleButton "top" 0
+							//Fk
+							-attachForm $shoulderButton "left" 2
+							-attachForm $shoulderButton "top" 18
+							
+							-attachForm $elbow1FkButton "left" 2
+							-attachForm $elbow1FkButton "top" 36
+
+							-attachForm $wristFkButton "left" 2
+							-attachForm $wristFkButton "top" ($elbow2Offset + 54)
+							
+							//Ik
+							-attachForm $elbow1IkButton "left" 62
+							-attachForm $elbow1IkButton "top" 36
+
+							-attachForm $wristIkButton "left" 62
+							-attachForm $wristIkButton "top" ($elbow2Offset + 54)
+							
+							//SWITCH
+							-attachForm $armSwitch "left" 128
+							-attachForm $armSwitch "top" 0
+
+							-attachForm $armIkToFk "left" 128
+							-attachForm $armIkToFk "top" 18
+
+							-attachForm $armFkToIk "left" 128
+							-attachForm $armFkToIk "top" 36
+							
+							-attachForm $armALL "left" 128
+							-attachForm $armALL "top" 54
 								
+							$armsFormLayout;
+
+							if ($elbowNum == 2)
+							{
 								formLayout -edit
-								//CLAVICLE
-								-attachForm $clavicleButton "left" 2
-								-attachForm $clavicleButton "top" 0
-								//Fk
-								-attachForm $shoulderButton "left" 2
-								-attachForm $shoulderButton "top" 18
+								-attachForm $elbow2FkButton "left" 2
+								-attachForm $elbow2FkButton "top" 54
 								
-								-attachForm $elbow1FkButton "left" 2
-								-attachForm $elbow1FkButton "top" 36
-
-								-attachForm $wristFkButton "left" 2
-								-attachForm $wristFkButton "top" ($elbow2Offset + 54)
+								-attachForm $LowerArmIkButton "left" 62
+								-attachForm $LowerArmIkButton "top" 54
 								
-								//Ik
-								-attachForm $elbow1IkButton "left" 62
-								-attachForm $elbow1IkButton "top" 36
-
-								-attachForm $wristIkButton "left" 62
-								-attachForm $wristIkButton "top" ($elbow2Offset + 54)
-								
-								//SWITCH
-								-attachForm $armSwitch "left" 128
-								-attachForm $armSwitch "top" 0
-
-								-attachForm $armIkToFk "left" 128
-								-attachForm $armIkToFk "top" 18
-
-								-attachForm $armFkToIk "left" 128
-								-attachForm $armFkToIk "top" 36
-								
-								-attachForm $armALL "left" 128
-								-attachForm $armALL "top" 54
-									
 								$armsFormLayout;
-
-								if ($elbowNum == 2)
-								{
-									formLayout -edit
-									-attachForm $elbow2FkButton "left" 2
-									-attachForm $elbow2FkButton "top" 54
-									
-									-attachForm $LowerArmIkButton "left" 62
-									-attachForm $LowerArmIkButton "top" 54
-									
-									$armsFormLayout;
-								}								
-									
-								setParent ($modRigName + "ArmModFrameLayout" + $i);
+							}								
+								
+							setParent ($modRigName + "ArmModFrameLayout" + $i);
+							if (`objExists ($each + ".side")`)
+							{
 								if (`getAttr ($each + ".side")` == "left")
 								{
 									setParent..;
 								}
-								setParent..;
-								
-								$i++;
-								if ($i == 2 || !`objExists ($each + ".side")`)
-								{
-									setParent ($modRigName + "ArmsColumnLayout");
-								}
+							}
+							setParent..;
+							
+							$i++;
+							if ($i == 2 || !`objExists ($each + ".side")`)
+							{
+								setParent ($modRigName + "ArmsColumnLayout");
 							}
 						}
-						setParent ($modRigName + "SubModSelectionPaneLayout1");
-						
+					}
+					setParent ($modRigName + "SubModSelectionPaneLayout1");
+					
 						
 					//LEGS///////////////////////////////////////////////////////////////////////////////////////////
 					$i = 0;
@@ -2907,16 +3063,19 @@ global proc CreateModuPoserGUI(string $main_Ctrls[])
 								}								
 									
 								setParent ($modRigName + "LegModFrameLayout" + $i);
-								if (`getAttr ($each + ".side")` == "left")
+								if (`objExists ($each + ".side")`)
 								{
+									if (`getAttr ($each + ".side")` == "left")
+									{
+										setParent..;
+									}
 									setParent..;
-								}
-								setParent..;
-								
-								$i++;
-								if ($i == 2 || !`objExists ($each + ".side")`)
-								{
-									setParent ($modRigName + "LegsColumnLayout");
+									
+									$i++;
+									if ($i == 2 || !`objExists ($each + ".side")`)
+									{
+										setParent ($modRigName + "LegsColumnLayout");
+									}
 								}
 							}
 							//setParent ($modRigName + "LegsColumnLayout");
@@ -3075,7 +3234,7 @@ global proc CreateModuPoserGUI(string $main_Ctrls[])
 								string $moduleName = `getAttr ($each + ".moduleName")`;
 								vector $buttonC1 = <<0.55, 0.55, 0.00>>;
 								vector $buttonC2 = <<0.75, 0.75, 0.00>>;
-								vector $buttonC2 = <<0.95, 0.95, 0.00>>;
+								vector $buttonC3 = <<0.95, 0.95, 0.00>>;
 								if (`objExists ($each + ".side")`)
 								{
 									if (`getAttr ($each + ".side")` == "right")
@@ -3187,7 +3346,7 @@ global proc CreateModuPoserGUI(string $main_Ctrls[])
 								//SPLINE CONTROLS
 								int $splineNum = `getAttr ($each + ".splineJoints")`;
 								$splineNum = ($splineNum - 1);
-								int $currentSplineNum = 1;
+								$currentSplineNum = 1;
 								string $spineSelectFormLayout = `formLayout -numberOfDivisions 100`;
 								$hOffset = 1;
 								$vOffset = 0;
@@ -3577,7 +3736,7 @@ global proc RapidRig_Modular_V2_Selector()
 	string $main_Ctrls[] = `ls "*MAIN_Ctrl" "*:*MAIN_Ctrl" `;
 	if (`size $main_Ctrls` > 0)
 	{
-		window -title "Rapid Rig: Modular Selector 2.0.9"
+		window -title "Rapid Rig: Modular Selector 2.1.6"
 		//-wh 375 212
 		-rtf on
 		-mnb true

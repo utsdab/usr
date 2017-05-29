@@ -3,12 +3,9 @@ try:
 except:
     import libPymel
 
-import logging
-
 import pymel.core as pymel
-
 from maya import OpenMaya
-
+import logging
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
@@ -217,7 +214,7 @@ def export_network(_data, **kwargs):
         network = _data._network
     else:
         # Automaticly name network whenever possible
-        if hasattr(_data, '__getNetworkName__') and _data.__getNetworkName__ is None:
+        if hasattr(_data, '__getNetworkName__') and _data.__getNetworkName__ is None: 
             networkName = _data.__class__.__name__
         else:
             networkName = _data.__getNetworkName__() if hasattr(_data, '__getNetworkName__') else _data.__class__.__name__
@@ -228,7 +225,7 @@ def export_network(_data, **kwargs):
     if not network.hasAttr('_uid'):
         pymel.addAttr(network, longName='_uid', niceName='_uid', at='long') # todo: validate attributeType
 #    network._uid.set(id(_data))
-
+    
     # Convert _pData to basic data dictionary (recursive for now)
     dicData = core._export_basicData(_data, _bRecursive=False, **kwargs)
     assert(isinstance(dicData, dict))

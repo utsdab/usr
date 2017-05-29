@@ -3,18 +3,14 @@ try:
 except:
     import libSerialization
 
-import functools
-import logging
-
 import pymel.core as pymel
-
 from maya import cmds
-
+import logging, functools
 
 # Ensure we always deal with pynodes
 def _cast_string_to_pynode(val):
     if isinstance(val, pymel.PyNode): return val
-    if isinstance(val, basestring):
+    if isinstance(val, basestring): 
         if not cmds.objExists(val):
             raise Exception("Can't find object {0}".format(val))
         return pymel.PyNode(val)
@@ -24,7 +20,7 @@ def _cast_string_to_pynode(val):
 # Ensure we always deal with attributes
 def _cast_string_to_attribute(val):
     if isinstance(val, pymel.Attribute): return val
-    if isinstance(val, basestring):
+    if isinstance(val, basestring): 
         if not cmds.objExists(val):
             raise Exception("Can't find attribute {0}".format(val))
         return pymel.Attribute(val)
@@ -83,7 +79,7 @@ class IkFkNetwork(object):
     def snapFkToIk(self):
         for ctrl, jnt in zip(self.fkCtrls, self.ikChain):
             ctrl.setMatrix(jnt.getMatrix(worldSpace=True), worldSpace=True)
-
+        
 
     def switchToIk(self):
         if self.attState.get() != self._state_ik:

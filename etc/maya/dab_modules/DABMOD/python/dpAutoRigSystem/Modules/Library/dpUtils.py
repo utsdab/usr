@@ -1,6 +1,5 @@
 # importing libraries:
 import maya.cmds as cmds
-import maya.OpenMaya as om
 import os
 import sys
 import re
@@ -361,7 +360,7 @@ def clearNodeGrp(nodeGrpName='dpAR_GuideMirror_Grp', attrFind='guideBaseMirror',
                     foundChildrenList.append(child)
         if len(foundChildrenList) != 0:
             if unparent:
-                for item in foundChildrenList:
+                for item in foundChildList:
                     cmds.parent(item, world=True)
                 cmds.delete(nodeGrpName)
         else:
@@ -489,7 +488,7 @@ def deleteChildren(item):
                 cmds.delete(child)
 
 #Profiler decorator
-DPAR_PROFILE_MODE = False
+DPAR_PROFILE_MODE = True
 def profiler(func):
     def runProfile(*args, **kwargs):
         if DPAR_PROFILE_MODE:
@@ -506,22 +505,3 @@ def profiler(func):
             return pResult
     return runProfile
 
-'''
-Open Maya Utils Functions
-'''
-
-def extract_world_scale_from_matrix(obj):
-    world_matrix = cmds.getAttr(obj + ".worldMatrix")
-    mMat = om.MMatrix()
-    om.MScriptUtil.createMatrixFromList(world_matrix, mMat)
-    mTransform = om.MTransformationMatrix(mMat)
-    scale_util = om.MScriptUtil()
-    scale_util.createFromDouble(0.0, 0.0, 0.0)
-    ptr = scale_util.asDoublePtr()
-    mTransform.getScale(ptr, om.MSpace.kWorld)
-
-    x_scale = om.MScriptUtil.getDoubleArrayItem(ptr, 0)
-    y_scale = om.MScriptUtil.getDoubleArrayItem(ptr, 1)
-    z_scale = om.MScriptUtil.getDoubleArrayItem(ptr, 2)
-
-    return [x_scale, y_scale, z_scale]
