@@ -145,25 +145,55 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -enable 1
-        -width 39
-        -height 39
+        -width 35
+        -height 35
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "djRivet" 
+        -annotation "Studio Library" 
         -enableBackground 0
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
-        -label "djRivet" 
+        -label "studio library" 
         -labelOffset 0
         -rotation 0
         -flipX 0
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
-        -imageOverlayLabel "RIV" 
         -overlayLabelColor 0.8 0.8 0.8 
-        -overlayLabelBackColor 0 0 0 0.5 
+        -overlayLabelBackColor 0 0 0 0.2 
+        -image "poseLib.png" 
+        -image1 "poseLib.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import studiolibrary\nstudiolibrary.main()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Rivet" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "rivet" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.2 
         -image "djRivet.png" 
         -image1 "djRivet.png" 
         -style "iconOnly" 
