@@ -25,8 +25,8 @@ TrFileRevisionDate = "$DateTime: 2009/04/23 17:17:43 $"
 ## tractorNukeLib.py - a python script for Nuke to spool Nuke
 ## jobs to Pixar's Tractor
 ##
-## 
-## author: Ian Hsieh, ihsieh@pixar.com (2011/07/21)
+##
+## site: Ian Hsieh, ihsieh@pixar.com (2011/07/21)
 ##
 ##-------------------------------------------------------------- ##
 
@@ -211,7 +211,7 @@ def trAbsPath (path):
     '''
     Generate a canonical path for tractor.  This is an absolute path
     with backslashes flipped forward.  Backslashes have been known to
-    cause problems as they flow through system, especially in the 
+    cause problems as they flow through system, especially in the
     Safari javascript interpreter.
     '''
     return os.path.abspath( path ).replace('\\', '/')
@@ -266,7 +266,7 @@ def jobDelete (options):
 ## ------------------------------------------------------------ ##
 
 ##
-## Spool function. This code is taken from 
+## Spool function. This code is taken from
 ## the Tractor blade's tractor-spool.py script, with a couple
 ## of the options removed (Ex: -rib).
 ##
@@ -285,7 +285,7 @@ def Spool (argv):
     spoolhost = socket.gethostname().split('.')[0] # options can override
     user = getpass.getuser()
 
-    # ------ # 
+    # ------ #
 
     if not appProductDate[0].isdigit():
         appProductDate = " ".join(TrFileRevisionDate.split()[1:3])
@@ -412,7 +412,7 @@ def Spool (argv):
 
 ## ----------------------------------------------------------------------- ##
 
-## 
+##
 ## renderPanel function
 ##
 ## Creates the UI Panel in Nuke. This is the function
@@ -421,7 +421,7 @@ def Spool (argv):
 def renderPanel(debug=False):
     panel = nuke.Panel("Tractor Spool")
     dire = ''
-    
+
     ## Get .nuke directory
     if not 'HOME' in os.environ.keys():
         dire = os.environ['USERPROFILE']
@@ -431,7 +431,7 @@ def renderPanel(debug=False):
     if not os.path.exists(dire):
         os.makedirs(dire)
 
-    script = nuke.root().name() 
+    script = nuke.root().name()
 
     iniFile = dire + '/tractorNuke.ini'
 
@@ -440,7 +440,7 @@ def renderPanel(debug=False):
     if 'TRACTOR_ENGINE' in os.environ.keys():
         name = os.environ['TRACTOR_ENGINE']
         engine,n,p = name.partition(":")
-        if p: 
+        if p:
             port = p
 
     style = 'Local Remote'
@@ -448,7 +448,7 @@ def renderPanel(debug=False):
     delJobScript = False
     jobPriority = 1
     nthreads = 1
-    RAM = '0' 
+    RAM = '0'
     jobServerAttributes = 'NukeRender'
     jobCmdTags = ''
     envKey = ''
@@ -527,16 +527,16 @@ def renderPanel(debug=False):
     panel.addButton('Cancel')
     panel.addButton('Spool Job')
     result = panel.show()
-   
+
     if debug: print 'result:'+str(result)
 
     saveBeforeRender = panel.value('Save before Render')
-    
+
     if saveBeforeRender:
             print 'Saving script before Render '+script
             nuke.scriptSave()
-            
-    selected_only = panel.value('Selected Only')    
+
+    selected_only = panel.value('Selected Only')
     ff = int(panel.value('First Frame'))
     lf = int(panel.value('Last Frame'))
     engine = panel.value('Tractor Engine')
@@ -678,14 +678,14 @@ def render(argv):
             type="int", default=0)
 
     (opts, args) = optparser.parse_args( argv )
-    
+
     # nodes to render
     nodes = None
     if opts.selected_only:
         nodes = nuke.selectedNodes()
     else:
         nodes = nuke.root().nodes()
-            
+
     #look for Write nodes
     if opts.debug: print 'Scanning %d nodes'%len(nodes)
     write_nodes = list()
@@ -701,30 +701,30 @@ def render(argv):
                     write_nodes.append(subnode)
         except AttributeError:
             #thrown by nodes() on non-group or gizmo
-            pass            
+            pass
 
     print ''
     if (len(write_nodes) < 1):
         print 'tractorNuke: No renderable nodes selected'
         return
-                
-    #for each write node, get its name for the -X arg of nuke              
+
+    #for each write node, get its name for the -X arg of nuke
     write_node_names = list()
-    for node in write_nodes: 
+    for node in write_nodes:
             write_node_names.append(node.fullName())
 
     #for each write node, compute the frame name for each frame
-    #this accounts for expressions, offsets, etc    
+    #this accounts for expressions, offsets, etc
     image_names = dict()
     for frame in range(opts.ff, opts.lf+1):
         #nuke.Root.setFrame(frame)
         nuke.frame(frame) #deprecated but seems to work better than using Root
         image_names[frame] = list()
-        for node in write_nodes:      
-                filename = nuke.filename(node,nuke.REPLACE)           
+        for node in write_nodes:
+                filename = nuke.filename(node,nuke.REPLACE)
                 print filename
                 image_names[frame].append(filename)
- 
+
     if opts.debug:
         print 'Submitting:'
         print opts.script
@@ -741,9 +741,9 @@ def render(argv):
     fnm = opts.dire.replace('\\', '/') + '/tmpNuke_' + str(time.time()) + '.alf'
     jobFile = open(fnm, 'w')
 
-    cmdtail = '-service { ' + opts.jobServerAttributes + '} -envkey { ' 
+    cmdtail = '-service { ' + opts.jobServerAttributes + '} -envkey { '
     cmdtail = cmdtail + ' ' + opts.envkey + '}'
-    
+
     jobFile.write('##AlfredToDo 3.0\n')
     jobFile.write('##\n')
     jobFile.write('## Generated: ' + str(currentTime) +'\n')
@@ -767,7 +767,7 @@ def render(argv):
 
     ## Query for the path to Nuke's executable.
     ## If sites are running different OS's, they should uncomment the second
-    ## line so that the command only contains the Nuke executable. 
+    ## line so that the command only contains the Nuke executable.
     ## Then, they should add an evironment key that includes the Nuke version
     ## For example:
     ##  nuke6.3v1
@@ -777,7 +777,7 @@ def render(argv):
 
     ##--------------------------------------------------------------------
 
-    for frame in range(opts.ff, opts.lf+1): 
+    for frame in range(opts.ff, opts.lf+1):
 
         title = ''
         title = 'Frame ' + str(frame)
@@ -804,6 +804,6 @@ def render(argv):
     if opts.paused:
         args.append('--paused')
     args.append(fnm)
-    
+
     ## Spool job
     Spool(args)
