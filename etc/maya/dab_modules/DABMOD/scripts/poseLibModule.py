@@ -793,7 +793,7 @@ def readCfgFile(directory=None):
         directory = 'F:/maya_scripts/my_scripts/poseLib'
     else:
         directory = cmds.internalVar(userScriptDir=True)
-    print 'PoseLib config directory = ' + directory
+    print 'PoseLib site directory = ' + directory
 
     # Read the .cfg file.
     originalDom = minidom.parse(os.path.join(directory, 'poseLib.cfg'))
@@ -945,7 +945,7 @@ def writeCfgFile(directory=None,
         directory = 'F:/maya_scripts/my_scripts/poseLib'
     else:
         directory = cmds.internalVar(userScriptDir=True)
-    print 'PoseLib config directory = ' + directory
+    print 'PoseLib site directory = ' + directory
 
     projects = projects.split(',')
     projectsPaths = projectsPaths.split(',')
