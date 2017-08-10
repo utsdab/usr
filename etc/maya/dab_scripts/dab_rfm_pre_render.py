@@ -42,6 +42,8 @@ def whichRenderer():
         cmds.setAttr('defaultRenderGlobals.imageFilePrefix', '<Scene>_<Camera>_<RenderLayer>', type='string')
     elif current_renderer == 'renderManRIS':
         cmds.setAttr('defaultRenderGlobals.imageFilePrefix', '<Scene>_<Camera>_<RenderLayer>', type='string')
+    elif current_renderer == 'arnold':
+        cmds.setAttr('defaultRenderGlobals.imageFilePrefix', '<Scene>_<Camera>_<RenderLayer>', type='string')
 
 #####################
 def setResolution(w,h):

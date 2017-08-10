@@ -1,0 +1,106 @@
+//This is a wrapper for the renderman reib gen mel scripts
+//plus a pre render set of sanity checking for maya files
+
+//pre render scripts are assigned in render globals:
+//Pre render MEL: python( "import pre" )
+//Pre render frame MEL: python( "pre.preFrame()" )
+//
+//
+// -command  >>>>> renderManBatchGenRibForLayer {layerid} {start} {end} {phase}
+//
+//
+// maya -batch
+//       -proj /Volumes/dabrender/work/user_work/matthewgidney/TESTING_Renderfarm
+//      -command "dab_pre_render 0 1 100 1"
+//      -file  /Volumes/dabrende.......idney/TESTING_Renderfarm/scenes/test_cube_RMS21.ma
+//
+//
+global proc dab_set_globals()
+{
+    //file:///Applications/Pixar/RenderMan_20/howToSetRenderGlobalValues.html
+    //rman__setting-type__namespace_setting-name
+    //
+    //eg.
+    //rmanSetAttr renderManGlobals rman__riopt___PixelSamples "5 5";
+    //setAttr renderManGlobals.rman__riopt___PixelSamples 5 5;
+    //
+    //rmanSetAttr renderManGlobals rman__GDScheme occlusion;
+    //setAttr -type "string" renderManGlobals.rman__GDSchemeocclusion;
+    //
+    //RENDER NODES
+    //defaultRenderGlobals
+    //renderManGlobals
+    //rmanFinalOutputGlobals0
+    //rmanShadowGlobals
+    //RenderManEnvLightShape1
+    //
+    //FUNCTIONS
+    //rmanCreateGlobals;
+    //rmanCreateEnvLight;
+    print("RUNNING MEL:  dab_set_globals\n");
+    rmanCreateGlobals;
+
+}
+
+global proc dab_report_globals()
+{
+    print("\n---------------------------------------\n");
+    print("RUNNING MEL:  dab_report_globals\n");
+
+    print("RMANTREE: " + `getenv "RMANTREE"` + "\n");
+    print("RMSTREE : " + `getenv "RMSTREE"` + "\n");
+
+    print("RMSPROJ : " + `rman getvar RMSPROJ` + "\n");
+    print("STAGE   : " + `rman getvar STAGE` + "\n");
+    print("RIBPATH : " + `rman getvar RIBPATH` + "\n");
+
+//    string $a[] = `rmanGetOutputs rmanFinalGlobals`;
+//    string $b[] = `rmanGetPassClasses`;
+//    print("RENDEROUTPUTS: " + "\n");
+//    print $a;
+//    print("PASSCLASSES: "  + "\n");
+//    print $b;
+
+    print("---------------------------------------\n");
+}
+
+global proc dab_set_passes()
+{
+//    rmanGetChannelClasses;
+//    rmanAddOutput rmanFinalGlobals specular;
+//
+//    rmanGetOutputs rmanFinalGlobals;
+//    rmanAddOutput "rmanFinalPass" "N";
+//    rmanCreatePass Shadow;
+//    rmanUpdateAE;
+    print("RUNNING MEL:  dab_set_passes\n");
+
+}
+
+global proc deb_micro_manager()
+{
+    print("RUNNING MEL:  deb_micro_manager\n");
+}
+
+global proc dab_arnold_pre_render( int $start, int $end, int $frameStep, string $assFile)
+{
+    print("RUNNING MEL: >>>>>> THE STUDENT NANNY IS RUNNING >>>>>>> from dab_pre_render.mel\n");
+
+    dab_set_globals();
+    deb_micro_manager();
+    dab_set_passes();
+
+    python("import dab_arnold_pre_render as dpr");
+    python("dpr.sayHello()");
+//    python("dpr.showEnvironment()");
+
+    dab_report_globals();
+
+    //  perform assgen for arnold
+    print("RUNNING ASS GEN: arnoldExportAss \n");
+    arnoldExportAss -f $assFile -startFrame $start -endFrame $end -frameStep $frameStep -mask 255 -lightLinks 1 -shadowLinks 2;
+//    arnoldExportAss  -f "arnold/out.ass" -startFrame 1 -endFrame 3 -frameStep 1 -mask 255 -lightLinks 1 -shadowLinks 2 ;
+
+
+    print("--------FINISHED---------\n");
+}

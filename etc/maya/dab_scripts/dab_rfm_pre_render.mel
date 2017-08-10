@@ -82,7 +82,7 @@ global proc deb_micro_manager()
     print("RUNNING MEL:  deb_micro_manager\n");
 }
 
-global proc dab_pre_render( int $layerid, int $start, int $end, int $phase)
+global proc dab_rfm_pre_render( int $layerid, int $start, int $end, int $phase)
 {
     print("RUNNING MEL: >>>>>> THE STUDENT NANNY IS RUNNING >>>>>>> from dab_pre_render.mel\n");
 
@@ -91,7 +91,7 @@ global proc dab_pre_render( int $layerid, int $start, int $end, int $phase)
     deb_micro_manager();
     dab_set_passes();
 
-    python("import dab_pre_render as dpr");
+    python("import dab_rfm_pre_render as dpr");
     python("dpr.sayHello()");
 //    python("dpr.showEnvironment()");
 
