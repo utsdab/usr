@@ -44,10 +44,10 @@
 # ----------------------------------------------------------------------------------------------
 
 
-import maya.OpenMaya as OpenMaya
-import maya.OpenMayaMPx as OpenMayaMPx
-import maya.cmds as cmds
-from maya.mel import eval as meval
+import maya_tools.OpenMaya as OpenMaya
+import maya_tools.OpenMayaMPx as OpenMayaMPx
+import maya_tools.cmds as cmds
+from maya_tools.mel import eval as meval
 import re
 import sys
 
@@ -86,55 +86,55 @@ helpText += '\n Execute: extractDeltas -s <mesh with skin cluster> -c <correctiv
 # --------------------------------------------------------------------------------
 
 class extractDeltas(OpenMayaMPx.MPxCommand):
-	
+
 	def __init__(self):
 		OpenMayaMPx.MPxCommand.__init__(self)
-		
+
 	def doIt(self, args):
-		
+
 		self.dagModifier = OpenMaya.MDagModifier()
-		
+
 		skinName = ''
 		correctiveName = ''
 		resultName = ''
 		listString = ''
-		
+
 		# --------------------------------------------------------------------------------
 		# parse the arguments
 		# --------------------------------------------------------------------------------
-		
+
 		argData = OpenMaya.MArgDatabase(self.syntax(), args)
-		
+
 		# help flag
 		if argData.isFlagSet(helpFlag):
 			self.setResult(helpText)
 			return
-		
+
 		# skin flag
 		if argData.isFlagSet(skinFlag):
 			skinName = argData.flagArgumentString(skinFlag, 0)
-		
+
 		# corrective flag
 		if argData.isFlagSet(correctiveFlag):
 			correctiveName = argData.flagArgumentString(correctiveFlag, 0)
-		
+
 		# vertex list flag
 		if argData.isFlagSet(vertexListFlag):
 			listString = argData.flagArgumentString(vertexListFlag, 0)
-		
+
 		# --------------------------------------------------------------------------------
 		# check the selection
 		# --------------------------------------------------------------------------------
-		
+
 		sel = []
 		if skinName != '' and correctiveName != '':
 			sel.append(skinName)
 			sel.append(correctiveName)
 		else:
 			sel = cmds.ls(sl = True, tr = True)
-		
+
 		shapeList = []
-		
+
 		for i in range(len(sel)):
 			shapes = cmds.listRelatives(sel[i], s = True)
 			if shapes == None:
@@ -151,59 +151,59 @@ class extractDeltas(OpenMayaMPx.MPxCommand):
 				if cmds.getAttr(shapes[1] + '.intermediateObject'):
 					shapeList.append(shapes[1])
 				else:
-					OpenMaya.MGlobal.displayError(shapes[1] + ' is not an intermediate/original shape node.')	
+					OpenMaya.MGlobal.displayError(shapes[1] + ' is not an intermediate/original shape node.')
 					return
 			shapeList.append(shapes[0])
-		
+
 		if len(shapeList) != 3:
 			OpenMaya.MGlobal.displayError('Select a skinned mesh with a valid original shape node and a target mesh object.')
 			return
-		
+
 		selList = OpenMaya.MSelectionList()
 		for sl in shapeList:
 			selList.add(sl)
-		
+
 		intermediateObj = OpenMaya.MObject()
 		skinObj = OpenMaya.MObject()
 		targetObj = OpenMaya.MObject()
-		
+
 		selList.getDependNode(0, intermediateObj)
 		selList.getDependNode(1, skinObj)
 		selList.getDependNode(2, targetObj)
-		
+
 		# --------------------------------------------------------------------------------
 		# define the mesh functions and get the points
 		# --------------------------------------------------------------------------------
-		
+
 		skinFn = OpenMaya.MFnMesh()
 		skinFn.setObject(skinObj)
 		targetFn = OpenMaya.MFnMesh()
 		targetFn.setObject(targetObj)
 		intermediateFn = OpenMaya.MFnMesh()
 		intermediateFn.setObject(intermediateObj)
-		
+
 		skinPoints = OpenMaya.MPointArray()
 		skinFn.getPoints(skinPoints)
 		targetPoints = OpenMaya.MPointArray()
 		targetFn.getPoints(targetPoints)
 		intermediatePoints = OpenMaya.MPointArray()
 		intermediateFn.getPoints(intermediatePoints)
-		
+
 		extractPoints = OpenMaya.MPointArray(intermediatePoints)
-		
+
 		# --------------------------------------------------------------------------------
 		# get the delta points through a temporary blendShape node
 		# --------------------------------------------------------------------------------
-		
+
 		pointList = []
 		for i in range(0, skinPoints.length()):
 			if skinPoints[i] != targetPoints[i]:
 				pointList.append(i)
-		
+
 		if len(pointList) == 0:
-			OpenMaya.MGlobal.displayError('No shape extracted. Both meshes are identical.')	
+			OpenMaya.MGlobal.displayError('No shape extracted. Both meshes are identical.')
 			return
-		
+
 		# create an intersection list between the delta points and the given vertex list
 		vList = []
 		if listString != '':
@@ -211,19 +211,19 @@ class extractDeltas(OpenMayaMPx.MPxCommand):
 			array = map(int, array)
 			intersectList = list(set(pointList) & set(array))
 			pointList = intersectList
-		
+
 		# --------------------------------------------------------------------------------
 		# duplicate the original
 		# --------------------------------------------------------------------------------
-		
+
 		resultFn = OpenMaya.MFnMesh()
 		resultObj = OpenMaya.MObject()
-		
+
 		# copies the mesh using API functions but its not easily undoable
 		#resultObj = resultFn.copy(intermediateObj, OpenMaya.cvar.MObject_kNullObj)
 		# duplicating the mesh through maya commands is a bit more complex
 		# but the undo comes for free
-		
+
 		resultMesh = cmds.duplicate(shapeList[0], rc = True)
 		shapes = cmds.listRelatives(resultMesh, s = True)
 		# delete the main shape node and deactivate the intermediate object
@@ -233,110 +233,110 @@ class extractDeltas(OpenMayaMPx.MPxCommand):
 		attrList = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz']
 		for a in attrList:
 			cmds.setAttr(resultMesh[0] + '.' + a, l = False)
-		
+
 		selList.clear()
 		selList.add(shapes[0])
 		selList.getDependNode(0, resultObj)
 		resultFn.setObject(resultObj)
-		
+
 		resultPoints = OpenMaya.MPointArray()
 		resultFn.getPoints(resultPoints)
-		
+
 		# --------------------------------------------------------------------------------
 		# build a relative coordinate space by first preturbing
 		# the origional mesh and then building a coordinate space
 		# on the skinned mesh
 		# --------------------------------------------------------------------------------
-		
+
 		xArray = OpenMaya.MPointArray(intermediatePoints)
 		yArray = OpenMaya.MPointArray(intermediatePoints)
 		zArray = OpenMaya.MPointArray(intermediatePoints)
-		
+
 		xPointArray = OpenMaya.MPointArray()
 		yPointArray = OpenMaya.MPointArray()
 		zPointArray = OpenMaya.MPointArray()
-		
+
 		for i in pointList:
 			xArray.set(i, intermediatePoints[i].x + 1.0, intermediatePoints[i].y, intermediatePoints[i].z)
 			yArray.set(i, intermediatePoints[i].x, intermediatePoints[i].y + 1.0, intermediatePoints[i].z)
 			zArray.set(i, intermediatePoints[i].x, intermediatePoints[i].y, intermediatePoints[i].z + 1.0)
-		
+
 		intermediateFn.setPoints(xArray)
 		skinFn.getPoints(xPointArray)
-		
+
 		for i in pointList:
 			offX = xPointArray[i].x - skinPoints[i].x
 			offY = xPointArray[i].y - skinPoints[i].y
 			offZ = xPointArray[i].z - skinPoints[i].z
 			xPointArray.set(i, offX, offY, offZ)
-		
+
 		intermediateFn.setPoints(yArray)
 		skinFn.getPoints(yPointArray)
-		
+
 		for i in pointList:
 			offX = yPointArray[i].x - skinPoints[i].x
 			offY = yPointArray[i].y - skinPoints[i].y
 			offZ = yPointArray[i].z - skinPoints[i].z
 			yPointArray.set(i, offX, offY, offZ)
-		
+
 		intermediateFn.setPoints(zArray)
 		skinFn.getPoints(zPointArray)
-		
+
 		for i in pointList:
 			offX = zPointArray[i].x - skinPoints[i].x
 			offY = zPointArray[i].y - skinPoints[i].y
 			offZ = zPointArray[i].z - skinPoints[i].z
 			zPointArray.set(i, offX, offY, offZ)
-		
+
 		# set the original points back
 		intermediateFn.setPoints(intermediatePoints)
-		
+
 		# --------------------------------------------------------------------------------
 		# perform the extraction from the skinned mesh
 		# --------------------------------------------------------------------------------
-		
+
 		for i in pointList:
-			extractItems = 	[zPointArray[i].x, zPointArray[i].y, zPointArray[i].z, 0.0, 
-							xPointArray[i].x, xPointArray[i].y, xPointArray[i].z, 0.0, 
-							yPointArray[i].x, yPointArray[i].y, yPointArray[i].z, 0.0, 
+			extractItems = 	[zPointArray[i].x, zPointArray[i].y, zPointArray[i].z, 0.0,
+							xPointArray[i].x, xPointArray[i].y, xPointArray[i].z, 0.0,
+							yPointArray[i].x, yPointArray[i].y, yPointArray[i].z, 0.0,
 							skinPoints[i].x, skinPoints[i].y, skinPoints[i].z, 1.0]
-			
-			resultItems = 	[0.0, 0.0, 1.0, 0.0, 
-							1.0, 0.0, 0.0, 0.0, 
-							0.0, 1.0, 0.0, 0.0, 
+
+			resultItems = 	[0.0, 0.0, 1.0, 0.0,
+							1.0, 0.0, 0.0, 0.0,
+							0.0, 1.0, 0.0, 0.0,
 							resultPoints[i].x, resultPoints[i].y, resultPoints[i].z, 1.0]
-			
+
 			extractMatrix = OpenMaya.MMatrix()
 			OpenMaya.MScriptUtil.createMatrixFromList(extractItems, extractMatrix)
-			
+
 			resultMatrix = OpenMaya.MMatrix()
 			OpenMaya.MScriptUtil.createMatrixFromList(resultItems, resultMatrix)
-			
+
 			point = OpenMaya.MPoint()
 			point = targetPoints[i] * extractMatrix.inverse()
 			point *= resultMatrix
 			extractPoints.set(point, i)
-		
+
 		resultFn.setPoints(extractPoints)
-		
+
 		# --------------------------------------------------------------------------------
 		# cleanup
 		# --------------------------------------------------------------------------------
-		
+
 		cmds.sets(resultFn.fullPathName(), e = True, fe = 'initialShadingGroup')
 		parentNode = cmds.listRelatives(resultFn.fullPathName(), p = True)
 		resultName = cmds.rename(parentNode, sel[1] + '_corrective')
-		
+
 		self.setResult(resultName)
-		
+
 		return self.redoIt()
 
 	def redoIt(self):
 		self.dagModifier.doIt()
-	
+
 	def undoIt(self):
 		self.dagModifier.undoIt()
-	
+
 	def isUndoable(self):
 		return True
 
@@ -348,7 +348,7 @@ class extractDeltas(OpenMayaMPx.MPxCommand):
 # creator
 def cmdCreator():
 	return OpenMayaMPx.asMPxPtr(extractDeltas())
-	
+
 def syntaxCreator():
 	syn = OpenMaya.MSyntax()
 	syn.addFlag(helpFlag, helpFlagLong)

@@ -1,6 +1,6 @@
 #!/usr/bin/python
-import maya.mel as mel
-import maya.cmds as cmds
+import maya_tools.mel as mel
+import maya_tools.cmds as cmds
 import sys
 import os
 import xml.dom.minidom as minidom

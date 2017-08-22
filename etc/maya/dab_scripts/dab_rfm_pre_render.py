@@ -1,4 +1,4 @@
-import maya.cmds as cmds
+import maya_tools.cmds as cmds
 import os
 
 '''
@@ -44,6 +44,31 @@ def whichRenderer():
         cmds.setAttr('defaultRenderGlobals.imageFilePrefix', '<Scene>_<Camera>_<RenderLayer>', type='string')
     elif current_renderer == 'arnold':
         cmds.setAttr('defaultRenderGlobals.imageFilePrefix', '<Scene>_<Camera>_<RenderLayer>', type='string')
+
+def setIntegrator(integrator="PxrVisualizer"):
+    '''
+
+    do this in mel
+
+
+    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVisualizer");
+    rmanSetAttr("PxrVisualizer","style","matcap");
+
+    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrDebugShadingContext");
+    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrDefault");
+    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrDirectLighting");
+    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrOcclusion");
+    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrPathTracer");
+    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVCM");
+    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrValidateBxdf");
+    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVisualizer");
+    '''
+    rfm_integrator = cmds.getAttr("renderManRISGlobals.rman__riopt__Integrator_name")
+    print "Current Integrator is: {}".format(rfm_integrator)
+    print "Setting Integrator to {i}".format(integrator)
+
+
+
 
 #####################
 def setResolution(w,h):
@@ -174,4 +199,5 @@ rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVisualizer"
 
 if __name__ == "__main__":
     sayhello()
+    setRfnIntegrator()
     whichrenderer()

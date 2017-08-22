@@ -22,12 +22,12 @@
 
 import os
 
-import maya.OpenMaya as OpenMaya
-import maya.OpenMayaMPx as OpenMayaMPx
-import maya.OpenMayaAnim as OpenMayaAnim
+import maya_tools.OpenMaya as OpenMaya
+import maya_tools.OpenMayaMPx as OpenMayaMPx
+import maya_tools.OpenMayaAnim as OpenMayaAnim
 
-import maya.cmds as cmd
-import maya.mel as mel
+import maya_tools.cmds as cmd
+import maya_tools.mel as mel
 
 kPluginCmdName = 'transferSkinCluster'
 
@@ -65,23 +65,23 @@ helpText += '\n Execute: transferSkinCluster -m <mode> -f <file name>;';
 # --------------------------------------------------------------------------------
 
 class transferSkinCluster(OpenMayaMPx.MPxCommand):
-	
+
 	def __init__( self ):
 		OpenMayaMPx.MPxCommand.__init__(self)
-	
+
 	def doIt( self, args ):
-		
+
 		modeArg = 0
 		fileName = ''
 		orderArg = 0
-		
+
 		# parse the arguments.
 		argData = OpenMaya.MArgDatabase(self.syntax(), args)
-		
+
 		if argData.isFlagSet(helpFlag):
 			self.setResult(helpText)
 			return()
-		
+
 		if argData.isFlagSet(modeFlag):
 			modeArg = argData.flagArgumentDouble(modeFlag, 0)
 		if argData.isFlagSet(orderFlag):
@@ -91,18 +91,18 @@ class transferSkinCluster(OpenMayaMPx.MPxCommand):
 		else:
 			OpenMaya.MGlobal.displayError(kPluginCmdName + ' needs file name flag.')
 			return();
-		
+
 		if fileName == '':
 			OpenMaya.MGlobal.displayError(kPluginCmdName + ' file name is not specified.')
 			return()
-		
+
 		if modeArg < 0 or modeArg > 1:
 			OpenMaya.MGlobal.displayError(kPluginCmdName + ' mode needs to be set to either 0 for \'write\' or 1 for \'read\'.')
 			return()
-		
+
 		start = cmd.timerX()
 		msgString = ''
-		
+
 		result = 0
 		if modeArg == 0:
 			result = self.writeWeights(fileName)
@@ -110,7 +110,7 @@ class transferSkinCluster(OpenMayaMPx.MPxCommand):
 		else:
 			result = self.readWeights(fileName, orderArg)
 			msgString = 'imported from '
-		
+
 		doneTime = cmd.timerX(startTime=start)
 		if result == 1:
 			OpenMaya.MGlobal.displayInfo('transferSkinCluster command took %.02f seconds' % doneTime)
@@ -122,7 +122,7 @@ class transferSkinCluster(OpenMayaMPx.MPxCommand):
 	# --------------------------------------------------------------------------------
 
 	def writeWeights( self, fileName ):
-		
+
 		# get the current selection
 		skinClusterNode = cmd.ls(sl=True, fl=True)
 		if len(skinClusterNode) != 0:
@@ -135,26 +135,26 @@ class transferSkinCluster(OpenMayaMPx.MPxCommand):
 		if cmd.nodeType(skinClusterNode) != 'skinCluster':
 			OpenMaya.MGlobal.displayError('Selected node is not a skinCluster.')
 			return(-1)
-		
+
 		# get the MFnSkinCluster
 		sel = OpenMaya.MSelectionList()
 		OpenMaya.MGlobal.getActiveSelectionList(sel)
 		skinClusterObject = OpenMaya.MObject()
 		sel.getDependNode(0, skinClusterObject)
 		skinClusterFn = OpenMayaAnim.MFnSkinCluster(skinClusterObject)
-		
+
 		# get the influence objects
 		infls = cmd.skinCluster(skinClusterNode, q=True, inf=True)
 		if len(infls) == 0:
 			OpenMaya.MGlobal.displayError('No influence objects found for skinCluster %s.' % skinClusterNode)
 			return(-1)
-		
+
 		# get the connected shape node
 		shape = cmd.skinCluster(skinClusterNode, q=True, g=True)[0]
 		if len(infls) == 0:
 			OpenMaya.MGlobal.displayError('No connected shape nodes found.')
 			return(-1)
-		
+
 		# get the dag path of the shape node
 		cmd.select(shape, r=True)
 		sel = OpenMaya.MSelectionList()
@@ -163,21 +163,21 @@ class transferSkinCluster(OpenMayaMPx.MPxCommand):
 		sel.getDagPath(0, shapeDag)
 		# create the geometry iterator
 		geoIter = OpenMaya.MItGeometry(shapeDag)
-		
+
 		# open the file for writing
 		try:
 			weightFile = open(fileName, 'wb')
 		except:
 			OpenMaya.MGlobal.displayError('A file error has occured for file \'' + fileName + '\'.')
 			return(-1)
-		
+
 		# write all influences and the shape node to the file
 		for i in range(0, len(infls), 1):
 			weightFile.write(infls[i] + " ")
 		weightFile.write(shape + '\n')
-		
+
 		weightFile.write(skinClusterNode + '\n')
-		
+
 		# write the attributes of the skinCluster node to the file
 		result = cmd.getAttr(skinClusterNode + ".normalizeWeights")
 		weightFile.write('-nw %s ' % result)
@@ -185,12 +185,12 @@ class transferSkinCluster(OpenMayaMPx.MPxCommand):
 		weightFile.write('-mi %s ' % result)
 		result = cmd.getAttr(skinClusterNode + ".dropoff")[0][0]
 		weightFile.write('-dr %s\n' % result)
-        
+
 		# create a pointer object for the influence count of the MFnSkinCluster
 		infCount = OpenMaya.MScriptUtil()
 		infCountPtr = infCount.asUintPtr()
 		OpenMaya.MScriptUtil.setUint(infCountPtr, 0)
-		
+
 		# get the skinCluster weights
 		value = OpenMaya.MDoubleArray()
 		while geoIter.isDone() == False:
@@ -200,49 +200,49 @@ class transferSkinCluster(OpenMayaMPx.MPxCommand):
 					lineArray = [geoIter.index(), infls[j], j, value[j]]
 					weightFile.write(str(lineArray) + '\n')
 			geoIter.next()
-		
+
 		weightFile.close()
 		return(1)
-		
+
 
 	# --------------------------------------------------------------------------------
 	# read the weights file
 	# --------------------------------------------------------------------------------
 
 	def readWeights( self, fileName, reverseOrder ):
-		
+
 		# open the file for reading
 		try:
 			weightFile = open(fileName, 'rb')
 		except:
 			OpenMaya.MGlobal.displayError('A file error has occured for file \'' + fileName + '\'.')
 			return(-1)
-		
+
 		weightData = weightFile.read()
 		weightLines = weightData.split('\n')
 		weightFile.close()
-		
+
 		normalization = 1
-		
+
 		# variables for writing a range of influences
 		weightString = ''
 		inflStart = -1
 		inflEnd = -1
 		setCount = 0
 		writeData = 0
-		
+
 		# --------------------------------------------------------------------------------
 		# the first line contains the joints and skin shape
 		# --------------------------------------------------------------------------------
 		objects = weightLines[0]
 		items = objects.split(' ')
 		shape = items[len(items) - 1]
-		
+
 		# --------------------------------------------------------------------------------
 		# the second line contains the name of the skin cluster
 		# --------------------------------------------------------------------------------
 		skinClusterName = weightLines[1]
-		
+
 		# --------------------------------------------------------------------------------
 		# the third line contains the values for the skin cluster
 		# --------------------------------------------------------------------------------
@@ -258,25 +258,25 @@ class transferSkinCluster(OpenMayaMPx.MPxCommand):
 		except:
 			weightFile.close()
 			return()
-		
+
 		# check if the geometry is not already bound
 		history = cmd.listHistory(shape, f=0, bf=1)
 		for h in history:
 			if cmd.nodeType(h) == 'skinCluster':
 				OpenMaya.MGlobal.displayError(shape + ' is already connected to a skinCluster.')
 				return(-1)
-		
+
 		# check for the version
 		# up to Maya 2012 the bind method flag is not available
 		version = mel.eval('getApplicationVersionAsFloat()')
 		bindMethod = '-bm 0 '
 		if version < 2013:
 			bindMethod = '-ih '
-		
+
 		# create the new skinCluster
 		newSkinCluster = mel.eval('newSkinCluster \"-tsb ' + bindMethod + weightLines[2] + '-omi true -rui false\"')[0]
 		cmd.rename(newSkinCluster, skinClusterName)
-		
+
 		# get the current normalization and store it
 		# it will get re-applied after applying all the weights
 		normalization = cmd.getAttr(skinClusterName + '.nw')
@@ -285,7 +285,7 @@ class transferSkinCluster(OpenMayaMPx.MPxCommand):
 		# pruning the skin weights to zero is much faster
 		# than iterating through all components and setting them to 0
 		cmd.skinPercent(skinClusterName, shape, prw=100, nrm=0)
-		
+
 		# allocate memory for the number of components to set
 		weights = eval(weightLines[len(weightLines) - 2])
 		# get the index of the last component stored in the weight list
@@ -293,16 +293,16 @@ class transferSkinCluster(OpenMayaMPx.MPxCommand):
 		cmd.select(skinClusterName, r=True)
 		cmdString = ('setAttr -s ' + str(maxIndex + 1) + ' \".wl\"')
 		OpenMaya.MGlobal.executeCommand(cmdString)
-					
+
 		# --------------------------------------------------------------------------------
 		# apply the weight data
 		# --------------------------------------------------------------------------------
-		
+
 		# timer for timing the read time without the smooth binding
 		#start = cmd.timerX()
-		
+
 		for l in range(3, len(weightLines) - 1):
-			
+
 			weights = eval(weightLines[l])
 			weightsNext = ''
 			# also get the next line for checking if the component changes
@@ -312,14 +312,14 @@ class transferSkinCluster(OpenMayaMPx.MPxCommand):
 			else:
 				weightsNext = weights
 				writeData = 1
-			
+
 			compIndex = weights[0]
-						
+
 			# --------------------------------------------------------------------------------
 			# construct the setAttr string
 			# i.e. setAttr -s 4 ".wl[9].w[0:3]"  0.0003 0.006 0.496 0.496
 			# --------------------------------------------------------------------------------
-			
+
 			# start a new range
 			if inflStart == -1:
 				inflEnd = inflStart = weights[2]
@@ -334,36 +334,36 @@ class transferSkinCluster(OpenMayaMPx.MPxCommand):
 						weightString += '0 '
 						setCount += 1
 					inflEnd = weights[2]
-				
+
 			# add the weight to the weight string
 			weightString += str(weights[3]) + ' '
 			# increase the number of weights to be set
 			setCount += 1
-				
+
 			# if the next line is for the next index set the weights
 			if compIndex != weightsNext[0]:
 				writeData = 1
-				
+
 			if writeData == 1:
 				# decide if a range or a single influence index is written
 				rangeString = ':' + str(inflEnd)
 				if inflEnd == inflStart:
 					rangeString = ''
-					
+
 				cmdString = ('setAttr -s ' + str(setCount) + ' \".weightList[' + str(compIndex) + '].weights[' + str(inflStart) + rangeString + ']\" ' + weightString)
 				OpenMaya.MGlobal.executeCommand(cmdString)
-					
+
 				# reset and start over
 				inflStart = inflEnd = -1
 				writeData = 0
 				setCount = 0
 				weightString = ''
-				
+
 		cmd.setAttr((skinClusterName + '.nw'), normalization)
-		
+
 		#doneTime = cmd.timerX(startTime=start)
 		#OpenMaya.MGlobal.displayInfo('%.02f seconds' % doneTime)
-		
+
 		return(1)
 
 
@@ -374,7 +374,7 @@ class transferSkinCluster(OpenMayaMPx.MPxCommand):
 # creator
 def cmdCreator():
 	return OpenMayaMPx.asMPxPtr(transferSkinCluster())
-	
+
 def syntaxCreator():
 	syn = OpenMaya.MSyntax()
 	syn.addFlag(helpFlag, helpFlagLong);

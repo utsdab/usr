@@ -1,20 +1,20 @@
-# 
+#
 # Copyright (c) 2011 Chad Vernon
-# 
+#
 
-import maya.OpenMayaMPx as OpenMayaMPx
-import maya.OpenMaya as OpenMaya
+import maya_tools.OpenMayaMPx as OpenMayaMPx
+import maya_tools.OpenMaya as OpenMaya
 import math
 
 class cvShapeInverter(OpenMayaMPx.MPxDeformerNode):
     kPluginNodeName = "cvShapeInverter"
     kPluginNodeId = OpenMaya.MTypeId(0x00115805)
-    
+
     aMatrix = OpenMaya.MObject()
     aCorrectiveGeo = OpenMaya.MObject()
     aDeformedPoints = OpenMaya.MObject()
     aActivate = OpenMaya.MObject()
-    
+
     def __init__(self):
         OpenMayaMPx.MPxDeformerNode.__init__(self)
         self.__initialized = False
@@ -103,7 +103,7 @@ def initialize():
     mAttr = OpenMaya.MFnMatrixAttribute()
     tAttr = OpenMaya.MFnTypedAttribute()
     nAttr = OpenMaya.MFnNumericAttribute()
-    
+
     outputGeom = OpenMayaMPx.cvar.MPxDeformerNode_outputGeom
 
     cvShapeInverter.aActivate = nAttr.create('activate', 'activate',
@@ -124,7 +124,7 @@ def initialize():
     mAttr.setUsesArrayDataBuilder(True)
     cvShapeInverter.addAttribute(cvShapeInverter.aMatrix)
 # end initialize
-    
+
 
 def initializePlugin(mobject):
     plugin = OpenMayaMPx.MFnPlugin(mobject)

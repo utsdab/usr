@@ -42,6 +42,29 @@ global proc dab_set_globals()
 
 }
 
+
+global proc deb_set_integrator(string $newintegrator)
+{
+    string $currentintegrator = `getAttr("renderManRISGlobals.rman__riopt__Integrator_name")`;
+    string $integrators[] =  {"PxrDebugShadingContext","PxrDefault","PxrDirectLighting","PxrOcclusion","PxrPathTracer","PxrVCM","PxrValidateBxdf","PxrVisualizer"};
+    int $OK = 0;
+    for ($i in $integrators)
+    {
+        if ($i == $newintegrator)
+        {
+            $OK = 1;
+            print ("Current Integrator is: " + $currentintegrator + "\n");
+            rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name", $newintegrator);
+            print ("Setting Integrator to " + $newintegrator + "\n");
+        };
+    };
+    if ($OK == 0)
+    {
+        print ("Not a valid integrator: Leaving as " + $currentintegrator + "\n");
+    };
+}
+
+
 global proc dab_report_globals()
 {
     print("\n---------------------------------------\n");
@@ -54,25 +77,25 @@ global proc dab_report_globals()
     print("STAGE   : " + `rman getvar STAGE` + "\n");
     print("RIBPATH : " + `rman getvar RIBPATH` + "\n");
 
-//    string $a[] = `rmanGetOutputs rmanFinalGlobals`;
-//    string $b[] = `rmanGetPassClasses`;
-//    print("RENDEROUTPUTS: " + "\n");
-//    print $a;
-//    print("PASSCLASSES: "  + "\n");
-//    print $b;
+    //    string $a[] = `rmanGetOutputs rmanFinalGlobals`;
+    //    string $b[] = `rmanGetPassClasses`;
+    //    print("RENDEROUTPUTS: " + "\n");
+    //    print $a;
+    //    print("PASSCLASSES: "  + "\n");
+    //    print $b;
 
     print("---------------------------------------\n");
 }
 
 global proc dab_set_passes()
 {
-//    rmanGetChannelClasses;
-//    rmanAddOutput rmanFinalGlobals specular;
-//
-//    rmanGetOutputs rmanFinalGlobals;
-//    rmanAddOutput "rmanFinalPass" "N";
-//    rmanCreatePass Shadow;
-//    rmanUpdateAE;
+    //    rmanGetChannelClasses;
+    //    rmanAddOutput rmanFinalGlobals specular;
+    //
+    //    rmanGetOutputs rmanFinalGlobals;
+    //    rmanAddOutput "rmanFinalPass" "N";
+    //    rmanCreatePass Shadow;
+    //    rmanUpdateAE;
     print("RUNNING MEL:  dab_set_passes\n");
 
 }
@@ -86,14 +109,14 @@ global proc dab_rfm_pre_render( int $layerid, int $start, int $end, int $phase)
 {
     print("RUNNING MEL: >>>>>> THE STUDENT NANNY IS RUNNING >>>>>>> from dab_pre_render.mel\n");
 
-
     dab_set_globals();
     deb_micro_manager();
     dab_set_passes();
+    dab_set_intergrator("PxrDefault");
 
     python("import dab_rfm_pre_render as dpr");
     python("dpr.sayHello()");
-//    python("dpr.showEnvironment()");
+    //    python("dpr.showEnvironment()");
 
     dab_report_globals();
 

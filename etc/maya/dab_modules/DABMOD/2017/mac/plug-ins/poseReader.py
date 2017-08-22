@@ -50,11 +50,11 @@
 
 import sys
 import math
-import maya.OpenMaya as OpenMaya
-import maya.OpenMayaAnim as OpenMayaAnim
-import maya.OpenMayaUI as OpenMayaUI
-import maya.OpenMayaMPx as OpenMayaMPx
-import maya.OpenMayaRender as OpenMayaRender
+import maya_tools.OpenMaya as OpenMaya
+import maya_tools.OpenMayaAnim as OpenMayaAnim
+import maya_tools.OpenMayaUI as OpenMayaUI
+import maya_tools.OpenMayaMPx as OpenMayaMPx
+import maya_tools.OpenMayaRender as OpenMayaRender
 
 
 #
