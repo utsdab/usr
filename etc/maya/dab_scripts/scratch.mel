@@ -1,0 +1,139 @@
+
+// set resolution
+setAttr "defaultResolution.width" 1280;
+setAttr "defaultResolution.height" 720;
+
+//Get the name of the first image in the sequence and process any file name prefix tokens.
+string $firstImageName[] = `renderSettings -firstImageName -leaveUnmatchedTokens`;
+
+
+// Get the name of the first and last image for the current layer
+string $fl[] = `renderSettings -firstImageName -lastImageName`;
+print ("First image is "+$fl[0]+"\n");
+// This is the empty string if the scene is not set for animation
+if ($fl[1] == "") {
+	print "Not rendering animation\n";
+} else {
+	print ("Last image is "+$fl[1]+"\n");
+}
+
+
+rman getvar STAGE;
+// Result: untitled //
+rman getvar RIBPATH;
+rman getvar RMSPROJ;
+// Result: renderman/untitled/rib //
+
+rmanGetAttrName "ShadingRate";
+// Result: rman__riattr___ShadingRate //
+
+//https://renderman.pixar.com/resources/RenderMan_20/howToSetRenderGlobalValues.html
+rmanCreateGlobals;
+//string $pass = `rmanCreatePass Final`;
+
+setAttr "defaultRenderGlobals.extensionPadding" 4;
+setAttr "defaultRenderGlobals.byFrameStep" 1;
+
+getAttr "rmanFinalOutputGlobals0.rman__riopt__Display_type";
+
+setAttr "defaultRenderGlobals.outFormatControl" 0;
+setAttr "defaultRenderGlobals.animation" 1;
+setAttr "defaultRenderGlobals.putFrameBeforeExt" 1;
+setAttr "defaultRenderGlobals.imageFormat" 19;
+setAttr -type "string" "defaultRenderGlobals.imageFilePrefix" "<Scene>_<Camera>_<RenderLayer>";
+
+
+rmanGetChannelClasses;
+//rmanAddOutput rmanFinalOutputGlobals0 specular;
+rmanGetOutputs rmanFinalGlobals;
+rmanAddOutput rmanFinalGlobals "N";
+rmanAddOutput rmanFinalGlobals "__depth";
+rmanAddOutput rmanFinalGlobals "directDiffuse";
+rmanAddOutput rmanFinalGlobals "directSpecular";
+rmanAddOutput rmanFinalGlobals "indirectDiffuse";
+rmanAddOutput rmanFinalGlobals "transmissive";
+rmanAddOutput rmanFinalGlobals "subsurface";
+rmanAddOutput rmanFinalGlobals "MatteID0";
+rmanAddOutput rmanFinalGlobals "emissive";
+rmanAddOutput rmanFinalGlobals "dPdtime";
+
+
+
+rmanUpdateAE;
+rmanGetChannelClasses;
+rmanGetOutputs rmanFinalGlobals;
+
+
+rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVisualizer");
+rmanSetAttr("PxrVisualizer","style","matcap");
+
+
+rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrDebugShadingContext");
+rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrDefault");
+rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrDirectLighting");
+rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrOcclusion");
+rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrPathTracer");
+rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVCM");
+rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrValidateBxdf");
+rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVisualizer");
+
+setAttr "renderManRISGlobals.rman__riopt__Hider_incremental" 0;
+
+
+//////////////////////
+FurPluginMayaState(0,1);
+
+string $integratorAttr = `rman getMayaAttrName "rman__riopt__Integrator_name"`;
+string $rfm_integrator = getAttr($integratorAttr);
+
+getAttr("rman__riopt__Integrator_name")
+
+getAttr "rmanFinalOutputGlobals0.rman__riopt__Display_type";
+
+global proc deb_set_integrator(string $newintegrator)
+{
+    string $currentintegrator = `getAttr("renderManRISGlobals.rman__riopt__Integrator_name")`;
+    string $integrators[] =  {"PxrDebugShadingContext","PxrDefault","PxrDirectLighting","PxrOcclusion","PxrPathTracer","PxrVCM","PxrValidateBxdf","PxrVisualizer"};
+    int $OK = 0;
+    for ($i in $integrators)
+    {
+        if ($i == $newintegrator)
+        {
+            $OK = 1;
+            print ("Current Integrator is: " + $currentintegrator + "\n");
+            rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name", $newintegrator);
+            print ("Setting Integrator to " + $newintegrator + "\n");
+        };
+    };
+    if ($OK == 0)
+    {
+        print ("Not a valid integrator: Leaving as " + $currentintegrator + "\n");
+    };
+}
+
+deb_set_integrator("PxrVisualizer");
+
+/////////////////////////////
+global proc string[] getOutputImages()
+{
+    // get the output images as a string
+    string $ret[];
+    if (`rman ctxIsOpen` == false)
+    {
+        rman ctxOpen;
+    };
+    string $tasks[] = `rman ctxGetTasks -phase "/Job/Frames/Images"`;
+    int $i = 0;
+    int $frame = `currentTime -query`;
+    for ($i = 0; $i < size($tasks); $i = $i+1)
+    {
+        $ret[$i] = `rman ctxGetImageFile $tasks[$i] -frame $frame -fullpath`;
+        //string $output = `rman ctxGetImageFile $tasks[$i] -frame $frame -fullpath`;
+       //print ("" + $output + "\n");
+    };
+    return $ret;
+}
+
+string $a[] =  `getOutputImages`;
+print (size($a) +" "+ $a[0] + "\n");
+

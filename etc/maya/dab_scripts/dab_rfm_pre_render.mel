@@ -100,6 +100,26 @@ global proc dab_set_passes()
 
 }
 
+global proc string[] getOutputImages()
+{
+    // get the output images as a string
+    string $ret[];
+    if (`rman ctxIsOpen` == false)
+    {
+        rman ctxOpen;
+    };
+    string $tasks[] = `rman ctxGetTasks -phase "/Job/Frames/Images"`;
+    int $i = 0;
+    int $frame = `currentTime -query`;
+    for ($i = 0; $i < size($tasks); $i = $i+1)
+    {
+        $ret[$i] = `rman ctxGetImageFile $tasks[$i] -frame $frame -fullpath`;
+        //string $output = `rman ctxGetImageFile $tasks[$i] -frame $frame -fullpath`;
+        //print ("" + $output + "\n");
+    };
+    return $ret;
+}
+
 global proc deb_micro_manager()
 {
     print("RUNNING MEL:  deb_micro_manager\n");
@@ -126,3 +146,4 @@ global proc dab_rfm_pre_render( int $layerid, int $start, int $end, int $phase)
 
     print("--------FINISHED---------\n");
 }
+
