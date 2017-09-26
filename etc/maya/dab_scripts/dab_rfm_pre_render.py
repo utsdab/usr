@@ -1,5 +1,9 @@
-import maya.cmds as cmds
 import os
+try:
+    import maya.cmds as cmds
+    import pymel.core as pm
+except ImportWarning, err:
+    print (err)
 
 '''
 put this is the pythonpath then add into the prerendermel
@@ -198,6 +202,7 @@ rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVisualizer"
 '''
 
 if __name__ == "__main__":
-    sayhello()
-    setRfnIntegrator()
-    whichrenderer()
+    pass
+    # sayhello()
+    # setRfnIntegrator()
+    # whichrenderer()

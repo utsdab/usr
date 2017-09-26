@@ -1,5 +1,10 @@
-import maya_tools.cmds as cmds
 import os
+
+try:
+    import maya.cmds as cmds
+    import pymel.core as pm
+except ImportWarning, err:
+    print (err)
 
 '''
 put this is the pythonpath then add into the prerendermel
@@ -24,6 +29,42 @@ Pre render frame MEL: python( "pre.preFrame()" )
 
 
 '''
+
+
+'''
+# create an objects from render settings nodes
+rgArnold = pm.PyNode('defaultArnoldDriver')
+rgArnoldRO =  pm.PyNode('defaultArnoldRenderOptions')
+rgCommon = pm.PyNode('defaultRenderGlobals')
+rgRes = pm.PyNode('defaultResolution')
+
+rgCommon.imageFilePrefix.set('D:/fileName') # Set image file path and name
+
+rgArnold.aiTranslator.set('exr') # Set image format to EXR
+
+rgArnoldRO.AASamples.set(12) # Set antialiasing samples
+
+# Set resolution
+rgRes.width.set(1998)
+rgRes.height.set(1080)
+
+
+
+import mtoa.aovs as aovs
+def addAOV(aovName):
+    aov = aovs.AOVInterface().addAOV(aovName)
+    return aov
+
+
+
+def setArnold(*args):
+    if( pm.getAttr( 'defaultRenderGlobals.currentRenderer' ) != 'arnold' ):
+        pm.setAttr('defaultRenderGlobals.currentRenderer', 'arnold')
+'''
+
+
+
+
 #####################
 def sayHello():
     print ("RUNNING PYTHON: Starting DAB Arnold Pre Render Scripts.....sayHello........")
@@ -64,7 +105,6 @@ def setAnimation():
         print("Setting for animation: {}".format(""))
         cmds.setAttr("defaultRenderGlobals.extensionPadding", 4)
         cmds.setAttr("defaultRenderGlobals.byFrameStep", 1)
-        # cmds.getAttr("rmanFinalOutputGlobals0.rman__riopt__Display_type")
         cmds.setAttr("defaultRenderGlobals.outFormatControl", 0)
         cmds.setAttr("defaultRenderGlobals.animation", 1)
         cmds.setAttr("defaultRenderGlobals.putFrameBeforeExt", 1)
@@ -75,15 +115,6 @@ def setAnimation():
 
 #####################
 def setPasses():
-    '''
-    rmanGetChannelClasses;
-    rmanAddOutput rmanFinalGlobals specular;
-
-    rmanGetOutputs rmanFinalGlobals;
-    rmanAddOutput "rmanFinalPass" "N";
-    rmanCreatePass Shadow;
-    rmanUpdateAE;
-    '''
 
     try:
         # passes=cmds.mel("rmanGetOutputs rmanFinalGlobals;")
@@ -136,42 +167,10 @@ if ($fl[1] == "") {
 }
 
 
-rman getvar STAGE;
-// Result: untitled //
-rman getvar RIBPATH;
-// Result: renderman/untitled/rib //
 
-rmanGetAttrName "ShadingRate";
-// Result: rman__riattr___ShadingRate //
-
-//https://renderman.pixar.com/resources/RenderMan_20/howToSetRenderGlobalValues.html
-rmanCreateGlobals;
-
-
-getAttr "rmanFinalOutputGlobals0.rman__riopt__Display_type";
-
-
-rmanGetChannelClasses;
-rmanAddOutput rmanFinalGlobals specular;
-
-rmanGetOutputs rmanFinalGlobals;
-rmanAddOutput "rmanFinalPass" "N";
-rmanCreatePass Shadow;
-rmanUpdateAE;
-
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVisualizer");
-rmanSetAttr("PxrVisualizer","style","matcap");
-
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrDebugShadingContext");
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrDefault");
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrDirectLighting");
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrOcclusion");
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrPathTracer");
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVCM");
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrValidateBxdf");
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVisualizer");
 '''
-
 if __name__ == "__main__":
-    sayhello()
-    whichrenderer()
+    # sayhello()
+    # whichrenderer()
+    pass
+
