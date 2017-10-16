@@ -39,9 +39,7 @@ def whichRenderer():
     print "Current Renderer is: {}".format(current_renderer)
 
     if current_renderer == 'vray':
-        cmds.setAttr('vraySettings.fileNamePrefix', '<Scene>_<Camera>_<Layer>.', type='string')
-    elif current_renderer == 'mentalRay':
-        cmds.setAttr('defaultRenderGlobals.imageFilePrefix', '<Scene>_<Camera>_<RenderLayer>', type='string')
+        cmds.setAttr('vraySettings.fileNamePrefix', '<Scene>_<Camera>_<RenderLayer>.', type='string')
     elif current_renderer == 'mayaSoftware':
         cmds.setAttr('defaultRenderGlobals.imageFilePrefix', '<Scene>_<Camera>_<RenderLayer>', type='string')
     elif current_renderer == 'renderManRIS':
@@ -73,7 +71,6 @@ def setIntegrator(integrator="PxrVisualizer"):
 
 
 
-
 #####################
 def setResolution(w,h):
     try:
@@ -98,7 +95,21 @@ def setAnimation():
         cmds.setAttr("defaultRenderGlobals.animation", 1)
         cmds.setAttr("defaultRenderGlobals.putFrameBeforeExt", 1)
     except Exception,err:
-        print("Error seeting animation: {}".format(err))
+        print("Error setting animation: {}".format(err))
+    else:
+        cmds.setAttr("defaultRenderGlobals.imageFormat", 19)
+
+
+def setMotionBlur():
+    try:
+        print("Setting for motionblur: {}".format(""))
+        cmds.setAttr("defaultRenderGlobals.motionBlurByFrame", 1.0)
+        cmds.setAttr("defaultRenderGlobals.motionBlurUseShutter", 1)
+        # cmds.getAttr("rmanFinalOutputGlobals0.rman__riopt__Display_type")
+        cmds.setAttr("defaultRenderGlobals.motionBlurShutterOpen", -0.5)
+        cmds.setAttr("defaultRenderGlobals.motionBlurShutterClose", 0.5)
+    except Exception,err:
+        print("Error setting motionblur: {}".format(err))
     else:
         cmds.setAttr("defaultRenderGlobals.imageFormat", 19)
 
