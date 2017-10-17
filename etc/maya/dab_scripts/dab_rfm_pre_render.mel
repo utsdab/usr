@@ -131,7 +131,7 @@ global proc dab_rfm_pre_render( int $layerid, int $start, int $end, int $phase)
 
     dab_set_globals();
     deb_micro_manager();
-    dab_set_passes();
+//    dab_set_passes();
 //    dab_set_intergrator("PxrDefault");
 
     python("import dab_rfm_pre_render as dpr");
