@@ -17,31 +17,9 @@
 //
 global proc dab_set_globals()
 {
-    //file:///Applications/Pixar/RenderMan_20/howToSetRenderGlobalValues.html
-    //rman__setting-type__namespace_setting-name
-    //
-    //eg.
-    //rmanSetAttr renderManGlobals rman__riopt___PixelSamples "5 5";
-    //setAttr renderManGlobals.rman__riopt___PixelSamples 5 5;
-    //
-    //rmanSetAttr renderManGlobals rman__GDScheme occlusion;
-    //setAttr -type "string" renderManGlobals.rman__GDSchemeocclusion;
-    //
-    //RENDER NODES
-    //defaultRenderGlobals
-    //renderManGlobals
-    //rmanFinalOutputGlobals0
-    //rmanShadowGlobals
-    //RenderManEnvLightShape1
-    //
-    //FUNCTIONS
-    //rmanCreateGlobals;
-    //rmanCreateEnvLight;
     print("RUNNING MEL:  dab_set_globals\n");
     rmanCreateGlobals;
-
 }
-
 
 global proc deb_set_integrator(string $newintegrator)
 {
@@ -64,40 +42,21 @@ global proc deb_set_integrator(string $newintegrator)
     };
 }
 
-
 global proc dab_report_globals()
 {
     print("\n---------------------------------------\n");
     print("RUNNING MEL:  dab_report_globals\n");
-
     print("RMANTREE: " + `getenv "RMANTREE"` + "\n");
     print("RMSTREE : " + `getenv "RMSTREE"` + "\n");
-
     print("RMSPROJ : " + `rman getvar RMSPROJ` + "\n");
     print("STAGE   : " + `rman getvar STAGE` + "\n");
     print("RIBPATH : " + `rman getvar RIBPATH` + "\n");
-
-    //    string $a[] = `rmanGetOutputs rmanFinalGlobals`;
-    //    string $b[] = `rmanGetPassClasses`;
-    //    print("RENDEROUTPUTS: " + "\n");
-    //    print $a;
-    //    print("PASSCLASSES: "  + "\n");
-    //    print $b;
-
     print("---------------------------------------\n");
 }
 
 global proc dab_set_passes()
 {
-    //    rmanGetChannelClasses;
-    //    rmanAddOutput rmanFinalGlobals specular;
-    //
-    //    rmanGetOutputs rmanFinalGlobals;
-    //    rmanAddOutput "rmanFinalPass" "N";
-    //    rmanCreatePass Shadow;
-    //    rmanUpdateAE;
     print("RUNNING MEL:  dab_set_passes\n");
-
 }
 
 global proc string[] getOutputImages()
@@ -136,6 +95,8 @@ global proc dab_rfm_pre_render( int $layerid, int $start, int $end, int $phase)
 
     python("import dab_rfm_pre_render as dpr");
     python("dpr.sayHello()");
+    python("dpr.setUp()");
+
     //    python("dpr.showEnvironment()");
 
     dab_report_globals();

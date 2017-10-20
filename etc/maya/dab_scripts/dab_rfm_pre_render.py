@@ -5,29 +5,7 @@ try:
 except ImportWarning, err:
     print (err)
 
-'''
-put this is the pythonpath then add into the prerendermel
-Okay, the pre render script is definitely acting capriciously
-In order to investigate, I've made a small test case.
-Simple scene with only one object: nurbsSpehre1
-all scripts are in external file: pre.py
 
-CODE
-import maya.cmds
-
-def preFrame():
-    maya.cmds.move( 3, 0, 0, "nurbsSphere1", r = True)
-    x = maya.cmds.getAttr( "nurbsSphere1.tx" )
-    file = open( "log.txt","a")
-    file.write ( "x = " + x + "\r\n" )
-    file.close()
-
-pre render scripts are assigned in render globals:
-Pre render MEL: python( "import pre" )
-Pre render frame MEL: python( "pre.preFrame()" )
-
-
-'''
 #####################
 def sayHello():
     print ("RUNNING PYTHON: Starting DAB Pre Render Scripts.....sayHello........")
@@ -49,10 +27,7 @@ def whichRenderer():
 
 def setIntegrator(integrator="PxrVisualizer"):
     '''
-
     do this in mel
-
-
     rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVisualizer");
     rmanSetAttr("PxrVisualizer","style","matcap");
 
@@ -69,6 +44,27 @@ def setIntegrator(integrator="PxrVisualizer"):
     print "Current Integrator is: {}".format(rfm_integrator)
     print "Setting Integrator to {i}".format(integrator)
 
+
+#################################
+def setMe(node="renderManRISGlobals", attr="rman__torattr___motionBlur", value=1):
+    # helper to set an attribute
+    try:
+        _selected = pm.select(node)
+    except Exception, err:
+        print "Node not found {}".format(node)
+        raise()
+    else:
+        pass
+        #print "Node found {}".format(node)
+
+    try:
+        _fullAttr = "{}.{}".format(node, attr)
+        print _fullAttr
+        pm.setAttr(_fullAttr, value)
+    except Exception, err:
+        print "Cant set {}".format(_fullAttr)
+    else:
+        print "Set {} to {}".format(_fullAttr, value)
 
 
 #####################
@@ -158,6 +154,16 @@ def showEnvironment():
         print("-----------------")
 
 
+def setUp():
+    setMe("renderManRISGlobals","rman__torattr___motionBlur",1)
+    setMe("renderManRISGlobals","rman__torattr___cameraBlur",1)
+    setMe("renderManRISGlobals","rman__torattr___motionSamples",4)
+    setMe("renderManRISGlobals","rman__toropt___shutterAngle",180)
+    setMe("renderManRISGlobals","rman__toropt___motionBlurType","frame")
+    setMe("renderManRISGlobals","rman__torattr___denoise",0)
+    setMe("renderManRISGlobals","rman__riopt__rib_format","binary")
+    setMe("renderManRISGlobals","rman__riopt__rib_compression","gzip")
+    setMe("renderManRISGlobals","rman__torattr___linearizeColors",1)
 
 
 '''
