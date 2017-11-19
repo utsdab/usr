@@ -17,16 +17,6 @@
 //
 global proc dab_set_globals()
 {
-    //file:///Applications/Pixar/RenderMan_20/howToSetRenderGlobalValues.html
-    //rman__setting-type__namespace_setting-name
-    //
-    //eg.
-    //rmanSetAttr renderManGlobals rman__riopt___PixelSamples "5 5";
-    //setAttr renderManGlobals.rman__riopt___PixelSamples 5 5;
-    //
-    //rmanSetAttr renderManGlobals rman__GDScheme occlusion;
-    //setAttr -type "string" renderManGlobals.rman__GDSchemeocclusion;
-    //
     //RENDER NODES
     //defaultRenderGlobals
     //renderManGlobals
@@ -37,9 +27,21 @@ global proc dab_set_globals()
     //FUNCTIONS
     //rmanCreateGlobals;
     //rmanCreateEnvLight;
-    print("RUNNING MEL:  dab_set_globals\n");
+    rmanLoadPlugin;
     rmanCreateGlobals;
+    print("RUNNING MEL:  dab_set_globals\n");
+    setAttr -type "string" "defaultRenderGlobals.currentRenderer" "renderManRIS";
+    setAttr "defaultRenderGlobals.animation" 1;
+    setAttr "defaultRenderGlobals.extensionPadding" 4;
+    setAttr "defaultRenderGlobals.periodInExt" 1;
+    setAttr "defaultRenderGlobals.byFrameStep" 1;
+    getAttr "rmanFinalOutputGlobals0.rman__riopt__Display_type";
+    setAttr "defaultRenderGlobals.outFormatControl" 0;
+    setAttr "defaultRenderGlobals.putFrameBeforeExt" 1;
+    //setAttr "defaultRenderGlobals.imageFormat" 19;
+    setAttr -type "string" "defaultRenderGlobals.imageFilePrefix" "<Scene>";
 
+    print("RUNNING      :  all done dab_set_globals\n");
 }
 
 
@@ -69,10 +71,8 @@ global proc dab_report_globals()
 {
     print("\n---------------------------------------\n");
     print("RUNNING MEL:  dab_report_globals\n");
-
     print("RMANTREE: " + `getenv "RMANTREE"` + "\n");
     print("RMSTREE : " + `getenv "RMSTREE"` + "\n");
-
     print("RMSPROJ : " + `rman getvar RMSPROJ` + "\n");
     print("STAGE   : " + `rman getvar STAGE` + "\n");
     print("RIBPATH : " + `rman getvar RIBPATH` + "\n");
@@ -128,16 +128,12 @@ global proc deb_micro_manager()
 global proc dab_rfm_pre_render( int $layerid, int $start, int $end, int $phase)
 {
     print("RUNNING MEL: >>>>>> THE STUDENT NANNY IS RUNNING >>>>>>> from dab_pre_render.mel\n");
-
+    print("RUNNING MEL: >>>>>> dab_pre_render.mel\n");
     dab_set_globals();
     deb_micro_manager();
-//    dab_set_passes();
-//    dab_set_intergrator("PxrDefault");
-
     python("import dab_rfm_pre_render as dpr");
     python("dpr.sayHello()");
-    //    python("dpr.showEnvironment()");
-
+    python("dpr.setUp()");
     dab_report_globals();
 
     //  perform ribgen for renderman
@@ -146,4 +142,3 @@ global proc dab_rfm_pre_render( int $layerid, int $start, int $end, int $phase)
 
     print("--------FINISHED---------\n");
 }
-

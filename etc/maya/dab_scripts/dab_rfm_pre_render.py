@@ -1,37 +1,18 @@
-import maya.cmds as cmds
 import os
-
-'''
-put this is the pythonpath then add into the prerendermel
-Okay, the pre render script is definitely acting capriciously
-In order to investigate, I've made a small test case.
-Simple scene with only one object: nurbsSpehre1
-all scripts are in external file: pre.py
-
-CODE
-import maya.cmds
-
-def preFrame():
-    maya.cmds.move( 3, 0, 0, "nurbsSphere1", r = True)
-    x = maya.cmds.getAttr( "nurbsSphere1.tx" )
-    file = open( "log.txt","a")
-    file.write ( "x = " + x + "\r\n" )
-    file.close()
-
-pre render scripts are assigned in render globals:
-Pre render MEL: python( "import pre" )
-Pre render frame MEL: python( "pre.preFrame()" )
+try:
+    import maya.cmds as cmds
+    import pymel.core as pm
+except ImportWarning, err:
+    print (err)
 
 
-'''
 #####################
 def sayHello():
-    print ("RUNNING PYTHON: Starting DAB Pre Render Scripts.....sayHello........")
+    print ("RUNNING PYTHON: Starting DAB Pre Render Scripts")
 
 #####################
 def whichRenderer():
     current_renderer = cmds.getAttr('defaultRenderGlobals.currentRenderer')
-
     print "Current Renderer is: {}".format(current_renderer)
 
     if current_renderer == 'vray':
@@ -47,26 +28,24 @@ def whichRenderer():
 
 def setIntegrator(integrator="PxrVisualizer"):
     '''
-
-    do this in mel
-
-
-    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVisualizer");
-    rmanSetAttr("PxrVisualizer","style","matcap");
-
-    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrDebugShadingContext");
-    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrDefault");
-    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrDirectLighting");
-    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrOcclusion");
-    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrPathTracer");
-    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVCM");
-    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrValidateBxdf");
-    rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVisualizer");
     '''
-    rfm_integrator = cmds.getAttr("renderManRISGlobals.rman__riopt__Integrator_name")
-    print "Current Integrator is: {}".format(rfm_integrator)
-    print "Setting Integrator to {i}".format(integrator)
-
+    valid_integrators = ["PxrVisualizer",
+                         "PxrDirectLighting",
+                         "PxrVCM",
+                         "PxrPathTracer",
+                         "PxrOcclusion",
+                         "PxrValidateBxdf",
+                         "PxrDebugShadingContext"]
+    try:
+        rfm_integrator = cmds.getAttr("renderManRISGlobals.rman__riopt__Integrator_name")
+    except Exception, err:
+        print (err)
+    else:
+        if integrator in valid_integrators:
+            print "Current Integrator was: {}".format(rfm_integrator)
+            print "Setting Integrator to {}".format(integrator)
+        else:
+            print "Current Integrator is: {}".format(rfm_integrator)
 
 
 
@@ -101,15 +80,7 @@ def setAnimation():
 #####################
 def setPasses():
     '''
-    rmanGetChannelClasses;
-    rmanAddOutput rmanFinalGlobals specular;
-
-    rmanGetOutputs rmanFinalGlobals;
-    rmanAddOutput "rmanFinalPass" "N";
-    rmanCreatePass Shadow;
-    rmanUpdateAE;
     '''
-
     try:
         # passes=cmds.mel("rmanGetOutputs rmanFinalGlobals;")
         pass
@@ -120,7 +91,6 @@ def setPasses():
 
 
 def showEnvironment():
-
     try:
         print os.environ[ 'MAYA_LOCATION' ]
         print("--------MAYA_APP_DIR--------")
@@ -143,61 +113,57 @@ def showEnvironment():
         print("-----------------")
 
 
+#################################
+def setMe(node="renderManRISGlobals", attr="rman__torattr___motionBlur", value=1):
+    # helper to set an attribute
+
+    try:
+        _selected = pm.select(node)
+    except Exception, err:
+        print "Node not found {}".format(node)
+        raise()
+    else:
+        pass
+        #print "Node found {}".format(node)
 
 
-'''
-//Get the name of the first image in the sequence and process any file name prefix tokens.
-string $firstImageName[] = `renderSettings -firstImageName -leaveUnmatchedTokens`;
+    try:
+        _fullAttr = "{}.{}".format(node, attr)
+        pm.setAttr(_fullAttr, value)
+    except Exception, err:
+        print "Cant set {}".format(_fullAttr)
+    else:
+        print "Set {} to {}".format(_fullAttr, value)
 
 
-// Get the name of the first and last image for the current layer
-string $fl[] = `renderSettings -firstImageName -lastImageName`;
-print ("First image is "+$fl[0]+"\n");
-// This is the empty string if the scene is not set for animation
-if ($fl[1] == "") {
-	print "Not rendering animation\n";
-} else {
-	print ("Last image is "+$fl[1]+"\n");
-}
+#################################
+def getRISAttrs(node="renderManRISGlobals"):
+    # helper to show render attribute list
+    try:
+        _selected = pm.select(node)
+    except Exception, err:
+        print "Node not found {}".format(node)
+        raise(err)
+    else:
+        for _attr in pm.listAttr(node):
+            _nodeAttr = "{}.{}".format(node, _attr)
+            _value = pm.getAttr(_nodeAttr)
+            _nodeType = pm.nodeType(node)
+            print "{} {} {} {}".format(_nodeType, node, _attr , _value)
 
+def setUp():
+    #setMe("renderManRISGlobals","rman__torattr___motionBlur",1)
+    #setMe("renderManRISGlobals","rman__torattr___cameraBlur",1)
+    #setMe("renderManRISGlobals","rman__torattr___motionSamples",4)
+    #setMe("renderManRISGlobals","rman__toropt___shutterAngle",180)
+    #setMe("renderManRISGlobals","rman__toropt___motionBlurType","frame")
+    setMe("renderManRISGlobals","rman__torattr___denoise",0)
+    setMe("renderManRISGlobals","rman__riopt__rib_format","binary")
+    setMe("renderManRISGlobals","rman__riopt__rib_compression","gzip")
+    #setMe("renderManRISGlobals","rman__torattr___linearizeColors",1)
 
-rman getvar STAGE;
-// Result: untitled //
-rman getvar RIBPATH;
-// Result: renderman/untitled/rib //
-
-rmanGetAttrName "ShadingRate";
-// Result: rman__riattr___ShadingRate //
-
-//https://renderman.pixar.com/resources/RenderMan_20/howToSetRenderGlobalValues.html
-rmanCreateGlobals;
-
-
-getAttr "rmanFinalOutputGlobals0.rman__riopt__Display_type";
-
-
-rmanGetChannelClasses;
-rmanAddOutput rmanFinalGlobals specular;
-
-rmanGetOutputs rmanFinalGlobals;
-rmanAddOutput "rmanFinalPass" "N";
-rmanCreatePass Shadow;
-rmanUpdateAE;
-
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVisualizer");
-rmanSetAttr("PxrVisualizer","style","matcap");
-
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrDebugShadingContext");
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrDefault");
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrDirectLighting");
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrOcclusion");
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrPathTracer");
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVCM");
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrValidateBxdf");
-rmanSetAttr("renderManRISGlobals","rman__riopt__Integrator_name","PxrVisualizer");
-'''
 
 if __name__ == "__main__":
-    sayhello()
-    setRfnIntegrator()
-    whichrenderer()
+    pass
+    #sayhello()
+    #setUp()
