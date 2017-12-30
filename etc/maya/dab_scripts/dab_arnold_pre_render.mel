@@ -24,13 +24,6 @@ global proc dab_report_globals()
 {
     print("\n---------------------------------------\n");
     print("RUNNING MEL:  dab_report_globals\n");
-
-//    print("RMANTREE: " + `getenv "RMANTREE"` + "\n");
-//    print("RMSTREE : " + `getenv "RMSTREE"` + "\n");
-//    print("RMSPROJ : " + `rman getvar RMSPROJ` + "\n");
-//    print("STAGE   : " + `rman getvar STAGE` + "\n");
-//    print("RIBPATH : " + `rman getvar RIBPATH` + "\n");
-
     print("---------------------------------------\n");
 }
 
