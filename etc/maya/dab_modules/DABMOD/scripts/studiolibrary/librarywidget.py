@@ -14,6 +14,7 @@
 import re
 import os
 import time
+import copy
 import logging
 
 from studioqt import QtGui
@@ -48,6 +49,32 @@ class LibraryWidget(QtWidgets.QWidget):
     _instances = {}
 
     DEFAULT_NAME = "Default"
+    DEFAULT_SETTINGS = {
+        "paneSizes": [160, 280, 180],
+        "geometry": [-1, -1, 860, 720],
+        "foldersWidgetVisible": True,
+        "previewWidgetVisible": True,
+        "menuBarWidgetVisible": True,
+        "statusBarWidgetVisible": True,
+        "recursiveSearchEnabled": False,
+        "itemsWidget": {
+                "spacing": 2,
+                "padding": 6,
+                "sortOrder": 0,
+                "sortColumn": "Custom Order",
+                "groupOrder": 0,
+                "groupColumn": "Category",
+                "zoomAmount": 80,
+                "textVisible": True,
+            },
+        "searchWidget": {
+                "text": "",
+            },
+        "theme": {
+                "accentColor": "rgb(0, 175, 240, 255)",
+                "backgroundColor": "rgb(60, 60, 80, 255)",
+            }
+        }
 
     DATABASE_PATH = "{path}/.studiolibrary/database.json"
     SETTINGS_PATH = "{local}/StudioLibrary/LibraryWidget.json"
@@ -413,8 +440,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :type path: str
         :rtype: None
         """
-        path = os.path.abspath(path)
-        path = studiolibrary.normPath(path)
+        path = studiolibrary.realPath(path)
 
         if path == self.path():
             logger.debug("The root path is already set.")
@@ -494,8 +520,7 @@ class LibraryWidget(QtWidgets.QWidget):
         directory = path
 
         if not directory:
-            from os.path import expanduser
-            directory = expanduser("~")
+            directory = os.path.expanduser("~")
 
         dialog = QtWidgets.QFileDialog(None, QtCore.Qt.WindowStaysOnTopHint)
 
@@ -769,7 +794,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
                 action = QtWidgets.QAction("Move to Trash", menu)
                 action.setEnabled(not self.isTrashSelected())
-                action.triggered.connect(self.showTrashSelectedFoldersDialog)
+                action.triggered.connect(self.showMoveFoldersToTrashDialog)
                 menu.addAction(action)
 
         return menu
@@ -931,7 +956,7 @@ class LibraryWidget(QtWidgets.QWidget):
             self.selectItems(items)
             self.scrollToSelectedItem()
 
-    def setItems(self, items, sortEnabled=False):
+    def setItems(self, items):
         """
         Set the items for the library widget.
 
@@ -939,9 +964,11 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         selectedItems = self.selectedItems()
 
-        self.itemsWidget().setItems(items, sortEnabled=sortEnabled)
+        data = self.readItemData()
 
-        self.refreshItemData()
+        self.itemsWidget().setItems(items, data=data, sortEnabled=True)
+
+        self.refreshSearch()
 
         if selectedItems:
             self.selectItems(selectedItems)
@@ -985,7 +1012,7 @@ class LibraryWidget(QtWidgets.QWidget):
             )
         )
 
-        self.setItems(items, sortEnabled=False)
+        self.setItems(items)
 
     def createItemsFromUrls(self, urls):
         """
@@ -1155,6 +1182,11 @@ class LibraryWidget(QtWidgets.QWidget):
         action.triggered[bool].connect(self.setStatusBarWidgetVisible)
         menu.addAction(action)
 
+        menu.addSeparator()
+        action = QtWidgets.QAction("Reset Settings", menu)
+        action.triggered.connect(self.resetSettings)
+        menu.addAction(action)
+
         if self.trashEnabled():
             menu.addSeparator()
             action = QtWidgets.QAction("Show Trash Folder", menu)
@@ -1289,7 +1321,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
                     action = QtWidgets.QAction("Move to Trash", editMenu)
                     action.setEnabled(not self.isTrashSelected())
-                    action.triggered.connect(self.showTrashSelectedItemsDialog)
+                    action.triggered.connect(self.showMoveItemsToTrashDialog)
                     editMenu.addAction(action)
 
         menu.addSeparator()
@@ -1454,13 +1486,14 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self.moveItems(items, dst, copy=copy)
 
-    def moveItems(self, items, dst, copy=False):
+    def moveItems(self, items, dst, copy=False, force=False):
         """
         Move the given items to the destination folder path.
         
         :type items: list[studiolibrary.LibraryItem]
         :type dst: str
         :type copy: bool
+        :type force: bool
         :rtype: None 
         """
         self.itemsWidget().clearSelection()
@@ -1471,6 +1504,9 @@ class LibraryWidget(QtWidgets.QWidget):
             for item in items:
 
                 path = dst + "/" + item.name()
+
+                if force:
+                    path = studiolibrary.generateUniquePath(path)
 
                 if copy:
                     item.copy(path)
@@ -1483,7 +1519,8 @@ class LibraryWidget(QtWidgets.QWidget):
             self.showExceptionDialog("Move Error", e)
             raise
         finally:
-            self.addItems(movedItems, select=True)
+            self.refreshItems()
+            self.selectItems(movedItems)
 
     # -----------------------------------------------------------------------
     # Support for search
@@ -1784,13 +1821,53 @@ class LibraryWidget(QtWidgets.QWidget):
     # Support for saving and loading the widget state
     # -----------------------------------------------------------------------
 
+    def resetSettings(self):
+        """
+        Reset the settings to the default settings.
+
+        :rtype: str
+        """
+        self.setSettings(self.DEFAULT_SETTINGS)
+
     def settingsPath(self):
         """
-        Return the settings path for the CatalogWidget
+        Return the settings path for the LibraryWidget.
 
         :rtype: str
         """
         return studiolibrary.formatPath(self.SETTINGS_PATH)
+
+    def geometrySettings(self):
+        """
+        Return the geometry values as a list.
+
+        :rtype: list[int]
+        """
+        settings = (
+            self.window().geometry().x(),
+            self.window().geometry().y(),
+            self.window().geometry().width(),
+            self.window().geometry().height()
+        )
+        return settings
+
+    def setGeometrySettings(self, settings):
+        """
+        Set the geometry of the widget with the given values.
+
+        :type settings: list[int]
+        :rtype: None
+        """
+        x, y, width, height = settings
+
+        screenGeometry = QtWidgets.QApplication.desktop().screenGeometry()
+        screenWidth = screenGeometry.width()
+        screenHeight = screenGeometry.height()
+
+        if x <= 0 or y <= 0 or x >= screenWidth or y >= screenHeight:
+            self.centerWindow(width, height)
+        else:
+            self.window().setGeometry(x, y, width, height)
 
     def settings(self):
         """
@@ -1798,32 +1875,25 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: dict
         """
-        geometry = (
-            self.window().geometry().x(),
-            self.window().geometry().y(),
-            self.window().geometry().width(),
-            self.window().geometry().height()
-        )
-
         settings = {}
 
         settings['dpi'] = self.dpi()
-        settings['geometry'] = geometry
-        settings['sizes'] = self._splitter.sizes()
+        settings['geometry'] = self.geometrySettings()
+        settings['paneSizes'] = self._splitter.sizes()
 
         if self.theme():
             settings['theme'] = self.theme().settings()
-
-        settings["recursiveSearch"] = self.isRecursiveSearchEnabled()
 
         settings["foldersWidgetVisible"] = self.isFoldersWidgetVisible()
         settings["previewWidgetVisible"] = self.isPreviewWidgetVisible()
         settings["menuBarWidgetVisible"] = self.isMenuBarWidgetVisible()
         settings["statusBarWidgetVisible"] = self.isStatusBarWidgetVisible()
 
+        settings["recursiveSearchEnabled"] = self.isRecursiveSearchEnabled()
+
+        settings['itemsWidget'] = self.itemsWidget().settings()
         settings['searchWidget'] = self.searchWidget().settings()
         settings['foldersWidget'] = self.foldersWidget().settings()
-        settings['itemsWidget'] = self.itemsWidget().settings()
 
         settings["path"] = self.path()
 
@@ -1835,35 +1905,22 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :type settings: dict
         """
+        defaults = copy.deepcopy(self.DEFAULT_SETTINGS)
+        settings = studiolibrary.update(defaults, settings)
+
         isRefreshEnabled = self.isRefreshEnabled()
 
         try:
             self.setRefreshEnabled(False)
             self.itemsWidget().setToastEnabled(False)
 
-            defaultGeometry = [200, 100, 860, 680]
-            x, y, width, height = settings.get("geometry", defaultGeometry)
-            self.window().setGeometry(x, y, width, height)
+            geometry = settings.get("geometry")
+            if geometry:
+                self.setGeometrySettings(geometry)
 
-            # Make sure the window is on the screen.
-            x = self.window().geometry().x()
-            y = self.window().geometry().y()
-
-            screenGeometry = QtWidgets.QApplication.desktop().screenGeometry()
-            screenWidth = screenGeometry.width()
-            screenHeight = screenGeometry.height()
-
-            if x <= 0 or y <= 0 or x >= screenWidth or y >= screenHeight:
-                self.centerWindow()
-
-            if settings.get("geometry") is None:
-                self.centerWindow()
-
-            themeSettings = settings.get("theme", None)
+            themeSettings = settings.get("theme")
             if themeSettings:
-                theme = studioqt.Theme()
-                theme.setSettings(themeSettings)
-                self.setTheme(theme)
+                self.setThemeSettings(themeSettings)
 
             if not self.path():
                 path = settings.get("path")
@@ -1873,28 +1930,33 @@ class LibraryWidget(QtWidgets.QWidget):
             dpi = settings.get("dpi", 1.0)
             self.setDpi(dpi)
 
-            sizes = settings.get('sizes', [160, 280, 180])
-            if len(sizes) == 3:
+            sizes = settings.get('paneSizes')
+            if sizes and len(sizes) == 3:
                 self.setSizes(sizes)
 
-            value = settings.get("foldersWidgetVisible", True)
-            self.setFoldersWidgetVisible(value)
+            value = settings.get("foldersWidgetVisible")
+            if value is not None:
+                self.setFoldersWidgetVisible(value)
 
-            value = settings.get("menuBarWidgetVisible", True)
-            self.setMenuBarWidgetVisible(value)
+            value = settings.get("menuBarWidgetVisible")
+            if value is not None:
+                self.setMenuBarWidgetVisible(value)
 
-            value = settings.get("previewWidgetVisible", True)
-            self.setPreviewWidgetVisible(value)
+            value = settings.get("previewWidgetVisible")
+            if value is not None:
+                self.setPreviewWidgetVisible(value)
 
-            value = settings.get("statusBarWidgetVisible", True)
-            self.setStatusBarWidgetVisible(value)
+            value = settings.get("statusBarWidgetVisible")
+            if value is not None:
+                self.setStatusBarWidgetVisible(value)
 
-            searchWidgetSettings = settings.get('searchWidget', {})
-            self.searchWidget().setSettings(searchWidgetSettings)
+            value = settings.get('searchWidget')
+            if value is not None:
+                self.searchWidget().setSettings(value)
 
-            recursiveSearch = settings.get("recursiveSearch",
-                                           self.RECURSIVE_SEARCH_ENABLED)
-            self.setRecursiveSearchEnabled(recursiveSearch)
+            value = settings.get("recursiveSearchEnabled")
+            if value is not None:
+                self.setRecursiveSearchEnabled(value)
 
         finally:
             self.reloadStyleSheet()
@@ -1907,6 +1969,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         itemsWidgetSettings = settings.get('itemsWidget', {})
         self.itemsWidget().setSettings(itemsWidgetSettings)
+
         self.itemsWidget().setToastEnabled(True)
 
     def updateSettings(self, settings):
@@ -2001,19 +2064,25 @@ class LibraryWidget(QtWidgets.QWidget):
         self._splitter.setSizes([fSize, cSize, pSize])
         self._splitter.setStretchFactor(1, 1)
 
-    def centerWindow(self):
+    def centerWindow(self, width=None, height=None):
         """
         Center the widget to the center of the desktop.
 
         :rtype: None
         """
         geometry = self.frameGeometry()
+
+        if width:
+            geometry.setWidth(width)
+
+        if height:
+            geometry.setHeight(height)
+
         pos = QtWidgets.QApplication.desktop().cursor().pos()
         screen = QtWidgets.QApplication.desktop().screenNumber(pos)
-        centerPoint = QtWidgets.QApplication.desktop().screenGeometry(
-            screen).center()
+        centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
         geometry.moveCenter(centerPoint)
-        self.window().move(geometry.topLeft())
+        self.window().setGeometry(geometry)
 
     # -----------------------------------------------------------------------
     # Overloading events
@@ -2122,6 +2191,17 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: studioqt.Color
         """
         return self.theme().iconColor()
+
+    def setThemeSettings(self, settings):
+        """
+        Set the theme from the given settings.
+
+        :type settings: dict
+        :rtype: None
+        """
+        theme = studioqt.Theme()
+        theme.setSettings(settings)
+        self.setTheme(theme)
 
     def setTheme(self, theme):
         """
@@ -2279,7 +2359,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: None
         """
         self.createTrashFolder()
-        self.moveItems(items, dst=self.trashPath())
+        self.moveItems(items, dst=self.trashPath(), force=True)
 
     def moveFolderToTrash(self, folder):
         """
@@ -2293,51 +2373,31 @@ class LibraryWidget(QtWidgets.QWidget):
 
         src = folder.path()
         dst = os.path.join(self.trashPath(), os.path.basename(src))
+        dst = studiolibrary.generateUniquePath(dst)
 
         self.renameFolder(src, dst=dst)
 
-    def showTrashItemsDialog(self, items, title, text):
+    def showMoveItemsToTrashDialog(self):
         """
-        Show the "move to trash" dialog.
+        Show the "Move to trash" dialog for the selected items.
 
-        :type items: list[studiolibrary.LibraryItem]
-        :type title: str
-        :type text: str
-
-        :rtype: QtWidgets.QMessageBox.Button
+        :rtype: None
         """
-        result = None
+        items = self.selectedItems()
 
         if items:
+            title = "Move to trash?"
+            text = "Are you sure you want to move the selected" \
+                   "item/s to the trash?"
+
             result = self.showQuestionDialog(title, text)
 
             if result == QtWidgets.QMessageBox.Yes:
                 self.moveItemsToTrash(items)
 
-        return result
-
-    def showTrashSelectedItemsDialog(self):
+    def showMoveFoldersToTrashDialog(self):
         """
-        Show the "move to trash" dialog for the selected items.
-
-        :rtype: QtWidgets.QMessageBox.Button
-        """
-        items = self.selectedItems()
-
-        text = "Are you sure you want to move " \
-               "the selected item/s to the trash?"
-
-        button = self.showTrashItemsDialog(
-            items=items,
-            title="Move to trash?",
-            text=text,
-        )
-
-        return button
-
-    def showTrashSelectedFoldersDialog(self):
-        """
-        Show the move to trash dialog for the selected items.
+        Show the "Move to trash" dialog for the selected folders.
         
         :rtype: None
         """

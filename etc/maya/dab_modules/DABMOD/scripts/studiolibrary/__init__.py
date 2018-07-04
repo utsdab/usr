@@ -15,7 +15,7 @@ import os
 import sys
 
 
-__version__ = "2.2.6"
+__version__ = "2.3.4"
 
 _resource = None
 

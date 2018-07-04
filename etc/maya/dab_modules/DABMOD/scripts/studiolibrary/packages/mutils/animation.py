@@ -481,7 +481,7 @@ class Animation(mutils.Pose):
         Clean up all imported nodes, as well as the namespace.
         Should be called in a finally block.
         """
-        nodes = maya.cmds.ls(Animation.IMPORT_NAMESPACE + ":*") or []
+        nodes = maya.cmds.ls(Animation.IMPORT_NAMESPACE + ":*", r=True) or []
         if nodes:
             maya.cmds.delete(nodes)
 
@@ -597,6 +597,10 @@ class Animation(mutils.Pose):
                         dstCurve, = maya.cmds.listConnections(fullname, destination=False) or [None]
 
                         if dstCurve:
+                            # Filter to only animCurves since you can have proxy attributes
+                            if not maya.cmds.nodeType(dstCurve).startswith("animCurve"):
+                                continue
+
                             dstCurve = maya.cmds.rename(dstCurve, "CURVE")
                             srcCurve = mutils.animCurve("%s.%s" % (name, attr))
                             if srcCurve and "animCurve" in maya.cmds.nodeType(srcCurve):

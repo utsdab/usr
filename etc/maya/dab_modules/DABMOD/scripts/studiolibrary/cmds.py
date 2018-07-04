@@ -41,6 +41,7 @@ __all__ = [
     "replaceJson",
     "relPath",
     "absPath",
+    "realPath",
     "normPath",
     "copyPath",
     "movePath",
@@ -147,7 +148,7 @@ def itemClasses():
 
 def itemExtensions():
     """
-    Register the given item class to the given extension.
+    Return all the registered item extensions.
 
     :rtype: list[str]
     """
@@ -161,7 +162,7 @@ def itemExtensions():
 
 def clearItemClasses():
     """
-    Remove all registered item class.
+    Remove all registered item classes.
 
     :rtype: None
     """
@@ -238,7 +239,7 @@ def pathsFromUrls(urls):
 
 def isValidItemPath(path):
     """
-    Return True if the given path is supported by a registered items.
+    Return True if the given path is supported by a registered item.
 
     :type path: str
     :rtype: bool 
@@ -248,7 +249,7 @@ def isValidItemPath(path):
 
 def itemClassFromPath(path):
     """
-    Return the registered LibraryItemClass that supports the given path.
+    Return the registered LibraryItem class that supports the given path.
 
     :type path: str
     :rtype: studiolibrary.LibraryItem.__class__ or None
@@ -373,7 +374,7 @@ def localPath(*args):
 
 def formatPath(formatString, path="", **kwargs):
     """
-    Resolve the given destination path.
+    Resolve the given string with the given path and kwargs.
 
     Example:
         print formatPath("{dirname}/meta.json", path="C:/hello/world.json")
@@ -736,42 +737,16 @@ def absPath(data, start):
     return data
 
 
-def generateUniquePath(path, attempts=1000):
+def realPath(path):
     """
-    Generate a unique path on disc.
+    Return the given path eliminating any symbolic link.
     
-    Example:
-        # If the following files exist then the next unique path will be 3.
-        # C:/tmp/file.text
-        # C:/tmp/file (2).text
-        
-        print generateUniquePath("C:/tmp/file.text")
-        # C:/tmp/file (3).text
-    
-    :type path:  str
-    :type attempts: int
-    :rtype: str
+    :type path: str 
+    :rtype: str 
     """
-    attempt = 1  # We start at one so that the first unique name is actually 2.
-    dirname, name, extension = splitPath(path)
-    path_ = u'{dirname}/{name} ({number}){extension}'
-
-    while os.path.exists(path):
-        attempt += 1
-
-        path = path_.format(
-            name=name,
-            number=attempt,
-            dirname=dirname,
-            extension=extension
-        )
-
-        if attempt >= attempts:
-            msg = u'Cannot generate unique name for path {path}'
-            msg = msg.format(path=path)
-            raise ValueError(msg)
-
-    return path
+    path = os.path.realpath(path)
+    path = os.path.expanduser(path)
+    return normPath(path)
 
 
 def normPath(path):
@@ -848,6 +823,44 @@ def listPaths(path):
     for name in os.listdir(path):
         value = path + "/" + name
         yield value
+
+
+def generateUniquePath(path, attempts=1000):
+    """
+    Generate a unique path on disc.
+
+    Example:
+        # If the following files exist then the next unique path will be 3.
+        # C:/tmp/file.text
+        # C:/tmp/file (2).text
+
+        print generateUniquePath("C:/tmp/file.text")
+        # C:/tmp/file (3).text
+
+    :type path:  str
+    :type attempts: int
+    :rtype: str
+    """
+    attempt = 1  # We start at one so that the first unique name is actually 2.
+    dirname, name, extension = splitPath(path)
+    path_ = u'{dirname}/{name} ({number}){extension}'
+
+    while os.path.exists(path):
+        attempt += 1
+
+        path = path_.format(
+            name=name,
+            number=attempt,
+            dirname=dirname,
+            extension=extension
+        )
+
+        if attempt >= attempts:
+            msg = u'Cannot generate unique name for path {path}'
+            msg = msg.format(path=path)
+            raise ValueError(msg)
+
+    return path
 
 
 def findPaths(
