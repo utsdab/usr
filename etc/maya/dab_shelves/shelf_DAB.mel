@@ -6,14 +6,17 @@ global proc shelf_DAB () {
 
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "RapidRig_Modular" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "RapidRig_Modular;" 
@@ -38,14 +41,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "RapidRig_Modular_Selector" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "RRS" 
@@ -76,20 +82,269 @@ global proc shelf_DAB () {
         -visible 1
         -preventOverride 0
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -style "shelf" 
         -horizontal 0
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
         -enable 1
-        -width 35
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "dpAutoRig" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "dpAutoRig" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "dpAR" 
+        -overlayLabelColor 0.912752 0.912752 0.912752 
+        -overlayLabelBackColor 0 0 0 0.4 
+        -image "rigidBind.png" 
+        -image1 "rigidBind.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "# dpAutoRig Shelf button (Python)\n\n# dpAutoRig python script is FREE !!!\n# author: Danilo Pinheiro (nilouco)\n# contact: nilouco@gmail.com\n# http://nilouco.blogspot.com\n\n# download the last version at Github, please:\n# https://github.com/nilouco/dpAutoRigSystem\n\n# install:\n# first of all, copy the dpAutoRigSystem folder to your maya/scripts directory\n# or another MAYA_PATH like:\n#\n# Windows:\n# C:/Users/yourUserName/Documents/maya/scripts\n# or C:/Program Files/Autodesk/Maya2011/Python/Lib/site-packages/dpAutoRigSystem\n#\n# MAC:\n# /Users/yourUserName/Library/Preferences/Autodesk/maya/2012-x64/scripts/\n#\n# Linux:\n# /home/yourUserName/maya/scripts\n#\n# just copy and past this code in the scriptEditor python tab,\n# select it, drag and drop to your shelf as a python button.\n#\n#\n# Attention:\n# Your maya version and/or yourUserName must be edited.\n\n\ntry:\n    #Use the following line if the scripts is not copied in a maya path\n    import sys\n    #Change the text of line 37 \"Your Path To The Project\" for the path where you got the project\n    #Ex Win --> sys.path.append(\"C:/Program Files/dpAutoRigSystem\")\n    #Ex Mac --> sys.path.append(\"/Users/yourUserName/dpAutoRigSystem\")\n    #Ex Linux --> sys.path.append(\"/home/yourUserName/dpAutoRigSystem\")\n    sys.path.append(\"Your Path to the project\")\n    \n    import maya.cmds as cmds\n    import dpAutoRigSystem\n    import dpAutoRigSystem.dpAutoRig as autoRig\n    reload(autoRig)\n    autoRigUI = autoRig.DP_AutoRig_UI()\n    print \"\\ndpAutoRigSystem loaded with success.\"\nexcept:\n    print \"Error: importing python modules !!!\"\n    print \"Make sure the dpAutoRigSystem is in a correct MAYA_PATH directory (C:/Program Files/Autodesk/Maya2011/Python/Lib/site-packages/dpAutoRigSystem), and do not change any file, please.\"\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    separator
+        -enable 1
+        -width 34
         -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -style "shelf" 
+        -horizontal 0
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "studio library" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "LIB" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "sLib" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "createPose.png" 
+        -image1 "createPose.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import studiolibrary\nstudiolibrary.main()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    separator
+        -enable 1
+        -width 34
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -style "shelf" 
+        -horizontal 0
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "AdvancedSkeleton5" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "AdvancedSkeleton5" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "AS5.png" 
+        -image1 "AS5.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "source \"AdvancedSkeleton5.mel\";AdvancedSkeleton5;" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Selector:biped" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Selector:biped" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "asBiped.png" 
+        -image1 "asBiped.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "source \"biped.mel\";" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Selector:face" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Selector:face" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "asFace.png" 
+        -image1 "asFace.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "source \"face.mel\";" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "picker" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "picker" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "picker.png" 
+        -image1 "picker.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "source \"picker.mel\";" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    separator
+        -enable 1
+        -width 34
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -style "shelf" 
+        -horizontal 0
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
+        -enable 1
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "write skin transfer" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "transfer skin weights" 
@@ -113,14 +368,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "read skin transfer" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "transfer skin weights" 
@@ -144,26 +402,29 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
         -enable 1
-        -width 39
-        -height 39
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "djRivet" 
+        -annotation "Rivet" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
-        -label "djRivet" 
+        -label "rivet" 
         -labelOffset 0
         -rotation 0
         -flipX 0
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
-        -imageOverlayLabel "RIV" 
-        -overlayLabelColor 0.8 0.8 0.8 
-        -overlayLabelBackColor 0 0 0 0.5 
+        -imageOverlayLabel "RIVT" 
+        -overlayLabelColor 0 0 0 
+        -overlayLabelBackColor 1 1 1 0.8 
         -image "djRivet.png" 
         -image1 "djRivet.png" 
         -style "iconOnly" 
@@ -176,14 +437,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "source cometMenu.mel;" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "COMET" 
@@ -214,20 +478,24 @@ global proc shelf_DAB () {
         -visible 1
         -preventOverride 0
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -style "shelf" 
         -horizontal 0
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 64
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Select object(s) to key" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Set Key" 
@@ -252,14 +520,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Toggle local rotation axis visibility" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Local Rotation Axes" 
@@ -284,14 +555,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 64
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Select, or select and remove, different types of polygonal geometry" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Cleanup..." 
@@ -317,14 +591,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 64
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Select quads" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Cleanup..." 
@@ -350,14 +627,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 64
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Cut the faces using a yz plane" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Cut Faces Tool" 
@@ -383,14 +663,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Select an object(s)" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Center Pivot" 
@@ -415,14 +698,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Select an object(s)" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Freeze Transformations" 
@@ -447,14 +733,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Convert selected components to selected vertex component" 
         -enableBackground 1
+        -backgroundColor 0.266667 0.266667 0.266667 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "To Vertices" 
@@ -479,14 +768,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Convert selected components to selected edge component" 
         -enableBackground 1
+        -backgroundColor 0.266667 0.266667 0.266667 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "To Edges" 
@@ -511,14 +803,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Convert selected components to selected face component" 
         -enableBackground 1
+        -backgroundColor 0.266667 0.266667 0.266667 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "To Faces" 
@@ -543,14 +838,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Selects all connected edges that form an edge loop based on the current selection" 
         -enableBackground 1
+        -backgroundColor 0.266667 0.266667 0.266667 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "To Edge Loop" 
@@ -575,14 +873,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Selects all parallel edges that form an edge ring based on the current selection" 
         -enableBackground 1
+        -backgroundColor 0.266667 0.266667 0.266667 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "To Edge Ring" 
@@ -607,46 +908,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 64
         -enable 1
-        -width 35
-        -height 35
-        -manage 1
-        -visible 1
-        -preventOverride 0
-        -annotation "orthoModel" 
-        -enableBackground 1
-        -highlightColor 0.321569 0.521569 0.65098 
-        -align "center" 
-        -label "orthoModel" 
-        -labelOffset 0
-        -rotation 0
-        -flipX 0
-        -flipY 0
-        -useAlpha 1
-        -font "plainLabelFont" 
-        -imageOverlayLabel "VIEW" 
-        -overlayLabelColor 0 0 0 
-        -overlayLabelBackColor 0 0 0 0.2 
-        -image "commandButton.png" 
-        -image1 "commandButton.png" 
-        -style "iconOnly" 
-        -marginWidth 1
-        -marginHeight 1
-        -command "setNamedPanelLayout \"orthoModel\";" 
-        -sourceType "mel" 
-        -commandRepeatable 1
-        -flat 1
-    ;
-    shelfButton
-        -enableCommandRepeat 1
-        -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Slide edge loops or paths along their neighbouring edges" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Slide Edge Tool" 
@@ -672,14 +944,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 64
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Delete the selected poly components" 
         -enableBackground 1
+        -backgroundColor 0.266667 0.266667 0.266667 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Delete Edge/Vertex" 
@@ -704,14 +979,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Delete construction history on the selected object(s)" 
         -enableBackground 1
+        -backgroundColor 0.266667 0.266667 0.266667 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "History" 
@@ -736,14 +1014,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 64
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Extrude the selected vertices" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Extrude" 
@@ -769,47 +1050,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 64
         -enable 1
-        -width 35
-        -height 35
-        -manage 1
-        -visible 1
-        -preventOverride 0
-        -annotation "Split selected edge ring" 
-        -enableBackground 0
-        -highlightColor 0.321569 0.521569 0.65098 
-        -align "center" 
-        -label "Insert Edge Loop Tool" 
-        -labelOffset 0
-        -rotation 0
-        -flipX 0
-        -flipY 0
-        -useAlpha 1
-        -font "plainLabelFont" 
-        -imageOverlayLabel "INS" 
-        -overlayLabelColor 0.8 0.8 0.8 
-        -overlayLabelBackColor 0 0 0 0.2 
-        -image "polySplitEdgeRing.png" 
-        -image1 "polySplitEdgeRing.png" 
-        -style "iconOnly" 
-        -marginWidth 1
-        -marginHeight 1
-        -command "SplitEdgeRingTool" 
-        -sourceType "mel" 
-        -doubleClickCommand "InsertEdgeLoopToolOptions" 
-        -commandRepeatable 1
-        -flat 1
-    ;
-    shelfButton
-        -enableCommandRepeat 1
-        -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Sculpt a geometry object" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Sculpt Geometry Tool" 
@@ -835,14 +1086,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 64
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "mirrorMeUI" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "mirrorMeUI" 
@@ -867,14 +1121,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 64
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Enter Multi-Cut tool" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Multi-Cut Tool" 
@@ -899,78 +1156,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 64
         -enable 1
-        -width 35
-        -height 35
-        -manage 1
-        -visible 1
-        -preventOverride 0
-        -annotation "Split selected edge ring" 
-        -enableBackground 0
-        -highlightColor 0.321569 0.521569 0.65098 
-        -align "center" 
-        -label "Insert Edge Loop Tool" 
-        -labelOffset 0
-        -rotation 0
-        -flipX 0
-        -flipY 0
-        -useAlpha 1
-        -font "plainLabelFont" 
-        -overlayLabelColor 0.8 0.8 0.8 
-        -overlayLabelBackColor 0 0 0 0.2 
-        -image "polySplitEdgeRing.png" 
-        -image1 "polySplitEdgeRing.png" 
-        -style "iconOnly" 
-        -marginWidth 1
-        -marginHeight 1
-        -command "SplitEdgeRingTool" 
-        -sourceType "mel" 
-        -doubleClickCommand "InsertEdgeLoopToolOptions" 
-        -commandRepeatable 1
-        -flat 1
-    ;
-    shelfButton
-        -enableCommandRepeat 1
-        -enable 1
-        -width 35
-        -height 35
-        -manage 1
-        -visible 1
-        -preventOverride 0
-        -annotation "Split selected edge ring" 
-        -enableBackground 0
-        -highlightColor 0.321569 0.521569 0.65098 
-        -align "center" 
-        -label "Insert Edge Loop Tool" 
-        -labelOffset 0
-        -rotation 0
-        -flipX 0
-        -flipY 0
-        -useAlpha 1
-        -font "plainLabelFont" 
-        -overlayLabelColor 0.8 0.8 0.8 
-        -overlayLabelBackColor 0 0 0 0.25 
-        -image "polySplitEdgeRing.png" 
-        -image1 "polySplitEdgeRing.png" 
-        -style "iconOnly" 
-        -marginWidth 1
-        -marginHeight 1
-        -command "SplitEdgeRingTool" 
-        -sourceType "mel" 
-        -doubleClickCommand "InsertEdgeLoopToolOptions" 
-        -commandRepeatable 1
-        -flat 1
-    ;
-    shelfButton
-        -enableCommandRepeat 1
-        -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Merge vertices / border edges based on selection" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Merge Components" 
@@ -995,14 +1191,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 64
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Make normals of all selected faces point in a consistent direction" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Conform" 
@@ -1026,14 +1225,17 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 64
         -enable 1
-        -width 35
-        -height 35
+        -width 34
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Set the soft/hard threshold angles for edge normals" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Soften Edge" 
@@ -1052,6 +1254,216 @@ global proc shelf_DAB () {
         -marginHeight 1
         -command "SoftPolyEdgeElements 1" 
         -sourceType "mel" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Unlock selected" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "ulock" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "unlock" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "commandButton.png" 
+        -image1 "commandButton.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "// unlock selected\n$sel = `ls -selection`;\nlockNode -lock off $sel;" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Lock selected " 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "lock" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "lock" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "commandButton.png" 
+        -image1 "commandButton.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "// lock selected\n$sel = `ls -selection`;\nlockNode -lock on $sel;" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Unlock all below selected" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "ulockAll" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "unlockAll" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "commandButton.png" 
+        -image1 "commandButton.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "// unlock all below selected\n$sel = `ls -dag -ap -sl`;\nlockNode -lock off $sel;" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Put selected shape nodes under seleccted transform parent" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Parent Shapes" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "Parent Shapes" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "commandButton.png" 
+        -image1 "commandButton.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "// put selected shape nodes under seleccted transform parent\n// seletc a transfom and a shape node\nstring $shapes[] = `ls -selection -shapes -ni`;\nprint(\"Shapes:  \");\nprint $shapes;\nprint(\"\\n\");\n\nstring $transforms[] = `ls -selection -transforms -ni`;\nprint (\"Transforms:  \");\nprint $transforms;\nprint(\"\\n\");\n\nif (size($transforms) > 1) {\n    print(\"Only pick one transform as a parent please\");\n} else {\n    print(\"Am Parenting.....\");\n    for ($each in $shapes) {\n        print (\"Parenting \" + $each + \" under \" + $transforms[0] + \"\\n\");\n        parent -relative -shape $each $transforms[0];\n    }\n}" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Make XY Controller" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "XY" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "XY" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "pythonFamily.png" 
+        -image1 "pythonFamily.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import xy_control as xy\nxy.main()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 1
+        -flexibleWidthValue 32
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import x_control as cont\ncont.main() " 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "x" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "x" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "pythonFamily.png" 
+        -image1 "pythonFamily.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import x_control as cont\ncont.main() " 
+        -sourceType "python" 
         -commandRepeatable 1
         -flat 1
     ;

@@ -59,7 +59,7 @@ for( $num=$start ; $num<=$finish ; $num+=$step )
     $outname = $_;
 
     # Execute the 'mv' command to rename the file, and die if it fails.
-    printf("move $inname $outname\n");
-    system("move $inname $outname\n");
+    printf("mv $inname $outname\n");
+    system("mv $inname $outname\n");
     die "renseq: couldn't rename file $inname to $outname\n" if( $? );
 }

@@ -1,19 +1,13 @@
 try:
     import pymel.core as pymel
     try:
-        from sstk.libs.libQt import QtCore, QtGui
+        from sstk.libs.libQt import QtCore, QtWidgets
         from sstk.libs import libSerialization
     except:
-        ##### from PySide import QtCore, QtGui
-        # from PySide2 import QtGui
-        from PySide2 import QtGui, QtCore, QtWidgets
-        ######
+        from ..Vendor.Qt import QtCore, QtGui, QtWidgets, QtCompat
         from ..Modules.Library import libSerialization
     from Ui import PoseReader as poseReaderUI
     reload(poseReaderUI)
-    # import shiboken
-    import shiboken2
-    ####
     from maya import OpenMayaUI
     from functools import partial
     import maya.cmds as cmds
@@ -50,13 +44,10 @@ class PoseReaderData(object):
 def getMayaWindow():
     OpenMayaUI.MQtUtil.mainWindow()
     ptr = OpenMayaUI.MQtUtil.mainWindow()
-    ###
-    # return shiboken2.wrapInstance(long(ptr), QtGui.QWidget)
-    return shiboken2.wrapInstance(long(ptr), QtGui.QWidget)
-    ###
+    return QtCompat.wrapInstance(long(ptr), QtWidgets.QWidget)
+    
 
-
-class PoseReaderDialog(QtGui.QMainWindow):
+class PoseReaderDialog(QtWidgets.QMainWindow):
     def __init__(self, parent=getMayaWindow(), *args, **kwargs):
         super(PoseReaderDialog, self).__init__(parent)
         self.ID_COL_NAME = 0
@@ -107,10 +98,10 @@ class PoseReaderDialog(QtGui.QMainWindow):
         self.ui.tblData.insertRow(iCurRowIdx)
 
         #Create the name field
-        pCellName = QtGui.QTableWidgetItem()
+        pCellName = QtWidgets.QTableWidgetItem()
         self.ui.tblData.setItem(iCurRowIdx, self.ID_COL_NAME, pCellName)
 
-        edtName = QtGui.QLineEdit()
+        edtName = QtWidgets.QLineEdit()
         edtName.setText(sName)
         edtName.textChanged.connect(partial(self.on_action_nameChange, iCurRowIdx, self.ID_COL_NAME))
 
@@ -124,10 +115,10 @@ class PoseReaderDialog(QtGui.QMainWindow):
         pCellName.setData(QtCore.Qt.UserRole, pData)
 
         #Create the comboBox for axis selection
-        pCellAxis = QtGui.QTableWidgetItem()
+        pCellAxis = QtWidgets.QTableWidgetItem()
         self.ui.tblData.setItem(iCurRowIdx, self.ID_COL_AXIS, pCellAxis)
 
-        cbAxis = QtGui.QComboBox()
+        cbAxis = QtWidgets.QComboBox()
         aAxisName = ("X", "Y", "Z")
         cbAxis.addItems(aAxisName)
         cbAxis.setCurrentIndex(iAxisIdx)
@@ -138,10 +129,10 @@ class PoseReaderDialog(QtGui.QMainWindow):
         pCellAxis.setData(QtCore.Qt.UserRole, pData)
 
         #Create the comboBox for axis order
-        pCellAxisOrder = QtGui.QTableWidgetItem()
+        pCellAxisOrder = QtWidgets.QTableWidgetItem()
         self.ui.tblData.setItem(iCurRowIdx, self.ID_COL_AXISORDER, pCellAxisOrder)
 
-        cbAxisOrder = QtGui.QComboBox()
+        cbAxisOrder = QtWidgets.QComboBox()
         aAxisOrderName = ("XYZ", "YZX", "ZXY", "XZY", "YXZ", "ZYX")
         cbAxisOrder.addItems(aAxisOrderName)
         cbAxisOrder.setCurrentIndex(iAxisOrder)
@@ -152,10 +143,10 @@ class PoseReaderDialog(QtGui.QMainWindow):
         pCellAxisOrder.setData(QtCore.Qt.UserRole, pData)
 
         #Create a spinBox to restrict user to a range of angle
-        pCellAngle = QtGui.QTableWidgetItem()
+        pCellAngle = QtWidgets.QTableWidgetItem()
         self.ui.tblData.setItem(iCurRowIdx, self.ID_COL_ANGLE, pCellAngle)
 
-        spnAngle = QtGui.QSpinBox()
+        spnAngle = QtWidgets.QSpinBox()
         spnAngle.setRange(-360.0, 360.0)
         spnAngle.setValue(fAngle)
         spnAngle.valueChanged.connect(partial(self.on_action_angleChange, iCurRowIdx, self.ID_COL_AXIS))
@@ -217,14 +208,14 @@ class PoseReaderDialog(QtGui.QMainWindow):
         pData.nChildLoc.angleMaxValue.set(args[0])
 
     def on_action_textChange(self, *args):
-        sName = self.ui.edtNewName.toPlainText()
+        sName = self.ui.edtNewName.text()
         if sName:
             self.ui.btnCreate.setEnabled(True)
         else:
             self.ui.btnCreate.setEnabled(False)
 
     def on_action_create(self, *args):
-        sName = self.ui.edtNewName.toPlainText()
+        sName = self.ui.edtNewName.text()
 
         # loading Maya matrix node
         if not (cmds.pluginInfo("decomposeMatrix", query=True, loaded=True)):
@@ -235,7 +226,7 @@ class PoseReaderDialog(QtGui.QMainWindow):
                     cmds.loadPlugin("matrixNodes.mll")
                 except:
                     print self.langDic[self.langName]['e002_decomposeMatrixNotFound']
-
+                    
         aSel = pymel.selected()
         if (len(aSel) == 2):
             #Create the container of the system data
@@ -264,8 +255,8 @@ class PoseReaderDialog(QtGui.QMainWindow):
 
                 #Setup the rotation extaction
                 pData.nMultM = pymel.createNode("multMatrix", name=sName+"_ExtactAngle_MM")
-                pymel.connectAttr(pData.nParentLoc.worldMatrix[0], pData.nMultM.matrixIn[0])
-                pymel.connectAttr(pData.nChildLoc.worldInverseMatrix[0], pData.nMultM.matrixIn[1])
+                pymel.connectAttr(pData.nChildLoc.worldMatrix[0], pData.nMultM.matrixIn[0])
+                pymel.connectAttr(pData.nParentLoc.worldInverseMatrix[0], pData.nMultM.matrixIn[1])
                 pData.nDecM = pymel.createNode("decomposeMatrix", name=sName+"_ExtractAngle_DM")
                 pymel.connectAttr(pData.nMultM.matrixSum, pData.nDecM.inputMatrix)
 
@@ -303,7 +294,7 @@ class PoseReaderDialog(QtGui.QMainWindow):
         if event.button() == QtCore.Qt.RightButton:
             pCell = self.ui.tblData.item(iRow,iCol)
             pData = pCell.data(QtCore.Qt.UserRole) #Attr set function
-            menu = QtGui.QMenu()
+            menu = QtWidgets.QMenu()
             action_sel_child = menu.addAction('Select Child')
             action_sel_child.triggered.connect(partial(pymel.select, pData.nChildLoc))
             action_sel_parent = menu.addAction('Select Parent');
@@ -343,7 +334,7 @@ class PoseReader():
     def centerDialog(self):
         #Create a frame geo to easilly move it from the center
         pFrame = self.pDialog.frameGeometry()
-        pScreen = QtGui.QApplication.desktop().screenNumber(QtGui.QApplication.desktop().cursor().pos())
-        ptCenter = QtGui.QApplication.desktop().screenGeometry(pScreen).center()
+        pScreen = QtWidgets.QApplication.desktop().screenNumber(QtWidgets.QApplication.desktop().cursor().pos())
+        ptCenter = QtWidgets.QApplication.desktop().screenGeometry(pScreen).center()
         pFrame.moveCenter(ptCenter)
         self.pDialog.move(pFrame.topLeft())

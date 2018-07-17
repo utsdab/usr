@@ -11,28 +11,28 @@ import datetime
 import getpass
 
 import os
-import maya.cmds as cmds
-import maya.utils
-import maya.mel
+import maya_tools.cmds as cmds
+import maya_tools.utils
+import maya_tools.mel
 from time import gmtime, strftime
 
 TrFileRevisionDate = "$DateTime: 2009/04/23 17:17:43 $"
 
 tractorMayaWindow = ''
-tractorEngineNameGrp = '' 
-tractorEnginePortGrp = '' 
+tractorEngineNameGrp = ''
+tractorEnginePortGrp = ''
 doCleanUpGrp = ''
 rendererMenuGrp = ''
 localRemoteGrp = ''
-framesPerServerGrp = '' 
-jobPriorityGrp = '' 
-jobServerAttributesGrp = '' 
-jobCmdTagsGrp = '' 
-envkeyGrp = '' 
-rendererArgsGrp = '' 
-jobDoneCmdGrp = '' 
-jobErrorCmdGrp = '' 
-crewsGrp = '' 
+framesPerServerGrp = ''
+jobPriorityGrp = ''
+jobServerAttributesGrp = ''
+jobCmdTagsGrp = ''
+envkeyGrp = ''
+rendererArgsGrp = ''
+jobDoneCmdGrp = ''
+jobErrorCmdGrp = ''
+crewsGrp = ''
 extraJobOptionsGrp = ''
 doJobPauseGrp = ''
 otherRendererGrp = ''
@@ -248,7 +248,7 @@ def Spool (argv):
     spoolhost = socket.gethostname().split('.')[0] # options can override
     user = getpass.getuser()
 
-    # ------ # 
+    # ------ #
 
     if not appProductDate[0].isdigit():
         appProductDate = " ".join(TrFileRevisionDate.split()[1:3])
@@ -403,7 +403,7 @@ def trAbsPath (path):
     '''
     Generate a canonical path for tractor.  This is an absolute path
     with backslashes flipped forward.  Backslashes have been known to
-    cause problems as they flow through system, especially in the 
+    cause problems as they flow through system, especially in the
     Safari javascript interpreter.
     '''
     return os.path.abspath( path ).replace('\\', '/')
@@ -437,7 +437,7 @@ def jobSpool (jobfile, options):
 ## ------------------------------------------------------------- ##
 
 def createRibTask (ribfiles, options):
-    single = True if  type(ribfiles) == type ("") else False 
+    single = True if  type(ribfiles) == type ("") else False
 
     jtxt = "  Task -title {"
     if single:
@@ -458,7 +458,7 @@ def createRibTask (ribfiles, options):
     jtxt += '} -service {' + options.ribservice + '} -tags {prman}'
     jtxt += "\n  }\n"  # end of cmds
     return jtxt
-    
+
 ## ------------------------------------------------------------- ##
 
 def createRibRenderJob (ribfiles, options):
@@ -506,10 +506,10 @@ def jobDelete (options):
 ## ------------------------------------------------------------- ##
 
 def getSceneFilename():
-    result = maya.mel.eval('file -q -sceneName')
+    result = maya_tools.mel.eval('file -q -sceneName')
     if result == '':
-        dir = maya.mel.eval('workspace -q -rootDirectory')
-        dir += maya.mel.eval('workspace -q -fre "scene"')
+        dir = maya_tools.mel.eval('workspace -q -rootDirectory')
+        dir += maya_tools.mel.eval('workspace -q -fre "scene"')
         result = dir + '/untitled.ma'
     return result
 
@@ -521,21 +521,21 @@ def stashScene():
     scenefile = getSceneFilename()
     sceneName = os.path.splitext( os.path.basename(scenefile))[0]
 
-    id = maya.mel.eval('getpid')
-    rn = maya.mel.eval('rand 1000')
-    id += maya.mel.eval('floor ' + str(rn))
+    id = maya_tools.mel.eval('getpid')
+    rn = maya_tools.mel.eval('rand 1000')
+    id += maya_tools.mel.eval('floor ' + str(rn))
     id = int(id)
-    scenedir = maya.mel.eval('workspace -q -fre renderScenes')
+    scenedir = maya_tools.mel.eval('workspace -q -fre renderScenes')
     if  scenedir == None:
-        scenedir = maya.mel.eval('workspace -q -rte renderScenes')
-    
-    rootDir = maya.mel.eval('workspace -q -rootDirectory')
+        scenedir = maya_tools.mel.eval('workspace -q -rte renderScenes')
+
+    rootDir = maya_tools.mel.eval('workspace -q -rootDirectory')
     scenedir = rootDir + '/' + scenedir
-    maya.mel.eval('sysFile -makeDir "' + scenedir + '"')
+    maya_tools.mel.eval('sysFile -makeDir "' + scenedir + '"')
     # insert an underscore so maya doesn't automatically delete the file on us
     tmpFileName = scenedir + '/' + '_' + sceneName + "_" + str(id)
-    filetype = maya.mel.eval('file -q -type')
-    tmpFileName = maya.mel.eval('file -type "' + filetype[0] + '" -ea "' + tmpFileName + '"')
+    filetype = maya_tools.mel.eval('file -q -type')
+    tmpFileName = maya_tools.mel.eval('file -type "' + filetype[0] + '" -ea "' + tmpFileName + '"')
 
     return tmpFileName;
 
@@ -567,10 +567,10 @@ def createJobScript():
     sceneFile = stashScene()
     currentTime = strftime('%a, %d %b %Y %H:%M:%S +0000', gmtime())
     cmdType = 'Cmd'
-    projDir = maya.mel.eval('workspace -q -rootDirectory')
-    id = maya.mel.eval('getpid')
-    rn = maya.mel.eval('rand 1000')
-    id += maya.mel.eval('floor ' + str(rn))
+    projDir = maya_tools.mel.eval('workspace -q -rootDirectory')
+    id = maya_tools.mel.eval('getpid')
+    rn = maya_tools.mel.eval('rand 1000')
+    id += maya_tools.mel.eval('floor ' + str(rn))
     id = int(id)
     fnm = ''
     fnm = projDir + '/tmpMaya_' + str(id) + '.alf'
@@ -581,7 +581,7 @@ def createJobScript():
 
     cmdtail = '-service { RfMRender } -envkey { ' #maya' +  cmds.about(p=True).split(' ')[1]
     cmdtail = cmdtail + ' ' + envKey + '}'
-    
+
     if 'Remote' == distribMode:
         cmdType = 'RemoteCmd'
 
@@ -617,14 +617,14 @@ def createJobScript():
             title = 'Frame ' + str(frame)
         else:
             title = 'Frames ' + str(frame) + ' to ' + str(e) + ' by ' + str(byFrame)
-            
+
 
         jobFile.write('   Task -title {' + title + '} -cmds {\n')
         cmd = ''
         e = frame + framesPerServer - byFrame
         if e > stopFrame:
             e = stopFrame
-		
+
         cmd += renderCmd + ' -s ' + str(frame) + ' -e ' + str(e) + ' -b ' + str(byFrame)
         cmd += options
         cmd += ' %D(' + sceneFile + ') '
@@ -661,7 +661,7 @@ def doCleanUpFunc(args):
 def switchRenderers(args):
     global renderer
     global rendererMenuGrp
-    global otherRendererGrp 
+    global otherRendererGrp
     text = cmds.optionMenuGrp(rendererMenuGrp, query=1, v=True)
     rendererDict = { 'Default': 'default', 'Maya Software': 'sw', 'Maya Hardware': 'hw',
                     'Mental Ray': 'mr', 'RenderMan': 'rman' }
@@ -773,7 +773,7 @@ def tractorSpoolForMayaWindow():
     global envkeyGrp
     global rendererArgsGrp
     global jobDoneCmdGrp
-    global jobErrorCmdGrp 
+    global jobErrorCmdGrp
     global crewsGrp
     global extraJobOptionsGrp
     global doJobPauseGrp
@@ -786,14 +786,14 @@ def tractorSpoolForMayaWindow():
     if 'TRACTOR_ENGINE' in os.environ.keys():
         name = os.environ['TRACTOR_ENGINE']
         tractorEngineName,n,p = name.partition(":")
-        if p: 
+        if p:
             tractorEnginePort = p
 
     if cmds.window(tractorMayaWindow, query=1, exists=1) == False:
         tractorMayaWindow = cmds.window(title="UTS Tractor Spool for Maya", iconName="Tractor", retain=1)
 
         columnLayout = cmds.columnLayout(adjustableColumn=True)
-        
+
         tractorEngineNameGrp = cmds.textFieldGrp(label='Tractor Engine Name', text=tractorEngineName, ann='The name of your tractor engine', cc=tractorEngineNameFunc)
         tractorEnginePortGrp = cmds.intFieldGrp(label='Tractor Engine Port', numberOfFields=1, v1=int(tractorEnginePort), ann='The port number of your tractor engine', cc=tractorEnginePortFunc)
 
@@ -803,7 +803,7 @@ def tractorSpoolForMayaWindow():
 
         doJobPauseGrp = cmds.checkBoxGrp(numberOfCheckBoxes=1,label='Start Paused', v1=0
                                         , cc= doJobPauseFunc)
-                                                
+
         rendererMenuGrp = cmds.optionMenuGrp(label='Renderer', cc=switchRenderers, ann='Select which render to use.')
 
         cmds.menuItem(label='Default')
@@ -813,7 +813,7 @@ def tractorSpoolForMayaWindow():
         cmds.menuItem(label='Mental Ray')
         cmds.menuItem(label='Other')
 
-        otherRendererGrp = cmds.textFieldGrp(label='Other Renderer', text='', enable=False, cc=otherRendererFunc, 
+        otherRendererGrp = cmds.textFieldGrp(label='Other Renderer', text='', enable=False, cc=otherRendererFunc,
                     ann='Specify another renderer. Run \'Render -listRenderers\' to see a list.')
 
         localRemoteGrp = cmds.optionMenuGrp(label='Style', cc=styleFunc, ann='Choose to do local render or remote')
@@ -821,7 +821,7 @@ def tractorSpoolForMayaWindow():
         cmds.menuItem(label='Remote')
 
         framesPerServerGrp = cmds.intFieldGrp(label='Frames Per Server', numberOfFields=1, v1=1, cc=framesPerServerFunc,
-                                            ann='The number of frames per server.  Only used for remote renders.') 
+                                            ann='The number of frames per server.  Only used for remote renders.')
         jobPriorityGrp = cmds.intFieldGrp(label='Job Priority', numberOfFields=1, v1=0, cc=jobPriorityFunc,
                                         ann='"This affects how active jobs are assigned to remote servers.  It does not affect position in the dispater queue.')
         jobServerAttributesGrp = cmds.textFieldGrp(label='Job Server Attributes'
@@ -829,7 +829,7 @@ def tractorSpoolForMayaWindow():
         jobCmdTagsGrp = cmds.textFieldGrp(label='Job Cmd Tags', text='', cc=jobCmdTagsFunc
                                     , ann='Can be used to accumulate job statistics, enforce local global and limits etc.')
 
-        aboutString = maya.cmds.about(p=True)
+        aboutString = maya_tools.cmds.about(p=True)
         aboutStringTokens = aboutString.split(' ')
         defaultKey = 'maya' + aboutStringTokens[ len(aboutStringTokens)-1 ]
         envKey = defaultKey
@@ -849,7 +849,7 @@ def tractorSpoolForMayaWindow():
 
         spoolBtn = cmds.button(label='Spool', command=spoolJob)
         closeBtn = cmds.button(label="Close", command=closeBtnFunc)
-        
+
         cmds.setParent('..')
 
     cmds.showWindow(tractorMayaWindow)

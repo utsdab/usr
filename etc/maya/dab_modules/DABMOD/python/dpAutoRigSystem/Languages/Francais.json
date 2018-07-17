@@ -75,6 +75,10 @@
     "i066_addAttr"        : "Ajouter les attributs supplémentaires",
     "i067_duplicating"    : "Dupliquer un guide de module.",
     "i068_CtrlD"          : "Ctrl + D",
+    "i069_notSkinJoint"   : "Ces joints listés en bas n'existent plus:",
+    "i070_continueSkin"   : "Esc-que vous voulez continuer le Skinning quand même?",
+    "i071_yes"            : "Oui",
+    "i072_no"             : "Non",
 
     "p001_prefixText" : "Attention: Le préfixe ne peut pas commencer avec un numéro, un espace blanc ou des caractères spéciaux, désole.",
     "p002_left"       : "G",
@@ -158,7 +162,18 @@
     "m070_duplicate"     : "Dupliquer",
     "m071_SpaceSwitcher" : "Changeur d'espace",
     "m072_SpaceSwitcherDesc" : "Les premiers éléments sélectionné seront utilisés comme parent au dernier objet selection. Pour faire le changement de parent, utilisez l'outil pour une meilleure efficacité",
+    "m073_single"        : "Unique",
+    "m074_singleDesc"    : "Description du module Unique:\n\nCe module crée un joint unique\nqu'on peut l'utiliser pour créer des rigs très simples\nou pour rigs faciales avec l'option Indirect Skinning\nsi on veut le passer par une target de blendShape.",
+    "m075_upperTeeth"    : "DentsAHaut",
+    "m076_lowerTeeth"    : "DentsEnBas",
+    "m077_tongue"        : "Langue",
+    "m078_nose"          : "Nez",
+    "m079_nostril"       : "Narine",
+    "m080_alignWorld"    : "Aligné au Monde",
     
+    "extra_CopyPasteShapes" : "CopyPaste Ctrl Shapes",
+    "extra_CopyPasteShapesDesc" : "Sauvegarde et restaure l'apparences des controllers. Pratique lorsque le rig doit être reconstruit.",
+
     "c_arm_before"      : "Clavicule",
     "c_arm_main"        : "Epaule",
     "c_arm_corner"      : "Coude",
@@ -199,6 +214,7 @@
     "c_arm"             : "Bras",
     "c_foot"            : "Pied",
     "c_lip"             : "Levre",
+    "c_uniformScale"    : "taileUniforme",
     
     "e000_GuideNotFound"           : "Erreur: (000) - Guide pas trouvé dans cette scène.",
     "e001_GuideNotChecked"         : "Erreur: (001) - Guide(s) pas trouvée(s) dans le dossier respectif...",
