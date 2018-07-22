@@ -1399,10 +1399,10 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
-        -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthType 3
+        -flexibleWidthValue 64
         -enable 1
-        -width 34
+        -width 35
         -height 34
         -manage 1
         -visible 1
@@ -1422,8 +1422,8 @@ global proc shelf_DAB () {
         -imageOverlayLabel "XY" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "pythonFamily.png" 
-        -image1 "pythonFamily.png" 
+        -image "areaLight.svg" 
+        -image1 "areaLight.svg" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -1434,10 +1434,10 @@ global proc shelf_DAB () {
     ;
     shelfButton
         -enableCommandRepeat 1
-        -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthType 3
+        -flexibleWidthValue 64
         -enable 1
-        -width 34
+        -width 35
         -height 34
         -manage 1
         -visible 1
@@ -1454,11 +1454,11 @@ global proc shelf_DAB () {
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
-        -imageOverlayLabel "x" 
+        -imageOverlayLabel "X" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "pythonFamily.png" 
-        -image1 "pythonFamily.png" 
+        -image "arrayMapper.svg" 
+        -image1 "arrayMapper.svg" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
