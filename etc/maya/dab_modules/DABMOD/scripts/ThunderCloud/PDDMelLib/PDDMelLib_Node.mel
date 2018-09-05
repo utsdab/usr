@@ -1,0 +1,24 @@
+global proc string[] PDD_createNode(string $type,string $name)
+{
+
+string $nodeShape = `createNode $type`;
+
+        pickWalk -d up; string $nodeTransform = `rename ($name)`;
+        pickWalk -d down; string $nodeShape = PDD_currentSelectionName(1);
+
+string $results[];
+$result[0] = $nodeShape ;
+$result[1] = $nodeTransform ;
+return $result;
+}
+
+global proc string PDD_shapeOf(string $object)
+{
+string $selections[]= `ls-sl`;
+select $object;
+return (PDD_currentSelectionShapeName(1));
+
+select -cl;
+select $selections;
+
+}

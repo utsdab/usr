@@ -1,0 +1,29 @@
+print ("loading PDDMelLib files \n");
+
+string $scripts[] = {
+  "ThunderCloud/PDDMelLib/PDDMelLib_Node.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_hierarchy.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_math.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_Naming.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_string.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_attribute.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_Connection.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_debug.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_file.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_Curve.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_control.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_surface.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_UIElement.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_UIFloatSlider.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_UILayout_thumbnailWindow.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_UILayout_userPathThumbnailWindow.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_drivenKey.mel",
+  "ThunderCloud/PDDMelLib/PDDMelLib_dialog.mel"
+};
+
+for ($eachScript in $scripts)
+    {
+        //string $path = $eachScript;
+    eval ("  source \""+$eachScript+"\";");
+    
+    }

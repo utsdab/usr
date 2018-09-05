@@ -1,0 +1,150 @@
+//========== GMH2_GUICreateExportButtons.mel ===============
+
+global proc createGMHExportButtons()
+{
+    int $tableWidth = 420;
+    int $scrollListWidth = ($tableWidth*0.33) ;
+     frameLayout -lv 0 -l"" -w $tableWidth "mainExportFrameLayout";
+
+    setParent "mainExportFrameLayout";
+    frameLayout -lv 0 -l"" -w 150 ;
+     flowLayout -w $tableWidth;
+         text -l"  FileName ";
+         string $autoNameCheckBoxCommand = ("int $exportFileNameAutoEnState = `checkBox -q -v \"GMH2AutoNameCheckBox\"`;"
+                                            +" int $invertExportFileNameAutoEnState ;"
+                                            +" if ($exportFileNameAutoEnState==0) textField -e -en 1 \"GMHExportFileNameField\";"
+                                            +" if ($exportFileNameAutoEnState==1) textField -e -en 0 \"GMHExportFileNameField\";");
+                                            
+         textField -w 140 -en 0 "GMHExportFileNameField";  checkBox -l"Auto Name" -v 1 -cc $autoNameCheckBoxCommand    "GMH2AutoNameCheckBox"; //text -l"  Leave blank for auto name" -en 0;
+     setParent ..;
+      flowLayout -w $tableWidth;
+         text -l"         Path ";
+         textField -text"Select a path to export"-w 300 "GMHExportPathField"; button -l"SET" -c"GMH2_GUIExport_setExportPath_commandUI" -w 50;
+    
+     setParent ..;
+        flowLayout -w $tableWidth;
+            text -l"         ";
+            text-l"Type " -font  "tinyBoldLabelFont"; 
+            checkBox -l"Meshes" -v 1 "GMH2_export_meshesCheckBox";
+            checkBox -l"Curves" -v 0 "GMH2_export_curvesCheckBox";
+     setParent ..;
+        flowLayout -w $tableWidth;
+            text -l"  ";
+            text-l"Structure " -font  "tinyBoldLabelFont"; 
+            checkBox -l"Groups separation" -v 0 "GMH2_export_groupCheckBox";
+            
+        
+        setParent ..;
+        flowLayout -w $tableWidth;
+            text -l"      ";
+            text-l"Format " -font  "tinyBoldLabelFont"; 
+            checkBox -l"FBX      " -v 1 "GMH2_export_FBXCheckBox";
+            checkBox -l"OBJ"  "GMH2_export_OBJCheckBox";
+            
+            
+    setParent "mainExportFrameLayout";
+    flowLayout -w $tableWidth;
+    frameLayout -lv 0 -l"" -w $scrollListWidth;
+    text -l"GMH Style System";
+    string $command = "select `textScrollList -q -si \"ExportGMHStyleScrollList\"`";
+    textScrollList -w $scrollListWidth  -h 100 -ams 1 -sc $command "ExportGMHStyleScrollList";
+    button -l "Export From \n Selected GMH Style System" -c"GMH2_exportFromSurfaces_commandUI(1,0,0);";
+    
+    setParent ..;
+    frameLayout -lv 0 -l"" -w $scrollListWidth ;
+    text -l"Material";
+    textScrollList -w $scrollListWidth -h 100 -ams 1  "ExportGMHMaterialScrollList";
+    button -l "Export From \n Selected Material" -c"GMH2_exportFromSurfaces_commandUI(0,1,0);";
+    
+    setParent ..;
+    frameLayout -lv 0 -l"" -w $scrollListWidth  ;
+    text -l"GMH Surface";
+    textScrollList -w $scrollListWidth -h 100 -en 0 -a "select GMH Surfaces \nto export";
+    button -l "Export From \n Selected GMH Surface" -c"GMH2_exportFromSurfaces_commandUI(0,0,1);";
+             
+}
+
+
+global proc int GMH2_GUIExport_setExportPath_commandUI()
+{
+         string $paths[] = `fileDialog2 -fm 0 -ff "*._" -dialogStyle 2 -okc "SET"`;
+    if ( $paths[0] == "") return 0;
+    if ( $paths[0] != "")
+    {
+        textField -e -text (PDD_pathExtract($paths[0])) "GMHExportPathField";
+        
+        textField -e -text (basename($paths[0],"._")) "GMHExportFileNameField";
+        return 1;
+    }
+    return 1;
+    
+
+}
+
+global proc int GMH2_exportFromSurfaces_commandUI(int $styleFlag, int $materialFlag, int $surfaceFlag)
+{
+    string $selections[] = `ls-sl`;
+    int $OBJFlag = `checkBox -q -v "GMH2_export_OBJCheckBox"`;
+    int $FBXFlag = `checkBox -q -v "GMH2_export_FBXCheckBox"`;
+    
+    int $meshFlag = `checkBox -q -v "GMH2_export_meshesCheckBox"`;
+    int $curveFlag = `checkBox -q -v "GMH2_export_curvesCheckBox"`;
+    int $groupFlag = `checkBox -q -v "GMH2_export_groupCheckBox"`;
+    int $autoName = `checkBox -q -v "GMH2AutoNameCheckBox"`;
+    string $path = `textField -q -text "GMHExportPathField"`;
+    string $fileName = ` textField -q -text "GMHExportFileNameField"`;
+    string $fullPath = $path+"/"+$fileName;
+
+
+   
+
+    if (!`filetest -d $path`) {warning ("Please select a valid path \n");return 0;}
+    
+    if (($fileName=="")&&($autoName ==0)) {warning ("Please input a valid file name \n");return 0;}
+    
+    if ( $styleFlag ==1)
+    {
+        
+        string $GMHStyleSystems[] = `textScrollList -q -si "ExportGMHStyleScrollList"`;
+         if ( $autoName == 1)
+             {
+                 if (size($GMHStyleSystems)<=1) {$fileName = $GMHStyleSystems[0];}
+                 else                          {$fileName = "GMHStyleSystem_mesh";}
+             }  
+             $fullPath = $path+"/"+$fileName;
+        if ($curveFlag ==1)GMH2_exportCurvesFromStyleSystem($fullPath,$GMHStyleSystems,$FBXFlag,$OBJFlag,$groupFlag);
+        if ($meshFlag ==1)GMH2_exportMeshFromStyleSystem($fullPath,$GMHStyleSystems,$FBXFlag,$OBJFlag,$groupFlag);
+    }
+    
+    if ($materialFlag ==1)
+    {
+          string $materials[] = `textScrollList -q -si "ExportGMHMaterialScrollList"`;
+        
+                 if (size($materials)<=1) {$fileName = $materials[0];}
+                 else                          {$fileName = "GMHMaterials_mesh";}
+             $fullPath = $path+"/"+$fileName;
+                 
+        if ($curveFlag ==1)GMH2_exportCurvesFromMaterials($fullPath,$materials,$FBXFlag,$OBJFlag,$groupFlag);
+        if ($meshFlag ==1)GMH2_exportMeshFromMaterials($fullPath,$materials,$FBXFlag,$OBJFlag,$groupFlag);
+        
+    }    
+        
+    if ($surfaceFlag ==1)
+    {
+          string $surfaces[] = `ls-sl`;
+                 if (size($surfaces)<=1)       {$fileName = $surfaces[0];}
+                 else                          {$fileName = "GMHSurface_mesh";}
+        
+             $fullPath = $path+"/"+$fileName;
+        if ($curveFlag ==1)GMH2_exportCurvesFromSurfaces($fullPath,$surfaces,$FBXFlag,$OBJFlag,$groupFlag);
+        if ($meshFlag ==1)GMH2_exportMeshFromSurfaces($fullPath,$surfaces,$FBXFlag,$OBJFlag,$groupFlag);
+    }    
+    
+    select $selections;
+    return 1;
+}
+//test command
+//GMH2_exportFromSurfaces_commandUI(0,0,1);
+
+//create_GMHwindow();
+//tabLayout -e -sti 5 "GMH2MainTabLayout";

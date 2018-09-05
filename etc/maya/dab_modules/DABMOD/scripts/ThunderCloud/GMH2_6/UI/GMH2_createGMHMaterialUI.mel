@@ -1,0 +1,420 @@
+
+//create_GMHwindow();
+//tabLayout -e -sti 3 "GMH2MainTabLayout";
+//==============================    GMH2_createGMHMaterialUI.mel    ======================
+
+
+global proc createGMHMaterialUI()
+{   
+int $tableWidth = 420;
+    
+            string $mainColumnLayout = `columnLayout  -rowSpacing 10 -w $tableWidth "GMHMaterial_flowLayout"`;
+            string $GMH2shaderFrameLayout = `frameLayout -collapsable true  -w $tableWidth -l "GMH shaders ( Polygon Hair Style Only ) " "GMH2shaderFrameLayout"`;
+     
+           rowLayout -rat 1 "top" 5  -rat 2 "top" 5 -numberOfColumns 3 -w $tableWidth "GMHMaterial_rowLayout";
+   
+       //buttons
+           columnLayout  -rowSpacing 2 "GMHStyleTable_rowLayout_1";
+       
+           //string $command = "GMH2_createGMHshader_command()";
+           string $command = "GMH2_addGMHShader_command();";
+           button -l"Add GMH Shader" -c $command -w 110 -bgc 0.0442138 0.45098 0.0586201;
+           
+          // string $command = ("GMH2_deleteGMHShader_command();");
+           string $command = ("GMH2_removeGMHShader_command();");
+           button -l"Remove Shader" -c $command -w 110 -bgc 0.744 0.186013 0.072912;
+           
+           button -l"Apply Shader To \n GMH Style " -w 110 -bgc 0.056644 0.578 0.0721283;
+                   popupMenu -button 1 -pmc "GMH2_createApplyMaterialToStyleSystemPopUpMenuItem_command();" "GMH2StylePolySystemPopupMenu";
+            
+           button -l"Apply Shader To \nCurrent GMH Surfaces"  -w 110 -bgc 0.0442138 0.45098 0.0586201;
+                   popupMenu -button 1 -pmc "GMH2_createApplyMaterialToSurfacePopUpMenuItem_command();" "GMH2SurfacePopupMenu";
+                   
+           string $command = ("GMH2_removeMaterialOveride_command();");
+           button -l"Remove \n Override Material" -c $command -w 110 -bgc 0.0442138 0.45098 0.0586201;
+                   
+             /*      
+                      string $command = ("GMH2_assignShaderToGMHSurface_command();");
+           button -l"Export Hair Meshes of \ncurrent shader" -c $command -w 110 -bgc 0.401123 0.34 0.5;
+                   popupMenu -button 1 -pmc "GMH2_saveTextureAndExportMeshes_command();" "GMH2SaveMeshButton";
+           checkBox -l"Group" "GMH2_groupExportFlag";
+       */
+       //scroll List
+       setParent ..;
+            string $singleCC = "GMH2_updateSwatchPortToCurrentSelectedShader_command;GMH2_createTextureEditUI_command(); ";  
+            //string $doubleCC = 
+            string $doubleCC = "GMH2_updateSwatchPortToCurrentSelectedShader_command;GMH2_selectedCUrrentSelectedShader_command;"   ;      
+            textScrollList -w 100 -h 210 -ams 1
+             -dcc $doubleCC 
+             -sc  $singleCC 
+             "GMHMaterialList";
+            
+       //texture Preview port
+       setParent "GMHMaterial_rowLayout";
+           // columnLayout  -rowSpacing 10 ;
+           // flowLayout -w 200; text -l "Current Texture : ";text -l "Select a GMH shader" -font "boldLabelFont" "GMHTextureIndicator";setParent ..;
+            swatchDisplayPort -wh 210 210 -rs 210 -sn "lambert1" -bc 1 1 1 -bw 2 "GMH2SwatchPort";
+            /*
+    // texture frame
+       setParent $mainColumnLayout;
+        string $GMH2texturePreviewFrameLayout = `frameLayout -collapsable true -w 450  -l "GMH Textures" "GMH2texturePreviewFrameLayout"`;
+          
+             //deleteUI GMH2_textureEditControls_columnLayout;
+   
+       setParent $GMH2shaderFrameLayout;
+      
+            */
+       
+
+       
+}
+
+global proc int GMH2_removeMaterialOveride_command()
+{
+    string $selections[] = `ls-sl`;
+    for ($eachObj in $selections)
+    {
+        PDD_removeMaterialOverride($eachObj);
+    }
+    select $selections;
+    return 1;
+    
+}
+global proc int GMH2_saveTextureAndExportMeshes_command()
+{
+      string $shaders[] =`textScrollList -q -si "GMHMaterialList"`;
+   if ( $shaders[0] =="") return 0;
+   
+     string $filenames[] = `fileDialog2  -dialogStyle 2 -cap "Export Hair Meshes As" -fileFilter "*.GMH2" -fm 3 -okc"Export"`;
+     int $groupFlag = `checkBox -q -v "GMH2_groupExportFlag"`;
+        if ($filenames[0]!="")      GMH2_exportStrokeMeshOfGMHShader($shaders,$filenames[0],$groupFlag);
+    
+    return 1;
+}
+
+global proc int GMH2_saveTexture_command()
+{
+    string $shaders[] =`textScrollList -q -si "GMHMaterialList"`;
+   if ( $shaders[0] =="") return 0;
+   string $previewers[] = `listConnections -s on ($shaders[0]+".color")`;string $previewer = $previewers[0];
+
+// if (`attributeExists $attribute $previewer`)
+   if (`attributeExists "GMH2TextureMainGroup" $previewer`)
+  { string $GMH2Textures[] =  `listConnections -s on ($previewer+".GMH2TextureMainGroup")`;
+       if (`objExists $GMH2Textures[0]`)
+       { 
+       
+        string $filenames[] = `fileDialog2  -dialogStyle 2 -cap "Save Texture As" -fileFilter "*.png" -fm 0 -okc"Save"`;
+        if ($filenames[0]!="")   GMH2_saveTexture($GMH2Textures[0],$filenames[0]);
+       }
+    }
+   return 1; 
+}
+
+global proc GMH2_createApplyMaterialToSurfacePopUpMenuItem_command()
+{
+    popupMenu -e -deleteAllItems "GMH2SurfacePopupMenu";
+    string $command = "GMH2_assignShaderToGMHSurface_command(1)";
+     menuItem -l "Base Hair system" -c $command -p  "GMH2SurfacePopupMenu";
+    string $command = "GMH2_assignShaderToGMHSurface_command(2)";
+     menuItem -l "Secondary Hair system" -c $command -p  "GMH2SurfacePopupMenu";
+}
+
+global proc GMH2_createApplyMaterialToStyleSystemPopUpMenuItem_command()
+{
+    string $GMH2PolyStyleSystems[];
+    string $container[] = `ls -type"dagContainer"`;
+    
+    for ($eachContainer in $container)
+    {
+        if (`attributeExists "GMH_polyStyleSystem" $eachContainer`)
+        {
+            if (`getAttr ($eachContainer+(".GMH_polyStyleSystem"))` ==1 )
+          { string $tmps[];$tmps[0]=$eachContainer;appendStringArray($GMH2PolyStyleSystems ,$tmps,1);}
+        }
+    }
+    
+    popupMenu -e -deleteAllItems "GMH2StylePolySystemPopupMenu";
+    
+    for ($eachItem in $GMH2PolyStyleSystems)
+    {
+        string $command = "GMH2_assignShaderToStyleSystem_command(\""+$eachItem+"\")";
+        menuItem -l $eachItem -c $command -p  "GMH2StylePolySystemPopupMenu";
+    }
+
+}
+
+
+
+global proc GMH2_createTextureEditUI_command()
+{
+   if (`tabLayout -ex "GMH2TextureEditTabLayout"`) deleteUI "GMH2TextureEditTabLayout"; 
+    
+   if (`button -ex "saveGMH2TextureButton"`) deleteUI "saveGMH2TextureButton"; 
+   
+        // get value from the control and set current GMH2 texture to its value
+  string $shaders[] =`textScrollList -q -si "GMHMaterialList"`;
+   if ( $shaders[0] =="") $shaders[0]="lambert1";
+   string $previewers[] = `listConnections -s on ($shaders[0]+".color")`;string $previewer = $previewers[0];
+
+// if (`attributeExists $attribute $previewer`)
+   if (`attributeExists "GMH2TextureMainGroup" $previewer`)
+  { string $GMH2Textures[] =  `listConnections -s on ($previewer+".GMH2TextureMainGroup")`;
+   if (`objExists $GMH2Textures[0]`)
+       {
+               string $ramps[] = `listConnections -d on ($GMH2Textures[0]+".baseHairDiffuseRamp")`;
+               string $ramps2[] = `listConnections -d on ($GMH2Textures[0]+".secondaryHairDiffuseRamp")`;
+               string $baseHairNumRamps[] =`listConnections -d on ($GMH2Textures[0]+".baseHairRamp")`;
+               string $secondaryHairNumRamps[] =`listConnections -d on ($GMH2Textures[0]+".secondaryHairRamp")`;
+               
+              // if (`window -ex "GMH2TextureEditor"`) deleteUI "GMH2TextureEditor";
+               // window -title "GMH2 Texture editor" "GMH2TextureEditor";
+                setParent "GMH2texturePreviewFrameLayout";
+                
+       string $command = "GMH2_saveTexture_command();";
+        button -l"Save Diffuse Texture" -c $command -w 130 "saveGMH2TextureButton";   
+        
+                 string $tabs = `tabLayout -innerMarginWidth 5 -innerMarginHeight 5 "GMH2TextureEditTabLayout"`;
+                 
+                 
+                 
+                 // base hair tab
+                 columnLayout  -rowSpacing 2 "GMH2_BaseHairtextureEditControls_columnLayout";
+                if (`objExists $ramps[0]`) 
+                {
+              //  flowLayout -w 450 -columnSpacing 2;
+              rowLayout -numberOfColumns  2;
+                rampColorPort  -node $ramps[0] -w 410 -h 100 -bgc 0.161 0.161 0.161 ;
+                button -l ">" -w 20 -h 100 -c ("editRampNode "+$ramps[0]+";");
+                setParent "GMH2_BaseHairtextureEditControls_columnLayout";
+                }
+                
+                
+                int $baseHairNum = 4;
+                if (`attributeExists "GMH2_hairNum" $baseHairNumRamps[0]`)
+                   {$baseHairNum =   getAttr ($baseHairNumRamps[0]+".GMH2_hairNum");}
+                   
+                  string $command ="GMH2_editHairNum(\""+$GMH2Textures[0]+"\",\"base\",(`intSliderGrp -q -v baseHairNumControl`))";
+                 intSliderGrp -l "Hair Num" -f on -min 0 -max 50 -v $baseHairNum  -cc $command -cw3 120 50 250 "baseHairNumControl" ; 
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureBaseShape_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".BaseHairBlur\")";
+                 floatSliderGrp -l "Shape" -f on -min 0.01 -max 0.99 -v (`getAttr ($GMH2Textures[0]+".BaseHairBlur")`)  -s 0.01 -cw3 120 50 250 -cc $command "GMH2TextureBaseShape_ctrl";   
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureBaseWidth_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".BaseHairWidth\")";
+                 floatSliderGrp -l "Width" -f on -min 0.01 -max 0.99 -v (`getAttr ($GMH2Textures[0]+".BaseHairWidth")`)   -s 0.01   -cw3 120 50 250 -cc $command "GMH2TextureBaseWidth_ctrl"; 
+                  
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureBaseTwist_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".BaseHairTwist\")";
+                 floatSliderGrp -l "Twist" -f on  -min 0.01 -max 0.99 -v  (`getAttr ($GMH2Textures[0]+".BaseHairTwist")`)  -s 0.01 -cw3 120 50 250  -cc $command "GMH2TextureBaseTwist_ctrl"; ; 
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureBaseRootThinningRange_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".BaseRootThinningRange\")";
+                 floatSliderGrp -l "Root Thinning Range" -f on  -min 0.01 -max 0.99 -v  (`getAttr ($GMH2Textures[0]+".BaseRootThinningRange")`)  -s 0.001 -cw3 120 50 250  -cc $command "GMH2TextureBaseRootThinningRange_ctrl"; ; 
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureBaseRootThinningBias_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".BaseRootThinningBias\")";
+                 floatSliderGrp -l "Root Thinning Bias" -f on  -min 0.01 -max 0.99 -v (`getAttr ($GMH2Textures[0]+".BaseRootThinningBias")`)  -s 0.001 -cw3 120 50 250  -cc $command "GMH2TextureBaseRootThinningBias_ctrl"; ; 
+                 
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureBaseTipThinningRange_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".BaseTipThinningRange\")";
+                 floatSliderGrp -l "Tip Thinning Range" -f on  -min 0.01 -max 0.99 -v (`getAttr ($GMH2Textures[0]+".BaseTipThinningRange")`)  -s 0.001 -cw3 120 50 250  -cc $command "GMH2TextureBaseTipThinningRange_ctrl"; ; 
+                 
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureBaseTipThinningBias_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".BaseTipThinningBias\")";
+                 floatSliderGrp -l "Tip Thinning Bias" -f on  -min 0.01 -max 0.99 -v (`getAttr ($GMH2Textures[0]+".BaseTipThinningBias")`)  -s 0.001 -cw3 120 50 250  -cc $command "GMH2TextureBaseTipThinningBias_ctrl"; ; 
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureBaseDiffuserShadowFallOff_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".BaseHairDiffuseShadowFallOff\")";
+                 floatSliderGrp -l "Hair Emboss Shadow" -f on  -min 0.01 -max 0.99 -v (`getAttr ($GMH2Textures[0]+".BaseHairDiffuseShadowFallOff")`)  -s 0.001 -cw3 120 50 250  -cc $command "GMH2TextureBaseDiffuserShadowFallOff_ctrl"; ; 
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureBaseHairDIffuseShadowSide_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".BaseHairDiffuseShadowSide\")";
+                 floatSliderGrp -l "Hair Emboss size" -f on  -min 0.01 -max 0.99 -v (`getAttr ($GMH2Textures[0]+".BaseHairDiffuseShadowSide")`)  -s 0.001 -cw3 120 50 250  -cc $command "GMH2TextureBaseHairDIffuseShadowSide_ctrl"; ; 
+                 
+                  tabLayout -e -tl "GMH2_BaseHairtextureEditControls_columnLayout" "Base Hair Texture" $tabs;
+                  
+                  // secondary hair tab
+                  
+                  setParent ..;
+                  columnLayout  -rowSpacing 2 "GMH2_SecondaryHairtextureEditControls_columnLayout";
+                  if (`objExists $ramps2[0]`) 
+                {
+              //  flowLayout -w 450 -columnSpacing 2;
+              rowLayout -numberOfColumns  2;
+                rampColorPort  -node $ramps2[0] -w 410 -h 100 -bgc 0.161 0.161 0.161 ;
+                button -l ">" -w 20 -h 100 -c ("editRampNode "+$ramps2[0]+";");
+                setParent "GMH2_SecondaryHairtextureEditControls_columnLayout";
+                }
+                  
+                  
+                int $secondaryHairNum = 4;
+                if (`attributeExists "GMH2_hairNum" $secondaryHairNumRamps[0]`)
+                   {$secondaryHairNum =   getAttr ($secondaryHairNumRamps[0]+".GMH2_hairNum");}
+                   
+                  string $command ="GMH2_editHairNum(\""+$GMH2Textures[0]+"\",\"secondary\",(`intSliderGrp -q -v secondaryHairNumControl`))";
+                 intSliderGrp -l "Hair Num" -f on -min 0 -max 50 -v $secondaryHairNum  -cc $command -cw3 120 50 250 "secondaryHairNumControl" ; 
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureSecondaryShape_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".SecondaryHairBlur\")";
+                 floatSliderGrp -l "Shape" -f on -min 0.01 -max 0.99 -v (`getAttr ($GMH2Textures[0]+".SecondaryHairBlur")`)  -s 0.01 -cw3 120 50 250 -cc $command "GMH2TextureSecondaryShape_ctrl";   
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureSecondaryWidth_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".SecondaryHairWidth\")";
+                 floatSliderGrp -l "Width" -f on -min 0.01 -max 0.99 -v (`getAttr ($GMH2Textures[0]+".SecondaryHairWidth")`)   -s 0.01   -cw3 120 50 250 -cc $command "GMH2TextureSecondaryWidth_ctrl"; 
+                  
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureSecondaryTwist_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".SecondaryHairTwist\")";
+                 floatSliderGrp -l "Twist" -f on  -min 0.01 -max 0.99 -v  (`getAttr ($GMH2Textures[0]+".SecondaryHairTwist")`)  -s 0.01 -cw3 120 50 250  -cc $command "GMH2TextureSecondaryTwist_ctrl"; ; 
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureSecondaryRootThinningRange_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".SecondaryRootThinningRange\")";
+                 floatSliderGrp -l "Root Thinning Range" -f on  -min 0.01 -max 0.99 -v  (`getAttr ($GMH2Textures[0]+".SecondaryRootThinningRange")`)  -s 0.001 -cw3 120 50 250  -cc $command "GMH2TextureSecondaryRootThinningRange_ctrl"; ; 
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureSecondaryRootThinningBias_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".SecondaryRootThinningBias\")";
+                 floatSliderGrp -l "Root Thinning Bias" -f on  -min 0.01 -max 0.99 -v (`getAttr ($GMH2Textures[0]+".SecondaryRootThinningBias")`)  -s 0.001 -cw3 120 50 250  -cc $command "GMH2TextureSecondaryRootThinningBias_ctrl"; ; 
+                 
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureSecondaryTipThinningRange_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".SecondaryTipThinningRange\")";
+                 floatSliderGrp -l "Tip Thinning Range" -f on  -min 0.01 -max 0.99 -v (`getAttr ($GMH2Textures[0]+".SecondaryTipThinningRange")`)  -s 0.001 -cw3 120 50 250  -cc $command "GMH2TextureSecondaryTipThinningRange_ctrl"; ; 
+                 
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureSecondaryTipThinningBias_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".SecondaryTipThinningBias\")";
+                 floatSliderGrp -l "Tip Thinning Bias" -f on  -min 0.01 -max 0.99 -v (`getAttr ($GMH2Textures[0]+".SecondaryTipThinningBias")`)  -s 0.001 -cw3 120 50 250  -cc $command "GMH2TextureSecondaryTipThinningBias_ctrl"; ; 
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureSecondaryDiffuserShadowFallOff_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".SecondaryHairDiffuseShadowFallOff\")";
+                 floatSliderGrp -l "Hair Emboss Shadow" -f on  -min 0.01 -max 0.99 -v (`getAttr ($GMH2Textures[0]+".SecondaryHairDiffuseShadowFallOff")`)  -s 0.001 -cw3 120 50 250  -cc $command "GMH2TextureSecondaryDiffuserShadowFallOff_ctrl"; ; 
+                 
+                 string $command = "GMH2_updateAttributeFromSlider_command(\"GMH2TextureSecondaryHairDIffuseShadowSide_ctrl\",\"floatSliderGrp\",\""+$GMH2Textures[0]+".SecondaryHairDiffuseShadowSide\")";
+                 floatSliderGrp -l "Hair Emboss size" -f on  -min 0.01 -max 0.99 -v (`getAttr ($GMH2Textures[0]+".SecondaryHairDiffuseShadowSide")`)  -s 0.001 -cw3 120 50 250  -cc $command "GMH2TextureSecondaryHairDIffuseShadowSide_ctrl"; ; 
+                 
+                  tabLayout -e -tl "GMH2_SecondaryHairtextureEditControls_columnLayout" "Secondary Hair Texture" $tabs;
+                  
+                // showWindow "GMH2TextureEditor";
+          }
+    } 
+}
+
+global proc GMH2_updateAttributeFromSlider_command(string $controlName,string $controlType, string $objectAttribute)
+{setAttr ($objectAttribute) (`eval ($controlType +" -q -v "+$controlName)`);}
+
+
+
+global proc int GMH2_assignShaderToGMHSurface_command(string $level)
+{
+    
+    string $GMH2shaders[] = `textScrollList -q -si "GMHMaterialList"`;
+    if (!`objExists $GMH2shaders[0]`) {warning "please select a GMH Shader in GMH2 Window \n";return 0;}
+    
+    string $GMH2Shader = $GMH2shaders[0];
+    string $selections[]=`ls-sl`;
+    
+    for ($eachObj in $selections)
+    {
+       print ("Apply :< "+$GMH2Shader+" > to < "+$eachObj+" > at < "+  $level+" > level.\n"); // result 
+        GMH2_assignGMHShaderToGMHSurface( $GMH2Shader, $eachObj,$level);
+    
+    }
+ 
+     select $selections;
+     return 1;   
+}
+
+global proc int GMH2_assignShaderToStyleSystem_command(string $GMH2StyleSystem)
+{
+      
+    string $selections[]=`ls-sl`;
+    //string $GMH2StyleSystems[] = `textScrollList -q -si "GMHStyleList"`;
+    string $GMH2shaders[] = `textScrollList -q -si "GMHMaterialList"`;
+    
+   // if (!`objExists $GMH2StyleSystems[0]`) {warning "please select a GMH Style System in GMH2 Window \n";return 0;}
+    if (!`objExists $GMH2shaders[0]`) {warning "please select a GMH Shader in GMH2 Window \n";return 0;}
+    
+     print ("Apply :< "+$GMH2shaders[0]+" > to < "+$GMH2StyleSystem+".\n"); // result 
+     GMH2_assignGMHShaderToGMHStyleSystem($GMH2StyleSystem,$GMH2shaders[0]);
+     
+     select $selections;
+     return 1;
+}
+
+global proc int GMH2_addGMHShader_command()
+{
+    int $result = 0;
+    string $selections[] = `ls-sl`;
+    for ($eachShader in $selections)
+   { 
+       int $resultTmp = GMH2_setShaderAsGMHShader($eachShader);
+       if ($resultTmp == 1)
+       $result = 1;
+   }
+    if ($result ==0) {warning ("Please select valid Shader to set as GMH Shader \n");return 0;}
+    updateGUI(0);
+    
+    return 1;
+}
+
+global proc GMH2_deleteGMHShader_command()
+{
+    
+    string $shaders[] =`textScrollList -q -si "GMHMaterialList"`;
+    
+    for ($eachShader in $shaders)
+    GMH2_deleteGMHSHader($eachShader);
+    
+    
+    updateGUI(0);
+    
+}
+
+global proc GMH2_removeGMHShader_command()
+{
+    string $shaders[] =`textScrollList -q -si "GMHMaterialList"`;
+    
+    for ($eachShader in $shaders)
+    GMH2_unsetGMHShader($eachShader);
+    
+    
+    updateGUI(0);
+    
+    
+}
+
+global proc int GMH2_createGMHshader_command()
+{
+    string $name = PDD_promtDialog("Create New GMH Shader","GMH Shader Name","");
+    if ($name =="") return 0;
+    GMH2_createGMH2Shader($name); 
+    updateGUI(0);
+    
+    return 1;
+}
+
+
+global proc int GMH2_updateSwatchPortToCurrentSelectedShader_command()
+{
+   
+   string $shaders[] =`textScrollList -q -si "GMHMaterialList"`;
+   if ( $shaders[0] =="") $shaders[0]="lambert1";
+   
+   string $previewers[] = `listConnections -s on ($shaders[0]+".color")`;string $previewer = $previewers[0];
+   
+   if (!`objExists $previewer`) {$previewer = $shaders[0];}
+   
+   
+   swatchDisplayPort  -wh 210 210 -rs 512  -e -sn $previewer "GMH2SwatchPort";
+   swatchDisplayPort  -wh 210 210 -rs 210  -e -sn $previewer "GMH2SwatchPort";
+   
+  // text -e -l ($shaders[0]) "GMHTextureIndicator";
+   
+   
+
+   return 1;
+}
+
+global proc int GMH2_selectedCUrrentSelectedShader_command()
+{
+   string $shaders[] =`textScrollList -q -si "GMHMaterialList"`;
+   if ( $shaders[0] =="") $shaders[0]="lambert1";
+   select $shaders[0];  
+    string $previewers[] = `listConnections -s on ($shaders[0]+".color")`;string $previewer = $previewers[0];
+   
+   if (!`objExists $previewer`) {$previewer = $shaders[0];}
+   
+      select $previewer;
+   if (`attributeExists "GMH2TextureMainGroup" $previewer`)
+  { string $GMH2Texture = PDD_NodeFromConnection("GMH2TextureMainGroup","in",1);
+   if (`objExists $GMH2Texture`) select $GMH2Texture;}
+   
+  
+  return 1;  
+}

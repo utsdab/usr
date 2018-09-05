@@ -1,0 +1,41 @@
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                              PDD MEL LIB MATH PROC                                                  //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+global proc float PDD_calculateDistance(vector $coor1, vector $coor2)
+{
+    float $distancePos[];
+    $distancePos[0] = $coor1.x - $coor2.x;
+    $distancePos[1] = $coor1.y - $coor2.y;
+    $distancePos[2] = $coor1.z - $coor2.z;
+    
+    float $distance = `mag<<$distancePos[0],$distancePos[1],$distancePos[2]>>`;
+    return $distance;
+    
+    
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                     //
+//                                                                                                     //
+//                              clamp a value within a specific range                                  //
+//                                                                                                     //
+//                                                                                                     //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+global proc float PDD_clamp(float $min,float $max, float $value,int $warningFlag)
+{
+    if ($value<=$min)
+    {return $min;}
+    if($value >= $max)
+    {return $max;}
+    if ( ($min<$value)&&($value<$max))
+    {
+        
+        return $value;
+    }
+    
+    
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,372 @@
+//------- GMH2_exportCurve_source.mel -----
+
+//string $path = "D:/Dropbox/ENV/SCRIPT/THUNDERCLOUD/GMH2/scenes/test.fbx";
+//string $GMHstyleSystem = "A_GMHPolyStyleSystem";
+//int $FBXFlag =1; int $OBJFlag =1; int $groupFlag =1;
+//GMH2_exportCurvesFromStyleSystem($path,$GMHstyleSystem,$FBXFlag, $OBJFlag,$groupFlag);
+   // string $material = "UniqueColorBaseMat_1";
+//GMH2_exportCurvesFromMaterials($path,`ls-sl`,$FBXFlag, $OBJFlag,0);
+//GMH2_exportCurvesFromSurfaces($path,`ls-sl`,$FBXFlag, $OBJFlag,1);
+
+global proc string GMH2_exportCurvesFromSurfaces( string $path,string $surfaces[],int $FBXFlag, int $OBJFlag, int $groupFlag)
+{
+   
+    string $globalExportGrps[]; clear ($globalExportGrps);
+    string $globalExportCurves[]; clear ($globalExportCurves);
+    
+   for ($surface in $surfaces)
+   {
+      // string $surface = "pPlane1";
+      string $exportCurves[]; clear $exportCurves;
+    string $exportStrokeGrps[]; clear ($exportStrokeGrps);
+    string $surfaceShape = PDD_shapeName($surface);
+    string $mainGroup = PDD_NodeFromConnection2($surfaceShape,"GMH_InMainGroup","in");
+    
+    //check surface availibility
+    if ($mainGroup ==""){ print ("no curves exported for "+$surface+", ignored \n");}
+    else
+    {
+        string $GMHStyleSystem = PDD_NodeFromConnection2($mainGroup,"GMH_StyleMainGroupIn","in");
+         int $PolyStyleFlag = `getAttr ($GMHStyleSystem+".GMH_polyStyleSystem")`;
+         
+        
+         if ($PolyStyleFlag == 0) // case of GMH HAIR style System 
+                {
+                    // export Maya Hair output Curve.
+                    string $curves[] = PDD_NodesFromConnection2($mainGroup,"GMH_OutputCurves","out");               
+                    if ( size($curves) >=1)
+                    {
+                         select $curves; pickWalk -d up; string $curves2[] = `duplicate $curves`;
+                       select $curves2;parent -w;showHidden -a;
+                             string $convertedCurves[] = `ls-sl`;
+                             PDD_appendStringArrayToStringArray($convertedCurves,$globalExportCurves);
+                          // put curves into each surface group
+                                   if ($groupFlag ==1)
+                                  { select $convertedCurves;
+                                   string $group = `group -n($surface+"_grp")`;
+                                   PDD_appendStringToStringArray($group,$globalExportGrps);}
+                    }
+    
+                }//end of hair style case
+                
+          if ($PolyStyleFlag == 1) // case of GMH POLY style System 
+                {
+                    // export stroke output Curve.
+                    string $strokes[] = PDD_NodesFromConnection2($mainGroup,"GMH_outStrokes","out");
+                    
+                    // create curve from outMainCUrve of each stroke and putinto Group
+                    for ($eachStroke in $strokes)
+                    {
+                        //string $eachStroke="pPlane1_strokeGrp|pPlane1_stroke|pPlane1_stroke"
+                        string $tmps[];tokenize $eachStroke  "|" $tmps; string $strokeNiceName = ($tmps[size($tmps)-1]);
+                        select $eachStroke;
+                        
+                        //convert paintEffect to Curve and delete the unwanted group
+                       showHidden -a; doPaintEffectsToCurve( 1);
+                       string $convertedCurves[] = PDD_NodesFromConnection2($eachStroke,"outMainCurves","out");
+                       select $convertedCurves;pickWalk -d up;pickWalk -d up;pickWalk -d up;
+                       string $tmpGrpss[] = `ls-sl`;
+                       select $convertedCurves; pickWalk -d up; parent -w; 
+                       clear ($convertedCurves); $convertedCurves = `PDD_patchRename($strokeNiceName+"_curve")`;
+                       PDD_appendStringArrayToStringArray($convertedCurves,$globalExportCurves);
+                       delete $tmpGrpss;  
+                          // put curves into each stroke group
+                                   if ($groupFlag ==1)
+                                  { select $convertedCurves;
+                                   string $group = `group -n($strokeNiceName+"_curves_grp")`;
+                                   PDD_appendStringToStringArray($group,$exportStrokeGrps);
+                                   }
+                    }// end of each stroke loop
+            
+                
+                 if ($groupFlag ==1)
+                 { 
+                     if ( size ($exportStrokeGrps) >=1)
+                     { select $exportStrokeGrps;
+                       string $group = `group -n($surface+"_grp")`;
+                       PDD_appendStringToStringArray($group,$globalExportGrps);
+                       }
+                 }
+          }//end of poly style case
+            
+       }// end of surface check
+        
+   }// end of each surface loop
+   
+      if (size($globalExportCurves) <1)
+       {
+             warning ("no curves exported for selected surfaces, aborted \n"); return "";
+       }
+       
+       createNode "transform" -n"GMHStyleSystem_curve_grp";
+         if ($groupFlag ==1) // put all surface grp into a global export group
+             { 
+               parent $globalExportGrps  ("GMHStyleSystem_curve_grp");}
+          else // if group flag == 0 then put all converted curves into a global curves
+     {
+    parent $globalExportCurves   ("GMHStyleSystem_curve_grp");
+     }
+            select   "GMHStyleSystem_curve_grp"; 
+       
+       if ($FBXFlag ==1)
+      { file -force -options "" -typ "FBX export" -es ($path+"_curves.fbx");
+      print ("Export Curves to "+($path+"_curves.fbx")+", successed ! \n");
+      }
+       
+       if ($OBJFlag ==1)
+       {file -force -options ("groups="+$groupFlag+";ptgroups="+$groupFlag+";materials=0;smoothing=0;normals=0" )
+       -typ "OBJexport" -es ($path+"_curves.obj");
+       print ("Export Curves to "+($path+"_curves.obj")+", successed ! \n");
+       }
+         
+        delete "GMHStyleSystem_curve_grp";
+        return $path;
+    
+}
+//testing command
+//select -r pPlane1 ;
+//select -tgl pPlane3 ;
+//GMH2_exportCurvesFromSurfaces($path,`ls-sl`,$FBXFlag, $OBJFlag,1);
+
+global proc string GMH2_exportCurvesFromMaterials( string $path,string $materials[],int $FBXFlag, int $OBJFlag, int $groupFlag)
+{
+    
+    string $globalExportGrps[]; clear ($globalExportGrps);
+    string $globalExportCurves[]; clear ($globalExportCurves);
+   
+    for ($material in $materials)
+    {
+                     //string $material = "UniqueColorBaseMat_0";
+                string $exportStrokeGrps[]; clear ($exportStrokeGrps);
+                string $connectedGeos[] = PDD_NodesFromConnection2($material,"GMHMaterial","out");
+               
+                if (size($connectedGeos) <1) // check material availability
+                { print ("no Meshes exported for "+$material+" , ignored \n");}
+                else
+                {
+                
+                // get stroke lists
+                string $strokeLists[];clear ($strokeLists);
+                for ($strokeGeo in $connectedGeos)
+                {
+                    if (`attributeExists "GMHStrokeLevel" $strokeGeo`) // filter out stroke geo
+                    { string $strokeGeoShape = PDD_shapeName($strokeGeo);
+                      string $stroke = PDD_NodeFromConnection2($strokeGeoShape,"inMesh","in");
+                      PDD_appendStringToStringArray ($stroke,$strokeLists);
+                     }
+                }
+                
+                  for ($eachStroke in $strokeLists)
+                            {
+                                //string $eachStroke="pPlane1_strokeGrp|pPlane1_stroke|pPlane1_stroke"
+                                string $tmps[];tokenize $eachStroke  "|" $tmps; string $strokeNiceName = ($tmps[size($tmps)-1]);
+                                select $eachStroke;
+                                
+                                //convert paintEffect to Curve and delete the unwanted group
+                               showHidden -a; doPaintEffectsToCurve( 1);
+                               string $convertedCurves[] = PDD_NodesFromConnection2($eachStroke,"outMainCurves","out");
+                               select $convertedCurves;pickWalk -d up;pickWalk -d up;pickWalk -d up;
+                               string $tmpGrpss[] = `ls-sl`;
+                               select $convertedCurves; pickWalk -d up; parent -w; 
+                               clear ($convertedCurves); $convertedCurves = `PDD_patchRename($strokeNiceName+"_curve")`;
+                               PDD_appendStringArrayToStringArray($convertedCurves,$globalExportCurves);// put convert curve to global export curve
+                               delete $tmpGrpss;  
+                               
+                                  // put curves into each stroke group
+                               if ($groupFlag ==1)
+                              { select $convertedCurves;
+                               string $group = `group -n($strokeNiceName+"_curves_grp")`;
+                               PDD_appendStringToStringArray($group,$exportStrokeGrps);}
+                               
+                            }//end of each stroke loop
+                
+                // put stroke group into each material group
+                 if ($groupFlag ==1)
+                    {
+                        if ( size ($exportStrokeGrps) >=1)
+                        {
+                        select $exportStrokeGrps;
+                        string $group = `group -n($material+"_grp")`;
+                        PDD_appendStringToStringArray($group,$globalExportGrps);
+                        }
+                    } 
+                    
+                 }// end of material check
+    }// end of each material loop
+   
+       if (size($globalExportCurves) <1)
+       {
+             warning ("no curves exported for selected materials, aborted \n"); return "";
+       }
+       
+       createNode "transform" -n"GMHStyleSystem_curve_grp";
+         if ($groupFlag ==1) // put all surface grp into a global export group
+             { 
+               parent $globalExportGrps  ("GMHStyleSystem_curve_grp");}
+          else // if group flag == 0 then put all converted curves into a global curves
+     {
+    parent $globalExportCurves   ("GMHStyleSystem_curve_grp");
+     }
+            select   "GMHStyleSystem_curve_grp"; 
+       
+       if ($FBXFlag ==1)
+      { file -force -options "" -typ "FBX export" -es ($path+"_curves.fbx");
+      print ("Export Curves to "+($path+"_curves.fbx")+", successed ! \n");
+      }
+       
+       if ($OBJFlag ==1)
+       {file -force -options ("groups="+$groupFlag+";ptgroups="+$groupFlag+";materials=0;smoothing=0;normals=0" )
+       -typ "OBJexport" -es ($path+"_curves.obj");
+       print ("Export Curves to "+($path+"_curves.obj")+", successed ! \n");
+       }
+         
+        delete "GMHStyleSystem_curve_grp";
+        return $path;
+}
+// testing command
+//select -r UniqueColorBaseMat_2 ;
+//select -tgl UniqueColorBaseMat_3 ;
+//GMH2_exportCurvesFromMaterials($path,`ls-sl`,$FBXFlag, $OBJFlag,1);
+
+
+
+
+
+// export Curves of GMH Style System
+global proc string GMH2_exportCurvesFromStyleSystem(string $path,string $GMHstyleSystems[],int $FBXFlag, int $OBJFlag, int $groupFlag)
+{
+    
+      string $globalExportGrps[]; clear ($globalExportGrps);
+    string $globalExportCurves[]; clear ($globalExportCurves);
+   
+    for ($GMHstyleSystem in $GMHstyleSystems)
+    {
+       // print ("checking "+$GMHstyleSystem +" \n");
+        int $PolyStyleFlag = `getAttr ($GMHstyleSystem+".GMH_polyStyleSystem")`;
+        string $mainGroups[] = PDD_NodesFromConnection2($GMHstyleSystem,"GMH_OutMainGroup","out");
+        
+        if (size($mainGroups) <1) // check style system availability
+        { print ("no Curves exported for "+$GMHstyleSystem+" , ignored \n");}
+        else
+        {
+            //string $mainGroups[] = PDD_NodesFromConnection2("C_GMHStyleSystem","GMH_OutMainGroup","out");
+            string $exportCurves[]; clear ($exportCurves);
+            string $exportMainGrps[]; clear ($exportMainGrps);
+            
+            for ($eachMainGroup in $mainGroups)
+            {
+    
+                if ($PolyStyleFlag == 0) // case of GMH HAIR style System 
+                {
+                    // export Maya Hair output Curve.
+                    //select $eachMainGroup
+                    string $curves[] = PDD_NodesFromConnection2($eachMainGroup,"GMH_OutputCurves","out");               
+                    if ( size($curves) >=1)
+                    {
+                         select $curves;duplicate $curves;
+                         parent -w;pickWalk -d up;
+                         string $convertedCurves[] = `ls-sl`;
+                        // print (" CONVERTED CURVES = "); print $convertedCurves; print ("\n");
+                             PDD_appendStringArrayToStringArray($convertedCurves,$globalExportCurves);
+                          // put curves into each main group
+                                   if ($groupFlag ==1)
+                                  { select $convertedCurves;
+                                   string $group = `group -n($eachMainGroup+"_grp")`;
+                                  $exportMainGrps =  PDD_appendStringToStringArray($group,$exportMainGrps);}
+                    }
+                }//end of hair case
+                
+               if ($PolyStyleFlag == 1) // case of GMH POLY style System 
+                {
+                    // export stroke output Curve.
+                    string $strokes[] = PDD_NodesFromConnection2($eachMainGroup,"GMH_outStrokes","out");
+                    string $strokeGrps[]; clear $strokeGrps;
+                    // create curve from outMainCUrve of each stroke and putinto Group
+                    for ($eachStroke in $strokes)
+                        {
+                            //string $eachStroke="pPlane1_strokeGrp|pPlane1_stroke|pPlane1_stroke"
+                            string $tmps[];tokenize $eachStroke  "|" $tmps; string $strokeNiceName = ($tmps[size($tmps)-1]);
+                            select $eachStroke;
+                            
+                            //convert paintEffect to Curve and delete the unwanted group
+                           showHidden -a; doPaintEffectsToCurve( 1);
+                           string $convertedCurves[] = PDD_NodesFromConnection2($eachStroke,"outMainCurves","out");
+                           select $convertedCurves;pickWalk -d up;pickWalk -d up;pickWalk -d up;
+                           string $tmpGrpss[] = `ls-sl`;
+                           
+                           select $convertedCurves; pickWalk -d up; parent -w; 
+                           clear ($convertedCurves); $convertedCurves = `PDD_patchRename($strokeNiceName+"_curves_curve")`;
+                           
+                           PDD_appendStringArrayToStringArray($convertedCurves,$globalExportCurves);
+                           delete $tmpGrpss;  
+                              // put curves into each stroke group
+                                       if ($groupFlag ==1)
+                                      { select $convertedCurves;
+                                       string $group = `group -n($strokeNiceName+"_grp")`;
+                                       PDD_appendStringToStringArray($group,$strokeGrps);}
+                        }// end of each stroke loop
+    
+                        // put stroke group into each main group
+                         if ($groupFlag ==1)
+                            { 
+                                if ( size($strokeGrps) >=1)
+                                {select $strokeGrps;
+                                string $group = `group -n($eachMainGroup+"_grp")`;
+                                $exportMainGrps=PDD_appendStringToStringArray($group,$exportMainGrps);
+                                } 
+                             }
+                                
+                 }// end of poly case
+                    
+            }// end of each main Group loop
+            
+            
+           // print ( "export main grps = ") ; print $exportMainGrps ; print ("\n");
+                 if ($groupFlag ==1)
+                 { 
+                     if (size ($exportMainGrps) >=1)
+                         {select $exportMainGrps;
+                           string $group = `group -n($GMHstyleSystem+"_grp")`;
+                           PDD_appendStringToStringArray($group,$globalExportGrps);}
+                   }
+           }// end of each system Check
+               
+    }// end of each system loop
+    
+         if (size($globalExportCurves) <1)
+       {
+             warning ("no curves exported for selected materials, aborted \n"); return "";
+       }
+       
+       createNode "transform" -n"GMHStyleSystem_curve_grp";
+         if ($groupFlag ==1) // put all surface grp into a global export group
+             { 
+               parent $globalExportGrps  ("GMHStyleSystem_curve_grp");}
+          else // if group flag == 0 then put all converted curves into a global curves
+     {
+    parent $globalExportCurves   ("GMHStyleSystem_curve_grp");
+     }
+            select   "GMHStyleSystem_curve_grp"; 
+       
+       if ($FBXFlag ==1)
+      { file -force -options "" -typ "FBX export" -es ($path+"_curves.fbx");
+      print ("Export Curves to "+($path+"_curves.fbx")+", successed ! \n");
+      }
+       
+       if ($OBJFlag ==1)
+       {file -force -options ("groups="+$groupFlag+";ptgroups="+$groupFlag+";materials=0;smoothing=0;normals=0" )
+       -typ "OBJexport" -es ($path+"_curves.obj");
+       print ("Export Curves to "+($path+"_curves.obj")+", successed ! \n");
+       }
+         
+        delete "GMHStyleSystem_curve_grp";
+        return $path;
+}
+//test command
+//select -r A_GMHPolyStyleSystem ;
+//select -tgl C_GMHStyleSystem ;
+//GMH2_exportCurvesFromStyleSystem($path,`ls-sl`,$FBXFlag, $OBJFlag,1);
+
+//string $path = "D:/Dropbox/ENV/SCRIPT/THUNDERCLOUD/GMH2/scenes/test.fbx";
+//string $GMHstyleSystem = "A_GMHPolyStyleSystem";
+//int $FBXFlag =1; int $OBJFlag =1; int $groupFlag =1;

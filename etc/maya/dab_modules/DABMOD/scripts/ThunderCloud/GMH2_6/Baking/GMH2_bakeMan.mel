@@ -1,0 +1,88 @@
+
+//string $sourceObject = "pPlane4_Stroke_geo";string $targetObject = "pPlane4"; string $path = "D:/Dropbox/ENV/SCRIPT/THUNDERCLOUD/GMH2/scenes/hair_diffuse";string $map = "litAndShadedRGB";GMH2_bakeObject($sourceObject,$targetObject,$path,$map);string $GMHsurfaces[] = `ls-sl`;
+
+//GMH2_bakeGMHSurface(`ls-sl`,$path,$map);
+// GMH2_bakeObject("GMH2SourceObject","GMH2TargetObject",$path,$map)
+ 
+
+     
+ 
+global proc int GMH2_bakeGMHSurface(string $GMHsurfaces[],string $path, string $map,int $mapWidth, int $mapHeight, int $superSampling, int $filterSize, float $searchDistance)
+{
+    //filter out GMH Surface
+   // string $GMHsurfaces[] = `ls-sl`;
+    string $GMHSurfaceLists[];clear $GMHSurfaceLists;
+    for ($eachSurface in $GMHsurfaces)
+    {
+        string $eachSurfaceShape = PDD_shapeName($eachSurface);
+        if(`attributeExists "GMH_InMainGroup" $eachSurfaceShape`)
+        PDD_appendStringToStringArray($eachSurface,$GMHSurfaceLists);
+    }
+    
+    if (size($GMHSurfaceLists)<1) {warning ("no valid GMH Surfaces selected, aborted \n");return 0;}
+    
+    string $tmps[] =`duplicate $GMHSurfaceLists`;
+    string $duplicateObjects[];
+    if (size($tmps)>1)
+    { select $tmps; $duplicateObjects = `polyUnite -ch 0 -mergeUVSets 1`;}
+    else
+    {$duplicateObjects[0] = $tmps[0];}
+    
+   string $targetObject = `rename $duplicateObjects[0] "GMH2TargetObject"`;
+   
+       //filter out stroke geos
+    string $strokeGeoLists[];clear $strokeGeoLists;
+    for ($eachGMHSurface in $GMHSurfaceLists)
+    {
+        string $eachGMHSurfaceShape = PDD_shapeName($eachGMHSurface);
+        if(`attributeExists "GMH_InMainGroup" $eachGMHSurfaceShape`)
+        {
+            string $mainGroup = PDD_NodeFromConnection2($eachGMHSurfaceShape,"GMH_InMainGroup","out");
+            string $outGeos[] = PDD_NodesFromConnection2($mainGroup,"GMH_outPolyStrokesGeo","out");
+            PDD_appendStringArrayToStringArray($outGeos,$strokeGeoLists);
+        }
+    }
+    if (size($strokeGeoLists)<1) {warning (" No Poly Style GMH Surface selected, aborted \n");delete $targetObject; return 0;}
+    string $tmps[] =`duplicate $strokeGeoLists`;
+    string $duplicateStrokeGeos[];clear($duplicateStrokeGeos);
+    if (size($tmps)>1)
+    { select $tmps; $duplicateStrokeGeos = `polyUnite -ch 0 -mergeUVSets 1 $tmps`;}
+    else
+    {$duplicateStrokeGeos[0] = $tmps[0];}
+   string $sourceObject = `rename $duplicateStrokeGeos[0] "GMH2SourceObject"`;
+   
+   string $bakeLight[];clear ($bakeLight);
+    string $light[] = `ls-type"light"`; if (size($light)<=0){ defaultAmbientLight(1, 0.5, 1,1,1, "0", 0,0,0, "1");rename "defaultGMH2BakeLight";}
+    
+    if (`objExists "GMH2BakingGrp"`) delete "GMH2BakingGrp";
+    createNode "transform" -n"GMH2BakingGrp";
+    
+     select $targetObject;
+makeIdentity -apply true -t 0 -r 0 -s 1 -n 0 -pn 1;
+
+    parent $sourceObject "GMH2BakingGrp";
+    parent $targetObject "GMH2BakingGrp";
+     
+   GMH2_bakeObject($sourceObject,$targetObject,$path,$map,$mapWidth, $mapHeight,$superSampling,$filterSize,$searchDistance);
+   
+
+    if (`objExists "defaultGMH2BakeLight"`) delete "defaultGMH2BakeLight";
+     if (`objExists "GMH2BakingGrp"`) delete "GMH2BakingGrp";
+     
+    return 1;
+}
+
+global proc GMH2_bakeObject(string $sourceObject, string $targetObject, string $path, string $map, int $mapWidth, int $mapHeight, int $superSampling, int $filterSize, float $searchDistance)
+{
+    
+    surfaceSampler -target $targetObject -uvSet map1 -searchOffset 0
+    -maxSearchDistance $searchDistance
+    -source $sourceObject -mapOutput $map 
+    -mapWidth $mapWidth -mapHeight $mapWidth -max 1 
+    -mapSpace tangent -mapMaterials 1 
+    -shadows 1 -filename $path
+    -fileFormat "tga" -superSampling $superSampling -filterType 0 -filterSize $filterSize 
+    -overscan 0 -searchMethod 0 -useGeometryNormals 1
+     -ignoreMirroredFaces 0 -flipU 0 -flipV 0 ;
+
+}

@@ -1,0 +1,96 @@
+
+
+//==============================GMH2_GUIcreate_GMHSurfaceTable.mel======================
+//this is the main proc to create GMH2 UI main window. 
+global proc int create_GMHSurfaceTable()
+{
+    int $tableWidth = 400;
+    int $leftButtonWidth = 110;
+    int $scrollListWidth = 280;
+     frameLayout -collapsable true -w $tableWidth -l "GMH Surfaces" "GMH2SurfaceMainLayout";
+     columnLayout  -rowSpacing 10 "GMHStyleTable_flowLayout";
+   rowLayout -rat 1 "top" 5  -rat 2 "top" 5 -numberOfColumns 2 "GMHStyleTable_rowLayout";
+   
+     columnLayout  -rowSpacing 10 -w 110 "GMHStyleTable_rowLayout_1";
+       
+            string $command = ("string $GMHsystem[] =`textScrollList -query -selectItem  GMHStyleList`; if ($GMHsystem[0] == \"\"){ warning \"please select a GMH style system \\n\";}else"
+                              +"{ string $selections[] = `ls-sl`; for ($eachObj in $selections)" 
+                             + "{select $eachObj; CreateGMHSurface($GMHsystem[0],0);} select $selections;  updateGUI(0);   }");
+           button -l"Apply GMHStyle" -c $command -w $leftButtonWidth -bgc 0.0442138 0.45098 0.0586201;
+           
+         
+            // APPLY GMH STYLE
+            string $command = ("string $GMHsystem[] =`textScrollList -query -selectItem  GMHStyleList`; if ($GMHsystem[0] == \"\"){ warning \"please select a GMH style system \\n\";}else"
+                              +"{ string $selections[] = `ls-sl`; for ($eachObj in $selections)" 
+                             + "{select $eachObj; applySecondaryGMHHairSystem($eachObj,$GMHsystem[0],0);} select $selections;  updateGUI(0);   }");
+           button -l"Apply 2nd GMHStyle" -c $command -w $leftButtonWidth -bgc 0.0442138 0.5 0.286201;
+
+            
+            //delete surface      
+            string $command = ("GMH2_deleteGMHSurface_command;updateGUI(0);");
+           button -l"Delete GMH Surface" -c $command -w $leftButtonWidth -bgc 0.744 0.186013 0.072912;
+
+       
+           //delete orphan main group 
+           string $command = "GMH2_deleteOrphanMainGrp_commandUI";
+           button -l"Del Orphan Surface" -c $command;
+           
+       //scroll List
+       setParent ..;
+
+      columnLayout   -rowSpacing 10 "GMHStyleTable_rowLayout_2";
+      
+      // indication text       
+            string $singleClickCommand = ("string $GMHSurface[] =  (`textScrollList -query -selectItem  GMHSurfaceList`);"
+                                        +
+                                         "select $GMHSurface;updateGUI(0)");             
+            textScrollList -w $scrollListWidth -h 100 -ams 1 -sc $singleClickCommand "GMHSurfaceList";
+      
+      
+      
+            rowLayout -numberOfColumns 3;
+            
+
+            string $command = ("string $selections[] = `ls-sl`; for ($eachObj in $selections){select $eachObj;GMH_RotateSurface();} select $selections; updateGUI(0)");
+            button -c $command -l"Rotate"-w 60 ;
+            
+            string $command = ("string $selections[] = `ls-sl`; for ($eachObj in $selections){select $eachObj;GMH_reverseSurface();} select $selections; updateGUI(0)"); 
+            button -c $command -l"Reverse"-w 60 ;
+           
+            string $command = "GMH2_selectRootVertex_multiCommandUI();";
+            button -c $command -l"Select Root Vertices"-w 110 ;
+            
+            
+                        setParent ..;
+            
+      
+    return 1;
+}
+
+global proc GMH2_deleteOrphanMainGrp_commandUI()
+{
+    string $GMHsystems[] =`textScrollList -query -selectItem  "GMHStyleList"`;
+    for ($eachSystem in $GMHsystems)
+     {  GMH2_deleteOrphanMainGrp($eachSystem);}
+    
+    
+}
+
+
+global proc GMH2_deleteGMHSurface_command()
+{
+    string $selections[] = `ls-sl`; 
+    for ($eachObj in $selections)
+    {   string $mainGroup = getMainGroup($eachObj);
+    deleteGMHMainGroup($mainGroup);
+    select $eachObj;pickWalk -d down; string $eachObjShape = PDD_currentSelectionName(1);
+    if (`attributeExists "GMHStyleSystem" $eachObjShape`)
+    deleteAttr  ( $eachObjShape+".GMHStyleSystem");
+    } 
+    
+    
+    
+    
+}
+
+//create_GMHwindow();

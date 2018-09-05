@@ -1,0 +1,98 @@
+global proc GMH_display(string $mainGroup)
+{
+    string $GMHstyleSystem = PDD_NodeFromConnection2($mainGroup,"GMH_StyleMainGroupIn","in");
+    // POLY STYLE SYSTEM 
+   int $polyStyleFlag = `getAttr ($GMHstyleSystem+".GMH_polyStyleSystem")`;
+    
+            	    		//string $mainGroup ="pPlane1_GMHSurface"
+            			// find groups			
+            	string $subDSurfaces[]  = PDD_NodesFromConnection2($mainGroup,"GMH_outSubDSurfaceShape","out");
+            	string $NURBSurfaces[] = PDD_NodesFromConnection2($mainGroup,"GMH_outNURBSurfaceShape","out");
+            	string $GrowingCurve[] = PDD_NodesFromConnection2($mainGroup,"GMH_outGrowingCurves","out");
+            	string $leadingCurves[];clear ($leadingCurves);
+            	for ($eachGrowingCurve in $GrowingCurve)
+            	{string $LeadingCurve[] = PDD_NodesFromConnection2($eachGrowingCurve,"leadCurve","out");PDD_appendStringArrayToStringArray($LeadingCurve,$leadingCurves);}
+            	string $Stroke[] = PDD_NodesFromConnection2($mainGroup,"GMH_outStrokes","out");
+            	string $StrokeGeos[] = PDD_NodesFromConnection2($mainGroup,"GMH_outPolyStrokesGeo","out");
+            	string $OutputCurves[] = PDD_NodesFromConnection2($mainGroup,"GMH_OutputCurves","out");
+            	string $baseSurfaceShape = PDD_NodeFromConnection2($mainGroup,"GMH_outPolySurfaceShape","out");
+               string $strokesCurves[] = PDD_NodesFromConnection2($mainGroup,"GMH_StrokesCurves","out");
+                // adding visible toggle attributes
+                string $visAttributes[] = {"convertSurfaces_vis",
+                                        "guideCurve_vis",
+                                        "follicle_vis",
+                                        "outPutCurve_vis",
+                                        "stroke_vis",
+                                        "strokeGeo_vis",
+                                        "strokeOutputCurve_vis"
+                                        };
+              for ($eachAttr in $visAttributes){ if (!`attributeExists $eachAttr $mainGroup`)addAttr -ln $eachAttr  -at bool  $mainGroup;}
+               
+               for ($eachSubDSurface in $subDSurfaces){GMH2_testConnectionAndConnect(($mainGroup+".convertSurfaces_vis"), ($eachSubDSurface+".visibility"));}
+               for ($eachNURBSurface in $NURBSurfaces){GMH2_testConnectionAndConnect(($mainGroup+".convertSurfaces_vis"), ($eachNURBSurface+".visibility"));}
+               
+               if ($polyStyleFlag ==1) 
+              {
+                    for ($eachOutputCurve in $OutputCurves){GMH2_testConnectionAndConnect(($mainGroup+".guideCurve_vis"), ($eachOutputCurve+".visibility"));}// if polystyle then output Curve is guide Cuve , 
+                    for ($eachleadingCurve in $leadingCurves){GMH2_testConnectionAndConnect(($mainGroup+".follicle_vis"), ($eachleadingCurve+".visibility"));}  // follicle is leading curves
+                     for ($eachStrokesCurve in $strokesCurves){GMH2_testConnectionAndConnect(($mainGroup+".strokeOutputCurve_vis"), ($eachStrokesCurve+".visibility"));} // stroke curve is output Curve
+                       setAttr ($mainGroup+".strokeGeo_vis") 1;    
+              }
+              else
+              {
+                  
+                    for ($eachOutputCurve in $OutputCurves){GMH2_testConnectionAndConnect(($mainGroup+".outPutCurve_vis"), ($eachOutputCurve+".visibility"));}
+                    for ($eachleadingCurve in $leadingCurves){GMH2_testConnectionAndConnect(($mainGroup+".guideCurve_vis"), ($eachleadingCurve+".visibility"));}  
+                      for ($eachStrokesCurve in $strokesCurves){GMH2_testConnectionAndConnect(($mainGroup+".follicle_vis"), ($eachStrokesCurve+".visibility"));}  //stroke curve is follice
+                    
+              }
+              
+               for ($eachGrowingCurve in $GrowingCurve){GMH2_testConnectionAndConnect(($mainGroup+".guideCurve_vis"), ($eachGrowingCurve+".visibility"));}
+               for ($eachStroke in $Stroke){GMH2_testConnectionAndConnect(($mainGroup+".stroke_vis"), ($eachStroke+".lodVisibility"));}
+               for ($eachStrokeGeo in $StrokeGeos){GMH2_testConnectionAndConnect(($mainGroup+".strokeGeo_vis"), ($eachStrokeGeo+".visibility"));}
+
+               
+                
+            	                       
+	
+ 
+    // SET COLOR OVERIDE BASED ON SIMULATION STATE 
+    int $staticColorIndex = 11;
+     int $passiveColorIndex = 24;
+      int $dynamicColorIndex = 7;
+      
+      select $baseSurfaceShape;
+      if ( PDD_NodeFromConnection("overrideColor","in",1)== "")
+      {
+              string $expression=      `expression -s ("if ("+$baseSurfaceShape+".SimulationType == 0)\n{\n"+$baseSurfaceShape+".overrideColor ="+$staticColorIndex +";}"
+                  +"if ("+$baseSurfaceShape+".SimulationType == 1)\n{\n"+$baseSurfaceShape+".overrideColor ="+$passiveColorIndex +";}"
+                  +"if ("+$baseSurfaceShape+".SimulationType == 2)\n{\n"+$baseSurfaceShape+".overrideColor ="+$dynamicColorIndex +";}") 
+                  -o "" -ae 1 -uc all` ;
+                container -e -includeShapes -includeTransform -force -addNode $expression $mainGroup;
+        }
+        
+        
+        
+        // set base surface display state     
+        	    select $baseSurfaceShape;
+            	setAttr ($baseSurfaceShape+".overrideEnabled") 1;				// set MESH SURFACE become wire
+            	setAttr ($baseSurfaceShape+".overrideShading") 0;
+                setAttr ($baseSurfaceShape+".castsShadows") 0;
+                setAttr ($baseSurfaceShape+".receiveShadows") 0;
+                setAttr ($baseSurfaceShape+".motionBlur") 0;
+                setAttr ($baseSurfaceShape+".primaryVisibility") 0;
+                setAttr ($baseSurfaceShape+".smoothShading") 0;
+                setAttr ($baseSurfaceShape+".visibleInReflections") 0;
+                setAttr ($baseSurfaceShape+".visibleInRefractions") 0;
+                setAttr ($baseSurfaceShape+".doubleSided") 0;
+                
+}
+
+global proc GMH2_testConnectionAndConnect(string $objectAttribute1, string $objectAttribute2)
+{
+    
+    if (!`isConnected  $objectAttribute1 $objectAttribute2`) connectAttr $objectAttribute1 $objectAttribute2;
+    
+}
+//
+//string $mainGroup ="pPlane1_GMHSurface";GMH_display( $mainGroup);

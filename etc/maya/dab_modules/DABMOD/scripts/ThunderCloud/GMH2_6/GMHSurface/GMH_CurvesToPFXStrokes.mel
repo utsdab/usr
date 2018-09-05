@@ -1,0 +1,272 @@
+//string $mainGroup =PDD_currentSelectionName(1);
+//string $eachGrowCurves[] = `ls-sl`;
+//string $brush = PDD_currentSelectionName(1);
+//int $debugFlag = 1;
+
+//===================GMH_CurvesToPFXStrokes.mel============
+global proc string CurvesToPFXStroke(string $styleSystem,string $mainGroup,string $eachGrowCurve,string $leadCurves[], string $brush,int $debugFlag)
+{
+   //go through each set of grow Curve to convert to PFXStroke
+
+          string $historiesNodes[];clear $historiesNodes;
+            select $mainGroup;string $name=substituteAllString ($mainGroup,"_GMHSurface","");
+            //create new stroke
+           string $parents=` createNode "transform" -n ($name+"_stroke")`;;string $stroke =`createNode "stroke" -n ($name+"_stroke") -p($parents)`;
+           
+           
+           // connect Brush 
+           if (`getAttr ($styleSystem+".GMH_polyStyleSystem")` ==0) // Hair GMH system 
+          {  connectAttr -f ($brush+".outBrush") ($stroke+".brush");} //connect stroke to brush 
+            else// polyhair system then create a sub brush 
+            {
+                  // create stroke individual brush node to override Segment setting
+                  string $strokeNiceName =  PDD_removeInvalidCharactersFromName($stroke,"_",0);
+                      string $childBrush = `createNode "brush" -n ($strokeNiceName+"_overrideBrush")`;
+                    int $curveDegree = `getAttr ($leadCurves[0]+".degree")`;int $curveSpan = `getAttr ($leadCurves[0]+".spans")`; // calculate leadCurve CV to create each segment expression
+                    int $leadCurveCV = $curveDegree+ $curveSpan -1;
+    
+                    GMH2_connect2Brush($brush, $childBrush,$leadCurves[0],$mainGroup);
+                    //connect the child brush to stroke 
+                    connectAttr -f ($childBrush+".outBrush") ($stroke+".brush");
+                    container -e -includeShapes -includeTransform -force -addNode $childBrush $mainGroup;
+                    
+            }
+          
+            
+            //connect stroke to grow curves
+            connectAttr -f ($eachGrowCurve+".worldSpace[0]") ($stroke+".pathCurve[0].curve");
+            // set stroke sample of grow curve
+           connectAttr ($eachGrowCurve+".spans")($stroke+".pathCurve[0].samples");
+            setAttr ($stroke+".displayPercent") 100;
+  
+            // connect stroke to lead curves
+            for ($eachLeadingCurve in $leadCurves)
+              {int $controlCurveIndex = getNextAvailableIndexOfMultiAttr($stroke,"controlCurve" ) ;
+             connectAttr -f (  $eachLeadingCurve+".worldSpace[0]") ($stroke+".controlCurve["+$controlCurveIndex+"]");}
+             
+            //connect stroke to Main Group 
+            addAttr -ln "GMH_InMainGroup"  -at double  $stroke;
+            PDD_ConnectAttribute ($mainGroup,"GMH_outStrokes",$stroke,"GMH_InMainGroup",$debugFlag) ;
+            
+      
+
+ 
+    
+	    //set up stroke attributes
+	    
+        if ( getAttr ($styleSystem+".GMH_polyStyleSystem") ==0) // Hair GMH system 
+        {
+             setAttr ($stroke+".pressureScale[0].pressureScale_FloatValue") 0.99;
+            //setup pressure map
+            //set first map to Tubes Per Step
+            setAttr ($stroke+".pressureMap1") 10;
+            //set second map to Elevation
+            setAttr ($stroke+".pressureMap2") 11;
+            setAttr ($stroke+".drawAsMesh") 0;
+        }
+        else        // poly GMH system
+        {
+            
+        setAttr ($stroke+".useNormal") 1;
+        setAttr ($stroke+".normalZ") 1;
+        setAttr ($stroke+".normalY") -1;
+        setAttr ($stroke+".normalX") 10;
+        setAttr ($stroke+".pressureScale[0].pressureScale_Position") 0;
+        setAttr ($stroke+".pressureScale[0].pressureScale_FloatValue") 1;
+        setAttr ($stroke+".pressureScale[0].pressureScale_Interp") 2;
+        setAttr ($stroke+".pressureScale[1].pressureScale_Position") 0.5;
+        setAttr ($stroke+".pressureScale[1].pressureScale_FloatValue") 1.1;
+        setAttr ($stroke+".pressureScale[1].pressureScale_Interp") 2;
+        setAttr ($stroke+".pressureScale[2].pressureScale_Position") 1;
+        setAttr ($stroke+".pressureScale[2].pressureScale_FloatValue") 1;
+        setAttr ($stroke+".pressureScale[2].pressureScale_Interp") 2;
+            //setup pressure map
+            //set first map to Tubes Width
+            setAttr ($stroke+".pressureMap1") 6;
+            //set second map to Elevation
+            setAttr ($stroke+".pressureMap2") 11;
+            
+            setAttr ($stroke+".drawAsMesh") 0;
+            setAttr ($stroke+".meshQuadOutput") 1;
+            
+            
+        
+        
+        select $mainGroup;string $baseSurface = ( PDD_NodeFromConnection("GMH_outPolySurfaceShape","out",1));
+        connectAttr ($baseSurface+".GMH_Clump_Width_Mul") ($stroke+".pressureMax1") ;
+        connectAttr ($baseSurface+".GMH_seed") ($stroke+".seed") ;
+        //expression  -s ($stroke+".pressureScale[1].pressureScale_FloatValue = "+$baseSurface+".centreTubeScale * "+$brush+".relatetiveCentreTubeWidth") -o "" -ae 1 -uc all;
+        setAttr ($stroke+".drawAsMesh") 1;
+        
+        // stroke tube rotation
+       string $tmps_string[] =  GMH2_setTubeRotationDriven($baseSurface,$stroke,$eachGrowCurve,$leadCurves[0]);
+       PDD_appendStringArrayToStringArray $tmps_string $historiesNodes;
+       
+       
+        }
+
+
+
+
+
+
+
+
+        //Connect PolySurface Attr to Stroke attr
+        select $mainGroup;
+        string $baseSurface = PDD_NodeFromConnection("GMH_outPolySurfaceShape","out",1);
+        connectAttr -f ($baseSurface+".GMH_Clump_Per_Edge_loop")( $stroke+".sampleDensity");
+        connectAttr -f ($baseSurface+".GMH_hairTubeOffset")( $stroke+".surfaceOffset");
+        
+        
+        // create Stroke grp
+          select $mainGroup;string $strokeGrp = PDD_NodeFromConnection("GMH_outStrokeGrp","out",1);
+          if ($strokeGrp =="")
+          {
+              $strokeGrp = `createNode transform -n ($name+"_strokeGrp")`; 
+			  addAttr -ln "GMH_InMainGroup"  -at double $strokeGrp;
+              connectAttr -f ($strokeGrp+".GMH_InMainGroup") ($mainGroup+".GMH_outStrokeGrp");
+              parent $strokeGrp $mainGroup;
+              $strokeGrp = PDD_currentSelectionName(1);
+          }
+          
+          
+                  // put stroke into Main group
+                  select $stroke; pickWalk -d up;
+       parent `ls-sl` $strokeGrp; 
+       
+       
+       select $eachGrowCurve;pickWalk -d down;$stroke = PDD_NodeFromConnection("spans","out",1);
+
+// put histories nodes into main grp
+       container -e -includeShapes -includeTransform -force -addNode $historiesNodes $mainGroup;
+        
+ return $stroke;  
+ 
+
+}
+//createNode "stroke";string $surface = "pPlane1";string $stroke = "stroke1"
+global proc  string[] GMH2_setTubeRotationDriven(string $surface, string $stroke, string $growCurve,string $leadCurve)
+{
+    string $GMH2_setTubeRotationDrivens[];
+
+    connectAttr ($growCurve+".worldNormal") ($stroke+".normal");
+  
+ 
+return $GMH2_setTubeRotationDrivens;
+
+}
+
+
+
+
+global proc GMH2_connect2Brush(string $parentBrush, string $childBrush,string $leadCurve,string $mainGroup)
+{
+   //
+   // string $parentBrush = "A_PFXBrush";
+   // createNode "brush" -n"testBrush"; string $childBrush = "testBrush";
+    string $attrToConnects[] = {"globalScale"
+                                ,"brushWidth"
+                                ,"softness"
+                                ,"flatness1"
+                                ,"flatness2"
+                                ,"stampDensity"
+                                ,"forwardTwist"
+                                ,"twist"
+                                ,"twistRate"
+                                ,"twistRand"
+                                ,"occlusionWidthScale"
+                                ,"edgeClip"
+                                ,"edgeClipDepth"
+                                ,"tubeSections"
+                                ,"subSegments"
+                                ,"endCaps"
+                                ,"hardEdges"
+                                ,"tubes"
+                                ,"tubeCompletion"
+                                ,"tubesPerStep"
+                                ,"tubeRand"
+                                ,"startTubes"
+                                //,"segments"
+                                ,"lengthMin"
+                                ,"lengthMax"
+                                ,"tubeWidth1"
+                                ,"tubeWidth2"
+                                ,"widthRand"
+                                ,"widthBias"
+                                ,"segmentLengthBias"
+                                ,"segmentWidthBias"
+                                ,"surfaceSnap"
+                                ,"elevationMin"
+                                ,"elevationMax"
+                                //,"azimuthMin"
+                               // ,"azimuthMax"
+                                ,"tubeDirection"
+                                ,"simplifyMethod"
+                                ,"widthScale"
+                                ,"tubes"
+                                ,"displacementDelay"
+                                ,"noise"
+                                ,"noiseFrequency"
+                                ,"noiseOffset"
+                                ,"wiggle"
+                                ,"wiggleFrequency"
+                                ,"wiggleOffset"
+                                ,"curl"
+                                ,"curlFrequency"
+                                ,"curlOffset"
+                                ,"pathFollow"
+                                ,"pathAttract"
+                                ,"curveFollow"
+                                ,"curveAttract"
+                                ,"curveMaxDist"
+                                ,"surfaceAttract"
+                                ,"surfaceAttract"
+                                ,"maxAttractDistance"
+                                ,"surfaceCollide"
+                                ,"collideMethod"
+                                ,"deflection"
+                                ,"deflectionMin"
+                                ,"deflectionMax"
+                                ,"momentum"
+                                ,"lengthFlex"
+                                ,"spiralMin"
+                                ,"spiralMax"
+                                ,"spiralDecay"
+                                ,"bend"
+                                ,"bendBias"
+                                ,"occupyAttraction"
+                                ,"attractRadiusScale"
+                                ,"attractRadiusOffset"
+                                ,"occupyRadiusScale"
+                                ,"occupyRadiusOffset"
+                                ,"surfaceSampleDensity"
+                                ,"occupyBranchTermination"};
+                                
+                                for ($eachAttr in $attrToConnects)
+                                {
+                                    if (!`isConnected ($parentBrush+"."+ $eachAttr) ($childBrush+"."+ $eachAttr)`)
+                                    connectAttr ($parentBrush+"."+ $eachAttr) ($childBrush+"."+ $eachAttr);
+                                }
+    
+    
+    
+    
+//set up segment multiply attr of base surface & Azimuth multiply value
+
+connectAttr ($childBrush+".azimuthMax")($childBrush+".azimuthMin");
+
+string $baseSurfaceShape = PDD_NodeFromConnection2($mainGroup,"GMH_outPolySurfaceShape","out");
+
+
+    string $expression =( $childBrush+".segments = "+ $parentBrush+".segments * ("+$leadCurve+".spans) * 0.5 * "+$baseSurfaceShape+".GMH_polyHairSegMentMul ;"
+                        +"if("+$childBrush+".segments < 1)" + $childBrush+".segments = 1;")  ;
+    string $expression2 = ( $childBrush+".azimuthMax = "+ $parentBrush+".azimuthMax + "+$baseSurfaceShape+".GMH_tubeRotation ;");
+string $expressionNode = `expression -s ($expression+$expression2)  -o $childBrush -ae 1 -uc "none" -n($childBrush+"_expression")` ;
+
+container -e -includeShapes -includeTransform -force -addNode $expressionNode $mainGroup;    // put expression node to main grp
+
+
+
+    
+}

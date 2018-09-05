@@ -1,0 +1,44 @@
+//===========================GMH2_publishSubAttrToStyleMainGroup.mel===================
+global proc GMH2_publishSubAttrToStyleMainGroup(string $mainGroup,string $hairSystem, string $brush)
+{
+    string $hairSystem = PDD_shapeName($hairSystem);
+    //make sure all the node are its shapes nodes
+    int $polyFlag = `getAttr ($mainGroup+".GMH_polyStyleSystem")`;
+    
+    if ($polyFlag == 0) // case of hair style System
+    {
+         string $hairSystemAttrLists[] =  {       // display attr
+                                  "simulationMethod","displayQuality",
+                                       //Hair model attr
+                                  "hairsPerClump","subSegments","hairWidthScale","hairWidth","thinning","clumpWidthScale","clumpWidth","clumpTwist","subClumping","subClumpRand","clumpInterpolation",
+                                  "interpolationRange","curl","curlFrequency","noise","noiseFrequency","detailNoise","displacementScale",
+                                      // Hair shading Attr
+                                   "hairColorScale","hairColorR","hairColorG","hairColorB","opacity","translucence","specularColorR","specularColorG",
+                                   "specularColorB","specularPower","diffuseRand","specularRand","hueRand","satRand","valRand",
+                                       // hair dynamic
+                                    "attractionScale","startCurveAttract","attractionDamp","stiffness",
+                                       // render Attr
+                                       "multiStreaks","multiStreakSpread1","multiStreakSpread2",
+                                   "castShadows","receiveShadows","visibleInReflections","visibleInRefractions"
+                                   
+                                 };
+                                 
+         for ( $eachAttr in $hairSystemAttrLists) container -e -publishAndBind ($hairSystem+ "." +$eachAttr) ($eachAttr) $mainGroup;//publish hair system attribute to Style Main Group
+           
+           string $brushAttrLists[] = { "brushWidth","tubeSections",      
+                                  "segments",
+                                  "lengthMin",
+                                  "lengthMax",
+                                  "curveFollow",
+                                  "curveAttract",
+                                  "spiralMin",
+                                  "spiralMax"
+                                 };
+                                 
+        for ( $eachAttr in $brushAttrLists)container -e -publishAndBind ($brush+ "." +$eachAttr) ($eachAttr) $mainGroup;    //publish Brush attribute to Style Main Group
+        
+    }
+
+
+             
+}

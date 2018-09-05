@@ -1,0 +1,125 @@
+//=======================GMH2_CreateHairSystem.mel===================
+
+global proc string[] create_hair_system(string $name)
+{
+
+/*================================     create hairSystem Node     ================================*/
+
+        string $hairSystem = `createNode hairSystem`;
+        pickWalk -d up;
+        rename ($name+"_MayaHairSystem");        //rename the hair system
+        pickWalk -d down;                        //go to shape node
+        $hairSystem = PDD_currentSelectionName(1);    //initiate hairsystem variable
+
+
+
+/*================================     add attributes     ================================*/
+        select $hairSystem;
+        connectAttr time1.outTime ($hairSystem+".currentTime");    //connect to time
+        PDD_addUserAttribute("GMH_MayaHairSystem",1,0,1,0);
+        PDD_addUserAttribute("GMH_InStrokeCurves",1,0,1,0);
+        PDD_addUserAttribute("in_GMH_styleMainGroup",1,0,1,0);
+        
+     /*   //add the global Scale to hairSystem
+        PDD_addUserAttribute("GMH_globalScale",1,0,100,0);
+        string $connectionLists[] ={"hairWidth","clumpWidth"};
+    for ($eachattr in $connectionLists)
+    {
+
+          string $expressionString = (($hairSystem+"."+$eachattr) +" = "+($hairSystem+"."+$eachattr)+" * "+($hairSystem+".GMH_globalScale"));
+          expression  -s $expressionString  -o $hairSystem -ae 1 -uc all  ;            
+    }
+    */
+
+/*================================     create PFX Hair node to display hair system     ================================*/
+        string $pfxHair = `createNode pfxHair -n($name+"_pfxHair")`;
+        select $pfxHair;
+        pickWalk -d up ; rename ($name+"_pfxHair");    //rename
+        pickWalk -d down;
+        $pfxHair = PDD_currentSelectionName(1);
+        
+
+        connectAttr ($hairSystem +".outputRenderHairs") ($pfxHair+".renderHairs");    //connect PFX hair to hairSystem
+
+/*================================     set attributes     ================================*/
+        
+        //=========== PFX hair attribute ========
+        setAttr ($pfxHair+".overrideEnabled") 1;
+        setAttr ($pfxHair+".overrideDisplayType") 2;
+        PDD_addUserAttribute("in_GMH_styleMainGroup",1,0,1,0);
+        setAttr ($pfxHair+".drawAsMesh") 0;
+
+
+        //=========== hair system attribute ========
+       setHairSystemAttr($hairSystem);
+
+//PARENT TO PARENT GROUP
+select $pfxHair; select -add $hairSystem; 
+
+string $HairSystemResult[1];
+$HairSystemResult[0] = $hairSystem;
+$HairSystemResult[1] = $pfxHair;
+
+return $HairSystemResult;
+}
+
+
+ //==================== GMH2_setHairSYstemAttr.mel ===================
+ global proc setHairSystemAttr(string $hairSystem)
+ {
+     
+     // ============== dynamic attr =================//
+        setAttr ($hairSystem+ ".displayQuality") 20;
+        setAttr ($hairSystem+ ".startCurveAttract") 0.1;
+        setAttr ($hairSystem+ ".collide") 1;
+        setAttr ($hairSystem+ ".iterations") 4;
+        setAttr ($hairSystem+ ".simulationMethod") 3;
+        setAttr ($hairSystem+ ".displayQuality") 100;
+        setAttr ($hairSystem+ ".clumpWidth") 1;
+        setAttr ($hairSystem+ ".hairWidth") 0.01;
+        setAttr ($hairSystem+ ".hairsPerClump") 10;
+        setAttr ($hairSystem+ ".subSegments") 3;
+        setAttr ($hairSystem+ ".thinning") 0.19;
+        setAttr ($hairSystem+ ".stiffness") 0.15;
+        setAttr ($hairSystem+ ".noiseMethod") 2;
+        setAttr ($hairSystem+ ".curlFrequency") 2;
+        
+        
+     // ======================== hair shape attr =======================
+        setAttr ($hairSystem+ ".clumpCurl[1].clumpCurl_Position") 1;
+        setAttr ($hairSystem+ ".clumpCurl[1].clumpCurl_FloatValue") 1;
+        setAttr ($hairSystem+ ".clumpCurl[0].clumpCurl_Position") 0;
+        setAttr ($hairSystem+ ".clumpCurl[0].clumpCurl_FloatValue") 0.74;
+
+        setAttr ($hairSystem+ ".clumpWidthScale[2].clumpWidthScale_Position") 0.495652;
+        setAttr ($hairSystem+ ".clumpWidthScale[2].clumpWidthScale_FloatValue") 0.88;
+        setAttr ($hairSystem+ ".clumpWidthScale[2].clumpWidthScale_Interp") 2;
+        setAttr ($hairSystem+ ".clumpWidthScale[1].clumpWidthScale_Position") 1;
+        setAttr ($hairSystem+ ".clumpWidthScale[1].clumpWidthScale_FloatValue") 0.3;
+        setAttr ($hairSystem+ ".clumpWidthScale[0].clumpWidthScale_Position") 0;
+        setAttr ($hairSystem+ ".clumpWidthScale[0].clumpWidthScale_FloatValue") 0.44;
+        
+        
+        setAttr ($hairSystem+ ".hairWidthScale[0].hairWidthScale_Position") 0.530435;
+        setAttr ($hairSystem+ ".hairWidthScale[0].hairWidthScale_FloatValue") 1;
+        setAttr ($hairSystem+ ".hairWidthScale[2].hairWidthScale_Position") 0.0173913;
+        setAttr ($hairSystem+ ".hairWidthScale[2].hairWidthScale_Interp") 2;
+        setAttr ($hairSystem+ ".hairWidthScale[2].hairWidthScale_Position") 0;
+        setAttr ($hairSystem+ ".hairWidthScale[2].hairWidthScale_FloatValue") 0.54;
+        
+        setAttr ($hairSystem+ ".hairWidthScale[1].hairWidthScale_Position") 1;
+        setAttr ($hairSystem+ ".hairWidthScale[1].hairWidthScale_FloatValue") 0.26;
+        
+        setAttr ($hairSystem+ ".displacementScale[1].displacementScale_FloatValue") 1;
+        setAttr ($hairSystem+ ".displacementScale[1].displacementScale_Position") 1;
+        setAttr ($hairSystem+ ".displacementScale[1].displacementScale_Interp") 1;
+        setAttr ($hairSystem+ ".displacementScale[0].displacementScale_FloatValue") 1;
+        setAttr ($hairSystem+ ".displacementScale[0].displacementScale_Position") 0;
+        setAttr ($hairSystem+ ".displacementScale[0].displacementScale_Interp") 3;
+        
+        //======================= hair shading attr =====================================
+        
+        setAttr ($hairSystem+ ".hairColor") -type double3 0.431373 0.37735 0.202999 ;
+        
+ }
+       

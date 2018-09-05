@@ -1,0 +1,60 @@
+//=============================GMH2_PFXStrokeToCurves.mel=====
+global proc string[] PFXStrokeToCurves(string $mainGroup,string $eachGrowCurve,string $stroke,int $debugFlag)
+{
+
+// get polysurface and get objName
+        select $mainGroup;
+        string $baseSurface = PDD_NodeFromConnection("GMH_outPolySurfaceShape","out",$debugFlag);
+        string $name=substituteAllString ($mainGroup,"_GMHSurface","");
+
+//convert Stroke to Curves
+        select $stroke;
+        doPaintEffectsToCurve(1);
+        select $stroke;pickWalk -d down;string $StrokeCurvesShape[] = PDD_NodesFromConnection("outMainCurves","out",$debugFlag);
+//Connections
+//===================================================================================================================================
+        for ($eachCurve in $StrokeCurvesShape)
+        {
+          select $eachCurve;
+		    PDD_addUserAttribute("GMH_InMainGroup",1,0,1,0);
+          PDD_ConnectAttribute ($mainGroup,"GMH_StrokesCurves",$eachCurve,"GMH_InMainGroup",$debugFlag) ;		//connect main group to polygon surface
+         
+         select $eachCurve;PDD_addUserAttribute("GMH_InGrowCurve",1,0,1,0);
+         select $eachGrowCurve;PDD_addUserAttribute("StrokeCurveOut",1,0,1,0);
+         PDD_ConnectAttribute ($eachGrowCurve,"StrokeCurveOut",$eachCurve,"GMH_InGrowCurve",$debugFlag) ;
+         
+        }             
+
+//GET THE CURRENT PARENT GROUP OF THE CONVERTED CURVES
+        string $PFXCurves[] =`listRelatives -p -type"transform" $StrokeCurvesShape`;
+        select $PFXCurves;
+        pickWalk -d up;//Goto first Parent Group
+        pickWalk -d up;//Goto second Parent Group
+        string $OldParentGroup = PDD_currentSelectionName($debugFlag);
+
+
+ // create Stroke Curve group if not exist
+            select $mainGroup;  PDD_addUserAttribute("GMH_StrokeCurveGroup",1,0,1,0);
+            string $GMHStrokeCurveGrp = PDD_NodeFromConnection("GMH_StrokeCurveGroup","out",1);
+            if ( $GMHStrokeCurveGrp =="")
+            {
+               $GMHStrokeCurveGrp= `createNode transform -n ($name +"_strokeCurveGrp")`;
+               PDD_addUserAttribute("GMH_InMainGroup",1,0,1,0);
+               PDD_ConnectAttribute($mainGroup,"GMH_StrokeCurveGroup",$GMHStrokeCurveGrp,"GMH_InMainGroup",$debugFlag);
+               parent $GMHStrokeCurveGrp $mainGroup;
+               select $mainGroup;$GMHStrokeCurveGrp = PDD_NodeFromConnection("GMH_StrokeCurveGroup","out",1);
+            }
+
+// parent curves to new group and delete the old one . 
+        parent $PFXCurves $GMHStrokeCurveGrp;
+        delete $OldParentGroup;
+        
+        
+//Get ConvertCurve under new Group
+        select $eachGrowCurve;
+        $convertCurves = PDD_NodesFromConnection("StrokeCurveOut","out",$debugFlag);
+       
+
+        
+        return $convertCurves;
+}

@@ -1,0 +1,78 @@
+
+
+//==============================GMH2_GUIcreate_GMHStyleTable.mel======================
+//this is the main proc to create GMH2 UI main window. 
+global proc int create_GMHStyleTable()
+{
+    int $tableWidth = 400;
+    int $leftButtonWidth = 110;
+    int $scrollListWidth = 280;
+    int $subEditButtonWidth = 80;
+    
+    
+   frameLayout -collapsable true -w 400 -l "GMH Style System" "GMH2StyleTableFrameLaout";
+   columnLayout  -rowSpacing 10 "GMHStyleTable_columnLayout";
+   rowLayout -rat 1 "top" 30  -rat 2 "top" 5 -numberOfColumns 2 "GMHStyleTable_rowLayout";
+   
+   //buttons
+       columnLayout  -rowSpacing 10 -w $leftButtonWidth "GMHStyleTable_rowLayout_1";
+      
+           string $command = "createNameWindow (\"CreateNewGMHStyleWindow\",\"Create new GMH style\");";
+           button -l"Create GMH Style" -c $command -w $leftButtonWidth -bgc 0.0442138 0.45098 0.0586201;
+           
+           string $command = "createNameWindow (\"RenameGMHStyleWindow\",\"Rename GMH style\");";
+           button -l"Rename GMH Style" -c $command -w $leftButtonWidth ;
+           
+           string $command = ("string $GMHStyleSystem[] = `textScrollList -query -selectItem  GMHStyleList`; for ($obj in $GMHStyleSystem){deleteGMHStyleSystem($obj);};updateGUI(1);");
+           button -l"Delete GMH Style" -c $command -w $leftButtonWidth -bgc 0.744 0.186013 0.072912;
+           
+           string $command = "GMH2_loadPreset_command;";
+           button -l"Apply Preset" -c $command -w $leftButtonWidth -bgc 0.744 0.412225 0.072912 ;
+           
+           string $command = "GMH2_savePreset_command();";
+           button -l"Save Preset" -c $command -w $leftButtonWidth -bgc 0.744 0.412225 0.072912 ;
+           /*
+           string $command = "GMH2_exportMeshStrokeOfGMHStyleSystem_command;";
+           button -l"Export Poly \n GMHStyle  Meshes" -c $command -w 100 -bgc 0.744 0.412225 0.072912 ;
+           
+           checkBox -l "Group" "GMH2_groupGMHStyleExportFlag";*/
+           string $command = ("updateGUI(1);");
+           button -l"Update GUI" -c $command -w $leftButtonWidth ;
+       
+       //scroll List
+       setParent ..;
+
+      columnLayout   -rowSpacing 10 "GMHStyleTable_rowLayout_2";
+      
+      // indication text
+        flowLayout -columnSpacing 10 -w $tableWidth;
+       text -l "" -w 25;       text -l "Current:" ;       text -label "[ Please create/select a GMH Style ]" GMHStyleNameText;
+       setParent ..;
+       
+            string $singleClickCommand = "GMH2_updateCurrentGMHStyleText_command();GMH2_updateUVPreviewGMHSystemSLot_commandUI();GMH2_updateGMHSurfaceScrollList_commandUI;";              
+            string $doubleClickCommand = ("string $currentGMHStyle2s[] = `textScrollList -q -si \"GMHStyleList\"`; select $currentGMHStyle2s[0];");
+            textScrollList -w $scrollListWidth -ams 1 -sc ($singleClickCommand) -dcc $doubleClickCommand "GMHStyleList";
+      
+      
+    
+    
+      //Style Edit Button
+       setParent "GMHStyleTable_rowLayout_2";
+        flowLayout -columnSpacing 20 -w ($tableWidth+10);
+
+           string $command = "string $GMHStyleSystem[] = `textScrollList -query -selectItem  GMHStyleList`;select $GMHStyleSystem[0];";
+           button -l"Edit GMH Style" -c $command -w $subEditButtonWidth ;
+           
+           string $command = "string $GMHStyleSystem[] = `textScrollList -query -selectItem  GMHStyleList`;SelectHairSystemShape($GMHStyleSystem[0]);";
+           button -l"Edit Maya hair" -c $command -w $subEditButtonWidth ;
+           
+           string $command = "string $GMHStyleSystem[] = `textScrollList -query -selectItem  GMHStyleList`;SelectBrushNode($GMHStyleSystem[0]);";
+           button -l"Edit PFX" -c $command -w $subEditButtonWidth ;
+    
+    
+    setParent "GMH2StyleTableFrameLaout";
+    setParent ..;
+   return 1; 
+}
+
+//create_GMHwindow();//

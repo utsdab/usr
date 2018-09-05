@@ -1,0 +1,132 @@
+//===========================GMH2_polyToCurve.mel===============
+//convert PFX stroke to polygon
+
+
+//GMH2_convertPolyToCurve(PDD_currentSelectionName(1),"",2); int $rotateOrder =1
+
+
+global proc string[] GMH2_convertPolyToCurve(string $baseSurface,string $mainGroup,int $rotateOrder)
+{
+    string $historiesNode[] ; clear($historiesNode);
+    select $baseSurface;
+   string $userBaseMesh = PDD_currentSelectionName(1);
+   string $userBaseMeshShape = PDD_currentSelectionShapeName(0);
+   string $name = PDD_removeInvalidCharactersFromName($userBaseMesh,"_",0); 
+   //convert to SUBD
+       string $historiesNode_tmp[] = `polyToSubdiv -ap 0 -ch 1 -aut off  -maxPolyCount 10000  -maxEdgesPerVert 50 $userBaseMesh`;
+       PDD_appendStringArrayToStringArray($historiesNode_tmp,$historiesNode);
+      // rename ($name+"_GMHSubDMesh");
+       string $GMH2_subDMesh =  PDD_currentSelectionName(1);
+      addAttr -ln "GMH_InMainGroup"  -at long  $GMH2_subDMesh;
+      connectAttr ($mainGroup+".GMH_outSubDSurfaceShape") ($GMH2_subDMesh+".GMH_InMainGroup");
+       
+   //convert to NURB 
+       string $historiesNode_tmp[] = `subdToNurbs -ch 1 -aut on -ot 0 $GMH2_subDMesh`;
+       PDD_appendStringArrayToStringArray($historiesNode_tmp,$historiesNode);
+     //  rename ($name+"_GMHNURBSMesh");
+      select -hierarchy ;
+       string $NURBS_grps[]={};$NURBS_grps = `ls-sl-type"nurbsSurface"`;
+   // convert NURB to CURVE
+       string $growCurvesGrp[] = {};
+      for ($eachNurbSurface in $NURBS_grps)
+      {
+          select $eachNurbSurface;addAttr -ln "GMH_InMainGroup"  -at long  $eachNurbSurface;
+          connectAttr ($mainGroup+".GMH_outNURBSurfaceShape") ($eachNurbSurface+".GMH_InMainGroup");
+          string $eachGrowCurve;
+          if ($rotateOrder ==1){string $historiesNode_tmp[] = GMH2_duplicateSurfaceCurves( $eachNurbSurface,"v", 9999 , "u", "reverse") ;$eachGrowCurve = $historiesNode_tmp[0];PDD_appendStringArrayToStringArray($historiesNode_tmp,$historiesNode); }
+          if ($rotateOrder ==3){string $historiesNode_tmp[] = GMH2_duplicateSurfaceCurves( $eachNurbSurface,"v", 0 , "u", "notReverse") ;$eachGrowCurve = $historiesNode_tmp[0];PDD_appendStringArrayToStringArray($historiesNode_tmp,$historiesNode); }
+          if ($rotateOrder ==2){string $historiesNode_tmp[] = GMH2_duplicateSurfaceCurves( $eachNurbSurface,"u", 0 , "v", "notReverse") ;$eachGrowCurve = $historiesNode_tmp[0];PDD_appendStringArrayToStringArray($historiesNode_tmp,$historiesNode); }
+          if ($rotateOrder ==4){string $historiesNode_tmp[] = GMH2_duplicateSurfaceCurves( $eachNurbSurface,"u", 9999 , "v", "reverse") ;$eachGrowCurve = $historiesNode_tmp[0];PDD_appendStringArrayToStringArray($historiesNode_tmp,$historiesNode); }
+
+          string $tmps[];$tmps[0] = $eachGrowCurve;
+          appendStringArray($growCurvesGrp,$tmps,1);
+      }
+      
+      //put into Main Grp
+     // parent $GMH2_subDMesh $mainGroup;
+     string $existingNodes[] ; clear($existingNodes);
+      for ($eachNode in $historiesNode )
+      {
+          if(`objExists $eachNode`) 
+          PDD_appendStringToStringArray($eachNode,$existingNodes);
+            
+      }
+      //put all into GMHSurface MainGrp 
+      container -e -includeShapes -includeTransform -force -addNode $existingNodes $mainGroup;
+      
+      //connect grow curve to main group
+      for ($eachGrowCurve in $growCurvesGrp)
+      {
+          select $eachGrowCurve ; PDD_addUserAttribute("GMH_InMainGroup",1,0,1,0);
+           PDD_ConnectAttribute($mainGroup,"GMH_outGrowingCurves",$eachGrowCurve,"GMH_InMainGroup",1);
+          
+      }
+      
+      // get the name of the new curves to return value 
+      $growCurvesGrp = {};
+      select $mainGroup;
+      string $NURBSsurfaces[] = PDD_NodesFromConnection("GMH_outNURBSurfaceShape","out",1);
+      for ($eachNURBSSurface in $NURBSsurfaces)
+      {
+          select $eachNURBSSurface;
+          string $growCurve = PDD_NodeFromConnection("growCurve","out",1);
+          string $tmps[]; $tmps[0] = $growCurve; appendStringArray ($growCurvesGrp,$tmps,1);
+      }
+      
+      return $growCurvesGrp;
+}
+
+global proc string[] GMH2_duplicateSurfaceCurves(string $eachNurbSurface,string $growCurveFlag, int $growPosition , string $leadingCurveFlag, string $leadDirection) 
+{
+    string $results[] ;  clear ($results);
+             addAttr -ln "growCurve"  -at long  $eachNurbSurface;
+
+                string $leadingCurves[] = {};
+             string $tmps[] = ` duplicateCurve -ch 1 -rn 0 -local 0  ($eachNurbSurface + "."+$growCurveFlag+"[1]")`;PDD_appendStringArrayToStringArray($tmps,$results);
+              rename ($eachNurbSurface+"_growCurve");
+              string $growCurve[];$growCurve[0] = PDD_currentSelectionName(1);//appendStringArray($growCurves,$growCurve,1);
+              pickWalk -d down;
+              string $curveFromSurfaceIsoCH = PDD_NodeFromConnection("create","in",1);
+              setAttr ($curveFromSurfaceIsoCH+".isoparmValue") $growPosition;
+              addAttr -ln "leadCurve"  -at long  $growCurve[0];
+             // addAttr -ln "GMH_curveID"  -at long  -min 0 -max 1 -dv 0 $growCurve[0];    //curve ID to know if it's lead or grow curve
+              addAttr -ln "NURBSSurface"  -at long  $growCurve[0];
+            connectAttr ($eachNurbSurface+".growCurve") ($growCurve[0]+".NURBSSurface");
+
+            //string $eachNurbSurface = "nurbsPlaneShape1";string $leadingCurveFlag  ="u"
+              int $maxLeadingCurveSpan = getLastUVsurface($eachNurbSurface,$leadingCurveFlag);int $i;float $counter = 1;
+              for ($i = 0;$i <= $maxLeadingCurveSpan;$i++)
+              {//if ( $counter ==1) // only duplicate half of the UV span - which match the number of edge loop
+                  //{
+                      string $tmps[] = `duplicateCurve -ch 1 -rn 0 -local 0  ($eachNurbSurface + "."+$leadingCurveFlag+"["+$i+"]")`;PDD_appendStringArrayToStringArray($tmps,$results);
+                      rename ($eachNurbSurface+"_leadCurve");
+                      string $eachLeadCurve[];$eachLeadCurve[0] = PDD_currentSelectionName(1);appendStringArray($leadingCurves,$eachLeadCurve,1);
+                      if ($leadDirection == "reverse" ){string $tmps[] = `reverseCurve -ch 1 -rpo 1 $eachLeadCurve[0]`;  PDD_appendStringArrayToStringArray($tmps,$results);}                    
+                      addAttr -ln "growCurve"  -at long  $eachLeadCurve[0];
+                      connectAttr ($growCurve[0]+".leadCurve") ($eachLeadCurve[0]+".growCurve");
+                 // }
+            //  $counter = $counter * (-1.0);  
+              }
+             // parent $leadingCurves $growCurve[0];
+             select $eachNurbSurface;pickWalk -d up; string $NURBSurfaceDAG = PDD_currentSelectionName(1);
+              parent $growCurve[0] $NURBSurfaceDAG;
+               parent $leadingCurves $NURBSurfaceDAG;
+              select $eachNurbSurface;
+              $growCurve[0] = PDD_NodeFromConnection("growCurve","out",1);
+            
+            string $results2[];
+            $results2[0] = $growCurve[0];
+            PDD_appendStringArrayToStringArray($results,$results2);
+
+              return $results2;
+    
+}
+
+global proc GMH2_hideShape(string $object)
+{
+    select $object;pickWalk -d down;
+    string $shapes[] = `ls-sl`;
+    hide $shapes;
+    
+}
+  

@@ -1,0 +1,199 @@
+//==============================GMH2_createGMHSurfaceEditButtons.mel======================
+//this is the main proc to create GMH2 UI main window. 
+
+
+global proc createGMHSurfaceEditButtons()
+{   
+int $tableWidth = 420;
+int $editButtonWidth = 70;
+int $sliderWidth = $tableWidth-30;
+    //SURFACE EDIT
+            frameLayout -l"GMH Surface Edit" -mh 5 -mw 5 -cll 1 ;
+            flowLayout -w $tableWidth -cs 5 -wr 1 -h 50;
+            
+            string $command = ("string $selections[] = `ls-sl`; for ($eachObj in $selections){GMH2_GMHSurfaceAttributeReset($eachObj,0) ;} select $selections; updateGUI(0)");
+            button -c $command -l"Reset" -w $editButtonWidth -bgc 1 0.450843 0;
+            
+            string $command = ("string $selections[] = `ls-sl`; for ($eachObj in $selections){select $eachObj;GMH_RotateSurface();} select $selections; updateGUI(0)");
+            button -c $command -l"Rotate"-w $editButtonWidth ;
+            
+            string $command = ("string $selections[] = `ls-sl`; for ($eachObj in $selections){select $eachObj;GMH_reverseSurface();} select $selections; updateGUI(0)"); 
+            button -c $command -l"Reverse"-w $editButtonWidth ;
+            
+            string $command = ("string $selections[] = `ls-sl`; for ($eachObj in $selections){GMH2_GMHSurfaceAttributeEdit($eachObj,\"GMH_Clump_Per_Edge_loop\",0.5,0) ;} select $selections; updateGUI(0)");
+            button -c $command -l"thicken"-w $editButtonWidth ;
+           
+            
+            string $command = ("string $selections[] = `ls-sl`; for ($eachObj in $selections){GMH2_GMHSurfaceAttributeEdit($eachObj,\"GMH_Clump_Per_Edge_loop\",(-0.5),0) ;} select $selections; updateGUI(0)");
+            button -c $command -l"thinning"-w $editButtonWidth ;
+            
+            string $command = ("GMH2_editPressureRampGMHSurface()");
+            button -c $command -l"Edit Distribution Ramp"-w 120;
+            
+          
+            string $command = ("string $selections[] = `ls-sl`;GMH_ShowFolliclesCurves($selections); updateGUI(0)");
+            button -c $command -l"Show Follicles"-w 80 -bgc 0.060298 0.511 0.0633853;
+            
+            string $command = ("string $selections[] = `ls-sl`;GMH_HideFolliclesCurves($selections); updateGUI(0)");
+            button -c $command -l"Hide Follicles"-w 80 -bgc 0.725 0.0855499 0.161485;
+            
+            string $command = "GMH2_selectRootVertex_multiCommandUI();";
+            button -c $command -l"Select Root Vertices"-w 110 ;
+            
+            
+
+                        setParent ..;
+                        setParent ..;
+            
+            
+     // GMH PROPERTY PER SURFACE EDIT  
+            frameLayout -l "GMH Surface Properties Edit" -mw 0 -w ($tableWidth-20) -cll 1 ;
+            
+             floatSliderGrp -label "Clump Width Multiply" -field true
+            -minValue 0.001 -maxValue 10 -s 0.001
+             -w $sliderWidth
+            -fieldMinValue 0.001 -fieldMaxValue 100
+            -value 1 -dc "updateGMHHairProperties(\"GMH_Clump_Width_Mul\")"  -cc "updateGMHHairProperties(\"GMH_Clump_Width_Mul\")" "GMH_Clump_Width_Mul_control";
+            
+             floatSliderGrp -label "Hair Tubes Offset" -field true
+            -minValue -100 -maxValue 100 -s 0.1
+             -w $sliderWidth
+            -fieldMinValue -100 -fieldMaxValue 100
+            -value 0 -dc "updateGMHHairProperties(\"GMH_hairTubeOffset\")"  -cc "updateGMHHairProperties(\"GMH_hairTubeOffset\")" "GMH_hairTubeOffset_control";
+            
+             if (`checkBox -q -v "polyStyleControlCheckBox"` ==1)
+             {
+             frameLayout -l"Polygon Style Surface";
+         
+            floatSliderGrp -label " Tube Rotation " -field true      -minValue -2 -maxValue 2 -s 0.01    -w $sliderWidth       -fieldMinValue 0 -fieldMaxValue 1 
+            -value 1 -dc "updateGMHHairProperties(\"GMH_tubeRotation\")"  -cc "updateGMHHairProperties(\"GMH_tubeRotation\")" "GMH_tubeRotation_control";		
+            
+            
+            floatSliderGrp -label " Hair Tube Per Loop Multiply" -field true -minValue 0 -maxValue 100 -s 0.1    -w $sliderWidth      -fieldMinValue 0 -fieldMaxValue 100
+            -value 1 -dc "updateGMHHairProperties(\"GMH_Clump_Per_Edge_loop\")"   -cc "updateGMHHairProperties(\"GMH_Clump_Per_Edge_loop\")" "GMH_Clump_Per_Edge_loop_control";	
+          
+            
+            floatSliderGrp -label " Segment Per Tube Multiply" -field true
+            -minValue 0.1 -maxValue 10 -s 0.5
+             -w $sliderWidth
+            -fieldMinValue 0.1  -fieldMaxValue 10
+            -value 1 -dc "updateGMHHairProperties(\"GMH_polyHairSegMentMul\")"   -cc "updateGMHHairProperties(\"GMH_polyHairSegMentMul\")" "GMH_polyHairSegMentMul_control";	
+            
+            
+            floatSliderGrp -label " Hair Tube Seed " -field true
+            -minValue 0 -maxValue 1000 -s 0.5
+             -w $sliderWidth
+            -fieldMinValue 0  -fieldMaxValue 1000
+            -value 1 -dc "updateGMHHairProperties(\"GMH_seed\")"   -cc "updateGMHHairProperties(\"GMH_seed\")" "GMH_seed_control";	
+            setParent ..;
+            
+            }
+            
+              frameLayout -l"Maya Hair Style Surface";
+            floatSliderGrp -label "Hair Num Per Clump Multiply" -field true
+            -minValue 0.001 -maxValue 5 -s 0.001
+             -w $sliderWidth
+            -fieldMinValue 0.001 -fieldMaxValue 100
+            -value 1 -dc "updateGMHHairProperties(\"GMH_Hair_Num_Per_Clump_Mul\")" -cc "updateGMHHairProperties(\"GMH_Hair_Num_Per_Clump_Mul\")"  "GMH_Hair_Num_Per_Clump_Mul_control";
+            
+            
+            string $updateCommand = "";
+            colorSliderGrp -label "Per Surface Hair Color" -rgb 0 0 1 -cc "updateGMHHairProperties(\"GMH_HairColor\")" "GMH_HairColor_control";
+            
+            floatSliderGrp -label "Hair Color Override strength" -field true
+            -minValue 0 -maxValue 1 -s 0.001
+             -w $sliderWidth
+            -fieldMinValue 0 -fieldMaxValue 1
+            -value 0 -dc "updateGMHHairProperties(\"GMH_Overide_Hair_Color\")" -cc "updateGMHHairProperties(\"GMH_Overide_Hair_Color\")"  "GMH_Overide_Hair_Color_control";
+            
+                      					           		
+           
+                      					           		
+            floatSliderGrp -label " Curl Multiply " -field true
+            -minValue 0 -maxValue 1 -s 0.001
+             -w $sliderWidth
+            -fieldMinValue 0 -fieldMaxValue 1
+            -value 0 -dc "updateGMHHairProperties(\"GMH_Curl_Mult\")"  "GMH_Curl_Mult_control";		
+                      					           		
+            checkBoxGrp -label "Braid" -v1 0   -cc  "updateGMHHairProperties(\"GMH_Braid\")" "GMH_Braid_control";	
+            
+
+            setParent ..;
+
+                         if (`checkBox -q -v "polyStyleControlCheckBox"` ==1)
+                         {
+                                      frameLayout -l"GMH Surface UV";
+                                    GMH2_GUICreateGMHSurfaceUVButton_commandUI();
+                        }
+            }
+            
+            
+global proc int updateGMHHairProperties(string $property)
+{
+
+    string $GMHSurface[];
+    // filter out GMH base mesh 
+    string $selections[] = `ls-sl`;
+    for ( $obj in $selections ) 
+    {
+       string $objShape =PDD_shapeName($obj);
+        if ( `attributeExists "GMH_baseMesh" $objShape`)
+        {
+            string $tmps[]; $tmps[0] = $obj; appendStringArray ($GMHSurface,$tmps,1);
+            
+            vector $color = `colorSliderGrp -q -rgb "GMH_HairColor_control"`;
+           
+            if ($property == "GMH_HairColor")
+          { setAttr ($obj+".GMH_HairColor") ($color.x) ($color.y)($color.z);
+          select $GMHSurface;
+                   return 1;}
+           
+                if ($property == "GMH_Braid")
+               {
+                   float $value = `checkBoxGrp -q -v1 ($property+"_control")`;
+                   setAttr ($obj+"."+$property) $value;
+                   select $GMHSurface;
+                   return 1;
+               }
+               
+                float $value = `floatSliderGrp -q -v ($property+"_control")`;
+                   setAttr ($objShape+"."+$property) $value;
+              
+        }
+    }
+    
+    select $GMHSurface;
+    
+    return 1;
+}
+
+global proc GMH2_selectRootVertex_multiCommandUI()
+{
+    string $selections[] = `ls-sl`;
+    string $GMHSurfaces[]; clear($GMHSurfaces);
+    for ($eachObj in $selections)
+    {
+        string $surfaceShape = PDD_shapeName($eachObj);
+        if (`attributeExists "GMH_InMainGroup" $surfaceShape`)
+        {
+            string $mainGrp = PDD_NodeFromConnection2($surfaceShape,"GMH_InMainGroup","in");
+            if ($mainGrp !="") PDD_appendStringToStringArray($eachObj,$GMHSurfaces);
+        }
+        
+    }
+    
+    string $vertexLists[];
+    
+    if (size($GMHSurfaces)>0)
+    {
+        for ($eachGMHSurface in $GMHSurfaces)
+      { string $verticeLists_tmp[] =  GMH2_getClosest2VertexToGrowCurve($eachGMHSurface);
+       PDD_appendStringArrayToStringArray($verticeLists_tmp,$vertexLists);}
+    }
+    
+    if (size($vertexLists)>0) select $vertexLists;
+     softSelect -e -softSelectEnabled true;
+}
+
+//create_GMHwindow();
+//tabLayout -e -sti 2 "GMH2MainTabLayout";

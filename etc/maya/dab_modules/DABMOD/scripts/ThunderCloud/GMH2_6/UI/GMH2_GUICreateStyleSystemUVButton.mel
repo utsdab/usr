@@ -1,0 +1,63 @@
+
+
+//==============================GMH2_GUICreateStyleSystemUVButton.mel======================
+//this is the main proc to create GMH2 UI main window. 
+global proc GMH2_GUICreateStyleSystemUVButton_commandUI()
+{
+    int $tableWidth = 400;
+    int $buttonWidth = 200;
+    frameLayout -w $tableWidth -l"Style System UV" -cll 1 "styleSystemUV_frameLayout";
+    flowLayout;
+   frameLayout -lv 0 -w 250; button -l "Assign UV spaces to \n Style System" -c"GMH2_setAndCreateUVOfGMH2System_multiCommandUI();" ;
+   setParent ..;
+  GMH2_createUVPreviewSlot(150,4,"GMH_styleSystemUVPreviewSLot",1);
+  
+   
+   
+   
+}
+
+global proc int GMH2_setAndCreateUVOfGMH2System_multiCommandUI()
+{
+        string $selections[] = `ls-sl`;
+      string $currentGMHStyle2s[] = `textScrollList -q -si "GMHStyleList"`; 
+         if (size ($currentGMHStyle2s) ==0 ) {warning "please select a GMH Style System to assign UV spaces \n";return 0;}
+         
+        int $tmps_int[] = GMH2_querryUVPreviewSlotAttr("GMH_styleSystemUVPreviewSLot");
+        int $entrySlot = $tmps_int[0];
+        int $entryWidth = $tmps_int[1];
+         int $totalEntry = $tmps_int[2];
+         
+        if ($entryWidth ==0) // if the UV is not set then no set
+        {
+          warning "please select UV SLot to assign UV spaces to GMH2 Style System \n";return 0;
+        }
+        
+       
+         for ($eachGMHStyleSystem in $currentGMHStyle2s)
+         {
+              int $polyStyleSystem = getAttr ($eachGMHStyleSystem+".GMH_polyStyleSystem");
+              if ($polyStyleSystem ==1 )
+             GMH2_setAndCreateUVOfGMH2System($eachGMHStyleSystem,$entrySlot,$entryWidth,$totalEntry);
+         
+         }
+         
+         select $selections;
+           
+         return 1;
+        
+         
+    
+}
+
+global proc GMH2_updateUVPreviewGMHSystemSLot_commandUI()
+{
+   string $selections[] = `ls-sl`;
+      string $currentGMHStyle2s[] = `textScrollList -q -si "GMHStyleList"`; 
+         vector $UVAttr = GMH2_querryGMH2SystemUVSpace($currentGMHStyle2s[0]);
+
+     GMH2_setUVPreviewSlotAttr("GMH_styleSystemUVPreviewSLot",$UVAttr);
+}
+
+
+//create_GMHwindow();

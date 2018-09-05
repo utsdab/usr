@@ -1,0 +1,56 @@
+//===========================GMH2_strokeToPoly.mel===============
+//convert PFX stroke to polygon
+global proc string GMH2_convertStrokeToPoly(string $GMHstyleSystem, string $strokes,string $mainGroup,string $GMH2Shader,int $level)
+{
+    select $strokes;
+      select $mainGroup;string $name=substituteAllString ($mainGroup,"_GMHSurface","");
+      
+      //create attribute of Stroke to connect to stroke Geo 
+    if (!`attributeExists "GMH2_strokeGeo" $strokes`) addAttr  -ln "GMH2_strokeGeo" -at long  -dv 0 $strokes;
+    
+   // $strokes = PDD_currentSelectionName(1);
+    
+    //doPaintEffectsToPoly( 1,1,1,0,0);
+   string $mesh = `createNode "mesh"`;
+    connectAttr -f ($strokes+".worldMainMesh[0]")($mesh+".inMesh"); // connect mesh to stroke main mesh 
+    
+    select $mesh;
+    pickWalk -d up; rename ($name+"_Stroke_geo");
+
+    string $mesh = PDD_currentSelectionName(1);
+    addAttr -ln "GMH_inMainGroup"  -at double  $mesh;
+    addAttr -ln "GMH_styleSystem"  -at double  $mesh;
+    addAttr -ln "GMH_stroke"  -at double  $mesh;
+    pickWalk -d up;
+    string $meshGrp = PDD_currentSelectionName(1);
+        
+        //connect to main group
+    connectAttr ($mainGroup+".GMH_outPolyStrokesGeo")  ($mesh+".GMH_inMainGroup");
+        //connect to GMH Style system 
+    connectAttr ($GMHstyleSystem+".outMeshStrokes")   ($mesh+".GMH_styleSystem");
+        // connect to stroke 
+    connectAttr ($strokes+".GMH2_strokeGeo")   ($mesh+".GMH_stroke");
+        
+    
+    addAttr -ln "GMHStrokeLevel"  -at double  -dv $level $mesh;
+    
+    //apply material to mesh 
+     GMH2_assignShaderToMesh($mesh,$GMH2Shader);
+
+    
+     // create Stroke geo grp
+          select $mainGroup;string $strokeGeoGrp = PDD_NodeFromConnection("GMH_outStrokeGeoGrp","out",1);
+          if ($strokeGeoGrp =="")
+          {
+              $strokeGeoGrp = `createNode transform -n ($name+"_strokeGeoGrp")`; 
+			  addAttr -ln "GMH_InMainGroup"  -at double $strokeGeoGrp;
+              connectAttr -f ($strokeGeoGrp+".GMH_InMainGroup") ($mainGroup+".GMH_outStrokeGeoGrp");
+              parent $strokeGeoGrp $mainGroup;
+              $strokeGeoGrp = PDD_currentSelectionName(1);
+          }
+          parent $mesh $strokeGeoGrp;
+        //  delete $meshGrp;
+          hide $strokes;
+          string $strokeMesh = PDD_NodeFromConnection2($strokes,"GMH2_strokeGeo","out");
+    return $strokeMesh;
+}

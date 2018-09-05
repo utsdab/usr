@@ -1,0 +1,50 @@
+ //==================== GMH2_createStyleMainGroup.mel ===================
+ 
+ global proc string createStyleMainGroupNode(string $name,int $polyStyleFlag, int $debugFlag)
+ {
+
+//create & init variable
+
+global string $g_GMH2Dir;string $GMHIconPath;
+
+                if ($polyStyleFlag ==1)
+                {
+                    $name = ($name +"_GMHPolyStyleSystem");
+                    $GMHIconPath = PDD_getValidScriptPath($g_GMH2Dir+"graphic/GMH_polyStyle.png");
+                    
+                }
+                else
+                { 
+                $name = ($name +"_GMHHairStyleSystem");
+                $GMHIconPath = PDD_getValidScriptPath($g_GMH2Dir+"graphic/GMH_HairStyle.png");
+                }
+                
+              string $styleMainGroup = ` container -type dagContainer -ind "history" -ind "channels" -includeHierarchyBelow -includeTransform -name $name`;
+              string $styleMainGroup = PDD_currentSelectionName($debugFlag);
+
+                          
+    
+// add & set attr
+            addAttr -ln "GMH_styleMainGroup"  -at  "long" $styleMainGroup;  
+            addAttr -ln "PFXHair"  -at  "long" $styleMainGroup; 
+            addAttr -ln "MayaHairSystem"  -at  "long" $styleMainGroup; 
+            addAttr -ln "PFXStyle"  -at "long" $styleMainGroup; 
+            addAttr -ln "GMH_OutMainGroup"  -at  "long" $styleMainGroup; 
+            addAttr -ln "GMH_OutMainGroupAsset"  -at  "long" $styleMainGroup; 
+            addAttr -ln "GMH_polyStyleSystem"  -at  "long" $styleMainGroup; 
+            addAttr -ln "GMHShader"  -at  "long" -dv 1 $styleMainGroup; 
+            addAttr -ln "outMeshStrokes"  -at  "long" -dv 1 $styleMainGroup; 
+            
+            setAttr ($styleMainGroup+".blackBox") 1;
+            setAttr ($styleMainGroup+".GMH_polyStyleSystem") $polyStyleFlag;
+            setAttr -l true ($styleMainGroup+".GMH_polyStyleSystem");
+
+
+
+//ICON 
+
+        
+setAttr -type "string" ($styleMainGroup+".iconName") $GMHIconPath;
+
+           return  $styleMainGroup;  
+ }

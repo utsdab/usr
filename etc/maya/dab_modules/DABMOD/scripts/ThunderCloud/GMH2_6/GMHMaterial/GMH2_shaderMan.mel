@@ -1,0 +1,202 @@
+//==================== GMH2_shaderMan.mel ===================
+
+global proc GMH_createDefaultGMH2Shader()
+{
+    
+    // ignore if GMH Shader already created
+    if ( !`objExists "GMH2DefaultShader"`)
+    {
+      // create shader and connect SG shader engine
+    string $GMHShader = `shadingNode -asShader lambert -n "GMH2DefaultShader"`;
+    string $GMHShaderSG = `sets -renderable true -noSurfaceShader true -empty -name "GMH2DefaultShaderSG"`;
+    connectAttr -f ($GMHShader+".outColor") ($GMHShaderSG+".surfaceShader");
+        
+        //create ramp
+        string $ramp = `shadingNode -asTexture ramp -n"GMH2DefaultShader_ramp" `;
+    setAttr ($ramp+".colorEntryList[0].color") -type double3 0.239 0 0 ;
+    setAttr ($ramp+".colorEntryList[0].position") 0;
+    setAttr ($ramp+".colorEntryList[1].color") -type double3 1 0.550111 0.09 ;
+    setAttr ($ramp+".colorEntryList[1].position") 0.5;
+    setAttr ($ramp+".colorEntryList[2].color") -type double3 1 1 1 ;
+    setAttr ($ramp+".colorEntryList[2].position") 1;
+    
+
+        
+        //connect ramp to shader
+        
+    connectAttr -force ($ramp+".outColor") ($GMHShader+".color");
+    connectAttr -force ($ramp+".outColor") ($GMHShader+".ambientColor");
+
+       GMH2_setShaderAsGMHShader $GMHShader;
+    }
+    
+    
+    
+    
+}
+
+global proc PDD_removeMaterialOverride(string $surface)
+{
+    //disconnect override shader to GMH Surface
+    // $surface = "pPlane3";
+    string $surfaceShapes[] = `listRelatives -s -path $surface`;
+     if (`attributeExists "GMH_surfaceMaterial" $surfaceShapes[0]`)
+     {
+         
+         deleteAttr ($surfaceShapes[0]+".GMH_surfaceMaterial");
+         addAttr -longName GMH_surfaceMaterial -attributeType "float"  -m -im 1 -h true $surfaceShapes[0];
+     }
+     //get all stroke of surface and trace back to its original gmh style system 's material and reapply
+     string $mainGroup = PDD_NodeFromConnection2($surfaceShapes[0],"GMH_InMainGroup","in");
+     string $strokes[] = PDD_NodesFromConnection2($mainGroup,"GMH_outPolyStrokesGeo","out");
+     for ($eachStroke in $strokes )
+     {
+          string $GMHstyleSystem = PDD_NodeFromConnection2($eachStroke,"GMH_styleSystem","in");
+          string $GMHShader =  PDD_NodeFromConnection2($GMHstyleSystem,"GMHShader","in");
+          GMH2_assignShaderToMesh($eachStroke,$GMHShader);
+         
+     }
+  
+} 
+
+
+ global proc string[] GMH2_getGMH2ShaderLists()
+ {string $results[];
+      string $shaderTypes[] = `listNodeTypes "shader"`;
+                   for ($eachshaderType in $shaderTypes)
+                   {
+                       string $allNodeOfTypes[] = `ls -type $eachshaderType`;
+                       if (size($allNodeOfTypes)>1)
+                       {
+                        for ( $eachObj in $allNodeOfTypes )
+                        { 
+                            if ( `GMH2_isGMH2Shader($eachObj) ` == 1)
+                            {               
+                                string $tmps[]; $tmps[0] = $eachObj; appendStringArray($results,$tmps,1);
+                             } 
+                         }
+                        }
+                     }
+                     
+                     return stringArrayRemoveDuplicates($results);
+     
+ }
+ global proc int GMH2_isGMH2Shader(string $GMH2Shader)
+ {
+      if (!`attributeExists ("GMHMaterial") $GMH2Shader`) return 0;
+      if (!`attributeExists ("outColor") $GMH2Shader`) return 0;
+      
+      if (`getAttr ($GMH2Shader+".GMHMaterial")`== 0 ) return 0;
+      
+      return 1;
+ }
+
+ 
+ global proc GMH2_assignShaderToMesh(string $mesh,string $GMH2Shader)
+ {
+     if ( !`objExists $GMH2Shader`)
+        $GMH2Shader ="lambert1";
+
+                 select $mesh;
+                hyperShade -assign $GMH2Shader ; 
+                
+                 if (!`attributeExists ("GMHMaterial") $mesh`) addAttr -ln "GMHMaterial"  -at double  -dv 1 $mesh;
+                 if (!`attributeExists ("GMHMaterial") $GMH2Shader`) addAttr -ln "GMHMaterial"  -at double  -dv 1 $GMH2Shader;
+                 
+                if (!`isConnected ($GMH2Shader+".GMHMaterial") ($mesh+".GMHMaterial")`) 
+                {
+                    connectAttr -f ($GMH2Shader+".GMHMaterial") ($mesh+".GMHMaterial"); }
+                    
+
+                
+     
+ }
+ 
+global proc int GMH2_assignGMHShaderToGMHSurface(string $GMH2Shader, string $GMH2Surface, string $level)
+{
+    
+    if (`attributeExists ("GMH_InMainGroup") (PDD_shapeOf($GMH2Surface))`)
+    {
+        string $GMHMainGroup = PDD_NodeFromConnection2((PDD_shapeOf($GMH2Surface)),"GMH_InMainGroup","out");
+        if (`objExists $GMHMainGroup` )
+        {
+          string $strokeMeshes[]=  PDD_NodesFromConnection2($GMHMainGroup,"GMH_outPolyStrokesGeo","out");
+
+            for ($eachMesh in  $strokeMeshes)
+            {
+               if ( `getAttr ($eachMesh+".GMHStrokeLevel")` == $level)
+                {GMH2_assignShaderToMesh($eachMesh,$GMH2Shader);
+                }
+            } 
+            
+              if (!`isConnected ($GMH2Shader+".GMHMaterial")($GMH2Surface+".GMH_surfaceMaterial["+$level+"]") `)
+               { connectAttr -f ($GMH2Shader+".GMHMaterial")($GMH2Surface+".GMH_surfaceMaterial["+$level+"]") ;}
+        }
+         
+    }
+    
+    return 1;
+}
+
+global proc int GMH2_assignGMHShaderToGMHStyleSystem(string $GMH2StyleSystem, string $GMH2Shader )
+{
+    string $previousGMH2Shader = PDD_NodeFromConnection2($GMH2StyleSystem,"GMHShader","in");
+    
+    if (!`isConnected ($GMH2Shader+".GMHMaterial")($GMH2StyleSystem+".GMHShader") `)
+       { connectAttr -f ($GMH2Shader+".GMHMaterial")($GMH2StyleSystem+".GMHShader");}
+                
+    
+    // apply material to all GMH2 System stroke : 
+    select $GMH2StyleSystem;
+    string $GMHMainGroups = PDD_NodeFromConnection("GMH_OutMainGroupAsset","out",1);
+   // string $GMH2StyleSystem= PDD_currentSelectionName(1)
+ 
+     string $strokeMeshes[]=  PDD_NodesFromConnection2($GMH2StyleSystem,"outMeshStrokes","out");
+                     for ($eachMesh in  $strokeMeshes)
+                            {
+                                string $strokeGMH2Shader = PDD_NodeFromConnection2($eachMesh,"GMHMaterial","in");
+                                if (    ($strokeGMH2Shader == $previousGMH2Shader) || ($previousGMH2Shader =="")    )
+                               GMH2_assignShaderToMesh($eachMesh,$GMH2Shader);
+                            }
+        
+    
+  
+    
+    return 1;
+}
+
+
+
+global proc int GMH2_unsetGMHShader(string $shader)
+{
+
+      if (`attributeExists "GMHMaterial" $shader`)
+             {setAttr  ($shader+".GMHMaterial") 0;}
+             
+             
+    return 0;
+}
+
+
+
+global proc int GMH2_setShaderAsGMHShader(string $shader)
+{
+    int $result =0;
+    string $selections[] = `ls-sl`;
+    string $shaderTypes[] = `listNodeTypes "shader"`;
+   for ($eachshaderType in $shaderTypes)
+    {
+        if (`objectType $shader` == $eachshaderType)
+        {
+    
+                        if (!`attributeExists "GMHMaterial" $shader`)
+                         addAttr -ln "GMHMaterial"  -at double  -dv 1 $shader;
+                         setAttr  ($shader+".GMHMaterial") 1;
+                         $result =1;
+            
+        }
+    }
+    
+        if ($selections[0] !="") select $selections;
+    return $result;
+}

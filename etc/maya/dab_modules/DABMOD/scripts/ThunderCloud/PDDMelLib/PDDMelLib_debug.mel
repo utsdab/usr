@@ -1,0 +1,31 @@
+//===============================PDDMelLib_debug.mel===============
+
+
+global proc PDD_debug(int $debugFlag,string $object,string $message)
+{
+    if ($debugFlag == 1)
+    {
+        print "\n========      ";
+        if ( $object != "" )print $object;
+        print "        ";
+        print $message;
+        print "        ========\n";
+
+    }
+}
+
+
+global proc int PDD_getMayaVersion()
+{
+     string $tmps_string = `about -version`;
+string $buffers[]; tokenize $tmps_string $buffers;
+
+
+    return  $buffers[0];
+}
+
+
+
+
+
+

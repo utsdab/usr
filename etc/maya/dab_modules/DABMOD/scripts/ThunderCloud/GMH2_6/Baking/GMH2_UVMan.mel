@@ -1,0 +1,432 @@
+// =-===            GMH2_UVMan.mel                ====
+
+//GMH2_createStripeUV_command(0.5,0.05);
+//GMH2_getClosest2VertexToGrowCurve("pPlane6")
+//GMH2_createUVToRootAlign(0.25,0.01,"pPlane4")
+//int $entrySlot = 2; int $totalEntry =4;
+//string $surface="pPlane4"
+
+
+
+global proc int GMH2_createAndMoveUVToEntrySlot_multiCommand()
+{
+    string $surfaces[]= `ls-sl`;
+   
+   string $GMHSurfaces[] = GMH2_createAndMoveUVToEntrySlot_multi($surfaces);
+   if (size($GMHSurfaces) >0) {select $GMHSurfaces;DeleteHistory;}
+    
+    return 1;
+}
+
+
+
+global proc string[] GMH2_createAndMoveUVToEntrySlot_multi(string $surfaces[])
+{
+    string $GMHSurfaces[]; clear $GMHSurfaces;
+    // filter out GMH Surface
+    for ($eachSurface in $surfaces)
+        {
+             string $eachSurfaceShape = PDD_shapeName($eachSurface);
+             string $mainGroup = PDD_NodeFromConnection2($eachSurfaceShape,"GMH_InMainGroup","out");
+             if ($mainGroup ==""){warning (" surface : < "+$eachSurfaceShape+" > has no main group; ignored \n");}
+             else
+             {
+              PDD_appendStringToStringArray($eachSurface,$GMHSurfaces);                  
+             }// end of surface check loop
+        } // end of each surface loop
+    
+    
+    
+    int $counter =0;
+    if (size($GMHSurfaces)>0)
+    {
+          for ($eachGMHSurface in $GMHSurfaces)
+           {
+              GMH2_createAndMoveUVToEntrySlot($eachGMHSurface,$counter,1,size($GMHSurfaces)) ;
+               $counter++;
+           }   
+    }
+
+    return $GMHSurfaces;
+}
+
+//GMH2_createAndMoveUVToEntrySlot("pPlane1",2,2,4)
+//GMH2_createAndMoveUVToEntrySlot("pPlane4",2, 4)
+//int $entrySlot = 2;int $totalEntry= 4; $entryWidth =2;
+global proc GMH2_createAndMoveUVToEntrySlot(string $surface,int $entrySlot,int $entryWidth, int $totalEntry)
+{
+  //  string $surface = "pPlane1";
+    float $UVPercent = 1.0/ $totalEntry *1.0;
+    
+    float $padding = $UVPercent*0.05;
+    GMH2_createGMHSurfaceUV($UVPercent,$padding,$surface);
+    
+    //scale the UV
+    select $surface;ConvertSelectionToUVs;
+    polyEditUV -pu 0 -pv 0 -su $entryWidth -sv 1 ;
+
+    float $UVdistanceToMove = $UVPercent*($entrySlot);
+    select $surface; ConvertSelectionToUVs;   polyEditUV -u $UVdistanceToMove -v 0 ;
+    
+      
+}
+
+
+global proc int GMH2_createGMHSurfaceUV(float $UVPercent,float $padding,string $surface)
+{
+    string $selections[]=`ls-sl`;
+    string $rootVertices[] =( GMH2_getClosest2VertexToGrowCurve($surface));
+    int $counter =5; 
+    for ($counter =5;$counter>0; $counter --)
+    {  
+        select $surface; 
+        GMH2_createStripeUV_command($UVPercent,0.01,$counter);
+        
+            select $rootVertices[0];ConvertSelectionToUVs;
+            string $rootVerticesMaps1[] = `ls-sl-fl`;
+            string $rootVerticesMap1 = $rootVerticesMaps1[0];
+    
+            select $rootVertices[1];ConvertSelectionToUVs;
+            string $rootVerticesMaps2[] = `ls-sl-fl`;
+            string $rootVerticesMap2 = $rootVerticesMaps2[0];
+    
+    
+        float $UV1[] = `polyEditUV -q -u -v $rootVerticesMap1`;
+        float $UV2[] = `polyEditUV -q -u -v $rootVerticesMap2`;
+        
+        float $Udistance = ($UV2[0]-$UV1[0])*($UV2[0]-$UV1[0])*1.0;
+        float $Vdistance = ($UV2[1]-$UV1[1])*($UV2[1]-$UV1[1])*1.0;
+    
+        if (($Udistance > $Vdistance)&&($UV2[1] <0.1)&&($UV1[1] <0.1))
+        {
+            $counter =0;break;
+        }
+        
+    }
+    
+    if (size($selections)>0)select $selections;
+    
+    return 1;
+}
+
+
+
+global proc string[] GMH2_getClosest2VertexToGrowCurve(string $surface)
+{
+        //string $surface = "pPlane6";
+        string $results[]; clear ($results);
+    int $vertcounts[] = `polyEvaluate -vertex $surface`; 
+    string $surfaceVertexLists[] = `ls -fl  ($surface + ".vtx[0:" + ($vertcounts[0] - 1) + "]" )`;
+    
+    string $surfaceShape = PDD_shapeName($surface);
+    string $mainGroup = PDD_NodeFromConnection2($surfaceShape,"GMH_InMainGroup","out");
+    if ($mainGroup ==""){warning (" surface : < "+$surface+" > has no main group; ignored \n"); return $results;}
+    
+    string $growCurve = PDD_NodeFromConnection2($mainGroup,"GMH_outGrowingCurves","out");
+    int $curveDegree = `getAttr ($growCurve+".degree")`;int $curveSpan = `getAttr ($growCurve+".spans")`;
+    int $curveCV = $curveDegree+ $curveSpan -1;
+    
+    string $startCurveCV = $growCurve+".cv["+$curveCV+"]";
+    vector $startCurveCVCoor = `xform -q -ws -t $startCurveCV`;
+    //find shortest vertex to startCurveCV ie : the root vertex 1  
+    float $smallestDistance1=999999; string $closestSurfaceVertex1;
+        for ($eachVertex in $surfaceVertexLists )
+        {
+            vector $surfaceVertexCoor = `xform -q -ws -t $eachVertex`;
+            float $distance = mag($startCurveCVCoor - $surfaceVertexCoor);
+            if ($distance < $smallestDistance1)
+                {
+                   $smallestDistance1 = $distance;  
+                   $closestSurfaceVertex1 = $eachVertex;
+                }
+            
+        }
+       // select $closestSurfaceVertex1;print $closestSurfaceVertex1;
+        
+        string $endCurveCV =  $growCurve+".cv[0]";
+    vector $endCurveCVCoor = `xform -q -ws -t $endCurveCV`;
+    //find shortest vertex to startCurveCV ie : the root vertex 1  
+    float $smallestDistance2=999999; string $closestSurfaceVertex2;
+        for ($eachVertex in $surfaceVertexLists )
+        {
+            vector $surfaceVertexCoor2 = `xform -q -ws -t $eachVertex`;
+            float $distance = mag($endCurveCVCoor - $surfaceVertexCoor2);
+            if ($distance < $smallestDistance2)
+                {
+                   $smallestDistance2 = $distance;  
+                   $closestSurfaceVertex2 = $eachVertex;
+                }
+            
+        }
+        
+        
+       // select $closestSurfaceVertex2;print $closestSurfaceVertex2;
+        
+     $results[0] =    $closestSurfaceVertex1;
+     $results[1] =    $closestSurfaceVertex2;
+     
+return $results;
+}
+
+
+
+
+
+global proc GMH2_createStripeUV_command(float $UVPercent,float $padding,int $rotateNum) 
+{
+    string $selections[] = `ls-sl`;
+    for ($eachObj in $selections)
+    {
+        GMH2_createStripeUV($eachObj,$UVPercent,$padding,$rotateNum) ;
+    }
+    select $selections;
+    
+}
+
+global proc string[] GMH2_selectBodyMapUV(string $mode,string $object)
+{
+    //string $object = "pPlane1";
+    //string $mode = "vertical"
+   int $totalMaps[] = ` polyEvaluate -uv $object`; 
+   string $UVresults[] ;clear ($UVresults);
+   float $threshold=0.0001;float $maxValue = 1-$threshold;
+                   float $minValue = 0+$threshold;
+   
+   int $counter =0;
+     for ( $counter=0;$counter<=$totalMaps[0];$counter++)
+     {
+         string $currentMap = ($object+".map["+$counter+"]");
+        float $UVcoor[] = `polyEditUV -q -u -v $currentMap`;
+        
+         if ( $mode =="vertical")
+         {
+             if (    ($UVcoor[1] >$minValue)    && ($UVcoor[1] <$maxValue)    )
+            { PDD_appendStringToStringArray($currentMap,$UVresults);}
+         }
+         
+         if ( $mode =="horizontal")
+         {
+             if (    ($UVcoor[0] >$minValue)  && ($UVcoor[0] <$maxValue)    )
+             PDD_appendStringToStringArray($currentMap,$UVresults);
+         }
+         
+     }
+    
+    return $UVresults;
+}
+
+//float $UVPercent = 0.5; float $padding = 0.01;int $rotateNum = 0;string $object = "pPlane1";
+global proc GMH2_createStripeUV(string $object, float $UVPercent, float $padding,int $rotateNum) 
+{
+    string $selections[] = `ls-sl`;
+    select $object;
+    
+    //generate grid like UV
+polyForceUV -unitize;
+polyLayoutUV -l 2 -sc 1 -se 1 -rbf 1 -lm 0;
+ConvertSelectionToUVs;
+polyMapSewMove -nf 10 -lps 0 -ch 1;select $object;DeleteHistory;
+ 
+ 
+     //generate 1x1 square ratior UV
+polyLayoutUV -l 1 -sc 2 -se 2 -rbf 0 -lm 0;    // layout to 1x1 square
+select (GMH2_selectBodyMapUV("horizontal",$object)) ;   // select horizontal UV
+unfold -i 5000 -ss 0.001 -gb 0 -gmb 1 -pub 0 -ps  0 -oa 2 -us off;    //adjust horizontal UV
+select (GMH2_selectBodyMapUV("vertical",$object)) ;   // select vertical UV
+unfold -i 5000 -ss 0.001 -gb 0 -gmb 1 -pub 0 -ps  0 -oa 1 -us off;  //adjust vertical UV
+ 
+     //rotate
+select $object;
+    ConvertSelectionToUVs;
+int $counter = 1; for ($counter=0;$counter<$rotateNum;$counter++){polyRotateUVs -90;}
+
+    //scale
+ConvertSelectionToUVs;
+polyEditUV -pu 0 -pv 0 -su $UVPercent -sv 1 ;
+polyEditUV -pu ($UVPercent*0.5) -pv 0.5 -su (1-($padding/$UVPercent*0.5)) -sv (1-($padding*0.5)) ;
+select $object;
+DeleteHistory;
+    if (size($selections)>0)select $selections;
+}
+
+global proc GMH2_setAndCreateUVOfGMH2System(string $GMHStyleSystem,int $entrySlot,int $entryWidth, int $totalEntry)
+{
+    // set the UV of style System
+    GMH2_setUVToGMH2System($GMHStyleSystem,$entrySlot,$entryWidth,$totalEntry) ;
+    
+    //set UV of stroke Geo 
+    GMH2_setStrokeGeoUVOfGMH2System($GMHStyleSystem);
+    
+}
+//GMH2_querryGMH2SystemUVSpace("shortBase_GMHPolyStyleSystem")
+//int $entrySlot =2;int $entryWidth =1; int $totalEntry =5;
+global proc vector GMH2_querryGMH2SystemUVSpace(string $GMHStyleSystem)
+{
+    int $entrySlot = 0;
+    int $entryWidth =1;
+    int $totalEntry = 1;
+    if (`attributeExists "GMH2_UVSlots" $GMHStyleSystem`)
+    {
+        $entrySlot = getAttr ($GMHStyleSystem+".GMH2_UVEntry");
+        $entryWidth = getAttr ($GMHStyleSystem+".GMH2_UVEntryWidth");
+        $totalEntry = getAttr ($GMHStyleSystem+".GMH2_UVTTotalEntry");
+    }
+    if ($totalEntry ==0) $totalEntry = 1;
+    if ($entryWidth ==0) $entryWidth = 1;
+    
+    return <<($entrySlot),($entryWidth),($totalEntry)>> ;
+}
+
+global proc  GMH2_setSelectedStrokeGeoUVOfGMH2System(string $GMHStyleSystem,string $strokeGeos[])
+{
+      string $result_strings[]; clear($result_strings);
+      vector $UVattr = GMH2_querryGMH2SystemUVSpace($GMHStyleSystem);
+    int $entrySlot = ($UVattr.x);
+    int $entryWidth =($UVattr.y);
+    int $totalEntry = ($UVattr.z);
+
+    if ( size($strokeGeos) >0)
+    GMH2_setUVOfGeoStroke($strokeGeos,$entrySlot,$entryWidth,$totalEntry);
+    
+    // put into main Group 
+    
+}
+
+global proc GMH2_setStrokeGeoUVOfGMH2System(string $GMHStyleSystem)
+{
+    string $result_strings[];clear($result_strings);
+      vector $UVattr = GMH2_querryGMH2SystemUVSpace($GMHStyleSystem);
+    int $entrySlot = ($UVattr.x);
+    int $entryWidth =($UVattr.y);
+    int $totalEntry = ($UVattr.z);
+    
+    string $strokeGeos[] = PDD_NodesFromConnection2($GMHStyleSystem,"outMeshStrokes","out");
+    
+    if ( size($strokeGeos) >0)
+   GMH2_setUVOfGeoStroke($strokeGeos,$entrySlot,$entryWidth,$totalEntry);
+   
+    
+}
+//GMH2_setStrokeGeoUVOfGMH2System("A_GMHPolyStyleSystem")
+//string $eachStroke = "pPlane1_Stroke_geo";int $entrySlot = 0;int $entryWidth =1; int $totalEntry = 4;
+global proc GMH2_setUVOfGMHSurface(string $GMH2Surface, int $strokeLevel,int $entrySlot, int $entryWidth, int $totalEntry)
+{
+   // print ("GMH SUrface = "+$GMH2Surface+"\n");
+   // string $GMH2Surface = "hair_baseSurface9";int $strokeLevel = 1;
+   string $GMH2SurfaceShape = PDD_shapeOf($GMH2Surface);
+        if (`attributeExists ("GMH_InMainGroup") (PDD_shapeOf($GMH2Surface))`)
+    {
+        string $GMHMainGroup = PDD_NodeFromConnection2((PDD_shapeOf($GMH2Surface)),"GMH_InMainGroup","out");
+        if (`objExists $GMHMainGroup` )
+        {
+          string $strokeMeshes[]=  PDD_NodesFromConnection2($GMHMainGroup,"GMH_outPolyStrokesGeo","out");
+
+            for ($eachMesh in  $strokeMeshes)
+            {
+                string $tmps[];clear $tmps;  $tmps[0] = $eachMesh;
+               if ( `getAttr ($eachMesh+".GMHStrokeLevel")` == $strokeLevel)
+                {
+                    GMH2_setUVOfGeoStroke($tmps,$entrySlot,$entryWidth,$totalEntry);
+                    
+                    string $parentUVSlotAttr = ("GMH2_UVSlots_"+$strokeLevel);
+                 if (!`attributeExists ("GMH2_UVSlots_"+$strokeLevel) $GMH2SurfaceShape`)
+                    {  
+                    addAttr -ln ("GMH2_UVSlots_"+$strokeLevel)  -at double3  $GMH2SurfaceShape;
+                    addAttr -ln ("GMH2_UVEntry_"+$strokeLevel)  -at double -p $parentUVSlotAttr  $GMH2SurfaceShape;
+                    addAttr -ln ("GMH2_UVEntryWidth_"+$strokeLevel)  -at double -p $parentUVSlotAttr  $GMH2SurfaceShape;
+                    addAttr -ln ("GMH2_UVTTotalEntry_"+$strokeLevel)  -at double -p $parentUVSlotAttr  $GMH2SurfaceShape;
+                        }
+                    setAttr ($GMH2SurfaceShape+".GMH2_UVEntry_"+$strokeLevel) $entrySlot;
+                    setAttr ($GMH2SurfaceShape+".GMH2_UVEntryWidth_"+$strokeLevel) $entryWidth;
+                    setAttr ($GMH2SurfaceShape+".GMH2_UVTTotalEntry_"+$strokeLevel) $totalEntry;
+                
+                }
+                
+            } 
+            
+        }
+         
+    }   
+}
+
+global proc vector GMH2_querryGMHSurfaceUVSpace(string $GMHSurface, int $strokeLevel)
+{
+    int $entrySlot = 0;
+    int $entryWidth =1;
+    int $totalEntry = 1;
+    if (`attributeExists ("GMH2_UVSlots_"+$strokeLevel) $GMHSurface`)
+    {
+        $entrySlot = getAttr ($GMHSurface+".GMH2_UVEntry_"+$strokeLevel);
+        $entryWidth = getAttr ($GMHSurface+".GMH2_UVEntryWidth_"+$strokeLevel);
+        $totalEntry = getAttr ($GMHSurface+".GMH2_UVTTotalEntry_"+$strokeLevel);
+    }
+    if ($totalEntry ==0) $totalEntry = 1;
+    if ($entryWidth ==0) $entryWidth = 1;
+    
+    return <<($entrySlot),($entryWidth),($totalEntry)>> ;
+}
+
+
+global proc GMH2_setUVOfGeoStroke(string $strokeGeos[],int $entrySlot,int $entryWidth, int $totalEntry)
+{
+    string $GMH2_setUVOfGeoStrokes[]; clear($GMH2_setUVOfGeoStrokes);
+   // string $strokeGeos[] = `ls-sl`;
+    select $strokeGeos;
+    //delete all UVTweak of current Stroke geo be delete its history and restore connections
+    for ($eachStroke in $strokeGeos)
+    {
+       string $stroke = PDD_NodeFromConnection2($eachStroke,"GMH_stroke","in");
+       select $eachStroke;DeleteHistory;
+       string $strokeGeoShape = PDD_shapeName($eachStroke);
+       connectAttr -f ($stroke+".worldMainMesh[0]")($strokeGeoShape+".inMesh"); // connect mesh to stroke main mesh 
+    }
+    ConvertSelectionToUVs;
+    //reset UV to 1x1 square
+    for ($eachStroke in $strokeGeos)
+    {
+    string $mainGrp = PDD_NodeFromConnection2($eachStroke,"GMH_inMainGroup","in");
+    select $eachStroke;
+    string $tmps[] = `polyLayoutUV -lm 0 -sc 2 -se 0 -rbf 0 -fr 1 -ps 0 -l 0 -ch 1` ;
+    PDD_appendStringArrayToStringArray $tmps $GMH2_setUVOfGeoStrokes;
+    
+    select $eachStroke;
+    ConvertSelectionToUVs;
+    float $scale = $entryWidth*1.0/$totalEntry*1.0;
+   string $tmps[] = ` polyEditUV -pu 0 -pv 0 -su ($scale) -sv 1 `;
+   PDD_appendStringArrayToStringArray $tmps $GMH2_setUVOfGeoStrokes;
+  
+    select $eachStroke;
+    ConvertSelectionToUVs;
+   float $distanceToMove = 1.0/$totalEntry*1.0*$entrySlot;
+   string $tmps[] =` polyEditUV -u $distanceToMove -v 0` ;
+   PDD_appendStringArrayToStringArray $tmps $GMH2_setUVOfGeoStrokes;
+   
+    container -e -includeShapes -includeTransform -force -addNode $GMH2_setUVOfGeoStrokes $mainGrp;
+    
+   }
+   
+    
+}
+
+global proc GMH2_setUVToGMH2System(string $GMHStyleSystem,int $entrySlot,int $entryWidth, int $totalEntry)
+{
+    
+    // set UV attr of GMH Style System
+  // string $GMHStyleSystem = "A_GMHPolyStyleSystem";
+   if (!`attributeExists "GMH2_UVSlots" $GMHStyleSystem`)
+        {  
+        addAttr -ln "GMH2_UVSlots"  -at double3  $GMHStyleSystem;
+        addAttr -ln "GMH2_UVEntry"  -at double -p GMH2_UVSlots  $GMHStyleSystem;
+        addAttr -ln "GMH2_UVEntryWidth"  -at double -p GMH2_UVSlots  $GMHStyleSystem;
+        addAttr -ln "GMH2_UVTTotalEntry"  -at double -p GMH2_UVSlots  $GMHStyleSystem;
+    }
+    setAttr ($GMHStyleSystem+".GMH2_UVEntry") $entrySlot;
+    setAttr ($GMHStyleSystem+".GMH2_UVEntryWidth") $entryWidth;
+    setAttr ($GMHStyleSystem+".GMH2_UVTTotalEntry") $totalEntry;
+    
+    
+     // set UV of all strokes
+     
+     
+    
+}

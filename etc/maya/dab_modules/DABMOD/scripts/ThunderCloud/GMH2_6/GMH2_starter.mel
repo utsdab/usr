@@ -1,0 +1,98 @@
+global proc GMH2_setHotKey_command()
+{
+    nameCommand
+    -annotation "ThunderCloud_GMH2_Hotkey"
+    -command "source \"ThunderCloud/GMH2_6/GMH2_starter.mel\";"
+    ThunderCloud_GMH_command;
+hotkey -k "!" -ctl -name "ThunderCloud_GMH_command";
+   hotkey -k "!" -ctl -name "";
+    hotkey -k "!" -ctl -name "ThunderCloud_GMH_command";
+    
+}
+
+global proc GMH2_command()
+{
+    GMH2_setHotKey_command();
+    global string $g_GMH2Dir = "ThunderCloud/GMH2_6/";    //relative path of GMH2_6 from Maya script folder
+                                                    
+                                                                print "\n ===================================\n";
+                                                                print "loading GMH2 \n";
+                                               
+                                                                print "loading PDD Mel Library scripts\n";
+source "ThunderCloud/PDDMelLib/PDDMelLib_header.mel";
+                                                                print "loading GMH2 scripts\n";
+
+
+string $scripts[] = {
+    // misc
+ "misc/GMH_utilities_proc.mel"
+,"misc/GMH_display.mel"
+ //style system
+,"GMHStyleSystem/GMH2_CreateBrush.mel"
+,"GMHStyleSystem/GMH2_createStyleMainGroup.mel"
+,"GMHStyleSystem/GMH2_createGMHStyleSystem.mel"
+,"GMHStyleSystem/GMH2_CreateHairSystem.mel"
+,"GMHStyleSystem/GMH2_deleteGMHstyleSystem.mel"
+,"GMHStyleSystem/GMH2_publishSubAttrToStyleMainGroup.mel"
+// preset
+,"presetsLoader/GMH2_presetMan.mel"
+// surface
+,"GMHSurface/GMH_CurvesToPFXStrokes.mel"
+,"GMHSurface/GMH2_PFXStrokeToCurves.mel"
+,"GMHSurface/GMH2_CurveToMayaHair.mel" 
+,"GMHSurface/GMH2_CreateGMHSurface.mel"   
+,"GMHSurface/GMH_setBaseSurfaceAttrs.mel" 
+,"GMHSurface/GMH_createGMHMainGroup.mel" 
+,"GMHSurface/GMH2_deleteGMHMainGroup.mel"  
+,"GMHSurface/GMH_RotateSurface.mel"        
+,"GMHSurface/GMH2_polyToCurve.mel"  
+,"GMHSurface/GMH2_strokeToPoly.mel"  
+,"GMHSurface/GMH2_ApplySecondaryGMHSurface.mel"
+// edit
+,"GMHStyleSystem/edit/GMH2_connectNucleus.mel"
+,"GMHSurface/edit/GMH2_GMHSurfaceAttributeEdit.mel" 
+,"GMHSurface/edit/GMH2_GMHSurfaceAttributeReset.mel"  
+,"GMHSurface/edit/GMH2_convertToFolicle.mel"
+,"GMHSurface/edit/GMH2_setGMHSurfaceSimulationState.mel"
+,"GMHSurface/edit/GMH2_editPressureRamp.mel"
+,"GMHSurface/edit/GMH_HideShowFolliclesCurves.mel"
+// material
+,"GMHMaterial/GMH2_shaderMan.mel"
+//export
+,"export/GMH2_exportCurve_source.mel"
+,"export/GMH2_exportMesh_source.mel"
+//baking
+,"baking/GMH2_bakeMan.mel"
+//UV
+,"baking/GMH2_UVMan.mel"
+
+//GUI
+
+,"UI/GMH2_GUICreateGMHSurfaceUVButton.mel"
+,"UI/GMH2_GUIbaking_UVPreviewSlotMan.mel"
+,"UI/GMH2_GUICreateBakingButtons.mel"
+,"UI/GMH2_GUICreateExportButtons.mel"
+,"UI/GMH2_GUIcreate_GMHStyleTable.mel"
+,"UI/GMH2_GUIcreate_GMHSurfaceTable.mel"
+,"UI/GMH2_GUI_utilities_proc.mel"
+,"UI/GMH2_createGMHSurfaceEditButtons.mel"
+,"UI/GMH2_createGMHDynamicButtons.mel"
+,"UI/GMH2_createGMHMaterialUI.mel"
+,"UI/GMH2_GUI.mel"
+,"UI/GMH2_GUICreateStyleSystemUVButton.mel"
+};
+
+// GMH2 create GMH Style system scripts ;
+for ($eachScript in $scripts)
+    {
+        string $path = $g_GMH2Dir+$eachScript;
+    eval (" source \""+$path+"\";");
+    
+    }
+
+                                                                print "Starting GMH2 \n";
+
+create_GMHwindow(1);
+}
+
+GMH2_command();

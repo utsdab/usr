@@ -1,0 +1,290 @@
+//------- GMH2_exportMesh_source.mel -----
+
+//string $path = "D:/Dropbox/ENV/SCRIPT/THUNDERCLOUD/GMH2/scenes/test.fbx";
+//string $GMHstyleSystem = "A_GMHPolyStyleSystem";
+//int $FBXFlag =1; int $OBJFlag =1; int $groupFlag =1;
+//GMH2_exportCurvesFromStyleSystem($path,$GMHstyleSystem,$FBXFlag, $OBJFlag,$groupFlag);
+   // string $material = "UniqueColorBaseMat_1";
+//GMH2_exportCurvesFromMaterials($path,`ls-sl`,$FBXFlag, $OBJFlag,0);
+//GMH2_exportCurvesFromSurfaces($path,`ls-sl`,$FBXFlag, $OBJFlag,1);
+
+global proc string GMH2_exportMeshFromSurfaces( string $path,string $surfaces[],int $FBXFlag, int $OBJFlag, int $groupFlag)
+{
+   
+   //string $surface = "pPlane3"
+    string $globalExportGrps[]; clear ($globalExportGrps);
+    string $globalExportMeshes[]; clear ($globalExportMeshes);
+   for ($surface in $surfaces)
+   {
+       string $exportMeshesGrps[] ; clear $exportMeshesGrps;
+    string $surfaceShape = PDD_shapeName($surface);
+    string $mainGroup = PDD_NodeFromConnection2($surfaceShape,"GMH_InMainGroup","in");
+    
+    // surface availibility check
+      if ($mainGroup ==""){ print ("no meshes exported for "+$surface+", ignored \n");}
+      else
+      {
+    string $GMHstyleSystem = PDD_NodeFromConnection2($mainGroup,"GMH_StyleMainGroupIn","in");
+     int $PolyStyleFlag = `getAttr ($GMHstyleSystem+".GMH_polyStyleSystem")`;            
+      if ($PolyStyleFlag == 1) // case of GMH POLY style System 
+            {
+                // export stroke output Curve.
+               string $strokeGeos[] = PDD_NodesFromConnection2($mainGroup,"GMH_outPolyStrokesGeo","out");
+                
+                // create curve from outMainCUrve of each stroke and putinto Group
+                for ($eachStrokeGeo in $strokeGeos)
+                {                   
+                  select $eachStrokeGeo; string $exportMeshes[] = `duplicate -n ($eachStrokeGeo+"_export")`;
+                 PDD_appendStringArrayToStringArray($exportMeshes,$globalExportMeshes);
+                 
+                      // put curves into group base on level 
+                               if ($groupFlag ==1)
+                              { int $level = `getAttr ($eachStrokeGeo+".GMHStrokeLevel")`;
+                               string $group = `group -n($mainGroup+"_level"+$level+"_grp")`;
+                               PDD_appendStringToStringArray($group,$exportMeshesGrps);
+                               }
+                }// end of each stroke loop
+        
+            
+             if ($groupFlag ==1)
+             { 
+                 { select $exportMeshesGrps;
+                   string $group = `group -n($surface+"_grp")`;
+                   PDD_appendStringToStringArray($group,$globalExportGrps);
+                   }
+             }
+
+      }//end of poly style case
+      
+      }// end of surface check
+   }// end of each surface loop
+   
+        // put all material into a global export group
+        if (size($globalExportMeshes) <1)
+       {
+             warning ("no meshes exported for selected surface, aborted \n"); return "";
+       }
+       
+        string $globalGrps = `createNode "transform" -n"GMHSurface_mesh_grp"`;
+         if ($groupFlag ==1) // put all surface grp into a global export group
+             { parent $globalExportGrps ("GMHSurface_mesh_grp");}
+          else // if group flag == 0 then put all converted curves into a global curves
+     {
+          if (size($globalExportMeshes)>1)
+                   {
+                      select $globalExportMeshes;string $tmps[] = `polyUnite -ch 0 -mergeUVSets 1`;
+                      string $tmps2 = `rename ("GMHSurface_meshes")`;
+                      PDD_appendStringToStringArray($tmps2,$globalExportGrps); 
+                   }
+                   else
+                   {
+                        PDD_appendStringArrayToStringArray($globalExportMeshes,$globalExportGrps); 
+                       
+                   }
+                   
+         parent $globalExportGrps ("GMHSurface_mesh_grp"); }
+            select   $globalGrps; 
+       
+       if ($FBXFlag ==1)
+      { file -force -options "" -typ "FBX export" -es ($path+"_meshes.fbx");
+      print ("Export Meshes to "+($path+"_meshes.fbx")+", successed ! \n");
+      }
+       
+       if ($OBJFlag ==1)
+       {file -force -options ("groups="+$groupFlag+";ptgroups="+$groupFlag+";materials=0;smoothing=0;normals=0" )
+       -typ "OBJexport" -es ($path+"_meshes.obj");
+       print ("Export Meshes to "+($path+"_meshes.obj")+", successed ! \n");
+       }
+ 
+        
+        delete $globalGrps;
+        return $path;
+    
+            
+    
+}
+//testing command
+//select -r pPlane2 ;
+//select -tgl pPlane3 ;
+//GMH2_exportMeshFromSurfaces($path,`ls-sl`,$FBXFlag, $OBJFlag,0);
+global proc string GMH2_exportMeshFromMaterials( string $path,string $materials[],int $FBXFlag, int $OBJFlag, int $groupFlag)
+{
+    
+    string $globalExportGrps[]; clear ($globalExportGrps);
+    string $globalExportMeshes[]; clear ($globalExportMeshes);
+   string $globalUniteMeshes[]; clear $globalUniteMeshes;
+    for ($material in $materials)
+    {
+                     //string $material = "UniqueColorBaseMat_0";
+                string $connectedGeos[] = PDD_NodesFromConnection2($material,"GMHMaterial","out");
+                // material check 
+                if (size($connectedGeos) <1) {print ("no meshes exported for "+$material+", ignored \n");}
+                else
+                {
+                // get stroke lists
+                string $materialMeshes[] ; clear $materialMeshes;
+                string $strokeLists[];clear ($strokeLists);
+                for ($strokeGeo in $connectedGeos)
+                {
+                    if (`attributeExists "GMHStrokeLevel" $strokeGeo`) // filter out stroke geo
+                    {
+                         select $strokeGeo; 
+                         string $exportMeshes[] = `duplicate -n ($strokeGeo+"_mesh")`;
+                      PDD_appendStringArrayToStringArray($exportMeshes,$strokeLists);
+                      PDD_appendStringArrayToStringArray($exportMeshes,$globalExportMeshes);
+                      PDD_appendStringArrayToStringArray($exportMeshes,$materialMeshes);
+                    }
+                }
+                
+                // put stroke group into each material group
+                 if ($groupFlag ==1)
+                    {
+                        if ( size ($strokeLists) >=1)
+                        {
+                        select $strokeLists;
+                        string $group = `group -n($material+"_grp")`;
+                        PDD_appendStringToStringArray($group,$globalExportGrps);
+                        }
+                    } 
+                         else // if group Flag == 0
+               {
+
+                      select $materialMeshes;
+                       if (size($materialMeshes)>1)
+                      {clear $materialMeshes; $materialMeshes = `polyUnite -ch 0 -mergeUVSets 1`;
+                       $materialMeshes[0] = `rename ($material+"_meshes")`;}
+                      PDD_appendStringArrayToStringArray($materialMeshes,$globalUniteMeshes); 
+               }
+               }// end of material check
+    }// end of each material loop
+   
+       // put all material into a global export group
+        if (size($globalExportMeshes) <1)
+       {
+             warning ("no meshes exported for selected materials, aborted \n"); return "";
+       }
+       
+        string $globalGrps = `createNode "transform" -n"GMHMaterial_mesh_grp"`;
+         if ($groupFlag ==1) // put all surface grp into a global export group
+             { parent $globalExportGrps ("GMHMaterial_mesh_grp");}
+          else // if group flag == 0 then put all converted curves into a global curves
+     {parent $globalUniteMeshes ("GMHMaterial_mesh_grp"); }
+            select   $globalGrps; 
+       
+       if ($FBXFlag ==1)
+      { file -force -options "" -typ "FBX export" -es ($path+"_meshes.fbx");
+      print ("Export Meshes to "+($path+"_meshes.fbx")+", successed ! \n");
+      }
+       
+       if ($OBJFlag ==1)
+       {file -force -options ("groups="+$groupFlag+";ptgroups="+$groupFlag+";materials=0;smoothing=0;normals=0" )
+       -typ "OBJexport" -es ($path+"_meshes.obj");
+       print ("Export Meshes to "+($path+"_meshes.obj")+", successed ! \n");
+       }
+ 
+        
+        delete $globalGrps;
+        return $path;
+    
+    
+    
+}
+// testing command
+//select -r UniqueColorBaseMat_2 ;
+//select -tgl UniqueColorBaseMat_0 ;
+//GMH2_exportMeshFromMaterials($path,`ls-sl`,$FBXFlag, $OBJFlag,1);
+
+
+
+
+
+// export Curves of GMH Style System
+global proc string GMH2_exportMeshFromStyleSystem(string $path,string $GMHstyleSystems[],int $FBXFlag, int $OBJFlag, int $groupFlag)
+{
+    
+      string $globalExportGrps[]; clear ($globalExportGrps);
+    string $globalExportMeshes[]; clear ($globalExportMeshes);
+   string $globalUniteMeshes[]; clear ($globalUniteMeshes);
+   int $counter = 0;
+    for ($GMHstyleSystem in $GMHstyleSystems)
+    {
+        //string $GMHstyleSystem="ShortFloat_GMHStyleSystem";
+       // print ("checking "+$GMHstyleSystem +" \n");
+        int $PolyStyleFlag = `getAttr ($GMHstyleSystem+".GMH_polyStyleSystem")`;
+        string $exportMainGrps[]; clear ($exportMainGrps);
+        string $styleSystemMeshs[]; clear ($styleSystemMeshs);
+
+                // export stroke output geo.
+                string $strokeGeos[] = PDD_NodesFromConnection2($GMHstyleSystem,"outMeshStrokes","out");
+                
+                if (size($strokeGeos) <1){ print ("no Meshes exported for "+$GMHstyleSystem+", ignored \n");}
+                else
+                {
+                    select $strokeGeos;//print ("convereted meshes =\n");
+                    duplicate; string $convertedMeshes[] = `ls-sl`;
+                   // print $convertedMeshes;
+                    PDD_appendStringArrayToStringArray($convertedMeshes,$globalExportMeshes);
+                    PDD_appendStringArrayToStringArray($convertedMeshes,$exportMainGrps);
+                    PDD_appendStringArrayToStringArray($convertedMeshes,$styleSystemMeshs);
+         
+                                
+                
+       // print ( "export main grps = ") ; print $exportMainGrps ; print ("\n");
+             if ($groupFlag ==1)
+             { 
+                 if (size ($exportMainGrps) >=1)
+                     {select $exportMainGrps;
+                       string $group = `group -n($GMHstyleSystem+"_grp")`;
+                       PDD_appendStringToStringArray($group,$globalExportGrps);}
+               }
+               else // if group Flag == 0
+               {
+                  
+                   {
+                      select $styleSystemMeshs;
+                       if (size($styleSystemMeshs)>1)
+                      {clear $styleSystemMeshs; $styleSystemMeshs = `polyUnite -ch 0 -mergeUVSets 1`;
+                       $styleSystemMeshs[0] = `rename ($GMHstyleSystem+"_meshes")`;}
+                      PDD_appendStringArrayToStringArray($styleSystemMeshs,$globalUniteMeshes); 
+                   }
+               }
+               
+                      }// end of Style System check
+               
+    }// end of each system loop
+    
+         if (size($globalExportMeshes) <1)
+       {
+             warning ("no meshes exported for selected GMH Style System, aborted \n"); return "";
+       }
+       
+        string $globalGrps = `createNode "transform" -n"GMHStyleSystem_mesh_grp"`;
+         if ($groupFlag ==1) // put all surface grp into a global export group
+             { parent $globalExportGrps ("GMHStyleSystem_mesh_grp");}
+          else // if group flag == 0 then put all converted curves into a global curves
+     {parent $globalUniteMeshes ("GMHStyleSystem_mesh_grp"); }
+            select   $globalGrps; 
+       
+       if ($FBXFlag ==1)
+      { file -force -options "" -typ "FBX export" -es ($path+"_meshes.fbx");
+      print ("Export Meshes to "+($path+"_meshes.fbx")+", successed ! \n");
+      }
+       
+       if ($OBJFlag ==1)
+       {file -force -options ("groups="+$groupFlag+";ptgroups="+$groupFlag+";materials=0;smoothing=0;normals=0" )
+       -typ "OBJexport" -es ($path+"_meshes.obj");
+       print ("Export Meshes to "+($path+"_meshes.obj")+", successed ! \n");
+       }
+ 
+        
+        delete $globalGrps;
+        return $path;
+}
+//test command
+//select -r A_GMHPolyStyleSystem ;
+//select -tgl C_GMHStyleSystem ;
+//GMH2_exportMeshFromStyleSystem($path,`ls-sl`,$FBXFlag, $OBJFlag,1);
+
+//string $path = "D:/Dropbox/ENV/SCRIPT/THUNDERCLOUD/GMH2/scenes/test";
+//string $GMHstyleSystem = "A_GMHPolyStyleSystem";
+//int $FBXFlag =1; int $OBJFlag =1; int $groupFlag =1;

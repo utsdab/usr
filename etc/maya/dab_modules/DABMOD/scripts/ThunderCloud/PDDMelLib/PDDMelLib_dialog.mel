@@ -1,0 +1,25 @@
+global proc PDD_messageDialog(string $message )
+{
+    confirmDialog -title "Message" -message $message
+    -button "OK"-defaultButton "OK"
+    -cancelButton "OK" -dismissString "OK";
+    
+}
+
+global proc string PDD_promtDialog(string $title,string $message,string $textFieldDefault)
+{
+    string $text ="";
+string $result = `promptDialog
+    -title $title
+    -message $message
+    -text $textFieldDefault
+    -button "OK" -button "Cancel"
+    -defaultButton "OK" -cancelButton "Cancel"
+    -dismissString "Cancel"`;
+
+if ($result == "OK") {
+    $text = `promptDialog -query -text`;
+}
+
+return $text;    
+}

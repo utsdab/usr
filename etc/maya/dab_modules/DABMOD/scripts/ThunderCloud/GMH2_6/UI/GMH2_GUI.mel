@@ -1,0 +1,157 @@
+//==============================GMH2_GUI.mel======================
+//this is the main proc to create GMH2 UI main window. 
+
+//create_GMHwindow(1);
+//tabLayout -e -sti 5 "GMH2MainTabLayout";
+
+global proc create_GMHwindow(int $showPolyStyleControl)
+{
+    global string $g_GMH2Dir;
+         int $width =420;int $height = 750;
+ string $version = "v2.6";string $title = ("TCS - GMH2 "+$version);
+            int $debugFlag = 0;
+            string $window = "GMH2Window";  
+            
+            //docking
+            int	$floating	= 1;		// 0=docked		1=floating
+	        string	$defaultDockArea = "left";	// "top", "left", "bottom", "right";
+            string $dock	= $window +"dock";
+	        if( `dockControl -exists $dock` )
+		    deleteUI $dock;
+		    
+            //Window
+         if (`window -exists $window`) deleteUI $window;
+            window -title $title -w $width $window;
+
+         columnLayout -w $width -rowSpacing 0;
+           string $imagePath = PDD_getValidScriptPath($g_GMH2Dir+"graphic/GMH2_banner.png");
+           iconTextButton  -image  $imagePath  -c"showHelp -absolute \"http:\/\/www.thundercloud-studio.com\";";
+           flowLayout -w $width -columnSpacing 2 ;
+        //   string $imagePath = PDD_getValidScriptPath("THUNDERCLOUD/GMH2/graphic/online_tut.png");
+          // symbolButton -image $imagePath -c"showHelp -absolute \"http:\/\/www.thundercloud-studio.com/main.php?page=mainGallery.php&Dir=tutorial/#GMH\";";
+          iconTextButton -bgc 0.406012 0.295354 0.0982681  -fn "boldLabelFont" -width 120 -style "textOnly" -l "GMH2 homePage" -c "showHelp -absolute \"http:\/\/www.thundercloud-studio.com/?header=GMH2homepage\";";
+             iconTextButton -bgc 0.361 0.262613 0.087362  -fn "boldLabelFont" -width 120 -style "textOnly" -l "Tutorials" -c "showHelp -absolute \"http:\/\/www.thundercloud-studio.com/?header=GMH2Tutorials\";";
+             iconTextButton -bgc 0.361 0.262613 0.087362 -fn "boldLabelFont" -width 100 -style "textOnly"  -l "Manual" -c "showHelp -absolute \"http:\/\/www.thundercloud-studio.com/?header=GMH2Manual\";";
+             iconTextButton -bgc 0.361 0.262613 0.087362 -fn "boldLabelFont" -width 80 -style "textOnly"  -l "About" -c( "GMH2_GUI_createAboutWindow_commandUI(\""+$version+"\");");
+        //checkBox -l "Debug Mode" -vis 0 "debugCheckBox";
+        
+        setParent ..;
+        
+        
+        string $command = "int $showPolyStyleControl = `checkBox -q -v \"polyStyleControlCheckBox\"`; create_GMHwindow($showPolyStyleControl);";
+           checkBox -l"show Poly Style control" -v $showPolyStyleControl -cc $command -bgc  0.10143 0.203054 0.322 -w $width "polyStyleControlCheckBox";
+        
+        
+        string $tabs = `tabLayout -innerMarginWidth 1 -innerMarginHeight 1 -w $width "GMH2MainTabLayout"`;
+
+                //GMH CREATION LAYOUT
+                setParent $tabs;
+                columnLayout "GMH2mainColumnLayout";
+                create_GMHStyleTable();
+                setParent "GMH2mainColumnLayout";
+               create_GMHSurfaceTable();
+                setParent "GMH2mainColumnLayout";
+                 if (`checkBox -q -v "polyStyleControlCheckBox"` ==1)
+            GMH2_GUICreateStyleSystemUVButton_commandUI();
+            
+                tabLayout -e -tl "GMH2mainColumnLayout" "Creation" $tabs;
+        
+        
+
+                //GMH EDIT            
+                setParent $tabs;    
+               columnLayout "GMHEditColumnLayout";
+                 createGMHSurfaceEditButtons();
+                tabLayout -e -tl "GMHEditColumnLayout" "Surfaces Edit" $tabs;
+                  
+                  //GMH MATERIAL
+                if (`checkBox -q -v "polyStyleControlCheckBox"` ==1)
+                {
+                setParent $tabs;    
+                string $GMHMaterialColumnLayout = `columnLayout "GMHMaterialColumnLayout"`;
+                 createGMHMaterialUI();
+                tabLayout -e -tl $GMHMaterialColumnLayout "Material" $tabs;
+                }
+                  
+                  // GMH DYNAMIC
+                setParent $tabs; 
+                string $GMHDynamicColumnLayout = `columnLayout "GMHDynamicColumnLayout"`;
+                createGMHDynamicButtons();
+                tabLayout -e -tl $GMHDynamicColumnLayout "Dynamic" $tabs;
+                
+                 // GMH EXPORT
+                setParent $tabs; 
+                string $GMHExportColumnLayout = `columnLayout "GMHExportColumnLayout"`;
+                createGMHExportButtons();
+                tabLayout -e -tl $GMHExportColumnLayout "Export" $tabs;
+                
+                 // GMH BAKING
+                if (`checkBox -q -v "polyStyleControlCheckBox"` ==1)
+                {
+                setParent $tabs; 
+                string $GMHExportColumnLayout = `columnLayout "GMHBakingColumnLayout"`;
+                GMH2_GUICreateBakingButtons();
+                tabLayout -e -tl $GMHExportColumnLayout "Baking / UV " $tabs;
+                }
+        
+          /*  
+    
+                    //GMH CACHING
+                setParent $tabs; 
+                 string $GMHCacheScrollLayout = `scrollLayout
+                -horizontalScrollBarThickness 16
+                -verticalScrollBarThickness   16 "GMHCacheScrollLayout"`;
+         
+        tabLayout -e -tl $GMHCacheScrollLayout "GMH Cache" $tabs;
+      
+         
+        */
+        
+        //update all the scroll List
+        updateGUI($debugFlag); 
+        
+         window -e -widthHeight $width $height -s true $window;
+        showWindow $window;
+        
+       
+        dockControl
+        -r              
+		-area			$defaultDockArea
+		-floating		$floating
+		-content		$window
+		-allowedArea	"left"
+		-allowedArea	"right"
+		-label			$title
+		$dock;
+}
+global proc GMH2_GUI_createAboutWindow_commandUI(string $version)
+{
+     global string $g_GMH2Dir;
+    string $window = "GMH2AboutWindow";
+    if (`window -ex $window`) deleteUI $window;
+    
+    int $width = 250; int $height = 250;
+    window -t "GMH2 about" -tb 1 -mnb 0 -mxb 0 -width $width -height $height -bgc  0.194 0.169726 0.126488 -tlb 1 -sizeable 0 $window;
+    
+    frameLayout -mh 20 -mw 50 -lv 0;
+  rowColumnLayout -numberOfColumns 1 -rowSpacing 1 10;
+             string $imagePath = PDD_getValidScriptPath($g_GMH2Dir+"graphic/GMHIcon.png");
+           iconTextButton  -image  $imagePath  -c "showHelp -absolute \"http:\/\/www.thundercloud-studio.com/?header=GMH2homepage\"";
+           text -fn "boldLabelFont" -l "GEO TO MAYA HAIR SCRIPT";
+           text -l"Developed by";
+           text -fn "boldLabelFont" -l "Phung Dinh Dzung";
+           text -l ("Version: "+$version);
+                
+                
+           text -l ("This is a beta test version of GMH2.6. \n It is distributed exclusively among Beta\n testers of GMH2.6. Please support the \n author and development of GMH2 by \n not sharing  the software or uploading it \n anywhere for public download");
+           
+             string $imagePath = PDD_getValidScriptPath($g_GMH2Dir+"graphic/ThunderCloudLogo.png");
+           iconTextButton  -h 80 -image  $imagePath  -c "showHelp -absolute \"http:\/\/www.thundercloud-studio.com\"";
+           
+    
+    
+    window -e -width $width -height $height $window;
+    showWindow $window;
+}
+//create_GMHwindow;
+//GMH2_GUI_createAboutWindow_commandUI("2.6");

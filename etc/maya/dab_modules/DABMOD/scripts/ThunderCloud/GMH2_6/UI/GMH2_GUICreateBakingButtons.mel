@@ -1,0 +1,262 @@
+//========== GMH2_GUICreateBakingButtons.mel ===============
+
+
+global proc GMH2_GUICreateBakingButtons()
+{
+    int $tableWidth = 420;
+    int $UVPreviewSLotWidth = 250;
+      frameLayout -lv 0 -l"" -w $tableWidth "mainBakingFrameLayout";
+  
+    frameLayout -lv 1 -l"Bake"  -cll 1 "GMH2_childBakeFrameLayout";
+    
+          
+      flowLayout -w $tableWidth;
+        //path
+         text -l"         Path ";
+         textField -text"Select a path to export"-w 300 "GMHBakingPathField"; button -l"SET" -c"GMH2_GUIExport_setBakingPath_commandUI" -w 50;
+         setParent ..;
+        // name     
+         flowLayout -w $tableWidth;    
+         text -l"  FileName ";                                  
+         textField -w 140 -en 1 "GMHExportFileNameField_baking"; // checkBox -l"Auto Name" -v 1 -cc $autoNameCheckBoxCommand    "GMH2AutoNameBakingCheckBox"; //text -l"  Leave blank for auto name" -en 0;
+          
+    
+                
+   
+                
+                // map type check boxes
+    setParent "GMH2_childBakeFrameLayout"  ;
+    frameLayout -l"Map to bake" -h 50;
+      flowLayout -w $tableWidth;
+      checkBox -l"Shaded/lit map" "shadedCheckBox" ; //litAndShadedRGB
+      checkBox -l"Normal map" "normalCheckBox";//normal
+      checkBox -l"Alpha map" "alphaCheckBox"; //alpha
+      checkBox -l"Diffuse map" "diffuseRGBCheckBox";//diffuseRGB
+      checkBox -l"Displacement map" "displacementCheckBox";//displacement
+                
+         // texture size
+    setParent "GMH2_childBakeFrameLayout";
+    
+    frameLayout -l"Texture Size" -collapsable 1 "GMH2_textureSizeFrameLayout";
+      flowLayout -w $tableWidth   ;
+          string $command ="int $GMH2TextureWidth = `intSliderGrp -q -v \"GMH2TextureBakingWidthSlider\"`; intSliderGrp -e -v $GMH2TextureWidth \"GMH2TextureBakingHeightSlider\";";
+        
+        //  intSliderGrp -l"Width  " -min 256 -max 8192 
+       //  -f 1 -s 256  -cw4 140 50 280 50-w 400 -el" px" -v 2048 -dc $command "GMH2TextureBakingWidthSlider";
+       
+      string $command =( "PDD_createIntSliderEnum_Command(\"GMH2TextureBakingWidthSlider\",{\"128 px\",\"256 px\",\"512 px\",\"1024 px\",\"2048 px\",\"4096 px\",\"8192 px\"});"
+                          +" intSliderGrp -e -v (`intSliderGrp -q -v \"GMH2TextureBakingWidthSlider\"`) \"GMH2TextureBakingHeightSlider\";"
+                          + "PDD_createIntSliderEnum_Command(\"GMH2TextureBakingHeightSlider\",{\"128 px\",\"256 px\",\"512 px\",\"1024 px\",\"2048 px\",\"4096 px\",\"8192 px\"});");
+      intSliderGrp -l"Width  " -min 1 -max 7 -f 1 -s 1  -cw4 140 0 260 50 -w 380 -el "1024 px" -v 4 -dc $command   "GMH2TextureBakingWidthSlider";
+    
+    setParent "GMH2_textureSizeFrameLayout";
+      flowLayout -w $tableWidth  ;
+      string $command = "PDD_createIntSliderEnum_Command(\"GMH2TextureBakingHeightSlider\",{\"128 px\",\"256 px\",\"512 px\",\"1024 px\",\"2048 px\",\"4096 px\",\"8192 px\"});";
+      intSliderGrp -l"Height  " -min 1 -max 7 -f 1 -s 1  -cw4 140 0 260 50 -w 380 -el "1024 px" -v 4 -dc $command "GMH2TextureBakingHeightSlider";
+     
+     // sample quality
+     setParent "GMH2_childBakeFrameLayout";
+    frameLayout -l"Sampling quality" -collapsable 1 "GMH2_sampleFrameLayout";
+      flowLayout -w $tableWidth;
+      
+      string $command = ("float $GMH2_floatSliderMax = ((`floatSliderGrp -q -v \"GMH2_searchDistance_slider\"`)*1.3); if( $GMH2_floatSliderMax <=20) $GMH2_floatSliderMax =20;"
+                          +"floatSliderGrp -e -max $GMH2_floatSliderMax \"GMH2_searchDistance_slider\" ;"
+                          );
+      floatSliderGrp -l"Ray Distance" -min 0 -max 20 -v 0 -f 1 -el "( 0 = infinite )" -cw4 140 40 280 50 -w 400 -cc $command "GMH2_searchDistance_slider";
+      setParent ..;
+      
+      string $command = "PDD_createIntSliderEnum_Command(\"samplingQualitySlider\",{\"preview\",\"low\",\"medium\",\"high\"});";
+      intSliderGrp -l"Sampling Quality" -min 1 -max 4 -s 1 -w 400 -v 1 -el"preview" -dc $command "samplingQualitySlider";
+
+          // filter size
+    setParent "GMH2_sampleFrameLayout";
+     flowLayout -w $tableWidth;
+       intSliderGrp -l"    Filter Size  " -min 1 -max 8 
+     -f 1 -s 1  -cw4 140 40 280 50 -w 400 -el" px" -v 2   "GMH2TextureBakingFilterSizeSlider";
+            
+     
+                // Baking button
+        setParent "GMH2_childBakeFrameLayout";
+        button -l"Bake Maps" -bgc  0.188159 0.54902 0.129181 -h 30 -w ($tableWidth-20) -c"GMH2_BakeMaps_commandUI();";        
+     
+
+     
+
+             //UV editor
+       setParent "mainBakingFrameLayout";
+      frameLayout -lv 1 -l"UV" -w $tableWidth -cll 1 "bakingUVFrameLayout";
+      
+     flowLayout -w $tableWidth;
+     
+     frameLayout -lv 0 -l"UVAttrs" -w ($tableWidth - $UVPreviewSLotWidth -10) "bakingUVAttrFrameLayout";
+     button -l"Create UVSheet \n of selected surfaces" -w 120 -h 50 -c"GMH2_createAndMoveUVToEntrySlot_commandUI();";
+     checkBox -l"Auto UV"  -cc "GMH2_autoUVCheckBox_command();" "GMH2Baking_autoUVCheckBox";   
+      setParent ..;
+      GMH2_createUVPreviewSlot(250,4,"GMH2_UVPreviewSlot1",1);
+             
+             
+             
+             
+    //GMH2_setMaxFieldValueBaseOnOtherFieldValue("slotWidthField","slotTotalField");
+}
+
+global proc GMH2_autoUVCheckBox_command()
+{
+
+
+        columnLayout -e -vis( !`checkBox -q -v "GMH2Baking_autoUVCheckBox"`) "GMH2_UVPreviewSlot1_content";
+
+}
+
+global proc GMH2_createAndMoveUVToEntrySlot_commandUI()
+{
+    if (!`checkBox -q -v "GMH2Baking_autoUVCheckBox"`)
+    {
+        string $surfaces[] = `ls-sl`;
+        int $tmps_int[] = GMH2_querryUVPreviewSlotAttr("GMH2_UVPreviewSlot1");
+        int $entrySlot = $tmps_int[0];
+        int $entryWidth = $tmps_int[1];
+         int $totalEntry = $tmps_int[2];
+        
+        if ($entryWidth!=0)
+        {
+        for ($eachSurface in $surfaces)
+        GMH2_createAndMoveUVToEntrySlot( $eachSurface, $entrySlot, $entryWidth, $totalEntry);
+        }
+        
+        if (size($surfaces)>=1)
+        {select $surfaces;
+        DeleteHistory;}
+    }
+    else
+    {
+          string $surfaces[] = `ls-sl`;
+           if (size($surfaces)>=1)
+           {
+               GMH2_createAndMoveUVToEntrySlot_multiCommand();
+               select $surfaces;
+                DeleteHistory;
+               
+           }
+           
+        
+    }
+}
+
+
+global proc PDD_createIntSliderEnum_Command(string $sliderControlName, string $enum[])
+{
+   // string $sliderControlName ="samplingQualitySlider";
+    int $sliderMinValue = `intSliderGrp -q -min $sliderControlName`;
+    int $sliderMaxValue = `intSliderGrp -q -max $sliderControlName`;
+    int $sliderStepValue = `intSliderGrp -q -step $sliderControlName`;
+    int $currentValue = `intSliderGrp -q -v $sliderControlName`;
+    
+    int $counter =0;int $counter2 = 0;
+    for ($counter = $sliderMinValue; $counter <= $sliderMaxValue;$counter+=$sliderStepValue)
+    {
+       //  print ($counter +"\n");
+         if ($currentValue ==$counter)intSliderGrp -e -el ($enum[$counter2]) $sliderControlName;
+           
+         if ($counter2 > size($enum)) break;
+         $counter2++;
+    }
+    
+    
+}
+
+global proc int GMH2_BakeMaps_commandUI()
+{
+    string $selections[] = `ls-sl`;
+    string $fileName = `textField -q -text "GMHExportFileNameField_baking"`;
+    string $path = `textField -q -text "GMHBakingPathField"`;
+    string $mapToBakeLists[]; clear $mapToBakeLists;
+    float $searchDistance = `floatSliderGrp -q -v "GMH2_searchDistance_slider"`;
+    if (`checkBox -q -v  "shadedCheckBox"`) PDD_appendStringToStringArray("litAndShadedRGB",$mapToBakeLists);
+    if (`checkBox -q -v  "normalCheckBox"`) PDD_appendStringToStringArray("normal",$mapToBakeLists);
+    if (`checkBox -q -v  "alphaCheckBox"`) PDD_appendStringToStringArray("alpha",$mapToBakeLists);
+    if (`checkBox -q -v  "diffuseRGBCheckBox"`) PDD_appendStringToStringArray("diffuseRGB",$mapToBakeLists);
+    if (`checkBox -q -v  "displacementCheckBox"`) PDD_appendStringToStringArray("displacement",$mapToBakeLists);
+    
+    int $textureWidth ;
+    int $textureWidthValue = `intSliderGrp -q -v "GMH2TextureBakingWidthSlider"`;
+    if ($textureWidthValue ==1 ) $textureWidth = 128;
+    if ($textureWidthValue ==2 ) $textureWidth = 256;
+    if ($textureWidthValue ==3 ) $textureWidth = 512;
+    if ($textureWidthValue ==4 ) $textureWidth = 1024;
+    if ($textureWidthValue ==5 ) $textureWidth = 2048;
+    if ($textureWidthValue ==6 ) $textureWidth = 4096;
+    if ($textureWidthValue ==7 ) $textureWidth = 8192;
+    
+    int $textureHeight ;
+    int $textureHeightValue = `intSliderGrp -q -v "GMH2TextureBakingHeightSlider"`;
+    if ($textureHeightValue ==1 ) $textureWidth = 128;
+    if ($textureHeightValue ==2 ) $textureWidth = 256;
+    if ($textureHeightValue ==3 ) $textureWidth = 512;
+    if ($textureHeightValue ==4 ) $textureWidth = 1024;
+    if ($textureHeightValue ==5 ) $textureWidth = 2048;
+    if ($textureHeightValue ==6 ) $textureWidth = 4096;
+    if ($textureHeightValue ==7 ) $textureWidth = 8192;
+    
+    
+    int $superSampling = `intSliderGrp -q -v "samplingQualitySlider"`;
+    int $filterSize = `intSliderGrp -q -v "GMH2TextureBakingFilterSizeSlider"`;
+    
+    
+    
+    //checking options
+        if ($fileName =="") {confirmWindow2("Error","Please specify file name","",1); return 0;}
+        if (!`filetest -d $path`) {confirmWindow2("Error","Please specify a valid path","",1); return 0;}
+        if (size ($mapToBakeLists) <1){confirmWindow2("Error","Please select at least one map to bake","",1); return 0;}
+        if (size($selections)<1){confirmWindow2("Error","Please select at least one GMH Surface to bake","",1); return 0;}
+    
+    
+    
+    print ("Baking Map : \n"); print ("Setting: Width = "+$textureWidth+" Height = "+$textureHeight+" Sampling Quality = " +$superSampling+" filterSize = "+$filterSize+" \n");
+    
+
+     
+    for ($eachMap in $mapToBakeLists)
+    { print ("< "+ $eachMap +" > ");
+   int $i =0; for ($i=0;$i<=(15-(size($eachMap)));$i++)print " ";
+   print ("path <"+$path+"/"+$fileName+"_"+$eachMap+".tga>\n");
+   
+   
+
+   
+    
+    string $fullPath = $path +"/"+$fileName+"_"+$eachMap+"";
+    int $result = GMH2_bakeGMHSurface($selections,$fullPath,$eachMap,$textureWidth,$textureHeight,$superSampling, $filterSize,$searchDistance);
+    if ($result ==1) print ("success ! \n");
+    
+    
+    }
+    
+    
+    return 1;
+}
+//testing command
+//GMH2_BakeMaps_commandUI();
+
+
+global proc int GMH2_GUIExport_setBakingPath_commandUI()
+{
+     string $paths[] = `fileDialog2 -fm 0 -ff "tga" -dialogStyle 2 -okc "SET"`;
+    if ( $paths[0] == "") return 0;
+    if ( $paths[0] != "")
+    {
+        textField -e -text (PDD_pathExtract($paths[0])) "GMHBakingPathField";
+        
+        textField -e -text (basename($paths[0],".tga")) "GMHExportFileNameField_baking";
+        return 1;
+    }
+    return 1;
+    
+    
+}
+
+
+
+
+
+//create_GMHwindow();tabLayout -e -sti 6 "GMH2MainTabLayout";

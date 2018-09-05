@@ -1,0 +1,22 @@
+//====================PDDMelLib_control.mel============
+
+global proc string PDD_createCtrlBox(string $name,float $radius,float $posX,float $posY, float $posZ,int $color)
+{
+    
+curve -d 1 -p 2.108538 1.12868e-007 2.015637 -p 2.108538 1.12868e-007 -2.086493 -p -1.993592 1.12868e-007 -2.086493 -p -1.993592 1.12868e-007 2.015637 -p 2.108538 1.12868e-007 2.015637 -p 2.108538 4.102131 2.015637 -p 2.108538 4.102131 -2.086493 -p 2.108538 1.12868e-007 -2.086493 -p 2.108538 4.102131 -2.086493 -p -1.993592 4.102131 -2.086493 -p -1.993592 1.12868e-007 -2.086493 -p -1.993592 4.102131 -2.086493 -p -1.993592 4.102131 2.015637 -p -1.993592 1.12868e-007 2.015637 -p -1.993592 4.102131 2.015637 -p 2.108538 4.102131 2.015637 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 ;
+CenterPivot;
+move -rpr 0 0 0; 
+scale -r 0.259142 0.259142 0.259142 ;
+scale -r $radius $radius $radius ;
+string $result = `rename  $name`;
+
+move -rpr ($posX) ($posY) ($posZ) $result;
+
+makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 -pn 1;
+DeleteHistory;
+
+setAttr ($result+".overrideEnabled") 1;
+setAttr ($result+".overrideColor") $color;
+
+    return $result;
+}

@@ -1,0 +1,49 @@
+//=======================GMH_createGMHMainGroup.mel
+global proc string CreateGMHMainGroup(string $name,int $debugFlag)
+{
+            //create node
+                        
+            
+			string $GMHMainGroup = `container -type dagContainer -ind "history" -ind "channels" -n ($name+"_GMHSurface")`;
+			
+			  global string $g_GMH2Dir;
+        string $GMHIconPath = PDD_getValidScriptPath($g_GMH2Dir+"graphic/GMH_mainGrp_icon.png");
+            setAttr -type "string" ($GMHMainGroup+".iconName") $GMHIconPath;
+            
+			//add attributes
+			addAttr -ln "GMH_StyleMainGroupIn"  -at double $GMHMainGroup;
+			addAttr -ln "GMH_MainGroup"  -at double $GMHMainGroup;
+			addAttr -ln "GMH_outPolySurfaceShape"  -at double $GMHMainGroup;
+			addAttr -ln "GMH_outSubDSurfaceShape"  -at double $GMHMainGroup;
+			addAttr -ln "GMH_outNURBSurfaceShape"  -at double $GMHMainGroup;
+			addAttr -ln "GMH_outLeadingCurves"  -at double $GMHMainGroup;
+			addAttr -ln "GMH_outGrowingCurves"  -at double $GMHMainGroup;
+			addAttr -ln "GMH_outStrokes"  -at double $GMHMainGroup;
+			addAttr -ln "GMH_StrokesCurves"  -at double $GMHMainGroup;
+			addAttr -ln "GMH_Follicles"  -at double $GMHMainGroup;
+			addAttr -ln "GMH_OutputCurves"  -at double $GMHMainGroup;
+			addAttr -ln "GMH_OutputCurvesGroup"  -at double $GMHMainGroup;
+			addAttr -ln "GMH_outBaseSurface"  -at double $GMHMainGroup;
+			addAttr -ln "GMH_outNclothOutputSurface"  -at double $GMHMainGroup;
+			addAttr -ln "GMH_outStrokeGrp"  -at double $GMHMainGroup;
+			addAttr -ln "GMH_outStrokeGeoGrp"  -at double $GMHMainGroup;
+            addAttr -ln "GMH_outPolyStrokesGeo"  -at double $GMHMainGroup;
+			
+			
+			//set attributes
+			/*setAttr -lock true -keyable false -channelBox false ($GMHMainGroup+".tx");
+			setAttr -lock true -keyable false -channelBox false ($GMHMainGroup+".ty");
+			setAttr -lock true -keyable false -channelBox false ($GMHMainGroup+".tz");
+			setAttr -lock true -keyable false -channelBox false ($GMHMainGroup+".rx");
+			setAttr -lock true -keyable false -channelBox false ($GMHMainGroup+".ry");
+			setAttr -lock true -keyable false -channelBox false ($GMHMainGroup+".rz");
+			setAttr -lock true -keyable false -channelBox false ($GMHMainGroup+".sx");
+			setAttr -lock true -keyable false -channelBox false ($GMHMainGroup+".sy");
+			setAttr -lock true -keyable false -channelBox false ($GMHMainGroup+".sz");
+			setAttr -lock true -keyable false -channelBox false ($GMHMainGroup+".v");
+			*/
+			
+
+            
+    return $GMHMainGroup;
+}

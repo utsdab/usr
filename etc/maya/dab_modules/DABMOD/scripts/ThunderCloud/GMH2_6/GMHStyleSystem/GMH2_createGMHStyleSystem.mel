@@ -1,0 +1,154 @@
+//===========================GMH2_createGMHStyleSystem.mel===============
+
+//create a universal GMHStyleSystem to assign GMH hair to meshes.
+global proc string createGMHStyleSystem(string $name,int $polyStyleFlag)
+{
+    int $debugFlag = 0;
+    
+    string $Brush = GMH_CreateBrush($name,$polyStyleFlag);//create BRUSH
+                             
+    string $HairSystem[] = create_hair_system($name); //create Maya hair System
+
+     if ($polyStyleFlag ==1) // disable HairDynamic in case of Poly Style System 
+    setAttr ($HairSystem[0]+".simulationMethod") 1;
+                                                                                                            // PDD_debug($debugFlag,$Brush,"get NULLnode");
+      string $dummyStroke = PDD_NodeFromConnection2($Brush,"outBrush","out");//get the dummy stroke created along brush 
+
+
+      
+                                                                                                      //  PDD_debug($debugFlag,$Brush,"creating Style Main Group");
+    /*================================     creating Style Main Group     =====================*/
+    string $styleMainGroup = createStyleMainGroupNode($name,$polyStyleFlag,$debugFlag);
+
+
+       
+       
+    /*================================     connect Attr of GMHstyleMainGroup to GMHStyle Child nodes   =======================*/
+                                                                                                                 PDD_debug($debugFlag,"","conntecting GMHStyle child nodes");
+                            //connect NULL stroke to Brush 
+        PDD_ConnectAttribute($styleMainGroup,"PFXHair",$HairSystem[1],"in_GMH_styleMainGroup",$debugFlag);
+        PDD_ConnectAttribute($styleMainGroup,"MayaHairSystem",$HairSystem[0],"in_GMH_styleMainGroup",$debugFlag);
+        PDD_ConnectAttribute($styleMainGroup,"PFXStyle",$Brush,"in_GMH_styleMainGroup",$debugFlag);
+
+ 
+/*================================     reorganize  Style Main Group  ================================*/
+        
+                                                                                                                 PDD_debug($debugFlag,"","reorganizing");
+                                                                                                                 
+
+        // parent HairSystem to Style Main Group
+
+        
+                // SET UP GLOBAL SCALE ATTRIBUTES
+                 if ($polyStyleFlag !=1)    // CASE of normal GMH style system , showing Hair system and Brush attributes
+            {
+                    addAttr -ln "GMHHairWidth"  -at double  -min 1e-005 -smx 1  -dv 0.1 $HairSystem[0];
+                    addAttr -ln "GMHClumpWidth"  -at double  -min 1e-005 -smx 1  -dv 1 $HairSystem[0];
+                    addAttr -ln "globalScale"  -at double  -min 1e-005 -smx 1  -dv 1 $HairSystem[0];
+            
+                    string $expression = `expression -s ($HairSystem[0]+".hairWidth = "+$HairSystem[0]+".GMHHairWidth*"+$HairSystem[0]+".globalScale") -o $HairSystem[0] -ae 1 -uc all` ;
+                     container -e -includeShapes -includeTransform -force -addNode $expression $styleMainGroup;
+                     
+                      string $expression = `expression -s ($HairSystem[0]+".clumpWidth = "+$HairSystem[0]+".GMHClumpWidth*"+$HairSystem[0]+".globalScale") -o $HairSystem[0] -ae 1 -uc all` ;
+                     container -e -includeShapes -includeTransform -force -addNode $expression $styleMainGroup;
+                    
+                    
+                    select $HairSystem;
+                    select -add $dummyStroke;    //select the transformNode of HairSystem
+                    select -add $Brush;
+         
+                    container -e -includeShapes -includeTransform -force -addNode `ls -sl` $styleMainGroup;
+               container -e -publishAndBind ($Brush+".tubesPerStep") "hairTubeNum" $styleMainGroup;
+                    
+                    container -e -publishAndBind ($HairSystem[0]+".globalScale") "globalScale" $styleMainGroup;
+                    container -e -publishAndBind ($HairSystem[0]+".GMHClumpWidth") "GMHClumpWidth" $styleMainGroup; 
+                     container -e -publishAndBind ($HairSystem[0]+".GMHHairWidth") "GMHHairWidth" $styleMainGroup;
+                     //publish all sub attr to styleMainGroup 
+                    GMH2_publishSubAttrToStyleMainGroup( $styleMainGroup,$HairSystem[0],$Brush);
+            // remove the Hair & clump width attributes from container
+                     container -e -unbindAndUnpublish ($HairSystem[0]+".hairWidth") $styleMainGroup;
+                     container -e -unbindAndUnpublish ($HairSystem[0]+".clumpWidth") $styleMainGroup;
+                       
+                       
+           
+           }
+           else
+           {        // case of poly Style SYstem , showing Brush attributes
+               
+                    select $HairSystem;
+                    select -add $dummyStroke;    //select the transformNode of HairSystem
+                    select -add $Brush;
+                    
+               container -e -includeShapes -includeTransform -force -addNode `ls -sl` $styleMainGroup;
+               container -e -publishAndBind ($Brush+".globalScale") "globalScale" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".brushWidth") "brushWidth" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".tubesPerStep") "hairTubeNum" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".tubeRand") "tubeRandom" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".segments") "tubeSegments" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".tubeSections") "tubeSections" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".lengthMin") "lengthMin" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".lengthMax") "lengthMax" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".flatness1") "BaseFlatness" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".flatness2") "TipFlatness" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".curveFollow") "surfaceFollow" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".curveAttract") "surfaceAttract" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".spiralMin") "spiralMin" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".spiralMax") "spiralMax" $styleMainGroup;
+               
+               container -e -publishAndBind ($Brush+".widthScale") "widthScale" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".tubeWidth1") "tubeWidth1" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".tubeWidth2") "tubeWidth2" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".widthRand") "widthRand" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".displacementDelay") "displacementDelay" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".noise") "noise" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".noiseFrequency") "noiseFrequency" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".noiseOffset") "noiseOffset" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".wiggle") "wiggle" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".wiggleFrequency") "wiggleFrequency" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".wiggleOffset") "wiggleOffset" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".curl") "curl" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".curlFrequency") "curlFrequency" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".twist") "twist" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".twistRate") "curlOffset" $styleMainGroup;
+               container -e -publishAndBind ($Brush+".twistRand") "twistRand" $styleMainGroup;
+               
+               //set UV space to default : 
+               GMH2_setAndCreateUVOfGMH2System($styleMainGroup,0,1,1);
+               
+               
+               
+                              select $styleMainGroup;
+               string $PFXHair = PDD_NodeFromConnection("PFXHair","out",1);
+               delete $PFXHair;
+               
+           }
+
+  /*================================     create container to hold GMH surfaces  ================================*/
+        PDD_debug($debugFlag,"","create surface container");
+                                                                                                                                   
+       string $GMHMainGroupAsset = ` container -type dagContainer -ind "history" -ind "channels" -includeHierarchyBelow -includeTransform -name ($name+"_surfaceGrp")`;
+        addAttr -ln "GMH_inMainGroup"  -at double;
+        connectAttr ($styleMainGroup+".GMH_OutMainGroupAsset")($GMHMainGroupAsset+".GMH_inMainGroup");    
+        
+        
+               //apply material 
+               GMH_createDefaultGMH2Shader();
+               GMH2_assignGMHShaderToGMHStyleSystem($styleMainGroup,"GMH2DefaultShader");
+        
+         
+       //icon
+            //icon name 
+             global string $g_GMH2Dir;
+        string $GMHIconPath = PDD_getValidScriptPath($g_GMH2Dir+"graphic/GMH2Surface_icon.png");
+        setAttr -type "string" ($GMHMainGroupAsset+".iconName") $GMHIconPath;
+
+                setAttr ($GMHMainGroupAsset+".viewMode") 2;
+                
+        parent $GMHMainGroupAsset $styleMainGroup ;
+        
+setAttr ($styleMainGroup+".overrideEnabled") 1;
+setAttr ($styleMainGroup+".overrideDisplayType") 2;
+        
+        
+return $styleMainGroup;
+}

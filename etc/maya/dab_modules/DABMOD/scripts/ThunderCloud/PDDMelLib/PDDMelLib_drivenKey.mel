@@ -1,0 +1,91 @@
+//PDDMelLib_drivenKey.mel
+
+
+//set driven key of driver and driven given both attributes and option to set driven key at 0 value
+global proc int PDD_setDrivenKey(string $driver,string $driverAttribute,float $driverValue, string $driven, string $drivenAttribute, float $drivenValue,int $setZeroValue)
+{
+    float $defaultDriverValue = getAttr ($driver+"."+$driverAttribute);
+    
+    float $defaultDrivenValue = getAttr ($driven+"."+$drivenAttribute);
+    
+    setAttr ($driver+"."+$driverAttribute) $driverValue;
+    
+    setAttr ($driven+"."+$drivenAttribute) $drivenValue;
+    
+setDrivenKeyframe -currentDriver ($driver+"."+$driverAttribute)($driven+"."+$drivenAttribute);
+
+    if ($setZeroValue ==1)
+    {
+            
+        
+    setAttr ($driver+"."+$driverAttribute) 0;
+    
+    setAttr ($driven+"."+$drivenAttribute) 0;
+    
+        
+setDrivenKeyframe -currentDriver ($driver+"."+$driverAttribute)($driven+"."+$drivenAttribute);
+    }
+    
+    
+    setAttr ($driver+"."+$driverAttribute) $defaultDriverValue;
+    
+    setAttr ($driven+"."+$drivenAttribute) $defaultDrivenValue;
+
+    
+    return 1;
+}
+
+
+// define 6 blendshape to corresponde with a ctrlbox to set driven 
+global proc int PDD_setDrivenBlendShapeCtrlBox ( string $ctrlBox,string $blendShapeNode, string $blendShapeUp, string $blendShapeDown, string $blendShapeLeft, string $blendShapeRight, string $blendShapeIn, string $blendShapeOut)
+{
+    float $maxX = getAttr($ctrlBox+".maxTransXLimit");
+    float $minX = getAttr($ctrlBox+".minTransXLimit");
+    
+    float $maxY = getAttr($ctrlBox+".maxTransYLimit");
+    float $minY = getAttr($ctrlBox+".minTransYLimit");
+    
+    float $maxZ = getAttr($ctrlBox+".maxTransZLimit");
+    float $minZ = getAttr($ctrlBox+".minTransZLimit");
+    
+    
+    if ($blendShapeUp !="")
+    {
+        PDD_setDrivenKey($ctrlBox,"translateY",$maxY,$blendShapeNode,$blendShapeUp,1,1);
+        
+    }
+        
+    if ($blendShapeDown !="")
+    {
+        PDD_setDrivenKey($ctrlBox,"translateY",$minY,$blendShapeNode,$blendShapeDown,1,1);
+        
+    }
+            
+    if ($blendShapeLeft !="")
+    {
+        PDD_setDrivenKey($ctrlBox,"translateX",$minX,$blendShapeNode,$blendShapeLeft,1,1);
+        
+    }
+            
+    if ($blendShapeRight !="")
+    {
+        PDD_setDrivenKey($ctrlBox,"translateX",$maxX,$blendShapeNode,$blendShapeRight,1,1);
+        
+    }
+                
+    if ($blendShapeIn !="")
+    {
+        PDD_setDrivenKey($ctrlBox,"translateZ",$minZ,$blendShapeNode,$blendShapeIn,1,1);
+        
+    }
+                
+    if ($blendShapeOut !="")
+    {
+        PDD_setDrivenKey($ctrlBox,"translateZ",$maxZ,$blendShapeNode,$blendShapeOut,1,1);
+        
+    }
+        
+    
+    
+    return 1;
+}

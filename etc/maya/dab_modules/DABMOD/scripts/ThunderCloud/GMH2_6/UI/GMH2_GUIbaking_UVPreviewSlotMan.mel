@@ -1,0 +1,278 @@
+
+//====================GMH2_GUIbaking_UVPreviewSlotMan.mel===============//
+//string $UVPreviewSlot ="GMH_styleSystemUVPreviewSLot"
+global proc GMH2_setUVPreviewSlotAttr(string $UVPreviewSlot, vector $UVAttr)
+{
+  
+  int $totalSlot = ($UVAttr.z);
+  int $entrySlot = ($UVAttr.x);
+  int $entryWidth = ($UVAttr.y);
+  
+ // int $totalSlot = 4;
+ // int $entrySlot = 2;
+ // int $entryWidth = 2;
+  
+  // set total slot
+    GMH2_setUVPreviewSlot($totalSlot,$UVPreviewSlot);
+    
+    // toogle slot
+ GMH2_highlightUVSLots($entrySlot,$entryWidth, $UVPreviewSlot);
+ 
+    
+}
+
+global proc int[] GMH2_querryUVPreviewSlotAttr(string $UVPreviewSlot)
+{
+    
+        int $entrySlots[] = GMH2_getNumberOfSlotAvai($UVPreviewSlot);
+        int $entrySlot = ($entrySlots[0]);
+        int $entryWidth = (size($entrySlots));
+         int $totalEntry = `text -q -l ($UVPreviewSlot+"_totalSlot")`;
+         
+    int $result[];clear $result;
+    
+    $result[0] = $entrySlot;
+    $result[1] = $entryWidth;
+    $result[2] = $totalEntry;
+    
+    return $result;
+}
+
+global proc GMH2_adjustUVPreviewSlotTotal(string $mode,string $UVPreviewSlot)
+{
+     int $currentTotalSlot =  `text -q -l ($UVPreviewSlot+"_totalSlot")`;
+    
+    if ($mode =="add")
+    $currentTotalSlot +=1;
+    
+    if ($mode =="minus")
+    $currentTotalSlot -=1;
+    
+    if( $currentTotalSlot<=0) $currentTotalSlot=1;
+    if( $currentTotalSlot>=21) $currentTotalSlot=21;
+    GMH2_setUVPreviewSlot($currentTotalSlot,$UVPreviewSlot);
+    
+    
+} 
+
+global proc GMH2_setUVPreviewSlot(int $totalSlot,string $UVPreviewSlot)
+{
+    
+   // string $UVPreviewSlot = "GMH2_UVPreviewSlot1";
+    int $width = `text -q -l ($UVPreviewSlot+"_width")`;
+    int $currentTotalSlot =  `text -q -l ($UVPreviewSlot+"_totalSlot")`;
+    
+    // only recreate the content of totalSLot is different 
+    if ($currentTotalSlot != $totalSlot)
+    {
+    //delete the content UI frame
+        if (`columnLayout -ex ($UVPreviewSlot+"_content")`) deleteUI ($UVPreviewSlot+"_content");
+    
+    //recreate only the content frame  
+    setParent $UVPreviewSlot;
+     GMH2_createUVPreviewSlot($width,$totalSlot,$UVPreviewSlot,0);
+     }
+
+}
+// GMH2_setUVPreviewSlot(5,$UVPreviewSlot);
+
+global proc string GMH2_createUVPreviewSlot( int $width, int $totalSlot, string $UVPreviewSlot,int $createMainFrameLayout)
+{
+    string $result;
+    int $slotNumberHeight = 20;
+    int $ButtonHeight = 20;
+  //  frameLayout -marginHeight 0 -lv 0 -l"UVSlotPreview" -ebg 1 -bgc 0 0.5 0  -w $width -h ($width+$slotNumberHeight) $UVPreviewSlot; 
+    
+    vector $deactiveColor = <<0.3,0.3,0.3>>;
+    vector $hiliColor = <<0.8,0.2,0.1>>;
+    vector $SlotLabel_color = <<0.1,0.1,0.1>>;
+    
+    // the slot
+    if ($createMainFrameLayout ==1)
+   {$result = `frameLayout  -lv 0 -w $width -h ($width+$slotNumberHeight+$ButtonHeight+5) $UVPreviewSlot`;}
+    
+    columnLayout  -w $width -h ($width+$slotNumberHeight) ($UVPreviewSlot+"_content");
+     flowLayout  -w ($width+5);
+     
+     int $counter =0;
+     for ($counter =0;$counter<$totalSlot;$counter++)
+     {   
+          string $command = "GMH2_tootleUVSLotContinues("+$counter+",\""+$UVPreviewSlot+"\")"; // toogle state of the button 
+         float $unitSlotWidth = (($width-5)/$totalSlot*1.0) ; // width of button
+             // create button
+             button -w $unitSlotWidth -h $width -en 1 -l""  -ann "inactive"
+             -bgc ($deactiveColor.x)($deactiveColor.y) ($deactiveColor.z)
+             -command $command -aop 1
+             ($UVPreviewSlot+"_slot"+$counter);
+     }
+        
+        
+        // slot number
+     setParent ($UVPreviewSlot+"_content");
+     flowLayout  -w ($width);
+     int $counter =0;
+     for ($counter =0;$counter<$totalSlot;$counter++)
+     {
+         float $unitSlotWidth = (($width-5)/$totalSlot*1.0) ;
+             text -w $unitSlotWidth -h $slotNumberHeight -l $counter -ebg 1 
+              -bgc ($SlotLabel_color.x)($SlotLabel_color.y) ($SlotLabel_color.z) 
+              ($UVPreviewSlot+"_slotLabel"+$counter);
+     }     
+     
+     // slot button 
+     
+     setParent ($UVPreviewSlot+"_content");
+     rowLayout -numberOfColumns 3 -w $width -cl2 "left" "right" -cw ($width*0.5) ($width*0.5);
+     button -w (($width*0.5)) -h $ButtonHeight -l"-" -c("GMH2_adjustUVPreviewSlotTotal(\"minus\",\""+$UVPreviewSlot+"\")") ;
+     button -w (($width*0.5)) -h $ButtonHeight -l"+" -c("GMH2_adjustUVPreviewSlotTotal(\"add\",\""+$UVPreviewSlot+"\")") ;
+     
+     
+     // create UI element to store UV Previewer slot attributes
+     columnLayout ($UVPreviewSlot+"_attributeUI");
+     text -l $totalSlot -vis 0 ($UVPreviewSlot+"_totalSlot");
+     text -l $width -vis 0 ($UVPreviewSlot+"_width");
+     colorSliderGrp -vis 0 -rgbValue ($deactiveColor.x)($deactiveColor.y) ($deactiveColor.z) ($UVPreviewSlot+"_deactiveColor") ;
+     colorSliderGrp -vis 0 -rgbValue ($hiliColor.x)($hiliColor.y) ($hiliColor.z)  ($UVPreviewSlot+"_hiliColor") ;
+             
+     
+    
+    return $result;
+    
+}
+
+global proc int GMH2_tootleUVSLotContinues(int $slotPosition, string $UVPreviewSlot)
+{
+
+GMH2_toogleUVSLot($slotPosition,$UVPreviewSlot); 
+
+if (!`GMH_isUVPreviewSLotContinous($UVPreviewSlot)`)
+GMH2_toogleUVSLot($slotPosition,$UVPreviewSlot); 
+
+        
+        
+        return 1;
+}
+
+global proc int[] GMH2_getNumberOfSlotAvai(string $UVPreviewSlot)
+{
+    int $totalSlot = `text -q -l ($UVPreviewSlot+"_totalSlot")`;
+    int $slotAvai[];clear($slotAvai);
+    int $currentSlot = 0;
+    for ($currentSlot =0; $currentSlot<=($totalSlot-1);$currentSlot++)
+        {
+             string $currentState = `button -q -ann ($UVPreviewSlot+"_slot"+$currentSlot)`;
+             if ($currentState =="active")
+             $slotAvai[size($slotAvai)] = $currentSlot;
+        }
+    return $slotAvai;
+}
+
+//GMH2_getFirstHiliSlot("GMH2_UVPreviewSlot1")
+ //GMH_isUVPreviewSLotContinous("GMH2_UVPreviewSlot1")
+// string $UVPreviewSlot ="GMH2_UVPreviewSlot1"
+ 
+global proc int GMH_isUVPreviewSLotContinous(string $UVPreviewSlot)
+{
+     int $totalSlot = `text -q -l ($UVPreviewSlot+"_totalSlot")`;
+    int $slotAvai1[];clear($slotAvai1);
+    int $currentSlot = 0;
+    int $lock = 0;
+    for ($currentSlot =0; $currentSlot<=($totalSlot-1);$currentSlot++)
+        {
+             string $currentState = `button -q -ann ($UVPreviewSlot+"_slot"+$currentSlot)`;
+            
+             if ($currentState =="active")
+           {  $slotAvai1[size($slotAvai1)] = $currentSlot; $lock =1;}
+             
+               if (    ($lock ==1)    &&    ($currentState =="inactive")    )
+               break;
+        }
+    
+    int $slotAvai2[] = GMH2_getNumberOfSlotAvai($UVPreviewSlot);
+    
+    if (size($slotAvai1) != size($slotAvai2))
+    {
+        return 0;
+    }
+    
+    return 1;
+}
+
+global proc int GMH2_getFirstHiliSlot(string $UVPreviewSlot)
+{
+    
+     int $totalSlot = `text -q -l ($UVPreviewSlot+"_totalSlot")`;
+    int $slotAvai1[];clear($slotAvai1);
+    int $currentSlot = 0;
+    int $lock = 0;
+    for ($currentSlot =0; $currentSlot<=($totalSlot-1);$currentSlot++)
+        {
+             string $currentState = `button -q -ann ($UVPreviewSlot+"_slot"+$currentSlot)`;
+            
+             if ($currentState =="active")
+           {  $slotAvai1[size($slotAvai1)] = $currentSlot; $lock =1;}
+             
+               if (    ($lock ==1)    &&    ($currentState =="inactive")    )
+               break;
+        }
+        return $slotAvai1[0];
+        
+}
+
+global proc GMH2_toogleUVSLot(int $slotPosition, string $UVPreviewSlot)
+{
+    int $totalSlot = `text -q -l ($UVPreviewSlot+"_totalSlot")`;
+    vector $deactiveColor = `colorSliderGrp -q -rgbValue ($UVPreviewSlot+"_deactiveColor")`;
+   vector $hiliColor =  `colorSliderGrp -q -rgbValue ($UVPreviewSlot+"_hiliColor")`;
+    
+    
+    // change color of hili button list
+    string $state = `button -q -ann ($UVPreviewSlot+"_slot"+$slotPosition)`;
+    if ($state =="inactive")   { button -e -bgc ($hiliColor.x)($hiliColor.y)($hiliColor.z) -ann"active" ($UVPreviewSlot+"_slot"+$slotPosition);}
+    if ($state =="active")   { button -e -bgc ($deactiveColor.x)($deactiveColor.y)($deactiveColor.z) -ann"inactive" ($UVPreviewSlot+"_slot"+$slotPosition);}
+
+    
+    
+}
+
+//GMH2_highlightUVSLots(0,1,"GMH_styleSystemUVPreviewSLot");
+//string $UVPreviewSlot = "GMH_styleSystemUVPreviewSLot";
+//int $slotPosition = 0; int $slotWidth =1;
+global proc GMH2_highlightUVSLots(int $slotPosition,int $slotWidth, string $UVPreviewSlot)
+{
+    int $totalSlot = `text -q -l ($UVPreviewSlot+"_totalSlot")`;
+    vector $deactiveColor = `colorSliderGrp -q -rgbValue ($UVPreviewSlot+"_deactiveColor")`;
+   vector $hiliColor =  `colorSliderGrp -q -rgbValue ($UVPreviewSlot+"_hiliColor")`;
+    
+    
+    int $hiliButtonIndexLists[]; clear($hiliButtonIndexLists);
+    
+    int $counter =0;
+    for ($counter =0;$counter<$slotWidth;$counter++)
+    {
+       int $tmp_int = $slotPosition + $counter;
+       $hiliButtonIndexLists[size($hiliButtonIndexLists)] = $tmp_int;
+    }
+    
+   // print $hiliButtonIndexLists
+    // set all slot to inactive color
+    int $counter = 0;
+    for ($counter=0;$counter<$totalSlot;$counter++)
+    {
+        button -e -bgc  ($deactiveColor.x)($deactiveColor.y)($deactiveColor.z) -ann "inactive"  ($UVPreviewSlot+"_slot"+$counter); 
+    }
+    
+    
+    // change color of hili button list
+    for ($eachIndex in $hiliButtonIndexLists)
+    button -e -bgc ($hiliColor.x)($hiliColor.y)($hiliColor.z)  -ann "active"  ($UVPreviewSlot+"_slot"+$eachIndex);
+    
+    
+}
+
+//create_GMHwindow();tabLayout -e -sti 6 "GMH2MainTabLayout";
+
+
+//PDD_createTestUIWindow("GMH2_createUVPreviewSlot(400,5,\"UVPreviewSlot1\",1);");
+//GMH2_highlightUVSLot(3,1,"UVPreviewSlot1");
+//string $UVPreviewSlot="UVPreviewSlot1";

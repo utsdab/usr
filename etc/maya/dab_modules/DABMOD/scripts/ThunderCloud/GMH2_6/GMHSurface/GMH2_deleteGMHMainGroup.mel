@@ -1,0 +1,95 @@
+
+global proc int deleteGMHMainGroup(string $GMHMainGroup)
+{
+    
+    int $debugFlag = 0;
+PDD_debug($debugFlag,"","START DELETE MAIN GROUP");
+
+    //check if GMH style exist or nor
+    if ( `objExists ($GMHMainGroup)` == 0 )
+    {
+        warning ("no GMH style is being asigned to selected surfaces \n");
+        return 0;
+    }
+    
+    
+    
+    // get  base surface from GMH style 
+    
+    select $GMHMainGroup;
+    string $baseSurface = PDD_NodeFromConnection("GMH_outPolySurfaceShape","out",1);
+    
+    //get the stroke and disconnect it from the brush to prevent delete brush when deleting GMHMainGroup surface
+    string $outStroke = PDD_NodeFromConnection("GMH_outStrokes","out",1);
+    
+    PDD_debug($debugFlag,"","Copy pressure ramp to base surface");
+    //copy the stroke pressure to baseSurface; 
+     GMH2_copyPressureRampValueToBaseSurfaceAttr($outStroke,$baseSurface);
+    
+    if ($outStroke !="")
+    {
+        select $outStroke;
+        string $brush =  PDD_NodeFromConnection("brush","in",1);
+        if ($brush !="")
+            {
+             if ( `isConnected ($brush+".outBrush")($outStroke+".brush")`)
+            disconnectAttr  ($brush+".outBrush")($outStroke+".brush");  
+            }
+    
+    }
+    
+    PDD_debug($debugFlag,"","deleting main group");
+    
+    delete $GMHMainGroup;
+    
+    PDD_debug($debugFlag,"","finished main group");
+    
+    select $baseSurface;
+   // string $baseSurface = PDD_currentSelectionName(1)
+   
+	setAttr ($baseSurface+".overrideEnabled") 0;				// set MESH SURFACE become wire
+	setAttr ($baseSurface+".overrideShading") 1;
+    setAttr ($baseSurface+".castsShadows") 1;
+    setAttr ($baseSurface+".receiveShadows") 1;
+    setAttr ($baseSurface+".motionBlur") 1;
+    setAttr ($baseSurface+".primaryVisibility") 1;
+    setAttr ($baseSurface+".smoothShading") 1;
+    setAttr ($baseSurface+".visibleInReflections") 1;
+    setAttr ($baseSurface+".visibleInRefractions") 1;
+    setAttr ($baseSurface+".doubleSided") 1;
+    
+    if (`attributeExists "GMHStyleSystem" $baseSurface`)
+    {
+        deleteAttr ( $baseSurface+".GMHStyleSystem");
+        
+    }
+    
+PDD_debug($debugFlag,"","FINISH DELETE MAIN GROUP");
+
+    return 1;
+    
+}
+
+
+
+global proc int GMH2_deleteOrphanMainGrp(string $GMHstyleSystem)
+{
+    //string $GMHstyleSystem = "shortBase_GMHPolyStyleSystem"; 
+    string $mainGrps[] = PDD_NodesFromConnection2($GMHstyleSystem,"GMH_OutMainGroup","out");
+    if(size($mainGrps) == 0 ) return 0;
+   string $orphanMainGrps[] ; clear($orphanMainGrps);
+    for ($eachMainGrp in $mainGrps)
+    {
+        string $baseSurface = PDD_NodeFromConnection2($eachMainGrp,"GMH_outPolySurfaceShape","out");
+        if ($baseSurface =="")
+        PDD_appendStringToStringArray($eachMainGrp,$orphanMainGrps);
+        
+    }
+    
+    if (size($orphanMainGrps) >0)
+    delete $orphanMainGrps;
+    
+    return 1;
+    
+    
+}

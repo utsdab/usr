@@ -1,0 +1,71 @@
+
+
+//==============================GMH2_GUICreateGMHSurfaceUVButton.mel======================
+//this is the main proc to create GMH2 UI main window. 
+global proc GMH2_GUICreateGMHSurfaceUVButton_commandUI()
+{
+    int $tableWidth = 400;
+    int $buttonWidth = 200;
+    flowLayout;
+   frameLayout -lv 0 -w 250;
+   
+    button -l "Assign UV space to \n GMH Surfaces 's Hair Tubes";
+    popupMenu -button 1 -pmc "GMH2_createApplyGMHSurfaceUVPopUpMenuItem_command();" "GMH2SurfaceUVPopupMenu";
+    
+  //  -c"GMH2_setAndCreateUVOfGMH2System_multiCommandUI();" ;
+   setParent ..;
+  GMH2_createUVPreviewSlot(150,4,"GMH_GMHSurfaceUVPreviewSLot",1);
+  
+   
+   
+   
+}
+global proc GMH2_createApplyGMHSurfaceUVPopUpMenuItem_command()
+{
+    popupMenu -e -deleteAllItems "GMH2SurfaceUVPopupMenu";
+    string $command = "GMH2_setAndCreateUVOfGMHSurfaceHairTube_multiCommandUI(1)";
+     menuItem -l "Base system Tubes" -c $command -p  "GMH2SurfaceUVPopupMenu";
+    string $command = "GMH2_setAndCreateUVOfGMHSurfaceHairTube_multiCommandUI(2)";
+     menuItem -l "Secondary system Tubes" -c $command -p  "GMH2SurfaceUVPopupMenu";
+}
+
+
+global proc int GMH2_setAndCreateUVOfGMHSurfaceHairTube_multiCommandUI(int $strokeLevel)
+{
+        string $selections[] = `ls-sl`;
+        
+        string $GMHSurfaces[] ; clear ($GMHSurfaces);
+        for ($eachObj in $selections ) 
+        { string $objShape = PDD_shapeName($eachObj);
+            string $mainGroup = PDD_NodeFromConnection2($objShape,"GMH_InMainGroup","in");
+            if ($mainGroup !="") PDD_appendStringToStringArray($eachObj,$GMHSurfaces);
+         }
+         
+           
+        int $tmps_int[] = GMH2_querryUVPreviewSlotAttr("GMH_GMHSurfaceUVPreviewSLot");
+        int $entrySlot = $tmps_int[0];
+        int $entryWidth = $tmps_int[1];
+         int $totalEntry = $tmps_int[2];
+         
+        if ($entryWidth ==0) // if the UV is not set then no set
+        {
+          warning "please select UV SLot to assign UV spaces to GMH Surface 's hair tubes\n";return 0;
+        }
+        
+                  for ($eachSurface in $GMHSurfaces)
+           {
+               GMH2_setUVOfGMHSurface($eachSurface, $strokeLevel,$entrySlot, $entryWidth,$totalEntry);
+               
+           }
+           
+         select $selections;
+           
+         return 1;
+        
+         
+    
+}
+
+
+
+//create_GMHwindow();tabLayout -e -sti 2 "GMH2MainTabLayout";

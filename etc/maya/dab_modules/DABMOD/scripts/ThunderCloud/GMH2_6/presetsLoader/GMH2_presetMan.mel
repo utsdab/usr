@@ -1,0 +1,436 @@
+//GMH2_loadPreset_command;
+//GMH2_savePreset_command;
+//GMH2_savePreset_command;
+global proc int GMH2_loadPreset_command()
+{
+    
+   
+         string $CurrentGMHStyleSystem[] = {};
+         $CurrentGMHStyleSystem = `textScrollList -query -selectItem "GMHStyleList"`;
+         if (size ($CurrentGMHStyleSystem) <1) return 0;
+      int $result = GMH2_loadPreset($CurrentGMHStyleSystem[0]);
+         if ($result ==1 ){ print ("success!\n");}
+           else{return 0;}
+    return 1; 
+    
+}
+global proc int GMH2_loadPreset(string $GMHStyleSystems)
+{
+   // $GMHStyleSystems="B_GMHPolyStyleSystem";
+   
+   string $styleNode ; if (`getAttr ($GMHStyleSystems+".GMH_polyStyleSystem")` == 1 ){$styleNode="GMHPolyStyleSystem";}else{$styleNode="GMHStyleSystem";}
+   
+string $HairSystem = PDD_NodeFromConnection2($GMHStyleSystems,"MayaHairSystem","out");
+string $PFXBrush = PDD_NodeFromConnection2($GMHStyleSystems,"PFXStyle","out");
+
+    // reading preset data from file
+     string $result[] = `fileDialog2 -fileFilter "*.GPD" -dialogStyle 0 -fm 1`;
+   string $data =  readLongStringFromFile($result[0]);
+    
+    
+    // parsing data
+    string $tmps[];tokenize $data ";" $tmps;string $dataArrays[] = $tmps;
+    
+    string $attributeNames[];clear($attributeNames);    
+    string $attributeValues[];clear($attributeValues);
+    
+    int $key =0;for ($eachData in $dataArrays)
+    {
+        string $tmps[];tokenize $eachData ":" $tmps; 
+        $attributeNames[$key] = $tmps[0];
+        $attributeValues[$key] = $tmps[1]; 
+        $key++;
+        
+    }
+   
+    print (" \nloading preset: < "+$result[0] +" >\n");
+    
+    //check if preset is match with GMH Style node : 
+    
+   // print ("attribute name 0 = "+$attributeNames[0]+"\n");
+   // print ("attribute value 0 = "+$attributeValues[0]+"\n");
+    
+    if ($attributeValues[0]!=$styleNode) {warning ("Please select a "+$styleNode +" Preset to apply \n");return 0;}
+    //apply data into GMHStyleSystem
+
+    // regular single data
+    int $key =0; for ($eachAttribute in $attributeNames)
+    {
+        print ("Checking Attribute < "+$eachAttribute+" >\n");
+        
+        //filter out original attributes name and its node   example <HairSystem>_<AttributeName>
+        string $tmps[];tokenize $eachAttribute "_" $tmps; 
+        string $node = $tmps[0]; $eachAttribute = $tmps[1];
+        
+        if ($node =="hairSystem")
+        {
+            if (`attributeExists $eachAttribute $HairSystem`)
+            {
+                print ("Attribute < "+ $eachAttribute+" > of node "+$HairSystem+" - preset value: "+$attributeValues[$key]+"\n");
+                //apply value to attributes
+                if ( $attributeValues[$key] !="N/A") // if value is N/A then do not apply 
+                {
+                    float $value = $attributeValues[$key]; //convert string to float
+                    setAttr ($HairSystem+"."+$eachAttribute) $value;
+                }
+                
+            } 
+        }
+        
+             if ($node =="PFXBrush")
+        {
+            if (`attributeExists $eachAttribute $PFXBrush`)
+            {
+                print ("Attribute < "+ $eachAttribute+" > of node "+$PFXBrush+" - preset value: "+$attributeValues[$key]+"\n");
+                //apply value to attributes
+                if ( $attributeValues[$key] !="N/A") // if value is N/A then do not apply 
+                {
+                    float $value = $attributeValues[$key]; //convert string to float
+                    setAttr ($PFXBrush+"."+$eachAttribute) $value;
+                }
+                
+            } 
+        }
+        
+        
+        $key++;
+    }
+    
+    //scale data 
+    // reset all scale data that will have preset values
+    
+    //filter out  scale attributes
+    string $scaleAttributeLists[]; clear $scaleAttributeLists;
+    for ($eachAttribute in $attributeNames)
+    {
+        string $stringResult = `match "Entry" $eachAttribute`;
+        if ($stringResult !="")
+        {
+             string $tmps[];tokenize $eachAttribute "_" $tmps;
+               string $scaleDataName = $tmps[0];
+            string $tmps[]; $tmps[0]= $scaleDataName; 
+             if (`attributeExists $scaleDataName $GMHStyleSystems`)
+            appendStringArray($scaleAttributeLists,$tmps,1);
+        }
+    }//remove duplicate attribute
+    $scaleAttributeLists = stringArrayRemoveDuplicates($scaleAttributeLists);
+    
+    //reset scale attributes
+    for ($eachScaleAttribute in $scaleAttributeLists)
+    {
+          int $indexs[] = `getAttr -mi ($GMHStyleSystems+"."+$eachScaleAttribute)`;
+           for ($eachIndex in $indexs)
+            {
+                if ($eachIndex!=0)
+              removeMultiInstance -break true ($GMHStyleSystems+"."+$eachScaleAttribute+"["+$eachIndex+"]"); 
+            }
+        
+    }
+ 
+            
+            
+    // load all preset values of applicable scale data
+    int $key =0; for ($eachAttribute in $attributeNames)
+    {
+        string $stringResult = `match "Entry" $eachAttribute`;
+        if ($stringResult !="")
+        {
+                 string $tmps[];tokenize $eachAttribute "_" $tmps;
+             string $scaleDataName = $tmps[0];
+                 string $tmp = $tmps[2];int $entryIndex =  $tmp;
+             string $dataType = $tmps[3];
+             
+             string $systemNode;
+             string $mayaHairSystem = PDD_NodeFromConnection2($GMHStyleSystems,"MayaHairSystem","out");
+             string $PFXBrush = PDD_NodeFromConnection2($GMHStyleSystems,"PFXStyle","out");
+             
+             if ( ($scaleDataName =="hairWidthScale")||($scaleDataName =="clumpWidthScale")||($scaleDataName =="displacementScale")||($scaleDataName =="attractionScale")||($scaleDataName =="hairColorScale"))
+             $systemNode = $mayaHairSystem;
+             
+             if ($scaleDataName =="widthScale")
+             $systemNode = $PFXBrush;
+
+
+                print ($scaleDataName+" entry "+$entryIndex+" has data "+ $dataType +" set to " + $attributeValues[$key] +"\n");
+                 float $floatValue;
+                 if ( $dataType!="Color")
+                 {
+                 $floatValue =  $attributeValues[$key];
+                 if ($dataType=="Value") $dataType = "FloatValue";
+                setAttr ($systemNode+"."+$scaleDataName+"["+$entryIndex+"]."+$scaleDataName+"_"+$dataType) $floatValue;
+                 } 
+                 else
+                 {
+                     string $tmps[];tokenize $attributeValues[$key]  " " $tmps; 
+                   float $colorR = $tmps[0];float $colorG = $tmps[1];float $colorB = $tmps[2];
+                   setAttr ($systemNode+"."+$scaleDataName+"["+$entryIndex+"]."+$scaleDataName+"_Color") $colorR $colorG $colorB;
+                 }
+            
+        }
+        $key++;
+    }
+    
+    
+    
+    
+return 1;
+    
+    
+}
+
+global proc int GMH2_savePreset_command()
+{
+    
+         string $CurrentGMHStyleSystem[] = {};
+         $CurrentGMHStyleSystem = `textScrollList -query -selectItem "GMHStyleList"`;
+          if (size ($CurrentGMHStyleSystem) <1) return 0;
+           string $styleNode ; if (`getAttr ($CurrentGMHStyleSystem[0]+".GMH_polyStyleSystem")` == 1 ){$styleNode="GMHPolyStyleSystem";}else{$styleNode="GMHStyleSystem";}
+       string $data =  GMH2_getPresetDataFromGMHStyleSystem($CurrentGMHStyleSystem[0]);
+        // string $styleNode = "GMHStyleSystem"
+        string $result[] = `fileDialog2 -fileFilter "*.GPD" -dialogStyle 0`;
+        //strip out unecessary string
+        string $fileName =  (basename($result[0],("_GMHStyleSystem.GPD")));
+        string $fileName =  (basename($fileName,("_GMHPolyStyleSystem.GPD")));
+        string $fileName =  (basename($fileName,(".GPD")));
+        
+        string $path = dirname($result[0]);
+        string $fullPath = $path+"/"+$fileName+"_"+$styleNode+".GPD";
+        
+        writeStringToFile($data,$fullPath);
+        print ("Saving Preset Datas to < "+$result[0]+"\n");
+        print ("success!\n");
+    
+    return 1;
+}
+
+
+
+global proc string GMH2_getPresetDataFromGMHStyleSystem(string $GMHStyleSystem)
+{
+   // string $GMHStyleSystem="B_GMHPolyStyleSystem";
+   string $styleNode ; if (`getAttr ($GMHStyleSystem+".GMH_polyStyleSystem")` == 1 ){$styleNode="GMHPolyStyleSystem";}else{$styleNode="GMHStyleSystem";}
+string $HairSystem = PDD_NodeFromConnection2($GMHStyleSystem,"MayaHairSystem","out");
+string $PFXBrush = PDD_NodeFromConnection2($GMHStyleSystem,"PFXStyle","out");
+
+// declare attributes to load 
+string $hairSystemAttributes[] =
+{
+   "hairSystem_globalScale","hairSystem_GMHClumpWidth","hairSystem_GMHHairWidth","hairSystem_simulationMethod","hairSystem_displayQuality",
+   "hairSystem_hairsPerClump","hairSystem_subSegments","hairSystem_thinning","hairSystem_clumpTwist","hairSystem_subClumping","hairSystem_subClumpRand",
+   "hairSystem_clumpInterpolation","hairSystem_interpolationRange","hairSystem_curl","hairSystem_curlFrequency","hairSystem_noise","hairSystem_noiseFrequency",
+   "hairSystem_detailNoise","hairSystem_hairColorR","hairSystem_hairColorG","hairSystem_hairColorB","hairSystem_opacity","hairSystem_translucence",
+   "hairSystem_specularColorR","hairSystem_specularColorG","hairSystem_specularColorB","hairSystem_specularPower",
+   "hairSystem_diffuseRand","hairSystem_specularRand","hairSystem_hueRand","hairSystem_satRand","hairSystem_valRand","hairSystem_startCurveAttract",
+   "hairSystem_attractionDamp","hairSystem_stiffness","hairSystem_multiStreaks","hairSystem_multiStreakSpread1","hairSystem_multiStreakSpread2",
+   "hairSystem_castShadows","hairSystem_receiveShadows","hairSystem_visibleInReflections","hairSystem_visibleInRefractions","hairSystem_something"
+};
+string $brushAttributes[] =
+{
+     "PFXBrush_tubeSections","PFXBrush_segments","PFXBrush_lengthMin","PFXBrush_lengthMax","PFXBrush_curveFollow","PFXBrush_curveAttract","PFXBrush_curveAttract",
+     "PFXBrush_curveAttract",
+     "PFXBrush_spiralMin","PFXBrush_spiralMax","PFXBrush_tubesPerStep","PFXBrush_TubeRandom","PFXBrush_tubeSegments","PFXBrush_TubeSections",
+     "PFXBrush_flatness1","PFXBrush_flatness2","PFXBrush_curveFollow","PFXBrush_curveAttract","PFXBrush_spiralMin","PFXBrush_spiralMax",
+     "PFXBrush_tubeWidth1","PFXBrush_tubeWidth2","PFXBrush_widthRand","PFXBrush_displacementDelay","PFXBrush_noise","PFXBrush_noiseFrequency",
+     "PFXBrush_noiseOffset","PFXBrush_wiggle","PFXBrush_wiggleFrequency","PFXBrush_wiggleOffset","PFXBrush_curl","PFXBrush_curlFrequency",
+     "PFXBrush_twist","PFXBrush_curlOffset","PFXBrush_twistRand"
+
+};
+
+string $allAttribute[] ={}; appendStringArray($allAttribute,$hairSystemAttributes,size($hairSystemAttributes));appendStringArray($allAttribute,$brushAttributes,size($brushAttributes));
+
+// load values of attributes
+vector $hairWidthScales[] = PDD_getScaleAttributeValues($HairSystem+".hairWidthScale");
+vector $clumpWidthScales[] = PDD_getScaleAttributeValues($HairSystem+".clumpWidthScale");
+vector $displacementScales[] = PDD_getScaleAttributeValues($HairSystem+".displacementScale");
+vector $hairColorScalesColor[] = PDD_getColorScaleAttributeValues($HairSystem+".hairColorScale");
+vector $hairColorScalesValue[] = PDD_getColorScaleValueAttributeValues($HairSystem+".hairColorScale");
+vector $attractionScales[] = PDD_getScaleAttributeValues($HairSystem+".attractionScale");
+vector $widthScale[] = PDD_getScaleAttributeValues($PFXBrush+".widthScale");
+
+float $attributeValues[]={};int $counter = 0 ;
+for ($eachAttribute in $hairSystemAttributes)
+{
+    string $tmps[]; tokenize $eachAttribute "_" $tmps; $eachAttribute = $tmps[1]; //filter out the original attribute name    format : hairSystem_<attributeName>
+    if (`attributeExists $eachAttribute $HairSystem`)
+   { $attributeValues[$counter] = `getAttr ($HairSystem+"."+$eachAttribute)`;}
+    else
+    {$attributeValues[$counter] =-912312899;}
+    $counter ++;
+    
+}
+for ($eachAttribute in $brushAttributes)
+{
+     string $tmps[]; tokenize $eachAttribute "_" $tmps; $eachAttribute = $tmps[1]; //filter out the original attribute name   format : PFXBrush_<attributeName>
+    if (`attributeExists $eachAttribute $PFXBrush`)
+    {$attributeValues[$counter] = `getAttr ($PFXBrush+"."+$eachAttribute)`;}
+        else
+    {$attributeValues[$counter] =-912312899;}
+    $counter ++;
+    
+}
+
+
+// prepair parsing data
+string $parsingData = ("styleNode:"+$styleNode+";");
+// normal data
+int $counter =0;
+for ($eachAttribute in $attributeValues)
+{
+    $parsingData += ($allAttribute[$counter]);
+    $parsingData +=  (":");
+    if ($eachAttribute == -912312899){$parsingData +=  "N/A";}else{$parsingData +=  $eachAttribute;}
+    $parsingData +=  ";";
+    $counter ++;
+    
+}
+//print $parsingData;
+// scale data
+
+    $parsingData +=  (PDD_getScaleDataParsingFormat("hairWidthScale", $hairWidthScales));
+    $parsingData +=  (PDD_getScaleDataParsingFormat("clumpWidthScale", $clumpWidthScales));
+    $parsingData +=  (PDD_getScaleDataParsingFormat("displacementScale", $displacementScales));
+    $parsingData +=  (PDD_getScaleDataParsingFormat("attractionScale", $attractionScales));
+    $parsingData +=  (PDD_getScaleDataParsingFormat("widthScale", $widthScale));
+    $parsingData += PDD_getColorDataParsingFormat("hairColorScale", $hairColorScalesColor);
+    $parsingData += PDD_getColorScaleDataParsingFormat("hairColorScale", $hairColorScalesValue);
+    
+
+return $parsingData;
+
+
+}
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+        
+global proc string PDD_getColorScaleDataParsingFormat(string $attributeName, vector $attributeValues[])
+{
+    string $result="";
+     int $counter =0;
+    for ($eachEntry in $attributeValues )
+    {
+        $result += ($attributeName+"_Entry_"+($counter)+"_Position:");
+        $result += ($eachEntry.x);
+        $result += ";";
+        
+        $result += ($attributeName+"_Entry_"+($counter++)+"_Interp:");
+        $result += ($eachEntry.y);
+        $result += ";";
+ 
+    }
+
+return $result;
+}
+  
+global proc string PDD_getColorDataParsingFormat(string $attributeName, vector $attributeValues[])
+{
+    string $result="";
+     int $counter =0;
+    for ($eachEntry in $attributeValues )
+    {
+        /*
+        $result += ($attributeName+"_Entry_"+($counter)+"_colorR:");
+        $result += ($eachEntry.x);
+        $result += ";";
+        
+        $result += ($attributeName+"_Entry_"+($counter)+"_colorG:");
+        $result += ($eachEntry.y);
+        $result += ";";
+        */
+        $result += ($attributeName+"_Entry_"+($counter++)+"_Color:");
+        $result += ($eachEntry.x)+" ";
+        $result += ($eachEntry.y)+" ";
+        $result += ($eachEntry.z)+" ";
+        $result += ";";  
+    }
+
+return $result;
+}
+   
+    
+global proc string PDD_getScaleDataParsingFormat(string $attributeName, vector $attributeValues[])
+{
+    string $result="";
+     int $counter =0;
+    for ($eachEntry in $attributeValues )
+    {
+        $result += ($attributeName+"_Entry_"+($counter)+"_Position:");
+        $result += ($eachEntry.x);
+        $result += ";";
+        
+        $result += ($attributeName+"_Entry_"+($counter)+"_Value:");
+        $result += ($eachEntry.y);
+        $result += ";";
+        
+        $result += ($attributeName+"_Entry_"+($counter++)+"_Interp:");
+        $result += ($eachEntry.z);
+        $result += ";";  
+    }
+
+return $result;
+}
+   
+
+
+
+
+
+global proc vector[] PDD_getScaleAttributeValues(string $objectMutiAttribute)
+{
+    vector $attributesValues[];int $counter = 0;
+    int $ScaleIndexs[] = `getAttr -multiIndices $objectMutiAttribute`;
+    
+    for ($eachIndex in  $ScaleIndexs)
+    {
+        $attributesValues[$counter] = `getAttr ($objectMutiAttribute+"["+$eachIndex+"]")`;
+        $counter++;
+    }
+return $attributesValues;
+}
+
+global proc vector[] PDD_getColorScaleAttributeValues(string $objectMutiAttribute)
+{
+    
+    vector $attributesValues[];int $counter = 0;
+    int $ScaleIndexs[] = `getAttr -multiIndices $objectMutiAttribute`;
+    string $tmps[] ; tokenize $objectMutiAttribute "." $tmps;
+    string $attributeName = $tmps[1];
+    for ($eachIndex in  $ScaleIndexs)
+    {
+        vector $color = `getAttr ($objectMutiAttribute+"["+$eachIndex+"]."+$attributeName+"_Color")`;
+        $attributesValues[$counter] = $color;
+        $counter++;
+    }
+return $attributesValues;
+}
+
+global proc vector[] PDD_getColorScaleValueAttributeValues(string $objectMutiAttribute)
+{
+    vector $attributesValues[];int $counter = 0;
+    int $ScaleIndexs[] = `getAttr -multiIndices $objectMutiAttribute`;
+    string $tmps[] ; tokenize $objectMutiAttribute "." $tmps;
+    string $attributeName = $tmps[1];
+    for ($eachIndex in  $ScaleIndexs)
+    {
+        float $position = `getAttr ($objectMutiAttribute+"["+$eachIndex+"]."+$attributeName+"_Position")`;
+        float $interp = `getAttr ($objectMutiAttribute+"["+$eachIndex+"]."+$attributeName+"_Interp")`;
+        $attributesValues[$counter] = <<$position,$interp,0>>;
+        $counter++;
+    }
+  
+return $attributesValues;
+}

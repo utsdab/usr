@@ -1,0 +1,165 @@
+//============================GMH2_ApplySecondaryGMHSurface.mel==================
+
+//int $debugFlag =1 ;
+//string $secondGMHSystem = PDD_currentSelectionName(1);
+global proc int applySecondaryGMHHairSystem(string $object,string $secondGMHSystem,int $debugFlag)
+{
+    
+    string $mainGroup = getMainGroup($object);  if ($mainGroup =="") return 0;
+    select $mainGroup; string $firstGMHSystem = PDD_NodeFromConnection("GMH_StyleMainGroupIn","out",1);
+    
+    
+    //check if current GMH style is already applied to this surface
+    select $object;  string $objectShape = PDD_currentSelectionShapeName(1);
+    int $level = 1;
+    if (!`attributeExists "GMHStyleSystem" $objectShape`)    addAttr -m -im 1  -at "double"  -ln   "GMHStyleSystem" $objectShape;
+    if (!`attributeExists "baseMesh" $secondGMHSystem`)    addAttr -ln "baseMesh"  -at double $secondGMHSystem;
+    if (`isConnected ($secondGMHSystem+".baseMesh") ($objectShape+".GMHStyleSystem["+$level+"]")`) {warning " current GMH Style System already applied to surface\n" ; return 0;}
+    connectAttr -f ($secondGMHSystem+".baseMesh") ($objectShape+".GMHStyleSystem["+$level+"]");
+    
+    
+    
+    int $flag1 = getAttr ($firstGMHSystem+".GMH_polyStyleSystem");
+     int $flag2 = getAttr ($secondGMHSystem+".GMH_polyStyleSystem");
+    
+    if ($flag1 == 1 ) // first System : Poly
+    {
+        if ($flag2 ==0) // second System : Hair
+        {
+            warning "Secondary is GMH Hair system, please select GMH Poly System to apply as second style, aborted \n"; return 0;
+        }
+        else   //second system : Poly
+        {
+            print " Apply polySystem as second style\n";
+            
+            //get all grow curve of GMH Surface
+               select $mainGroup; string $growCurves[] = PDD_NodesFromConnection("GMH_outGrowingCurves","out",1);
+               select $secondGMHSystem;string $secondStyleBrush =  PDD_NodeFromConnection("PFXStyle","out",1);
+               string $name=substituteAllString ($mainGroup,"_GMHSurface","");
+            // get correspondence lead curves 
+                for ($eachGrowCurve in $growCurves)
+                {
+                    
+                // create stroke and set the control & grow curves 
+                string $parents=` createNode "transform" -n ($name+"_ExtraStroke")`;string $stroke =`createNode "stroke" -n ($name+"_ExtraStroke") -p($parents)`; 
+                           
+                           // create child Brush & connect
+                     string $childBrush = `createNode "brush" -n ($stroke+"overrideBrush")`;
+                    string $leadCurves[] = PDD_NodesFromConnection2($eachGrowCurve,"GMH_OutputCurves","out"); int $curveDegree = `getAttr ($leadCurves[0]+".degree")`;int $curveSpan = `getAttr ($leadCurves[0]+".spans")`; // calculate leadCurve CV to create each segment expression
+                    int $leadCurveCV = $curveDegree+ $curveSpan -1;
+    
+                    GMH2_connect2Brush($secondStyleBrush, $childBrush,$leadCurves[0],$mainGroup);
+                    
+                    //connect the child brush to stroke 
+                    connectAttr -f ($childBrush+".outBrush") ($stroke+".brush");
+                    container -e -includeShapes -includeTransform -force -addNode $childBrush $mainGroup;
+                    
+                           
+                           
+                connectAttr ($eachGrowCurve+".spans")($stroke+".pathCurve[0].samples");
+                connectAttr -f ($eachGrowCurve+".worldSpace[0]") ($stroke+".pathCurve[0].curve");//connect stroke to grow curves
+                setAttr ($stroke+".displayPercent") 100;
+                  // connect stroke to lead curves
+                  select $eachGrowCurve; string $leadCurves[] = PDD_NodesFromConnection("GMH_OutputCurves","out",1);
+                for ($eachLeadingCurve in $leadCurves)
+                {int $controlCurveIndex = getNextAvailableIndexOfMultiAttr($stroke,"controlCurve" ) ;
+                connectAttr -f (  $eachLeadingCurve+".worldSpace[0]") ($stroke+".controlCurve["+$controlCurveIndex+"]");}
+             
+                //connect stroke to Main Group 
+                addAttr -ln "GMH_InMainGroup"  -at double  $stroke;
+                PDD_ConnectAttribute ($mainGroup,"GMH_outStrokes",$stroke,"GMH_InMainGroup",$debugFlag) ;
+                PDD_ConnectAttribute ($mainGroup,"stroke_vis",$stroke,"lodVisibility",$debugFlag) ;
+                
+                
+            
+            // setup attributes
+                setAttr ($stroke+".useNormal") 1;
+                setAttr ($stroke+".pressureScale[0].pressureScale_Position") 0;
+                setAttr ($stroke+".pressureScale[0].pressureScale_FloatValue") 1;
+                setAttr ($stroke+".pressureScale[0].pressureScale_Interp") 2;
+                setAttr ($stroke+".pressureScale[1].pressureScale_Position") 0.5;
+                setAttr ($stroke+".pressureScale[1].pressureScale_FloatValue") 1.1;
+                setAttr ($stroke+".pressureScale[1].pressureScale_Interp") 2;
+                setAttr ($stroke+".pressureScale[2].pressureScale_Position") 1;
+                setAttr ($stroke+".pressureScale[2].pressureScale_FloatValue") 1;
+                setAttr ($stroke+".pressureScale[2].pressureScale_Interp") 2;
+                //set tubeWidth as preesureMap 1
+                setAttr ($stroke+".pressureMap1") 6;
+                setAttr ($stroke+".pressureMax1") 1;
+                setAttr ($stroke+".pressureMin1") 0.85;
+        
+        
+                select $mainGroup;string $baseSurface = ( PDD_NodeFromConnection("GMH_outPolySurfaceShape","out",1));
+                connectAttr ($baseSurface+".GMH_Clump_Width_Mul") ($stroke+".pressureMax1") ;
+                //expression  -s ($stroke+".pressureScale[1].pressureScale_FloatValue = "+$baseSurface+".centreTubeScale * "+$secondStyleBrush+".relatetiveCentreTubeWidth") -o "" -ae 1 -uc all;
+                setAttr ($stroke+".drawAsMesh") 1;
+                setAttr ($stroke+".meshQuadOutput") 1;
+
+
+            // connect stroke
+             select $mainGroup;
+        string $baseSurface = PDD_NodeFromConnection("GMH_outPolySurfaceShape","out",1);
+        connectAttr -f ($baseSurface+".GMH_Clump_Per_Edge_loop")( $stroke+".sampleDensity");
+        
+         GMH2_setTubeRotationDriven($baseSurface,$stroke,$eachGrowCurve,$leadCurves[0]);    // set stroke rotation
+         
+        // create Stroke grp
+          select $mainGroup;string $strokeGrp = PDD_NodeFromConnection("GMH_outStrokeGrp","out",1);
+          if ($strokeGrp =="")
+          {
+              $strokeGrp = `createNode transform -n ($name+"_strokeGrp")`; 
+			  addAttr -ln "GMH_InMainGroup"  -at double $strokeGrp;
+              connectAttr -f ($strokeGrp+".GMH_InMainGroup") ($mainGroup+".GMH_outStrokeGrp");
+              parent $strokeGrp $mainGroup;
+              $strokeGrp = PDD_currentSelectionName(1);
+          }
+          
+          // create stroke geo mesh 
+          string $material = PDD_NodeFromConnection2($secondGMHSystem,"GMHShader","in");
+         string $strokeMesh = GMH2_convertStrokeToPoly($secondGMHSystem,$stroke,$mainGroup,$material,2);
+          PDD_ConnectAttribute ($mainGroup,"strokeGeo_vis",$strokeMesh,"visibility",$debugFlag);
+          
+          
+                  // put stroke into Main group
+                  select $stroke; pickWalk -d up;
+                   parent `ls-sl` $strokeGrp; 
+            } // end of each grow curves
+        }// end of second case
+        return 1;
+    }//end of first case
+    if($flag1==0)    //first system : hair
+    {
+    
+        if ($flag2 ==1) // second System : poly
+        {
+            warning "Base GMH Style is Hair system, Extra GMH Style is Poly system, please select GMH Hair System to apply as second style, aborted \n"; return 0;
+        }
+        else   //second system : hair
+        {
+            select $object; string $object = PDD_currentSelectionShapeName($debugFlag);
+            select $object;string $follicles[] = PDD_NodesFromConnection("GMH_Braid","out",$debugFlag);
+            if ( $follicles[0] =="")
+            {
+                warning ($object +" is not a valid GMH Surface to add secondary GMH Hair System on, ignored \n");
+                return 0;
+            }   
+            select $secondGMHSystem;
+            string $MayaHairSystem = PDD_NodeFromConnection("MayaHairSystem","out",$debugFlag);
+         
+                for ($eachFollicle in $follicles)
+                {
+                    int $next = getNextAvailableIndexOfMultiAttr($MayaHairSystem,"inputHair");
+                    select $eachFollicle;
+                    string $currentConnectHairSYstems[] = PDD_NodesFromConnection("outHair","out",$debugFlag);
+                    int $containtResult = stringArrayContains($MayaHairSystem,$currentConnectHairSYstems);
+                    if ($containtResult==0)
+                    {connectAttr -f ($eachFollicle+".outHair") ($MayaHairSystem+(".inputHair["+$next+"]")); }
+                    else
+                    {warning ($object+" already has secondary GMH style :" +$MayaHairSystem +" assigned to it , ignored\n");}
+                }
+           return 1;
+        }
+    }
+return 1;
+}
+

@@ -1,0 +1,148 @@
+//===================GMH_setBaseSurfaceAttrs.mel===========================
+
+// this proc will get overide value of each GMHBaseSurface 's attributes , if it's not available then asign defaul values.
+//it will return all the attributes value of current GMH surface if available.
+global proc float[] GMH_setBaseSurfaceAttrs( string $baseSurface,int $debugFlag)
+{
+    
+    // primary attr of GMH network
+            select $baseSurface;		
+
+
+    //attributes for overide GMH Hair setting
+               float $attr[] = {
+                               1.0        //0
+                               ,1.0       //1
+                               ,1.0        //2   
+                               ,1.0        //3
+                               ,0           //4
+                               ,1.0        //5
+                               ,1.0        //6
+                               ,1.0        //7
+                               ,0           //8
+                               ,0            //9
+                               ,1.0            //10
+                               ,2.0            //11
+                               ,0        //12
+                               ,1.0        //13
+                               ,0.0        //14
+                               ,0        //15
+                              ,1           //16
+                              ,1            //17
+                              ,1            //18
+                               };  
+               
+               // float array to store settings , declare it default values correspond to Base Surface individual setting
+
+// get the attrValue from baseSurface ( if available ) and put it to correspondance index
+       int $index = 0;
+       select $baseSurface;
+            string $attrValues[]= {  "PDD_GMH_rotateID",             //0
+                                     "GMH_Hair_Num_Per_Clump_Mul",   //1
+                                     "GMH_Clump_Width_Mul",          //2
+                                     "GMH_Clump_Per_Edge_loop",      //3
+                                     "GMH_Overide_Hair_Color",       //4
+                                     "GMH_Hair_Color_R" ,            //5
+                                     "GMH_Hair_Color_G",             //6
+                                     "GMH_Hair_Color_B" ,            //7
+                                     "GMH_Curl_Mult" ,                //8
+                                     "GMH_Braid",                     //9
+                                     "FolliclesLockType",            //10
+                                     "SimulationType"  ,              //11
+                                       "GMH_tubeRotation"  ,  //12
+                                       "GMH_polyHairSegMentMul",    //13
+                                       "GMH_hairTubeOffset",    //14
+                                       "GMH_seed"    //15
+                                };                
+       int $index = 0;
+       for ( $eachAttr in $attrValues)
+       {
+             if ( `attributeExists $eachAttr $baseSurface `==1)            //put into attr float array  to return values
+                {$attr[$index] = getAttr($baseSurface+"."+$eachAttr);}
+            $index++;  
+       }
+         
+         
+         
+         // ADD ATTRIBUTES
+                           if ( `attributeExists "SimulationType" $baseSurface `==0) 
+		                   addAttr -ln "SimulationType"  -at "enum" -en "Static:Passive:Dynamic:" -dv $attr[11]; 
+
+         
+         if ( `attributeExists "FolliclesLockType" $baseSurface `==0) 
+		 addAttr -ln "FolliclesLockType"  -at "enum" -en "No Attach:Base:Tip:BothEnds:" -dv $attr[10]; 
+
+         
+         if ( `attributeExists "GMH_HairColor" $baseSurface `==0)
+             {
+                addAttr -longName GMH_HairColor -usedAsColor -attributeType float3;
+                addAttr -longName GMH_Hair_Color_R -attributeType "float" -parent GMH_HairColor;
+                addAttr -longName GMH_Hair_Color_G -attributeType "float" -parent GMH_HairColor;
+                addAttr -longName GMH_Hair_Color_B -attributeType "float" -parent GMH_HairColor;    
+             }
+
+    
+    // delete the parent attribute if available
+
+   if (`attributeExists "GMH_styleInternalConnections" $baseSurface`)
+   deleteAttr ($baseSurface+".GMH_styleInternalConnections");
+   
+   if (`attributeExists "GMH_styleInternalAttrs" $baseSurface`)
+   deleteAttr ($baseSurface+".GMH_styleInternalAttrs");
+   
+   if (`attributeExists "GMH_internalConnections" $baseSurface`)
+   deleteAttr ($baseSurface+".GMH_internalConnections");
+   
+   if (`attributeExists "GMH_InternalAttrs" $baseSurface`)
+   deleteAttr ($baseSurface+".GMH_InternalAttrs");
+   
+    //delete the old attribute if clashes with old version 
+    
+   if (`attributeExists "GMH_Overide_Hair_Color" $baseSurface`)deleteAttr ($baseSurface+".GMH_Overide_Hair_Color");
+   if (`attributeExists "GMH_Hair_Num_Per_Clump_Mul" $baseSurface`)deleteAttr ($baseSurface+".GMH_Hair_Num_Per_Clump_Mul");
+   if (`attributeExists "GMH_Clump_Width_Mul" $baseSurface`)deleteAttr ($baseSurface+".GMH_Clump_Width_Mul");
+   if (`attributeExists "GMH_Clump_Per_Edge_loop" $baseSurface`)deleteAttr ($baseSurface+".GMH_Clump_Per_Edge_loop");
+   if (`attributeExists "GMH_Curl_Mult" $baseSurface`)deleteAttr ($baseSurface+".GMH_Curl_Mult");
+   if (`attributeExists "GMH_Braid" $baseSurface`)deleteAttr ($baseSurface+".GMH_Braid");
+   if (`attributeExists "GMH_tubeRotation" $baseSurface`)deleteAttr ($baseSurface+".GMH_tubeRotation");
+   if (`attributeExists "GMH_polyHairSegMentMul" $baseSurface`)deleteAttr ($baseSurface+".GMH_polyHairSegMentMul");
+   if (`attributeExists "GMH_hairTubeOffset" $baseSurface`)deleteAttr ($baseSurface+".GMH_hairTubeOffset");
+   if (`attributeExists "GMH_seed" $baseSurface`)deleteAttr ($baseSurface+".GMH_seed");
+   
+   if (`attributeExists "PDD_GMH_rotateID" $baseSurface`)deleteAttr ($baseSurface+".PDD_GMH_rotateID");
+   if (`attributeExists "GMH_BaseSurface" $baseSurface`)deleteAttr ($baseSurface+".GMH_BaseSurface");
+   if (`attributeExists "GMH_baseMesh" $baseSurface`)deleteAttr ($baseSurface+".GMH_baseMesh");
+   if (`attributeExists "GMH_InMainGroup" $baseSurface`)deleteAttr ($baseSurface+".GMH_InMainGroup");
+  // if (`attributeExists "GMH_surfaceMaterial" $baseSurface`)deleteAttr ($baseSurface+".GMH_surfaceMaterial");
+   // recreate all attributes with preserved values store in attr[]
+   
+    
+    
+   
+    addAttr -longName GMH_Overide_Hair_Color -attributeType double -min 0 -max 1 -dv  $attr[4];
+    addAttr -longName GMH_Hair_Num_Per_Clump_Mul -attributeType double -dv $attr[1] -smn 0 -smx 10;
+    addAttr -longName GMH_Clump_Width_Mul -attributeType double   -dv $attr[2]  -smn 0 -smx 10;
+    addAttr -longName GMH_Clump_Per_Edge_loop -attributeType double -dv $attr[3] -smn 0 -smx 10;
+    addAttr -longName GMH_Curl_Mult -attributeType double -dv $attr[8] -min 0 -max 1;
+    addAttr -longName GMH_Braid -attributeType long  -dv $attr[9] -min 0 -max 1;
+    addAttr -longName GMH_tubeRotation  -at double  -min -2 -max 2 -dv $attr[12];
+    addAttr -longName GMH_hairTubeOffset  -at double  -min -100 -max 100 -dv $attr[14];
+    addAttr -longName GMH_seed  -at double  -min 0 -max 1000 -dv $attr[15];
+
+    addAttr -ln "GMH_polyHairSegMentMul"  -at double  -min 0.1 -max 10 -dv $attr[13];
+    
+    addAttr -longName GMH_styleInternalConnections -numberOfChildren 1 -attributeType compound -h true;
+    addAttr -longName GMH_styleInternalAttrs -numberOfChildren 4 -attributeType compound -parent GMH_styleInternalConnections -h true;
+    addAttr -longName PDD_GMH_rotateID -attributeType long -dv $attr[0] -parent GMH_styleInternalAttrs -h true;
+    addAttr -longName GMH_BaseSurface -attributeType long -parent GMH_styleInternalAttrs -h true;
+    addAttr -longName GMH_baseMesh -attributeType long   -parent GMH_styleInternalAttrs -h true;
+    addAttr -longName GMH_InMainGroup -attributeType long   -parent GMH_styleInternalAttrs -h true;
+    
+    if (!`attributeExists "GMH_surfaceMaterial" $baseSurface`) addAttr -longName GMH_surfaceMaterial -attributeType "float"  -m -im 1 -h true;
+   
+
+   
+         
+         return $attr; 
+}
+ 

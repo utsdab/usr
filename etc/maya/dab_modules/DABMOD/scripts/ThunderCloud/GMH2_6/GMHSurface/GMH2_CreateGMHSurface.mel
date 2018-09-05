@@ -1,0 +1,164 @@
+//====    GMH2_CreateGMHSurface.mel        =====
+
+
+
+global proc string CreateGMHSurface(string $GMHStyleSystem,int $debugFlag)
+{
+    int $debugFlag = 0;
+PDD_debug($debugFlag,"","checking Surface");
+//======================= CHECK SURFACE AVAILABLE
+            string $baseSurface =PDD_currentSelectionName(1) ;
+            if ($baseSurface ==""){warning "nothing selected, ignored\n";return 0;}  
+            string $baseSurfaceShape = PDD_currentSelectionShapeName(1) ;
+            if (`objectType $baseSurfaceShape`!="mesh"){warning ($baseSurface + " is not a polygon mesh, ignored\n");return 0;}
+
+
+PDD_debug($debugFlag,"","checking main group available");
+//======================= CHECK SURFACE HISTORY / MAIN GROUP 
+            // if polysurface already asigned a GMH MainGroup then delete the existed one 
+            string $mainGroup = getMainGroup($baseSurface);          
+            if($mainGroup !="")deleteGMHMainGroup($mainGroup);
+
+
+PDD_debug($debugFlag,"","checking style System");
+//======================= CHECK GMH STYLE SYSTEM
+            select $GMHStyleSystem;
+            string $GMHStyleSystemShape = PDD_currentSelectionShapeName(1);
+            if ( `objExists $GMHStyleSystemShape`==0){warning "GMH Style System doesnt exist ";return 0;}
+            if (`attributeExists"GMH_styleMainGroup" $GMHStyleSystemShape`==0){warning "No valid GMH Style System specified\n";return 0;}
+            
+PDD_debug($debugFlag,"","checking Brush ");
+//======================= GET BRUSH AND HAIR SYSTEM          
+            select $GMHStyleSystemShape;
+            string $brush = PDD_NodeFromConnection("PFXStyle","out",$debugFlag);
+            string $HairSystem = PDD_NodeFromConnection("MayaHairSystem","out",$debugFlag);
+
+//======================= CREATING GMH SURFACE
+
+
+            //======================= CHECKING SURFACE ======================*/      
+            select $baseSurface;
+            string $name = PDD_removeInvalidCharactersFromName($baseSurface,"_",0); 
+            string $baseMeshShape = PDD_currentSelectionShapeName(1);
+  
+PDD_debug($debugFlag,"","Create main Group");          
+            //create MainGroup  
+            string $mainGroup = CreateGMHMainGroup($name,$debugFlag);
+            
+          string $GMH2Shader ="";
+           if ( `attributeExists ("GMH_surfaceMaterial") $baseMeshShape`)
+           $GMH2Shader = PDD_NodeFromConnection2($baseMeshShape,"GMH_surfaceMaterial","in");
+      
+PDD_debug($debugFlag,"","preserve Material settings");    
+            // get & set GMH2 attributes for Base Surface
+            //preserve Material setting
+            string $styleMaterial = PDD_NodeFromConnection2($GMHStyleSystem,"GMHShader","in");
+            
+            
+            //preserve material
+            string $surfaceMaterials[];    int $materialOveride = 0;         
+            if ( `attributeExists ("GMH_surfaceMaterial") $baseMeshShape`)
+          {  $surfaceMaterials =    PDD_NodesFromConnection2($baseMeshShape,"GMH_surfaceMaterial","in") ;} //Surface mat override system mat
+           string $material = $styleMaterial;
+             if($surfaceMaterials[0]!=""){$material = $surfaceMaterials[0];$materialOveride = 1;}
+             
+            // print (" MATERIAL OVERIDE = "+$materialOveride +" \n");
+  
+PDD_debug($debugFlag,"","preserve attributes");         
+            //preserve other setting such as : rotation , clump num etc
+            select $baseSurface;
+            float $attr[] = GMH_setBaseSurfaceAttrs($baseMeshShape,$debugFlag); 
+         
+           //reconnect override material if available
+           if ($materialOveride ==1 ) 
+           {
+               if (!`isConnected ($material+".GMHMaterial") ($baseMeshShape+".GMH_surfaceMaterial[1]")`)
+               connectAttr ($material+".GMHMaterial") ($baseMeshShape+".GMH_surfaceMaterial[1]");
+           }
+           
+            
+            //connect base Surface to Main Group 
+            if (!`isConnected ($mainGroup+".GMH_outPolySurfaceShape") ($baseMeshShape+".GMH_InMainGroup")`) connectAttr -f ($mainGroup+".GMH_outPolySurfaceShape") ($baseMeshShape+".GMH_InMainGroup");
+            
+            
+   
+PDD_debug($debugFlag,"","convert Poly to Curves");
+       
+            //convert BaseSuface To Curves
+           string $growCurves[] = GMH2_convertPolyToCurve($baseSurface,$mainGroup,($attr[0]));
+
+           //each set of grow curve 
+           for ($eachGrowCurve in $growCurves)
+           { 
+           select $eachGrowCurve;string $leadCurves[] = PDD_NodesFromConnection("leadCurve","out",1);//print $leadCurves;
+           
+                    //case of normal GMH2 hair system style
+                    if ( (getAttr ($GMHStyleSystem+".GMH_polyStyleSystem")) ==0 )
+                    {               
+                      string $stroke = CurvesToPFXStroke($GMHStyleSystem,$mainGroup,$eachGrowCurve,$leadCurves,$brush,$debugFlag);// Curves to Stroke 
+                     string $strokeCurves[] = PFXStrokeToCurves($mainGroup,$eachGrowCurve,$stroke,$debugFlag);  //Stroke to Curves  
+                      string $outputCurves[]= GMH2_CurvesToMayaHair($mainGroup,$eachGrowCurve,$strokeCurves,$HairSystem,$debugFlag);//Curves to Maya Hair
+                      // transfer the previous ramp pressure from base surface to stroke 
+                      GMH2_transferBaseSurfacePressureRmpToStroke($stroke,$baseMeshShape);
+                     }     
+                  else
+                      { 
+                   // Curves to Maya Hair for dynamic
+                       
+                       string $outputCurves[]= GMH2_CurvesToMayaHair($mainGroup,$eachGrowCurve,$leadCurves,$HairSystem,$debugFlag);
+                      string $stroke = CurvesToPFXStroke($GMHStyleSystem,$mainGroup,$eachGrowCurve,$outputCurves,$brush,$debugFlag); 
+                       string $polyStroke = GMH2_convertStrokeToPoly($GMHStyleSystem,$stroke,$mainGroup,$material,1);
+                      // transfer the previous ramp pressure from base surface to stroke 
+                      GMH2_transferBaseSurfacePressureRmpToStroke($stroke,$baseMeshShape);
+                      //apply UV space of current GMH2 Style SYstem 
+                      string $tmps[];clear ($tmps); $tmps[0] = $polyStroke;
+                      GMH2_setSelectedStrokeGeoUVOfGMH2System($GMHStyleSystem,$tmps);
+                   }  
+           }   
+           
+   
+       
+            
+            //lock the rotate attr
+            setAttr -l true ($baseMeshShape+".PDD_GMH_rotateID");
+            
+            
+           //CONNECT MAIN GROUP TO STYLE MAIN GROUP
+          PDD_ConnectAttribute($GMHStyleSystemShape,"GMH_OutMainGroup",$mainGroup,"GMH_StyleMainGroupIn",$debugFlag) ;
+         
+
+           GMH_display($mainGroup);
+
+                   
+            //string $baseMeshShape ="hair_baseSurface46Shape"
+            // reapply UV space
+           vector $UVAttrLv1 =  GMH2_querryGMHSurfaceUVSpace($baseMeshShape,1);
+           if (    (($UVAttrLv1.x)!=0)    &&    (($UVAttrLv1.y)!=1)    &&    (($UVAttrLv1.z)!=1))
+           GMH2_setUVOfGMHSurface($baseMeshShape,1,($UVAttrLv1.x),($UVAttrLv1.y),($UVAttrLv1.z));
+           
+           vector $UVAttrLv2 =  GMH2_querryGMHSurfaceUVSpace($baseMeshShape,2);
+           if (    (($UVAttrLv2.x)!=0)    &&    (($UVAttrLv2.y)!=1)    &&    (($UVAttrLv2.z)!=1))
+           GMH2_setUVOfGMHSurface($baseMeshShape,2,($UVAttrLv2.x),($UVAttrLv2.y),($UVAttrLv2.z));
+           
+           
+//connect style system to surface
+    //check if current GMH style is already applied to this surface
+    int $level = 0;
+    if (!`attributeExists "GMHStyleSystem" $baseSurfaceShape`)    addAttr -m -im 1  -at "double"  -ln   "GMHStyleSystem" -hidden 1 $baseSurfaceShape;
+    if (!`attributeExists "baseMesh" $GMHStyleSystem`)    addAttr -ln "baseMesh"  -at double $GMHStyleSystem;
+    if (!`isConnected ($GMHStyleSystem+".baseMesh") ($baseSurfaceShape+".GMHStyleSystem["+$level+"]")`)
+    connectAttr -f ($GMHStyleSystem+".baseMesh") ($baseSurfaceShape+".GMHStyleSystem["+$level+"]");
+        
+//put main group into GMH assets
+                        
+        select $GMHStyleSystem;
+        string $GMHsurfaceAsset  = PDD_NodeFromConnection("GMH_OutMainGroupAsset","out",1);
+        if ( !(isParentOf($GMHsurfaceAsset,$mainGroup)))
+        parent $mainGroup $GMHsurfaceAsset;
+
+
+
+
+select $baseSurface;
+return $mainGroup;
+}

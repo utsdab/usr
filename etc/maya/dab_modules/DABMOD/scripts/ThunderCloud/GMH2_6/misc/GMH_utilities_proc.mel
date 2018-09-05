@@ -1,0 +1,200 @@
+// ======================GMH_utilities_proc.mel======================
+
+global proc string getMainGroup(string $obj)
+{
+    select $obj;
+                //if the object itself is main group then return main group 
+        		if ((`attributeExists "GMH_MainGroup" $obj`) == 1)
+        		{
+        		    return $obj;
+        		}
+        
+        
+        //get the shape
+        $obj = `PDD_currentSelectionShapeName(1)`;
+        string $maingroup;
+        
+                //check if there is a connection MainGroup 
+        		if ((`attributeExists "GMH_InMainGroup" $obj`) == 1)
+        		{
+        		select $obj;	
+        		$maingroup = PDD_NodeFromConnection ("GMH_InMainGroup","in",1);
+        		    if ($maingroup =="")
+        		    {
+        		        return "";
+        		    }
+        		}
+        		else
+        		{
+        		    return "";
+        		}
+                
+	
+        return $maingroup;
+
+}
+
+
+
+
+global proc SelectBrushNode(string $GMHHairSystem)
+{
+    //check the checkBox  
+    if (getAttr ($GMHHairSystem+".blackBox")==1)
+    {
+        setAttr ($GMHHairSystem+".blackBox") 0;
+    }
+    select $GMHHairSystem;
+    string $brush = PDD_NodeFromConnection("PFXStyle","out",1);
+    
+    if ($brush!="")
+    select $brush;
+}
+
+
+
+
+
+
+global proc SelectHairSystemShape(string $GMHHairSystem)
+{
+    //check the checkBox  
+    if (getAttr ($GMHHairSystem+".blackBox")==1)
+    {
+        setAttr ($GMHHairSystem+".blackBox") 0;
+    }
+    select $GMHHairSystem;
+    string $mayaHairSystem = PDD_NodeFromConnection("MayaHairSystem","out",1);
+    
+    if ($mayaHairSystem!="")
+    select $mayaHairSystem;
+}
+
+global proc GMH2_resetPressureRampValue(string $stroke)
+{
+      int $mutiIndices[] = `getAttr -mi ($stroke+".pressureScale")`;
+        for($index in $mutiIndices)
+    {
+       if ($index!=0)
+        removeMultiInstance -break true ($stroke+".pressureScale["+$index+"]");
+        else
+        {
+            setAttr ($stroke+".pressureScale["+$index+"].pressureScale_Position") 0;
+            setAttr ($stroke+".pressureScale["+$index+"].pressureScale_FloatValue") 1;
+            setAttr ($stroke+".pressureScale["+$index+"].pressureScale_Interp") 1;
+        }
+            }
+      
+}
+
+global proc GMH2_copyPressureRampValueToBaseSurfaceAttr(string $stroke,string $baseSurface)
+{
+    //clear all the existing value of the baseSurface pressure value by remove the attr and add it again
+    if (`attributeExists "GMH2_pressureScale" $baseSurface`)
+     { deleteAttr ($baseSurface+".GMH2_pressureScale");}
+
+    addAttr -m -im true  -sn"GMH2_pressureScale" -at float3 -numberOfChildren 3 -hidden 1 $baseSurface;
+     addAttr -longName "GMH2_pressureScale_position" -attributeType "float" -parent GMH2_pressureScale $baseSurface;
+     addAttr -longName "GMH2_pressureScale_floatValue" -attributeType "float" -parent GMH2_pressureScale $baseSurface;
+     addAttr -longName "GMH2_pressureScale_interp" -attributeType "float" -parent GMH2_pressureScale $baseSurface;
+
+
+    int $mutiIndices[] = `getAttr -mi ($stroke+".pressureScale")`;
+    
+    for($index in $mutiIndices)
+    {
+        if (!(`isConnected ($stroke+".pressureScale["+$index+"]") ($baseSurface+".GMH2_pressureScale["+$index+"]")`))
+        connectAttr -f  ($stroke+".pressureScale["+$index+"]") ($baseSurface+".GMH2_pressureScale["+$index+"]");
+    }
+    
+}
+
+global proc GMH2_transferBaseSurfacePressureRmpToStroke(string $stroke,string $baseSurface)
+{
+    int $mutiIndices[];
+   if (`attributeExists  "GMH2_pressureScale" $baseSurface`)
+    $mutiIndices = `getAttr -mi ($baseSurface+".GMH2_pressureScale")`;
+    
+    for($index in $mutiIndices)
+    {
+ 
+     float $position = (`getAttr  ($baseSurface+".GMH2_pressureScale["+$index+"].GMH2_pressureScale_position")`);
+     float $floatValue = (`getAttr  ($baseSurface+".GMH2_pressureScale["+$index+"].GMH2_pressureScale_floatValue")`);
+     float $interp = (`getAttr  ($baseSurface+".GMH2_pressureScale["+$index+"].GMH2_pressureScale_interp")`);
+
+    setAttr ($stroke+".pressureScale["+$index+"].pressureScale_Position")$position;
+    setAttr ($stroke+".pressureScale["+$index+"].pressureScale_FloatValue")$floatValue;
+    setAttr ($stroke+".pressureScale["+$index+"].pressureScale_Interp")$interp;
+        
+    }
+}
+
+
+
+global proc int renameGMHSystem(string $GMHstyleSystem,string $name ) 
+{
+   
+   // check availability of the GMH Style System
+    if (!`attributeExists  "GMH_styleMainGroup" $GMHstyleSystem `)
+    {
+   
+            warning " no valid GMH Style System selected";
+            return 0;
+    }
+
+    int $oldBlackBoxAttr = getAttr ($GMHstyleSystem+".blackBox");
+    setAttr  ($GMHstyleSystem+".blackBox") 0;
+    //rename the GMHstyle Main Group
+    select $GMHstyleSystem;
+   rename  ($name + "_GMHStyleSystem");
+   $GMHstyleSystem= PDD_currentSelectionName(1);
+
+
+print ("rename GMHStyleSYstem =:" +$GMHstyleSystem +"\n");
+
+    //rename the Maya Hair System
+   select $GMHstyleSystem;
+   
+   string $mayaHairSystem = PDD_NodeFromConnection("MayaHairSystem","out",1);
+   select $mayaHairSystem;
+   pickWalk -d up;string $mayaHairSystemDAG = PDD_currentSelectionName(1);
+  $mayaHairSystemDAG =` rename $mayaHairSystemDAG ($name + "_MayaHairSystem") `;
+
+
+print "rename hair system \n";
+
+
+    //rename the pfxHair
+
+    select $GMHstyleSystem; 
+      string $PFXHair =  (PDD_NodeFromConnection("PFXHair","out",1));
+      if (`objExists $PFXHair`)
+      {select $PFXHair;pickWalk -d up;rename ($name + "_pfxHair");pickWalk -d down;}
+
+print "rename pfxhair \n";
+
+    //rename BRUSH
+     string $brush =  PDD_NodeFromConnection2($GMHstyleSystem,"PFXStyle","out");
+    select $brush;
+    $brush = rename ($name + "_Brush") ;
+    
+    //rename stroke
+    string $strokes[] =  PDD_NodesFromConnection2($brush,"outBrush","out"); 
+    for ( $eachStroke in $strokes) 
+    { 
+    select $eachStroke;pickWalk -d up;
+    rename ($name + "_stroke");
+    
+    }
+   
+
+    
+    //rename the GMH surface Main Group 
+    select $GMHstyleSystem;
+    string $GMHSurfaceMainGroup = PDD_NodeFromConnection("GMH_OutMainGroupAsset","out",1);
+    select $GMHSurfaceMainGroup ;rename ($name + "_surfaceGrp");
+    
+    
+    setAttr  ($GMHstyleSystem+".blackBox") $oldBlackBoxAttr;
+    return 1;
+}

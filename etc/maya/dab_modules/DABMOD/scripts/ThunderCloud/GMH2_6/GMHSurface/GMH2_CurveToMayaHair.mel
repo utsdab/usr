@@ -1,0 +1,109 @@
+//=================================GMH_ConvertPFXCurvesToMayaHair.mel ==================
+//string $leadCurves[] = `ls-sl`;
+global proc string[] GMH2_CurvesToMayaHair(string $mainGroup,string $eachGrowCurve,string $leadCurves[],string $HairSystem,int $debugFlag)
+{
+
+
+               // get Name
+               select $mainGroup;
+                string $name=substituteAllString ($mainGroup,"_GMHSurface","");
+                
+                
+   string $folliclesGroup[];
+   string $outputCurves[];clear ($outputCurves);
+   
+   select $leadCurves;
+   //ASIGN HAIR SYSTEM TO  CURVES GROUP
+   assignHairSystem $HairSystem;
+   
+   string $startPositionCurve[] =`ls-sl`;
+   
+   //connect follicles and outputCurves to main Group
+   for ( $eachCurves in $startPositionCurve)
+   {    
+           string $eachFollicles[] = `listConnections -type "follicle" -shapes 1 $eachCurves`;
+           appendStringArray($folliclesGroup,$eachFollicles,1);   
+
+       //FOLLICLES
+           if ($eachFollicles[0] ==""){warning "Cannot find follicles from surface Curves, please check Maya Version \n";print $eachCurves; break;};
+       select $eachFollicles[0];
+	   PDD_addUserAttribute("GMH_InMainGroup",1,0,1,0);
+       PDD_ConnectAttribute($mainGroup,"GMH_Follicles",$eachFollicles[0],"GMH_InMainGroup",$debugFlag);
+       //set rest post of follicle to "start curve"
+        setAttr ($eachFollicles[0]+".restPose") 1;
+        setAttr ($eachFollicles[0]+".degree") 1;
+        
+       //OUTPUT CURVES
+       select $eachFollicles[0]; string $outputCurve = PDD_NodeFromConnection("outCurve","out",$debugFlag);
+       select $outputCurve;pickWalk -d up;$outputCurve = `rename ($outputCurve+"_outputCurve")`;
+       $outputCurve = PDD_currentSelectionShapeName(1);
+       string $tmps[];$tmps[0]=$outputCurve;
+       appendStringArray($outputCurves,$tmps,1);   
+
+        //connect Growcurve to Output Curve , connect outputcurve to main group
+       select $eachCurves;; 
+       select $eachGrowCurve;PDD_addUserAttribute("GMH_OutputCurves",1,0,1,0);
+       select $outputCurve;
+	   PDD_addUserAttribute("GMH_InMainGroup",1,0,1,0);
+       PDD_ConnectAttribute($mainGroup,"GMH_OutputCurves",$outputCurve,"GMH_InMainGroup",$debugFlag);
+	   PDD_addUserAttribute("GMH_InGrowCurve",1,0,1,0);
+       PDD_ConnectAttribute($eachGrowCurve,"GMH_OutputCurves",$outputCurve,"GMH_InGrowCurve",$debugFlag);
+        
+       
+   }
+
+
+   //GET THE OUTPUTCURVES GROUP AND DELETE Extra Follicle Group
+               
+            // create GMH Output Curve group if not exist
+            select $mainGroup;string $GMHOutputCurveGrp = PDD_NodeFromConnection("GMH_OutputCurvesGroup","out",1);
+            if ( $GMHOutputCurveGrp =="")
+            {
+               $GMHOutputCurveGrp= `createNode transform -n ($name +"_outputCurveGrp")`;
+                PDD_addUserAttribute("GMH_InMainGroup",1,0,1,0);
+               PDD_ConnectAttribute($mainGroup,"GMH_OutputCurvesGroup",$GMHOutputCurveGrp,"GMH_InMainGroup",$debugFlag);
+               parent $GMHOutputCurveGrp $mainGroup;
+               select $mainGroup;$GMHOutputCurveGrp = PDD_NodeFromConnection("GMH_OutputCurvesGroup","out",1);
+            }
+		   
+            //parent the output curve to the GMH output curve groups
+            select $outputCurves; pickWalk -d up;
+           parent (`ls-sl`) $GMHOutputCurveGrp;
+           
+          //delete the unused follicle group
+          string $hairSystemDAGName=substituteAllString ($HairSystem,"Shape","");
+          string $unUsefolliclesGrp = $hairSystemDAGName+"Follicles";
+          if (`objExists $unUsefolliclesGrp`) delete $unUsefolliclesGrp ;
+          
+             string $hairSystemDAGName=substituteAllString ($HairSystem,"Shape","");
+          string $unUseoutPutGrp = $hairSystemDAGName+"OutputCurves";
+          if (`objExists $unUseoutPutGrp`) delete $unUseoutPutGrp ;
+            
+
+
+
+
+
+        //connect follicles to base Surface attributes
+       select $mainGroup;
+        string $baseSurfaceShape = PDD_NodeFromConnection("GMH_outPolySurfaceShape","out",$debugFlag);
+        for ( $eachFollicle in $folliclesGroup)
+        {
+        PDD_ConnectAttribute($baseSurfaceShape,"GMH_Hair_Num_Per_Clump_Mul",$eachFollicle,"densityMult",$debugFlag);
+        PDD_ConnectAttribute($baseSurfaceShape,"GMH_Clump_Width_Mul",$eachFollicle,"clumpWidthMult",$debugFlag);
+        PDD_ConnectAttribute($baseSurfaceShape,"GMH_Overide_Hair_Color",$eachFollicle,"colorBlend",$debugFlag);
+        PDD_ConnectAttribute($baseSurfaceShape,"GMH_Hair_Color_R",$eachFollicle,"colorR",$debugFlag);
+        PDD_ConnectAttribute($baseSurfaceShape,"GMH_Hair_Color_G",$eachFollicle,"colorG",$debugFlag);
+        PDD_ConnectAttribute($baseSurfaceShape,"GMH_Hair_Color_B",$eachFollicle,"colorB",$debugFlag);
+        PDD_ConnectAttribute($baseSurfaceShape,"GMH_Curl_Mult",$eachFollicle,"curlMult",$debugFlag);
+        PDD_ConnectAttribute($baseSurfaceShape,"GMH_Braid",$eachFollicle,"braid",$debugFlag);
+        PDD_ConnectAttribute($baseSurfaceShape,"FolliclesLockType",$eachFollicle,"pointLock",$debugFlag);
+        PDD_ConnectAttribute($baseSurfaceShape,"SimulationType",$eachFollicle,"simulationMethod",$debugFlag);
+        
+        }
+
+
+ select $eachGrowCurve;
+$outputCurves = PDD_NodesFromConnection("GMH_OutputCurves","out",$debugFlag);
+return $outputCurves;
+}
