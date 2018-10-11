@@ -152,15 +152,15 @@ def getRISAttrs(node="renderManRISGlobals"):
             print "{} {} {} {}".format(_nodeType, node, _attr , _value)
 
 def setUp():
-    #setMe("renderManRISGlobals","rman__torattr___motionBlur",1)
-    #setMe("renderManRISGlobals","rman__torattr___cameraBlur",1)
-    #setMe("renderManRISGlobals","rman__torattr___motionSamples",4)
-    #setMe("renderManRISGlobals","rman__toropt___shutterAngle",180)
-    #setMe("renderManRISGlobals","rman__toropt___motionBlurType","frame")
+    setMe("renderManRISGlobals","rman__torattr___motionBlur",1)
+    setMe("renderManRISGlobals","rman__torattr___cameraBlur",1)
+    setMe("renderManRISGlobals","rman__torattr___motionSamples",4)
+    setMe("renderManRISGlobals","rman__toropt___shutterAngle",180)
+    setMe("renderManRISGlobals","rman__toropt___motionBlurType","frame")
     setMe("renderManRISGlobals","rman__torattr___denoise",0)
     setMe("renderManRISGlobals","rman__riopt__rib_format","binary")
     setMe("renderManRISGlobals","rman__riopt__rib_compression","gzip")
-    #setMe("renderManRISGlobals","rman__torattr___linearizeColors",1)
+    setMe("renderManRISGlobals","rman__torattr___linearizeColors",1)
 
 
 if __name__ == "__main__":
