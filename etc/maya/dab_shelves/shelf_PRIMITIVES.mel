@@ -6,14 +6,17 @@ global proc shelf_PRIMITIVES () {
 
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 64
         -enable 1
         -width 35
-        -height 35
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Create a polygonal cube on the grid" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Cube" 
@@ -38,14 +41,17 @@ global proc shelf_PRIMITIVES () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 64
         -enable 1
         -width 35
-        -height 35
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Create a polygonal plane on the grid" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Plane" 
@@ -70,14 +76,17 @@ global proc shelf_PRIMITIVES () {
     ;
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 64
         -enable 1
         -width 35
-        -height 35
+        -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Create a polygonal sphere on the grid" 
         -enableBackground 0
+        -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
         -label "Sphere" 
