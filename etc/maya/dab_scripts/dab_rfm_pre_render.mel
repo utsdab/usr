@@ -27,8 +27,14 @@ global proc dab_set_globals()
     //FUNCTIONS
     //rmanCreateGlobals;
     //rmanCreateEnvLight;
-    rmanLoadPlugin;
-    rmanCreateGlobals;
+
+    //////////// changes for 22.3
+    //rmanLoadPlugin;  // 21 only
+    //rmanCreateGlobals;
+
+    load_rfm("22.3", "");
+
+
     print("RUNNING MEL:  dab_set_globals\n");
     setAttr -type "string" "defaultRenderGlobals.currentRenderer" "renderManRIS";
     setAttr "defaultRenderGlobals.animation" 1;
@@ -129,12 +135,17 @@ global proc dab_rfm_pre_render( int $layerid, int $start, int $end, int $phase)
 {
     print("RUNNING MEL: >>>>>> THE STUDENT NANNY IS RUNNING >>>>>>> from dab_pre_render.mel\n");
     print("RUNNING MEL: >>>>>> dab_pre_render.mel\n");
-    dab_set_globals();
-    dab_micro_manager();
+
+    load_rfm("22.3", "");
+
+
+//    dab_set_globals();    /// do this all in python
+//    dab_micro_manager();  /// do this in python
+
     python("import dab_rfm_pre_render as dpr");
     python("dpr.sayHello()");
     python("dpr.setUp()");
-    dab_report_globals();
+//    dab_report_globals();
 
     //  perform ribgen for renderman
     print("RUNNING RIB GEN: renderManBatchGenRibForLayer l\n");
