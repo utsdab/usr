@@ -1,0 +1,12 @@
+global proc dab_rfm_pre_render_mel()
+{
+    print("RUNNING MEL: >>>>>> dab_pre_render.mel\n");
+    //load_rfm("22.3", "");
+    //python("import dab_rfm_pre_render as dpr");
+    //python("dpr.sayHello()");
+    python("import dab_rfm_pre_render_python as dpr");
+    python("dpr.main()");
+    print("FINISHING MEL: >>>>>> dab_pre_render.mel\n");
+}
+
+dab_rfm_pre_render_mel();
