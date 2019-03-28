@@ -6,6 +6,41 @@ global proc shelf_DAB () {
 
     shelfButton
         -enableCommandRepeat 1
+        -flexibleWidthType 2
+        -flexibleWidthValue 92
+        -enable 1
+        -width 92
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Tractor Batch Render RFM" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Batch Render to Tractor" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "TR" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "Tractor.png" 
+        -image1 "Tractor.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import batch_render_rfm\nbatch_render_rfm.run()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
         -flexibleWidthType 1
         -flexibleWidthValue 32
         -enable 1
@@ -19,7 +54,7 @@ global proc shelf_DAB () {
         -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
-        -label "RapidRig_Modular;" 
+        -label "RapidRig_Modular" 
         -labelOffset 0
         -rotation 0
         -flipX 0
