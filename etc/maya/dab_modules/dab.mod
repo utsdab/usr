@@ -7,6 +7,15 @@ PATH +:= ../../bin
 [r] presets: ../../presets
 plug-ins: plug-ins
 
++ PLATFORM:mac MAYAVERSION:2019 DABMOD any DABMOD/2019/mac
+MODULESLOADED += DABMOD_2019_MAC
+PYTHONPATH +:= ../../python
+PATH +:= ../../bin
+[r] scripts: ../../scripts
+[r] icons: ../../icons
+[r] presets: ../../presets
+plug-ins: plug-ins
+
 + PLATFORM:win64 MAYAVERSION:2017 DABMOD any DABMOD\2018\win
 MODULESLOADED += DABMOD_2018_WIN
 PYTHONPATH +:= ../../python
