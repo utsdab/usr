@@ -1,5 +1,5 @@
 + PLATFORM:mac MAYAVERSION:2018 DABMOD any DABMOD/2018/mac
-MODULESLOADED += DABMOD_2017_MAC
+MODULESLOADED += DABMOD_2018_MAC
 PYTHONPATH +:= ../../python
 PATH +:= ../../bin
 [r] scripts: ../../scripts

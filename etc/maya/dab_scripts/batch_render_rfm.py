@@ -11,5 +11,5 @@ def run():
         rfm2.batch_render_spool(do_bake=False)
 
 if __name__ == "__main__":
-    print "RUNNING...."
+    print "RUNNING Batch Render Rfm ...."
     run()

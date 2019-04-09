@@ -11,7 +11,7 @@ queued_txmake_list = [] # list to hold txmake tasks still in the queue
 for txfile in mgr.txfile_list:
     if txfile._check_source_is_tex():
         continue
-    else
+    else:
         for img, item in txfile.tex_dict.iteritems():
             print img, item
     # validate all output files
