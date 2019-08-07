@@ -14,7 +14,7 @@
 #
 # Windows:
 # C:/Users/yourUserName/Documents/maya/scripts
-# or C:/Program Files/Autodesk/Maya2011/Python/Lib/stie-packages/dpAutoRigSystem
+# or C:/Program Files/Autodesk/Maya2011/Python/Lib/site-packages/dpAutoRigSystem
 #
 # MAC:
 # /Users/yourUserName/Library/Preferences/Autodesk/maya/2012-x64/scripts/

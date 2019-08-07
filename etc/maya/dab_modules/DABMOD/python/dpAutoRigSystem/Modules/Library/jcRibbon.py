@@ -56,6 +56,7 @@ def addRibbonToLimb(prefix='', myName=None, oriLoc=None, iniJnt=None, skipAxis='
     elbowctrlCtrl = elbowctrlList[1]
     elbowctrlZero = elbowctrlList[2]
     
+    cmds.addAttr(upctrlCtrl, longName="autoTwistBone", attributeType='float', min=0, defaultValue=0, max=1, keyable=True)
     cmds.addAttr(upctrlCtrl, longName="baseTwist", attributeType='float', keyable=True)
     
     if arm:
@@ -81,10 +82,16 @@ def addRibbonToLimb(prefix='', myName=None, oriLoc=None, iniJnt=None, skipAxis='
     cmds.delete(downLimb['constraints'][0])
     cmds.parentConstraint(elbowctrlCtrl, downLimb['locsList'][2], mo=True, w=1, name=downLimb['locsList'][2]+"_ParentConstraint")
     
-    cmds.parentConstraint(cmds.listRelatives(upLimb['middleCtrl'], p=True)[0], upctrl, mo=True, w=1, name=upctrl+"_ParentConstraint")
+    upPC = cmds.parentConstraint(cmds.listRelatives(upLimb['middleCtrl'], p=True)[0], elbowctrlCtrl, upctrl, mo=True, w=1, skipRotate=['x', 'y', 'z'], name=upctrl+"_ParentConstraint")[0]
+    cmds.orientConstraint(cmds.listRelatives(upLimb['middleCtrl'], p=True)[0], upctrl, mo=True, w=1, name=upctrl+"_OrientConstraint")
+    cmds.setAttr(upPC+'.interpType', 2)
+    cmds.connectAttr(elbowctrlCtrl+'.autoBend', upPC+'.'+elbowctrlCtrl+'W1', force=True)
     cmds.parentConstraint(cmds.listRelatives(upctrl, c=True)[0], upLimb['middleCtrl'], mo=True, w=1, name=upLimb['middleCtrl']+"_ParentConstraint")
     
-    cmds.parentConstraint(cmds.listRelatives(downLimb['middleCtrl'], p=True)[0], downctrl, mo=True, w=1, name=downctrl+"_ParentConstraint")
+    downPC = cmds.parentConstraint(cmds.listRelatives(downLimb['middleCtrl'], p=True)[0], elbowctrlCtrl, downctrl, mo=True, w=1, skipRotate=['x', 'y', 'z'], name=downctrl+"_ParentConstraint")[0]
+    cmds.orientConstraint(cmds.listRelatives(downLimb['middleCtrl'], p=True)[0], downctrl, mo=True, w=1, name=downctrl+"_OrientConstraint")
+    cmds.setAttr(downPC+'.interpType', 2)
+    cmds.connectAttr(elbowctrlCtrl+'.autoBend', downPC+'.'+elbowctrlCtrl+'W1', force=True)
     cmds.parentConstraint(cmds.listRelatives(downctrl, c=True)[0], downLimb['middleCtrl'], mo=True, w=1, name=downLimb['middleCtrl']+"_ParentConstraint")
     
     cmds.pointConstraint(lista[1], elbowctrl, mo=True, w=1, name=elbowctrl+"_PointConstraint")
@@ -106,7 +113,7 @@ def addRibbonToLimb(prefix='', myName=None, oriLoc=None, iniJnt=None, skipAxis='
             cmds.setAttr(nBone+".segmentScaleCompensate", 0)
     
     for i in range(len(limbJoints)):
-        limbJoints[i] = cmds.rename(limbJoints[i], prefix+myName+'_'+`i+1`+'_Jnt')
+        limbJoints[i] = cmds.rename(limbJoints[i], prefix+myName+'_%02d_Jnt'%(i+1))
         cmds.addAttr(limbJoints[i], longName="dpAR_joint", attributeType='float', keyable=False)
     
     scaleGrp = cmds.group(upLimb['scaleGrp'], downLimb['scaleGrp'], jntGrp, n=prefix+myName+'_Ribbon_Scale_Grp')
@@ -133,7 +140,15 @@ def addRibbonToLimb(prefix='', myName=None, oriLoc=None, iniJnt=None, skipAxis='
                 pass
             # rename joint
             cmds.rename(item, item.replace('_Jnt', '_Jxt'))
-            
+    
+    # implementing pin setup to ribbon corner offset control:
+    if elbowctrlList[2]:
+        worldRefPC = cmds.parentConstraint(worldRef, elbowctrl, elbowctrlZero, mo=True)[0]
+        pinRev = cmds.createNode('reverse', name=elbowctrlCtrl+"_Pin_Rev")
+        cmds.connectAttr(elbowctrlCtrl+".pin", worldRefPC+"."+worldRef+"W0", force=True)
+        cmds.connectAttr(elbowctrlCtrl+".pin", pinRev+".inputX", force=True)
+        cmds.connectAttr(pinRev+".outputX", worldRefPC+"."+elbowctrl+"W1", force=True)
+    
     
     # WIP: not used this mirror by dpAR system because each module guide will create each own mirror
     if mirror:
@@ -163,7 +178,7 @@ def addRibbonToLimb(prefix='', myName=None, oriLoc=None, iniJnt=None, skipAxis='
     extraCtrlList = upLimb['extraCtrlList']
     extraCtrlList.extend(downLimb['extraCtrlList'])
     
-    return {'scaleGrp':scaleGrp, 'staticGrp':staticGrp, 'ctrlsGrp':ctrlsGrp, 'bendGrpList':[upctrl, downctrl], 'ctrlList':[upctrlCtrl, downctrlCtrl, elbowctrlCtrl], 'extraBendGrp':[upLimb['extraCtrlGrp'], downLimb['extraCtrlGrp']], 'extraCtrlList':extraCtrlList}
+    return {'scaleGrp':scaleGrp, 'staticGrp':staticGrp, 'ctrlsGrp':ctrlsGrp, 'bendGrpList':[upctrl, downctrl], 'ctrlList':[upctrlCtrl, downctrlCtrl, elbowctrlCtrl], 'extraBendGrp':[upLimb['extraCtrlGrp'], downLimb['extraCtrlGrp']], 'extraCtrlList':extraCtrlList, 'twistBoneMD':upLimb['twistBoneMD']}
     
 def createBendCtrl(myName='Bend_Ctrl', r=1, zero=True):
     grp = None
@@ -184,12 +199,14 @@ def createElbowCtrl(myName='Limb_Ctrl', r=1, zero=True, armStyle=True):
     cmds.makeIdentity(curve, a=1)
     grp = None
     if zero:
-        zero = cmds.group(curve, n=myName+'_Grp')
+        zero = cmds.group(curve, n=myName+'_Zero')
         grp = cmds.group(zero, n=myName+'_Grp')
         if armStyle:
             cmds.rotate(0, -90, -90, zero)
         else:
             cmds.rotate(-90, 0, -90, zero)
+    cmds.addAttr(curve, longName='autoBend', attributeType='float', minValue=0, maxValue=1, defaultValue=0, keyable=True)
+    cmds.addAttr(curve, longName='pin', attributeType='float', minValue=0, maxValue=1, defaultValue=0, keyable=True)
     return [grp, curve, zero]
     
 #function to create the ribbon
@@ -214,10 +231,10 @@ def createRibbon(axis=(0, 0, 1), name='RibbonSetup', horizontal=False, numJoints
 
         #create a nurbsPlane based in the choose orientation option
         if horizontal:
-            ribbon =cmds.nurbsPlane(ax=axis, w=numJoints, lr=(1/float(numJoints)), d=3, u=numJoints, v=1, ch=0, name=name+'_Plane')[0]
+            ribbon = cmds.nurbsPlane(ax=axis, w=numJoints, lr=(1/float(numJoints)), d=3, u=numJoints, v=1, ch=0, name=name+'_Plane')[0]
             cmds.rebuildSurface(ribbon, ch=0, rpo=1, rt=0, end=1, kr=0, kcp=0, kc=0, sv=1, du=3, dv=1, tol=0.01, fr=0, dir=1) 
         else:
-            ribbon =cmds.nurbsPlane(ax=axis, w=1, lr=numJoints, d=3, u=1, v=numJoints, ch=0, name=name+'_Plane')[0]
+            ribbon = cmds.nurbsPlane(ax=axis, w=1, lr=numJoints, d=3, u=1, v=numJoints, ch=0, name=name+'_Plane')[0]
             cmds.rebuildSurface(ribbon, ch=0, rpo=1, rt=0, end=1, kr=0, kcp=0, kc=0, su=1, du=1, dv=3, tol=0.01, fr=0, dir=0) 
         # make this ribbonNurbsPlane as not skinable from dpAR_UI:
         cmds.addAttr(ribbon, longName="doNotSkinIt", attributeType="bool", keyable=True)
@@ -437,6 +454,8 @@ def createRibbon(axis=(0, 0, 1), name='RibbonSetup', horizontal=False, numJoints
 
         curveInfoNode = cmds.arclen(ribbon+".v[0.5]", constructionHistory=True)
         curveInfoNode = cmds.rename(curveInfoNode, ribbon+"_CurveInfo")
+        curveFromSurfaceIso = cmds.listConnections(curveInfoNode+".inputCurve", source=True, destination=False)
+        cmds.rename(curveFromSurfaceIso, ribbon+"_CurveFromSurfaceIso")
         rbScaleMD = cmds.createNode("multiplyDivide", name=ribbon+"_ScaleCompensate_MD")
         rbNormalizeMD = cmds.createNode("multiplyDivide", name=ribbon+"_Normalize_MD")
         cmds.setAttr(rbNormalizeMD+".operation", 2)
@@ -496,66 +515,68 @@ def createRibbon(axis=(0, 0, 1), name='RibbonSetup', horizontal=False, numJoints
         
         #do the controller joints skin and the ribbon
         ribbonShape = cmds.listRelatives(ribbon, shapes=True)
-        skin = cmds.skinCluster(drv_Jnt[0:3], ribbonShape, tsb=True, mi=2, dr=1)
+        skinClusterNode = cmds.skinCluster(drv_Jnt[0:3], ribbonShape, tsb=True, mi=2, dr=1, n=name+"_SC")[0]
+        bindPose = cmds.listConnections(skinClusterNode+".bindPose", destination=False, source=True)
+        cmds.rename(bindPose, name+"_BindPose")
         
         #skin presets for the ribbon (that's amazing!)
         if not horizontal:
             if numJoints == 3:
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][5]', tv=(drv_Jnt[2], 1))
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][4]', tv=[(drv_Jnt[2], 0.6), (drv_Jnt[1], 0.4)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][3]', tv=[(drv_Jnt[2], 0.2), (drv_Jnt[1], 0.8)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][2]', tv=[(drv_Jnt[0], 0.2), (drv_Jnt[1], 0.8)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][1]', tv=[(drv_Jnt[0], 0.6), (drv_Jnt[1], 0.4)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][0]', tv=(drv_Jnt[0], 1))
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][5]', tv=(drv_Jnt[2], 1))
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][4]', tv=[(drv_Jnt[2], 0.6), (drv_Jnt[1], 0.4)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][3]', tv=[(drv_Jnt[2], 0.2), (drv_Jnt[1], 0.8)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][2]', tv=[(drv_Jnt[0], 0.2), (drv_Jnt[1], 0.8)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][1]', tv=[(drv_Jnt[0], 0.6), (drv_Jnt[1], 0.4)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][0]', tv=(drv_Jnt[0], 1))
 
             elif numJoints == 5:
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][7]', tv=(drv_Jnt[2], 1))
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][6]', tv=[(drv_Jnt[2], 0.80), (drv_Jnt[1], 0.2)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][5]', tv=[(drv_Jnt[2], 0.5), (drv_Jnt[1], 0.5)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][4]', tv=[(drv_Jnt[2], 0.25), (drv_Jnt[1], 0.75)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][3]', tv=[(drv_Jnt[0], 0.25), (drv_Jnt[1], 0.75)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][2]', tv=[(drv_Jnt[0], 0.5), (drv_Jnt[1], 0.5)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][1]', tv=[(drv_Jnt[0], 0.8), (drv_Jnt[1], 0.2)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][0]', tv=(drv_Jnt[0], 1))
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][7]', tv=(drv_Jnt[2], 1))
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][6]', tv=[(drv_Jnt[2], 0.80), (drv_Jnt[1], 0.2)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][5]', tv=[(drv_Jnt[2], 0.5), (drv_Jnt[1], 0.5)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][4]', tv=[(drv_Jnt[2], 0.25), (drv_Jnt[1], 0.75)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][3]', tv=[(drv_Jnt[0], 0.25), (drv_Jnt[1], 0.75)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][2]', tv=[(drv_Jnt[0], 0.5), (drv_Jnt[1], 0.5)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][1]', tv=[(drv_Jnt[0], 0.8), (drv_Jnt[1], 0.2)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][0]', tv=(drv_Jnt[0], 1))
             elif numJoints == 7:
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][9]', tv=(drv_Jnt[2], 1))
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][8]', tv=[(drv_Jnt[2], 0.85), (drv_Jnt[1], 0.15)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][7]', tv=[(drv_Jnt[2], 0.6), (drv_Jnt[1], 0.4)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][6]', tv=[(drv_Jnt[2], 0.35), (drv_Jnt[1], 0.65)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][5]', tv=[(drv_Jnt[2], 0.25), (drv_Jnt[1], 0.75)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][4]', tv=[(drv_Jnt[0], 0.25), (drv_Jnt[1], 0.75)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][3]', tv=[(drv_Jnt[0], 0.35), (drv_Jnt[1], 0.65)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][2]', tv=[(drv_Jnt[0], 0.6), (drv_Jnt[1], 0.4)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][1]', tv=[(drv_Jnt[0], 0.85), (drv_Jnt[1], 0.15)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0:1][0]', tv=(drv_Jnt[0], 1))
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][9]', tv=(drv_Jnt[2], 1))
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][8]', tv=[(drv_Jnt[2], 0.85), (drv_Jnt[1], 0.15)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][7]', tv=[(drv_Jnt[2], 0.6), (drv_Jnt[1], 0.4)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][6]', tv=[(drv_Jnt[2], 0.35), (drv_Jnt[1], 0.65)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][5]', tv=[(drv_Jnt[2], 0.25), (drv_Jnt[1], 0.75)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][4]', tv=[(drv_Jnt[0], 0.25), (drv_Jnt[1], 0.75)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][3]', tv=[(drv_Jnt[0], 0.35), (drv_Jnt[1], 0.65)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][2]', tv=[(drv_Jnt[0], 0.6), (drv_Jnt[1], 0.4)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][1]', tv=[(drv_Jnt[0], 0.85), (drv_Jnt[1], 0.15)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0:1][0]', tv=(drv_Jnt[0], 1))
         else:
             if numJoints == 3:
-                cmds.skinPercent(skin[0], ribbon + '.cv[5][0:1]', tv=(drv_Jnt[2], 1))
-                cmds.skinPercent(skin[0], ribbon + '.cv[4][0:1]', tv=[(drv_Jnt[2], 0.6), (drv_Jnt[1], 0.4)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[3][0:1]', tv=[(drv_Jnt[2], 0.2), (drv_Jnt[1], 0.8)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[2][0:1]', tv=[(drv_Jnt[0], 0.2), (drv_Jnt[1], 0.8)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[1][0:1]', tv=[(drv_Jnt[0], 0.6), (drv_Jnt[1], 0.4)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0][0:1]', tv=(drv_Jnt[0], 1))
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[5][0:1]', tv=(drv_Jnt[2], 1))
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[4][0:1]', tv=[(drv_Jnt[2], 0.6), (drv_Jnt[1], 0.4)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[3][0:1]', tv=[(drv_Jnt[2], 0.2), (drv_Jnt[1], 0.8)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[2][0:1]', tv=[(drv_Jnt[0], 0.2), (drv_Jnt[1], 0.8)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[1][0:1]', tv=[(drv_Jnt[0], 0.6), (drv_Jnt[1], 0.4)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0][0:1]', tv=(drv_Jnt[0], 1))
             elif numJoints == 5:
-                cmds.skinPercent(skin[0], ribbon + '.cv[7][0:1]', tv=(drv_Jnt[2], 1))
-                cmds.skinPercent(skin[0], ribbon + '.cv[6][0:1]', tv=[(drv_Jnt[2], 0.80), (drv_Jnt[1], 0.2)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[5][0:1]', tv=[(drv_Jnt[2], 0.5), (drv_Jnt[1], 0.5)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[4][0:1]', tv=[(drv_Jnt[2], 0.25), (drv_Jnt[1], 0.75)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[3][0:1]', tv=[(drv_Jnt[0], 0.25), (drv_Jnt[1], 0.75)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[2][0:1]', tv=[(drv_Jnt[0], 0.5), (drv_Jnt[1], 0.5)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[1][0:1]', tv=[(drv_Jnt[0], 0.8), (drv_Jnt[1], 0.2)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0][0:1]', tv=(drv_Jnt[0], 1))
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[7][0:1]', tv=(drv_Jnt[2], 1))
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[6][0:1]', tv=[(drv_Jnt[2], 0.80), (drv_Jnt[1], 0.2)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[5][0:1]', tv=[(drv_Jnt[2], 0.5), (drv_Jnt[1], 0.5)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[4][0:1]', tv=[(drv_Jnt[2], 0.25), (drv_Jnt[1], 0.75)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[3][0:1]', tv=[(drv_Jnt[0], 0.25), (drv_Jnt[1], 0.75)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[2][0:1]', tv=[(drv_Jnt[0], 0.5), (drv_Jnt[1], 0.5)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[1][0:1]', tv=[(drv_Jnt[0], 0.8), (drv_Jnt[1], 0.2)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0][0:1]', tv=(drv_Jnt[0], 1))
             elif numJoints == 7:
-                cmds.skinPercent(skin[0], ribbon + '.cv[9][0:1]', tv=(drv_Jnt[2], 1))
-                cmds.skinPercent(skin[0], ribbon + '.cv[8][0:1]', tv=[(drv_Jnt[2], 0.85), (drv_Jnt[1], 0.15)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[7][0:1]', tv=[(drv_Jnt[2], 0.6), (drv_Jnt[1], 0.4)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[6][0:1]', tv=[(drv_Jnt[2], 0.35), (drv_Jnt[1], 0.65)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[5][0:1]', tv=[(drv_Jnt[2], 0.25), (drv_Jnt[1], 0.75)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[4][0:1]', tv=[(drv_Jnt[0], 0.25), (drv_Jnt[1], 0.75)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[3][0:1]', tv=[(drv_Jnt[0], 0.35), (drv_Jnt[1], 0.65)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[2][0:1]', tv=[(drv_Jnt[0], 0.6), (drv_Jnt[1], 0.4)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[1][0:1]', tv=[(drv_Jnt[0], 0.85), (drv_Jnt[1], 0.15)])
-                cmds.skinPercent(skin[0], ribbon + '.cv[0][0:1]', tv=(drv_Jnt[0], 1))
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[9][0:1]', tv=(drv_Jnt[2], 1))
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[8][0:1]', tv=[(drv_Jnt[2], 0.85), (drv_Jnt[1], 0.15)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[7][0:1]', tv=[(drv_Jnt[2], 0.6), (drv_Jnt[1], 0.4)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[6][0:1]', tv=[(drv_Jnt[2], 0.35), (drv_Jnt[1], 0.65)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[5][0:1]', tv=[(drv_Jnt[2], 0.25), (drv_Jnt[1], 0.75)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[4][0:1]', tv=[(drv_Jnt[0], 0.25), (drv_Jnt[1], 0.75)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[3][0:1]', tv=[(drv_Jnt[0], 0.35), (drv_Jnt[1], 0.65)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[2][0:1]', tv=[(drv_Jnt[0], 0.6), (drv_Jnt[1], 0.4)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[1][0:1]', tv=[(drv_Jnt[0], 0.85), (drv_Jnt[1], 0.15)])
+                cmds.skinPercent(skinClusterNode, ribbon + '.cv[0][0:1]', tv=(drv_Jnt[0], 1))
         constr = []
         if guias:
             top = guias[0]
@@ -587,9 +608,18 @@ def createRibbon(axis=(0, 0, 1), name='RibbonSetup', horizontal=False, numJoints
         # baseTwist:
         if not upCtrl == None:
             bttm_LocGrp = cmds.group(bttm_Loc[2], name=bttm_Loc[2]+"_Grp")
+            bttm_LocTwistBoneGrp = cmds.group(bttm_LocGrp, name=bttm_Loc[2]+"_TwistBone_Grp")
             bttm_LocPos = cmds.xform(bttm_Loc[0], query=True, worldSpace=True, translation=True)
             cmds.move(bttm_LocPos[0], bttm_LocPos[1], bttm_LocPos[2], bttm_LocGrp+".scalePivot", bttm_LocGrp+".rotatePivot", absolute=True)
+            cmds.move(bttm_LocPos[0], bttm_LocPos[1], bttm_LocPos[2], bttm_LocTwistBoneGrp+".scalePivot", bttm_LocTwistBoneGrp+".rotatePivot", absolute=True)
+            twistBoneMD = cmds.createNode("multiplyDivide", name=upCtrl+"_TwistBone_MD")
+            invertTwistBoneMD = cmds.createNode("multiplyDivide", name=upCtrl+"_InvertTwistBone_MD")
+            cmds.setAttr(invertTwistBoneMD+".input2X", -1)
+            cmds.connectAttr(upCtrl+".autoTwistBone", twistBoneMD+".input1X", force=True)
+            cmds.connectAttr(twistBoneMD+".outputX", invertTwistBoneMD+".input1X", force=True)
+            cmds.connectAttr(invertTwistBoneMD+".outputX", bttm_LocTwistBoneGrp+".rotateZ", force=True)
             cmds.connectAttr(upCtrl+".baseTwist", bttm_LocGrp+".rotateZ", force=True)
+            retDict['twistBoneMD'] = twistBoneMD
         
         #updating values
         cmds.setAttr(rbScaleMD+".input2X", cmds.getAttr(curveInfoNode+".arcLength"))
@@ -635,8 +665,8 @@ def createFollicles(rib, num, pad=0.5, name='xxxx', horizontal=False):
         passo = (1/float(num))/2.0;
         for i in range(num):
             #create the follicle and do correct connections to link it to the 
-            folShape = cmds.createNode('follicle', name=name+'_%d_FolShape'%i)
-            folTrans = cmds.rename(cmds.listRelatives(folShape, p=1)[0], name+'_%d_Fol'%i)         
+            folShape = cmds.createNode('follicle', name=name+'_%02d_FolShape'%i)
+            folTrans = cmds.rename(cmds.listRelatives(folShape, p=1)[0], name+'_%02d_Fol'%i)         
             fols.append(folTrans)
             cmds.connectAttr(rib+'.worldMatrix[0]', folShape+'.inputWorldMatrix')
             cmds.connectAttr(rib+'.local', folShape+'.inputSurface')
@@ -646,7 +676,7 @@ def createFollicles(rib, num, pad=0.5, name='xxxx', horizontal=False):
             cmds.setAttr(folShape+'.parameterV', 0.5) 
             #create the joint in the follicle
             cmds.select(cl=True)
-            jnts.append(cmds.joint(n=name+'_%d_Jnt'%i))
+            jnts.append(cmds.joint(n=name+'_%02d_Jnt'%i))
             cmds.setAttr(jnts[i]+'.jointOrient', 0, 0, 0)
             cmds.select(cl=True)
             #calculate the position of the first follicle
@@ -658,8 +688,8 @@ def createFollicles(rib, num, pad=0.5, name='xxxx', horizontal=False):
         passo = (1/float(num))/2.0;
         for i in range(num):
             #create the follicle and do correct connections in order to link it to the ribbon
-            folShape = cmds.createNode('follicle', name=name+'_%d_FolShape'%i)
-            folTrans = cmds.rename(cmds.listRelatives(folShape, p=1)[0], name+'_%d_Fol'%i)
+            folShape = cmds.createNode('follicle', name=name+'_%02d_FolShape'%i)
+            folTrans = cmds.rename(cmds.listRelatives(folShape, p=1)[0], name+'_%02d_Fol'%i)
             fols.append(folTrans)
             cmds.connectAttr(rib+'.worldMatrix[0]', folShape+'.inputWorldMatrix')
             cmds.connectAttr(rib+'.local', folShape+'.inputSurface')
@@ -669,7 +699,7 @@ def createFollicles(rib, num, pad=0.5, name='xxxx', horizontal=False):
             cmds.setAttr(folShape+'.parameterV', passo) 
             #create the joint in the follicle
             cmds.select(cl=True)
-            jnts.append(cmds.joint(n=name+'_%d_Jnt'%i))
+            jnts.append(cmds.joint(n=name+'_%02d_Jnt'%i))
             cmds.setAttr(jnts[i]+'.jointOrient', 0, 0, 0)
             cmds.select(cl=True)
             #calculate the first follicle position

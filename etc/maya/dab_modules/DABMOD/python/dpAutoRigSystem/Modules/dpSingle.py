@@ -23,6 +23,11 @@ class Single(Base.StartClass, Layout.LayoutClass):
         kwargs["DESCRIPTION"] = DESCRIPTION
         kwargs["ICON"] = ICON
         Base.StartClass.__init__(self, *args, **kwargs)
+        #Returned data from the dictionnary
+        self.mainJisList = []
+        self.aStaticGrpList = []
+        self.aCtrlGrpList = []
+        self.detectedBug = False
     
     
     def createModuleLayout(self, *args):
@@ -34,6 +39,10 @@ class Single(Base.StartClass, Layout.LayoutClass):
         return cmds.getAttr(self.moduleGrp + ".indirectSkin")
     
     
+    def getHasHolder(self):
+        return cmds.getAttr(self.moduleGrp + "." + self.langDic[self.langName]['c_holder'])
+        
+        
     def createGuide(self, *args):
         Base.StartClass.createGuide(self)
         # Custom GUIDE:
@@ -42,6 +51,8 @@ class Single(Base.StartClass, Layout.LayoutClass):
         
         cmds.addAttr(self.moduleGrp, longName="indirectSkin", attributeType='bool')
         cmds.setAttr(self.moduleGrp+".indirectSkin", 0)
+        cmds.addAttr(self.moduleGrp, longName=self.langDic[self.langName]['c_holder'], attributeType='bool')
+        cmds.setAttr(self.moduleGrp+"."+self.langDic[self.langName]['c_holder'], 0)
         
         cmds.setAttr(self.moduleGrp+".moduleNamespace", self.moduleGrp[:self.moduleGrp.rfind(":")], type='string')
         
@@ -66,6 +77,24 @@ class Single(Base.StartClass, Layout.LayoutClass):
         cmds.parentConstraint(self.cvEndJoint, self.jGuideEnd, maintainOffset=False, name=self.jGuideEnd+"_ParentConstraint")
         cmds.scaleConstraint(self.cvJointLoc, self.jGuide1, maintainOffset=False, name=self.jGuide1+"_ScaleConstraint")
         cmds.scaleConstraint(self.cvEndJoint, self.jGuideEnd, maintainOffset=False, name=self.jGuideEnd+"_ScaleConstraint")
+    
+    
+    def changeIndirectSkin(self, *args):
+        """ Set the attribute value for indirectSkin.
+        """
+        indSkinValue = cmds.checkBox(self.indirectSkinCB, query=True, value=True)
+        cmds.setAttr(self.moduleGrp+".indirectSkin", indSkinValue)
+        if indSkinValue == 0:
+            cmds.setAttr(self.moduleGrp+"."+self.langDic[self.langName]['c_holder'], 0)
+            cmds.checkBox(self.holderCB, edit=True, value=False, enable=False)
+        else:
+            cmds.checkBox(self.holderCB, edit=True, enable=True)
+            
+
+    def changeHolder(self, *args):
+        """ Set the attribute value for holder.
+        """
+        cmds.setAttr(self.moduleGrp+"."+self.langDic[self.langName]['c_holder'], cmds.checkBox(self.holderCB, query=True, value=True))
     
     
     def rigModule(self, *args):
@@ -126,9 +155,23 @@ class Single(Base.StartClass, Layout.LayoutClass):
                 cmds.addAttr(self.jnt, longName='dpAR_joint', attributeType='float', keyable=False)
                 # create a control:
                 if self.getHasIndirectSkin():
-                    self.ctrl = cmds.circle(name=side+self.userGuideName+"_Ctrl", degree=3, normal=(0, 0, 1), r=self.ctrlRadius, s=6, ch=False)[0]
+                    self.ctrl = cmds.circle(name=side+self.userGuideName+"_Ctrl", degree=3, normal=(0, 0, 1), r=self.ctrlRadius, s=8, ch=False)[0]
                 else:
-                    self.ctrl = cmds.circle(name=side+self.userGuideName+"_Ctrl", degree=1, normal=(0, 0, 1), r=self.ctrlRadius, s=6, ch=False)[0]
+                    self.ctrl = cmds.circle(name=side+self.userGuideName+"_Ctrl", degree=1, normal=(0, 0, 1), r=self.ctrlRadius, s=8, ch=False)[0]
+                # edit circle shape to Upper or Lower controls:
+                if "Upper" in self.userGuideName:
+                    cmds.setAttr(self.ctrl+"Shape.controlPoints[4].yValue", 0)
+                    cmds.setAttr(self.ctrl+"Shape.controlPoints[5].yValue", 0)
+                    cmds.setAttr(self.ctrl+"Shape.controlPoints[6].yValue", 0)
+                    if not self.getHasIndirectSkin():
+                        cmds.setAttr(self.ctrl+"Shape.controlPoints[3].yValue", 0)
+                elif "Lower" in self.userGuideName:
+                    cmds.setAttr(self.ctrl+"Shape.controlPoints[0].yValue", 0)
+                    cmds.setAttr(self.ctrl+"Shape.controlPoints[1].yValue", 0)
+                    cmds.setAttr(self.ctrl+"Shape.controlPoints[2].yValue", 0)
+                    if not self.getHasIndirectSkin():
+                        cmds.setAttr(self.ctrl+"Shape.controlPoints[7].yValue", 0)
+                        cmds.setAttr(self.ctrl+"Shape.controlPoints[8].yValue", 0)
                 utils.originedFrom(objName=self.ctrl, attrString=self.base+";"+self.guide)
                 # position and orientation of joint and control:
                 cmds.delete(cmds.parentConstraint(self.guide, self.jnt, maintainOffset=False))
@@ -147,16 +190,30 @@ class Single(Base.StartClass, Layout.LayoutClass):
                 cmds.setAttr(self.ctrl+".scaleCompensate", 1)
                 cmds.connectAttr(self.ctrl+".scaleCompensate", self.jnt+".segmentScaleCompensate", force=True)
                 if self.getHasIndirectSkin():
-                    # create a fatherJoint:
+                    # create a fatherJoint in order to zeroOut the skinning joint:
                     cmds.select(clear=True)
                     jxtName = self.jnt.replace("_Jnt", "_Jxt")
                     self.jxt = cmds.duplicate(self.jnt, name=jxtName)[0]
                     cmds.deleteAttr(self.jxt, attribute="dpAR_joint")
                     cmds.parent(self.jnt, self.jxt)
+                    cmds.makeIdentity(self.jnt, apply=True, jointOrient=False)
                     attrList = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz']
                     for attr in attrList:
                         cmds.connectAttr(self.ctrl+'.'+attr, self.jnt+'.'+attr)
-                else:
+                    if s == 1:
+                        if cmds.getAttr(self.moduleGrp+".flip") == 1:
+                            cmds.setAttr(self.jxt+".scaleX", -1)
+                            cmds.setAttr(self.jxt+".scaleY", -1)
+                            cmds.setAttr(self.jxt+".scaleZ", -1)
+                    if self.getHasHolder():
+                        cmds.delete(self.ctrl+"Shape", shape=True)
+                        self.ctrl = cmds.rename(self.ctrl, self.ctrl+"_"+self.langDic[self.langName]['c_holder']+"_Grp")
+                        ctrls.setLockHide([self.ctrl], ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'scaleCompensate'])
+                        self.jnt = cmds.rename(self.jnt, self.jnt.replace("_Jnt", "_"+self.langDic[self.langName]['c_holder']+"_Jis"))
+                        ctrls.setLockHide([self.jnt], ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz'], True, True)
+                    else:
+                        self.jnt = cmds.rename(self.jnt, self.jnt.replace("_Jnt", "_Jis"))
+                else: # like a fkLine
                     # create parentConstraint from ctrl to jnt:
                     cmds.parentConstraint(self.ctrl, self.jnt, maintainOffset=False, name=self.jnt+"_ParentConstraint")
                     # create scaleConstraint from ctrl to jnt:
@@ -166,10 +223,12 @@ class Single(Base.StartClass, Layout.LayoutClass):
                 self.cvEndJoint = side+self.userGuideName+"_Guide_JointEnd"
                 self.endJoint = cmds.joint(name=side+self.userGuideName+"_JEnd")
                 cmds.delete(cmds.parentConstraint(self.cvEndJoint, self.endJoint, maintainOffset=False))
+                self.mainJisList.append(self.jnt)
                 # create a masterModuleGrp to be checked if this rig exists:
-                self.toCtrlHookGrp     = cmds.group(side+self.userGuideName+"_Ctrl_Zero", name=side+self.userGuideName+"_Control_Grp")
+                self.toCtrlHookGrp = cmds.group(side+self.userGuideName+"_Ctrl_Zero", name=side+self.userGuideName+"_Control_Grp")
                 if self.getHasIndirectSkin():
                     locScale = cmds.spaceLocator(name=side+self.userGuideName+"_Scalable_DO_NOT_DELETE")[0]
+                    cmds.setAttr(locScale+".visibility", 0)
                     self.toScalableHookGrp = cmds.group(locScale, name=side+self.userGuideName+"_IndirectSkin_Grp")
                     jxtGrp = cmds.group(side+self.userGuideName+"_Jxt", name=side+self.userGuideName+"_Joint_Grp")
                     self.toStaticHookGrp   = cmds.group(jxtGrp, self.toScalableHookGrp, self.toCtrlHookGrp, name=side+self.userGuideName+"_Grp")
@@ -189,6 +248,8 @@ class Single(Base.StartClass, Layout.LayoutClass):
                 cmds.addAttr(self.toStaticHookGrp, longName="dpAR_type", dataType="string")
                 cmds.setAttr(self.toStaticHookGrp+".dpAR_name", self.userGuideName, type="string")
                 cmds.setAttr(self.toStaticHookGrp+".dpAR_type", CLASS_NAME, type="string")
+                self.aStaticGrpList.append(self.toStaticHookGrp)
+                self.aCtrlGrpList.append(self.toCtrlHookGrp)
                 # add module type counter value
                 cmds.addAttr(self.toStaticHookGrp, longName='dpAR_count', attributeType='long', keyable=False)
                 cmds.setAttr(self.toStaticHookGrp+'.dpAR_count', dpAR_count)
@@ -196,6 +257,13 @@ class Single(Base.StartClass, Layout.LayoutClass):
                     cmds.setAttr(self.toScalableHookGrp+".visibility", 0)
                 # delete duplicated group for side (mirror):
                 cmds.delete(side+self.userGuideName+'_'+self.mirrorGrp)
+            # check mirror indirectSkin bug in Maya2018:
+            if (int(cmds.about(version=True)[:4]) == 2018):
+                if self.mirrorAxis != 'off':
+                    if self.getHasIndirectSkin():
+                        meshList = cmds.ls(selection=False, type="mesh")
+                        if meshList:
+                            self.detectedBug = True
             # finalize this rig:
             self.integratingInfo()
             cmds.select(clear=True)
@@ -205,3 +273,13 @@ class Single(Base.StartClass, Layout.LayoutClass):
     
     def integratingInfo(self, *args):
         Base.StartClass.integratingInfo(self)
+        """ This method will create a dictionary with informations about integrations system between modules.
+        """
+        self.integratedActionsDic = {
+                                    "module": {
+                                                "mainJisList"   : self.mainJisList,
+                                                "staticGrpList" : self.aStaticGrpList,
+                                                "ctrlGrpList"   : self.aCtrlGrpList,
+                                                "detectedBug"   : self.detectedBug,
+                                              }
+                                    }

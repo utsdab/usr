@@ -62,9 +62,9 @@ try:
     from functools import partial
     import Modules.Library.dpUtils as utils
     import Modules.Library.dpControls as ctrls
-    import Extras.dpUpdateRigInfo as rigInfo
     import Modules.dpBaseClass as Base
     import Modules.dpLayoutClass as Layout
+    import Extras.dpUpdateRigInfo as rigInfo
     reload(utils)
     reload(ctrls)
     reload(rigInfo)
@@ -75,13 +75,13 @@ except Exception as e:
     print e
 
 # declaring member variables
-DPAR_VERSION = "3.02"
+DPAR_VERSION = "3.05.3"
 ENGLISH = "English"
 MODULES = "Modules"
 SCRIPTS = "Scripts"
 EXTRAS = "Extras"
 BASE_NAME = "dpAR_"
-EYE_LOOK_AT = "EyeLookAt"
+EYE = "Eye"
 HEAD = "Head"
 SPINE = "Spine"
 LIMB = "Limb"
@@ -89,6 +89,7 @@ FOOT = "Foot"
 FINGER = "Finger"
 ARM = "Arm"
 LEG = "Leg"
+SINGLE = "Single"
 GUIDE_BASE_NAME = "Guide_Base"
 GUIDE_BASE_ATTR = "guideBase"
 MODULE_NAMESPACE_ATTR = "moduleNamespace"
@@ -319,6 +320,9 @@ class DP_AutoRig_UI:
         self.allUIs["jntCollection"] = cmds.radioCollection('jntCollection', parent=self.allUIs["colSkinLeftA"])
         allJoints   = cmds.radioButton( label=self.langDic[self.langName]['i022_listAllJnts'], annotation="allJoints", onCommand=self.populateJoints )
         dpARJoints  = cmds.radioButton( label=self.langDic[self.langName]['i023_listdpARJnts'], annotation="dpARJoints", onCommand=self.populateJoints )
+        self.allUIs["jointsDisplay"] = cmds.rowColumnLayout('jointsDisplay', numberOfColumns=2, columnWidth=[(1, 40), (2, 100)], columnAlign=[(1, 'left'), (2, 'left')], columnAttach=[(1, 'left', 0), (2, 'left', 10)], parent=self.allUIs["colSkinLeftA"])
+        self.allUIs["_JntCB"] = cmds.checkBox('_JntCB', label="_Jnt", align='left', value=1, changeCommand=self.populateJoints, parent=self.allUIs["jointsDisplay"])
+        self.allUIs["_JisCB"] = cmds.checkBox('_JisCB', label="_Jis", align='left', value=1, changeCommand=self.populateJoints, parent=self.allUIs["jointsDisplay"])
         self.allUIs["jntTextScrollLayout"] = cmds.textScrollList( 'jntTextScrollLayout', width=30, allowMultiSelection=True, selectCommand=self.atualizeSkinFooter, parent=self.allUIs["skinningTabLayout"] )
         cmds.radioCollection( self.allUIs["jntCollection"], edit=True, select=dpARJoints )
         cmds.setParent(self.allUIs["skinningTabLayout"])
@@ -329,6 +333,7 @@ class DP_AutoRig_UI:
         allGeoms   = cmds.radioButton( label=self.langDic[self.langName]['i026_listAllJnts'], annotation="allGeoms", onCommand=self.populateGeoms )
         selGeoms   = cmds.radioButton( label=self.langDic[self.langName]['i027_listSelJnts'], annotation="selGeoms", onCommand=self.populateGeoms )
         self.allUIs["modelsTextScrollLayout"] = cmds.textScrollList( 'modelsTextScrollLayout', width=30, allowMultiSelection=True, selectCommand=self.atualizeSkinFooter, parent=self.allUIs["skinningTabLayout"] )
+        self.allUIs["geoLongName"] = cmds.checkBox('geoLongName', label=self.langDic[self.langName]['i073_displayLongName'], align='left', value=1, changeCommand=self.populateGeoms, parent=self.allUIs["colSkinRightA"])
         cmds.radioCollection( self.allUIs["geomCollection"], edit=True, select=allGeoms )
         cmds.setParent(self.allUIs["skinningTabLayout"])
         
@@ -540,18 +545,29 @@ class DP_AutoRig_UI:
         chooseJnt = cmds.radioButton(jntSelectedRadioButton, query=True, annotation=True)
         
         # list joints to be populated:
-        jntList = []
+        jointList = []
         allJointList = cmds.ls(selection=False, type="joint")
         if chooseJnt == "allJoints":
-            jntList = allJointList
+            jointList = allJointList
+            cmds.checkBox(self.allUIs["_JntCB"], edit=True, enable=False)
+            cmds.checkBox(self.allUIs["_JisCB"], edit=True, enable=False)
         elif chooseJnt == "dpARJoints":
-            for jnt in allJointList:
-                if cmds.objExists(jnt+'.'+BASE_NAME+'joint'):
-                    jntList.append(jnt)
+            cmds.checkBox(self.allUIs["_JntCB"], edit=True, enable=True)
+            cmds.checkBox(self.allUIs["_JisCB"], edit=True, enable=True)
+            displayJnt = cmds.checkBox(self.allUIs["_JntCB"], query=True, value=True)
+            displayJis = cmds.checkBox(self.allUIs["_JisCB"], query=True, value=True)
+            for jointNode in allJointList:
+                if cmds.objExists(jointNode+'.'+BASE_NAME+'joint'):
+                    if displayJnt:
+                        if "_Jnt" in jointNode:
+                            jointList.append(jointNode)
+                    if displayJis:
+                        if "_Jis" in jointNode:
+                            jointList.append(jointNode)
         
         # populate the list:
         cmds.textScrollList( self.allUIs["jntTextScrollLayout"], edit=True, removeAll=True)
-        cmds.textScrollList( self.allUIs["jntTextScrollLayout"], edit=True, append=jntList)
+        cmds.textScrollList( self.allUIs["jntTextScrollLayout"], edit=True, append=jointList)
         # atualize of footerB text:
         self.atualizeSkinFooter()
     
@@ -563,28 +579,58 @@ class DP_AutoRig_UI:
         geomSelectedRadioButton = cmds.radioCollection(self.allUIs["geomCollection"], query=True, select=True)
         chooseGeom = cmds.radioButton(geomSelectedRadioButton, query=True, annotation=True)
         
+        # get user preference as long or short name:
+        displayGeoLongName = cmds.checkBox(self.allUIs["geoLongName"], query=True, value=True)
+        
         # list geometries to be populated:
-        geomList = []
+        geomList, shortNameList, sameNameList = [], [], []
+        
         currentSelectedList = cmds.ls(selection=True, long=True)
         geomTypeList = ["mesh", "nurbsSurface", "subdiv"]
         for geomType in geomTypeList:
             allGeomList = cmds.ls(selection=False, type=geomType, long=True)
             if allGeomList:
                 for meshName in allGeomList:
-                    transformNameList = cmds.listRelatives(meshName, parent=True, fullPath=True, type="transform")
-                    if transformNameList:
-                        # do not add ribbon nurbs plane to the list:
-                        if not cmds.objExists(transformNameList[0]+".doNotSkinIt"):
-                            if not transformNameList[0] in geomList:
-                                if chooseGeom == "allGeoms":
-                                    geomList.append(transformNameList[0])
-                                elif chooseGeom == "selGeoms":
-                                    if transformNameList[0] in currentSelectedList or meshName in currentSelectedList:
+                    if cmds.getAttr(meshName+".intermediateObject") == 0:
+                        transformNameList = cmds.listRelatives(meshName, parent=True, fullPath=True, type="transform")
+                        if transformNameList:
+                            # do not add ribbon nurbs plane to the list:
+                            if not cmds.objExists(transformNameList[0]+".doNotSkinIt"):
+                                if not transformNameList[0] in geomList:
+                                    if chooseGeom == "allGeoms":
                                         geomList.append(transformNameList[0])
+                                        cmds.checkBox(self.allUIs["geoLongName"], edit=True, value=True, enable=False)
+                                    elif chooseGeom == "selGeoms":
+                                        cmds.checkBox(self.allUIs["geoLongName"], edit=True, enable=True)
+                                        if transformNameList[0] in currentSelectedList or meshName in currentSelectedList:
+                                            if displayGeoLongName:
+                                                geomList.append(transformNameList[0])
+                                            else:
+                                                shortName = transformNameList[0][transformNameList[0].rfind("|")+1:]
+                                                geomList.append(shortName)
+
+        # check if we have same short name:
+        if geomList:
+            for g, geo in enumerate(geomList):
+                if geo in geomList[:g]:
+                    sameNameList.append(geo)
+        if sameNameList:
+            geomList.insert(0, "*")
+            geomList.append(" ")
+            geomList.append("-------")
+            geomList.append(self.langDic[self.langName]['i074_attention'])
+            geomList.append(self.langDic[self.langName]['i075_moreOne'])
+            geomList.append(self.langDic[self.langName]['i076_sameName'])
+            for sameName in sameNameList:
+                geomList.append(sameName)
+        
         
         # populate the list:
         cmds.textScrollList( self.allUIs["modelsTextScrollLayout"], edit=True, removeAll=True)
-        cmds.textScrollList( self.allUIs["modelsTextScrollLayout"], edit=True, append=geomList)
+        if sameNameList:
+            cmds.textScrollList( self.allUIs["modelsTextScrollLayout"], edit=True, lineFont=[(len(geomList)-len(sameNameList)-2, 'boldLabelFont'), (len(geomList)-len(sameNameList)-1, 'obliqueLabelFont'), (len(geomList)-len(sameNameList), 'obliqueLabelFont')], append=geomList)
+        else:
+            cmds.textScrollList( self.allUIs["modelsTextScrollLayout"], edit=True, append=geomList)
         # atualize of footerB text:
         self.atualizeSkinFooter()
     
@@ -1028,8 +1074,6 @@ class DP_AutoRig_UI:
             self.masterCtrl.setDynamicAttr("geometryList", "")
             self.masterCtrl.setDynamicAttr("controlList", "")
             self.masterCtrl.rotateOrder.set(3)
-            pymel.connectAttr(self.masterCtrl.scaleY, self.masterCtrl.scaleX, lock=True, force=True)
-            pymel.connectAttr(self.masterCtrl.scaleY, self.masterCtrl.scaleZ, lock=True, force=True)
 
         self.globalCtrl = self.getBaseCtrl("globalCtrl", self.prefix+"Global_Ctrl", ctrls.dpCheckLinearUnit(16), iSection=4)
         if (self.ctrlCreated):
@@ -1046,6 +1090,14 @@ class DP_AutoRig_UI:
             pymel.makeIdentity(self.optionCtrl, apply=True)
             self.optionCtrlGrp = pymel.PyNode(utils.zeroOut([self.optionCtrl.__melobject__()])[0])
             self.optionCtrlGrp.translateX.set(fMasterRadius)
+            # use Option_Ctrl rigScale and rigScaleMultiplier attribute to Master_Ctrl
+            self.rigScaleMD = pymel.createNode("multiplyDivide", name=self.prefix+'RigScale_MD')
+            pymel.connectAttr(self.optionCtrl.rigScale, self.rigScaleMD.input1X, force=True)
+            pymel.connectAttr(self.optionCtrl.rigScaleMultiplier, self.rigScaleMD.input2X, force=True)
+            pymel.connectAttr(self.rigScaleMD.outputX, self.masterCtrl.scaleX, force=True)
+            pymel.connectAttr(self.rigScaleMD.outputX, self.masterCtrl.scaleY, force=True)
+            pymel.connectAttr(self.rigScaleMD.outputX, self.masterCtrl.scaleZ, force=True)
+            ctrls.setLockHide([self.masterCtrl.__melobject__()], ['sx', 'sy', 'sz'])
         else:
             self.optionCtrlGrp = self.optionCtrl.getParent()
 
@@ -1272,6 +1324,10 @@ class DP_AutoRig_UI:
                             cmds.parent(self.scalableHookGrp, self.scalableGrp)
                             # make scalableHookGrp inative:
                             cmds.setAttr(self.scalableHookGrp+".scalableHook", 0)
+                
+                # prepare to show a dialog box if find a bug:
+                self.detectedBug = False
+                self.bugMessage = self.langDic[self.langName]['b000_BugGeneral']
                 
                 # integrating modules together:
                 # working with specific cases:
@@ -1561,8 +1617,8 @@ class DP_AutoRig_UI:
                                     ctrls.colorShape(self.integratedTaskDic[moduleDic]['lCtrls'][s], "red")
                                     ctrls.colorShape(self.integratedTaskDic[moduleDic]['rCtrls'][s], "blue")
                         
-                        # integrate the EyeLookAt with the Head setup:
-                        if moduleType == EYE_LOOK_AT:
+                        # integrate the Eye with the Head setup:
+                        if moduleType == EYE:
                             eyeCtrl = self.integratedTaskDic[moduleDic]['eyeCtrl']
                             eyeGrp = self.integratedTaskDic[moduleDic]['eyeGrp']
                             upLocGrp = self.integratedTaskDic[moduleDic]['upLocGrp']
@@ -1592,7 +1648,18 @@ class DP_AutoRig_UI:
                                 for s, sideName in enumerate(self.itemMirrorNameList):
                                     eyeScaleGrp = self.integratedTaskDic[moduleDic]['eyeScaleGrp'][s]
                                     cmds.parentConstraint(headCtrl, eyeScaleGrp, maintainOffset=True)
-                
+                            # changing iris and pupil color override:
+                            # get itemGuideName:
+                            if self.itemGuideMirrorAxis != "off":
+                                self.itemMirrorNameList = self.itemGuideMirrorNameList
+                            for s, sideName in enumerate(self.itemMirrorNameList):
+                                if self.integratedTaskDic[moduleDic]['hasIris']:
+                                    irisCtrl = self.integratedTaskDic[moduleDic]['irisCtrl'][s]
+                                    ctrls.colorShape([irisCtrl], "cyan")
+                                if self.integratedTaskDic[moduleDic]['hasPupil']:
+                                    pupilCtrl = self.integratedTaskDic[moduleDic]['pupilCtrl'][s]
+                                    ctrls.colorShape([pupilCtrl], "black")
+                        
                         # integrate the Finger module:
                         if moduleType == FINGER:
                             self.itemGuideMirrorAxis     = self.hookDic[moduleDic]['guideMirrorAxis']
@@ -1626,6 +1693,42 @@ class DP_AutoRig_UI:
                                         origFromList = self.integratedTaskDic[fatherGuide]['integrateOrigFromList'][s]
                                         origFrom = origFromList[-1]
                                         cmds.parentConstraint(origFrom, scalableGrp, maintainOffset=True)
+                
+                        # integrate the Single module with another Single as a father:
+                        if moduleType == SINGLE:
+                            # connect Option_Ctrl display attribute to the visibility:
+                            if not cmds.objExists(self.optionCtrl+".display"+self.langDic[self.langName]['m081_tweaks']):
+                                cmds.addAttr(self.optionCtrl, longName="display"+self.langDic[self.langName]['m081_tweaks'], min=0, max=1, defaultValue=1, attributeType="long", keyable=False)
+                                cmds.setAttr(self.optionCtrl+".display"+self.langDic[self.langName]['m081_tweaks'], channelBox=True)
+                            self.itemGuideMirrorAxis     = self.hookDic[moduleDic]['guideMirrorAxis']
+                            self.itemGuideMirrorNameList = self.hookDic[moduleDic]['guideMirrorName']
+                            # working with item guide mirror:
+                            self.itemMirrorNameList = [""]
+                            # get itemGuideName:
+                            if self.itemGuideMirrorAxis != "off":
+                                self.itemMirrorNameList = self.itemGuideMirrorNameList
+                            for s, sideName in enumerate(self.itemMirrorNameList):
+                                ctrlGrp = self.integratedTaskDic[moduleDic]["ctrlGrpList"][s]
+                                cmds.connectAttr(self.optionCtrl+".display"+self.langDic[self.langName]['m081_tweaks'], ctrlGrp+".visibility", force=True)
+                            # get father module:
+                            fatherModule   = self.hookDic[moduleDic]['fatherModule']
+                            if fatherModule == SINGLE:
+                                for s, sideName in enumerate(self.itemMirrorNameList):
+                                    # getting child Single Static_Grp:
+                                    staticGrp = self.integratedTaskDic[moduleDic]["staticGrpList"][s]
+                                    # getting father Single mainJis (indirect skinning joint) data:
+                                    fatherGuide = self.hookDic[moduleDic]['fatherGuide']
+                                    try:
+                                        mainJis = self.integratedTaskDic[fatherGuide]['mainJisList'][s]
+                                    except:
+                                        mainJis = self.integratedTaskDic[fatherGuide]['mainJisList'][0]
+                                    # father's mainJis drives child's staticGrp:
+                                    cmds.parentConstraint(mainJis, staticGrp, maintainOffset=True)
+                                    cmds.scaleConstraint(mainJis, staticGrp, maintainOffset=True)
+                            # check Single mirror indirectSkin bug in Maya2018:
+                            if not self.detectedBug:
+                                self.detectedBug = self.integratedTaskDic[moduleDic]["detectedBug"]
+                                self.bugMessage = self.langDic[self.langName]['b001_BugSingleIndirectSkinMaya2018']
                 
                 
                 # atualise the number of rigged guides by type
@@ -1689,7 +1792,15 @@ class DP_AutoRig_UI:
                 if not pymel.hasAttr(pOptCtrl, "ikFkBlend"):
                     if (pOptCtrl.listAttr(string="*IkFk*")):
                         pymel.addAttr(pOptCtrl, ln="ikFkBlend", at="enum", enumName="----------", keyable=True)
-
+                        
+            #Try add hand follow (space switch attribute) on bipeds:
+            self.initExtraModule("dpAddHandFollow", EXTRAS)
+            
+            # show dialogBox if detected a bug:
+            if self.detectedBug:
+                print "\n\n"
+                print self.bugMessage
+                cmds.confirmDialog(title=self.langDic[self.langName]['i078_detectedBug'], message=self.bugMessage, button=['OK'])
 
         # re-declaring guideMirror and previewMirror groups:
         self.guideMirrorGrp = 'dpAR_GuideMirror_Grp'
@@ -1713,7 +1824,17 @@ class DP_AutoRig_UI:
     
     
     ###################### Start: Skinning.
-
+    
+    def validateGeoList(self, geoList, *args):
+        """ Check if the geometry list from UI is good to be skinned, because we can get issue if the display long name is not used.
+        """
+        if geoList:
+            for i, item in enumerate(geoList):
+                if item in geoList[:i]:
+                    self.info('i038_canceled', 'e003_moreThanOneGeo', item, 'center', 205, 270)
+                    return False
+        return True
+    
     def skinFromUI(self, *args):
         """ Skin the geometries using the joints, reading from UI the selected items of the textScrollLists or getting all items if nothing selected.
         """
@@ -1742,15 +1863,25 @@ class DP_AutoRig_UI:
         if not geomSkinList:
             geomSkinList = cmds.textScrollList( self.allUIs["modelsTextScrollLayout"], query=True, allItems=True)
         
-        if jointSkinList and geomSkinList:
-            for geomSkin in geomSkinList:
-                if (args[0] == "Add"):
-                    cmds.skinCluster(geomSkin, edit=True, ai=jointSkinList, toSelectedBones=True, removeUnusedInfluence=False, lockWeights=True, wt=0.0)
-                elif (args[0] == "Remove"):
-                    cmds.skinCluster(geomSkin, edit=True, ri=jointSkinList, toSelectedBones=True)
-                else:
-                    cmds.skinCluster(jointSkinList, geomSkin, toSelectedBones=True, dropoffRate=4.0, maximumInfluences=3, skinMethod=0, normalizeWeights=1, removeUnusedInfluence=False)
-
+        # check if we have repeated listed geometries in case of the user choose to not display long names:
+        if self.validateGeoList(geomSkinList):
+            if jointSkinList and geomSkinList:
+                for geomSkin in geomSkinList:
+                    if (args[0] == "Add"):
+                        cmds.skinCluster(geomSkin, edit=True, ai=jointSkinList, toSelectedBones=True, removeUnusedInfluence=False, lockWeights=True, wt=0.0)
+                    elif (args[0] == "Remove"):
+                        cmds.skinCluster(geomSkin, edit=True, ri=jointSkinList, toSelectedBones=True)
+                    else:
+                        baseName = geomSkin
+                        meshSuffixList = ["_Mesh", "_mesh", "_Geo", "_geo", "_Tgt", "_tgt"]
+                        for meshSuffix in meshSuffixList:
+                            if meshSuffix in geomSkin:
+                                baseName = geomSkin[:geomSkin.rfind(meshSuffix)]
+                        skinClusterName = baseName+"_SC"
+                        if "|" in skinClusterName:
+                            skinClusterName = skinClusterName[skinClusterName.rfind("|")+1:]
+                        cmds.skinCluster(jointSkinList, geomSkin, toSelectedBones=True, dropoffRate=4.0, maximumInfluences=3, skinMethod=0, normalizeWeights=1, removeUnusedInfluence=False, name=skinClusterName)
+                print self.langDic[self.langName]['i077_skinned'] + ', '.join(geomSkinList),
         else:
             print self.langDic[self.langName]['i029_skinNothing'],
 

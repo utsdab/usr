@@ -18,7 +18,7 @@ dic_colors = {
 
 # CONTROLS functions:
 def colorShape(objList, color):
-    """Create a color override for all shapes from a objList.
+    """Create a color override for all shapes from the objList.
     """
 
     if (dic_colors.has_key(color)):
@@ -49,7 +49,7 @@ def colorShape(objList, color):
                         cmds.setAttr(shape+".overrideColor", iColorIdx)
 
 def renameShape(transformList):
-    """Find shapes, rename they to Shapes and return the results.
+    """Find shapes, rename them to Shapes and return the results.
     """
     resultList = []
     for transform in transformList:
@@ -200,7 +200,7 @@ def middlePoint(a, b, createLocator=False):
         return[resultPos]
 
 
-def createSimpleRibbon(name='noodle', totalJoints=6):
+def createSimpleRibbon(name='ribbon', totalJoints=6):
     """ Creates a Ribbon system.
         Receives the total number of joints to create.
         Returns the ribbon nurbs plane, the joints groups and joints created.
@@ -217,7 +217,7 @@ def createSimpleRibbon(name='noodle', totalJoints=6):
     cmds.addAttr(ribbonNurbsPlane, longName="doNotSkinIt", attributeType="bool", keyable=True)
     cmds.setAttr(ribbonNurbsPlane+".doNotSkinIt", 1)
     # create groups to be used as a root of the ribbon system:
-    ribbonGrp = cmds.group(ribbonNurbsPlane, n=name+"_RibbonJoint_Grp")
+    ribbonGrp = cmds.group(ribbonNurbsPlane, n=name+"_Rbn_RibbonJoint_Grp")
     # create joints:
     jointList, jointGrpList = [], []
     for j in range(totalJoints+1):
@@ -238,7 +238,7 @@ def createSimpleRibbon(name='noodle', totalJoints=6):
         cmds.connectAttr(infoNode + ".tangentV", aimGrp + ".translate", force=True)
         # create joint:
         cmds.select(clear=True)
-        joint = cmds.joint(name=name+str(j)+"_Jnt")
+        joint = cmds.joint(name=name+"_%02d_Jnt"%j)
         jointList.append(joint)
         cmds.addAttr(joint, longName='dpAR_joint', attributeType='float', keyable=False)
         # parent the joint to the groups:
@@ -409,6 +409,16 @@ def cvChin(ctrlName, r=1):
     return curve
 
 
+def cvChew(ctrlName, r=1):
+    """Create a control to be used as a Chew control.
+    """
+    # create a simple circle curve:
+    curve = cmds.curve(n=ctrlName, d=3, p=[(0, -0.4*r, 0), (0.75*r, -0.75*r, 0), (r, 0, 0), (r, 0.75*r, 0), (0, 0.15*r, 0), (-r, 0.75*r, 0), (-r, 0, 0), (-0.75*r, -0.75*r, 0), (0, -0.4*r, 0)] )
+    # rename curveShape:
+    renameShape([curve])
+    return curve
+    
+
 def cvEyes(ctrlName, r=1, Le="L", Ri="R", eye="eye", pupil="pupil"):
     """Create a control to be used as a Chin control.
     """
@@ -483,17 +493,49 @@ def cvSmile(ctrlName, r=1):
     cmds.delete(face, lEye, rEye, mouth)
     cmds.select(clear=True)
     return smileCtrl
+    
+ 
+def cvFace(ctrlName, r=1):
+    """ Just call cvSmile
+    """
+    curve = cvSmile(ctrlName, r)
+    return curve   
 
 
 def cvCharacter(ctrlName, r=1):
-    """Create a control like a mini character (minimim) to be used as an option_Ctrl.
+    """Create a control like a mini character (minimim) to be used as an Option_Ctrl.
     """
     # get radius by checking linear unit
     r = dpCheckLinearUnit(r)
     # create a minime curve:
     curve = cmds.curve(n=ctrlName, d=1, p=[(0, 9*r, 0), (1*r, 9*r, 0), (1.9*r, 8.2*r, 0), (1*r, 7*r, 0), (0.4*r, 6.6*r, 0), (0.4*r, 5.7*r, 0), (2.4*r, 5.45*r, 0), (3.8*r, 5.5*r, 0), (4.6*r, 6*r, 0), (5.8*r, 5.5*r, 0), (5.25*r, 4.6*r, 0), (4*r, 5*r, 0), (2.4*r, 4.9*r, 0), (1.6*r, 4.5*r, 0), (1.1*r, 3*r, 0), (1.5*r, 1.7*r, 0), (1.7*r, 0.5*r, 0), (3*r, 0.37*r, 0), (3.15*r, 0, 0), (1*r, 0, 0), (0.73*r, 1.5*r, 0), (0, 2.25*r, 0), (-0.73*r, 1.5*r, 0), (-1*r, 0, 0), (-3.15*r, 0, 0), (-3*r, 0.37*r, 0), (-1.7*r, 0.5*r, 0), (-1.5*r, 1.7*r, 0), (-1.1*r, 3*r, 0), (-1.6*r, 4.5*r, 0), (-2.4*r, 4.9*r, 0), (-4*r, 5*r, 0), (-5.25*r, 4.6*r, 0), (-5.8*r, 5.5*r, 0), (-4.6*r, 6*r, 0), (-3.8*r, 5.5*r, 0), (-2.4*r, 5.45*r, 0), (-0.4*r, 5.7*r, 0), (-0.4*r, 6.6*r, 0), (-1*r, 7*r, 0), (-1.9*r, 8.2*r, 0), (-1*r, 9*r, 0), (0, 9*r, 0)] )
+    cmds.addAttr(curve, longName="rigScale", attributeType='float', defaultValue=1, keyable=True)
+    cmds.addAttr(curve, longName="rigScaleMultiplier", attributeType='float', defaultValue=1, keyable=False)
     # rename curveShape:
     renameShape([curve])
+    # create Option_Ctrl Text:
+    optCtrlTxt = cmds.group(name="Option_Ctrl_Txt", empty=True)
+    cvText = cmds.textCurves(name="Option_Ctrl_Txt_TEMP_Grp", font="Source Sans Pro", text="Option Ctrl", constructionHistory=False)[0]
+    txtShapeList = cmds.listRelatives(cvText, allDescendents=True, type='nurbsCurve')
+    if txtShapeList:
+        for s, shape in enumerate(txtShapeList):
+            # store CV world position
+            curveCVList = cmds.getAttr(shape+'.cp', multiIndices=True)
+            vtxWorldPosition = []
+            for i in curveCVList :
+                cvPointPosition = cmds.xform(shape+'.cp['+str(i)+']', query=True, translation=True, worldSpace=True) 
+                vtxWorldPosition.append(cvPointPosition)
+            # parent the shapeNode :
+            cmds.parent(shape, optCtrlTxt, r=True, s=True)
+            # restore the shape world position
+            for i in curveCVList:
+                cmds.xform(shape+'.cp['+str(i)+']', a=True, worldSpace=True, t=vtxWorldPosition[i])
+            cmds.rename(shape, optCtrlTxt+"Shape"+str(s))
+    cmds.delete(cvText)
+    cmds.parent(optCtrlTxt, curve)
+    cmds.setAttr(optCtrlTxt+".template", 1)
+    cmds.setAttr(optCtrlTxt+".tx", -10.4*r)
+    cmds.setAttr(optCtrlTxt+".ty", 10*r)
     return curve
 
 
@@ -501,7 +543,129 @@ def cvSquare(ctrlName, r=1):
     """Create and return a simple curve as a square control.
     """
     # create curve:
-    curve = cmds.curve(n=ctrlName, d=1, p=[(-r, 0, r), (r, 0, r), (r, 0, -r), (-r, 0, -r), (-r, 0, r)] )
+    curve = cmds.curve(n=ctrlName, d=1, p=[(-r, 0, r), (r, 0, r), (r, 0, -r), (-r, 0, -r), (-r, 0, r)])
+    # rename curveShape:
+    renameShape([curve])
+    return curve
+    
+    
+def cvRoundSquare(ctrlName, r=1):
+    """Create and return a simple curve as a round square control usually for lip corner to skinning.
+    """
+    # create curve:
+    curve = cmds.curve(n=ctrlName, d=3, p=[(0.5*r, 0, 0), (0.5*r, 0, 0), (0.5*r, 0.5*r, 0), (0, 0.5*r, 0), (-0.5*r, 0.5*r, 0), (-0.5*r, 0, 0), (-0.5*r, -0.5*r, 0), (0, -0.5*r, 0), (0.5*r, -0.5*r, 0), (0.5*r, 0, 0), (0.5*r, 0, 0), (0.5*r, 0, 0)])
+    # rename curveShape:
+    renameShape([curve])
+    return curve
+
+
+def cvEyelid(ctrlName, r=1):
+    """Create and return a simple curve as a football control usually for eyes corner or facial blink.
+    """
+    # create curve:
+    curve = cmds.curve(n=ctrlName, d=3, p=[(0.5*r, 0, 0), (0.25*r, 0.25*r, 0), (-0.125*r, 0.374*r, 0), (-0.5*r, 0, 0), (-0.5*r, 0, 0), (-0.5*r, 0, 0), (0, -0.5*r, 0), (0.5*r, 0, 0), (0.5*r, 0, 0)])
+    # rename curveShape:
+    renameShape([curve])
+    return curve
+    
+    
+def cvBrow(ctrlName, r=1):
+    """Create and return a simple curve as a brow control usually for facial blendShape control.
+    """
+    # create curve:
+    curve = cmds.curve(n=ctrlName, d=3, p=[(-0.22*r, -0.17*r, 0), (0.79*r, -0.52*r, 0), (1.1*r, 0, 0), (0.79*r, 0.17*r, 0), (0, 0.5*r, 0), (-0.79*r, 0.52*r, 0), (-1.1*r, 0, 0), (-0.79*r, -0.52*r, 0), (-0.22*r, -0.17*r, 0)])
+    # rename curveShape:
+    renameShape([curve])
+    return curve
+    
+    
+def cvDrop(ctrlName, r=1):
+    """Create and return a simple curve as a drop control.
+    """
+    # create curve:
+    curve = cmds.curve(n=ctrlName, d=3, p=[(0, -0.19*r, 0), (0.19*r, -0.19*r, 0), (0.36*r, 0, 0), (0.19*r, 0.19*r, 0), (0, 0.43*r, 0), (-0.19*r, 0.19*r, 0), (-0.36*r, 0, 0), (-0.19*r, -0.19*r, 0), (0, -0.19*r, 0)])
+    # rename curveShape:
+    renameShape([curve])
+    return curve
+    
+    
+def cvDimond(ctrlName, r=1):
+    """Create and return a simple curve as a dimond control.
+    """
+    # create curve:
+    curve = cmds.curve(n=ctrlName, d=1, p=[(0, -1*r, 0), (-1*r, 0, 0), (0, r, 0), (r, 0, 0), (0, -1*r, 0)])
+    # rename curveShape:
+    renameShape([curve])
+    return curve
+    
+    
+def cvLips(ctrlName, r=1):
+    """ Just call cvDimond
+    """
+    curve = cvDimond(ctrlName, r)
+    return curve
+    
+    
+def cvTriangle(ctrlName, r=1, normalZ=1, rotateShape=0):
+    """Create and return a simple curve as a triangle control. We can chose its direction.
+    """
+    # create curve:
+    curve = cmds.circle(name=ctrlName, radius=r, normal=(0, 0, normalZ), degree=1, sections=3, constructionHistory=False)[0]
+    cmds.xform(curve, centerPivots=True)
+    if not rotateShape == 0:
+        if rotateShape == -1:
+            cmds.setAttr(curve+".rotateZ", -90)
+        elif rotateShape == 1:
+            cmds.setAttr(curve+".rotateZ", 90)
+        cmds.makeIdentity(curve, apply=True)
+    # rename curveShape:
+    renameShape([curve])
+    return curve
+    
+    
+def cvMouth(ctrlName, r=1, rotateShape=0):
+    """ Just call cvTriangle
+    """
+    curve = cvTriangle(ctrlName, r, 1, rotateShape)
+    return curve
+    
+    
+def cvSneer(ctrlName, r=1, normalZ=1):
+    """Create and return a simple curve as a sneer control.
+    """
+    # create curve:
+    curve = cmds.circle(name=ctrlName, radius=r, normal=(0, 0, normalZ), degree=3, sections=8, constructionHistory=False)[0]
+    if normalZ == 1:
+        cmds.setAttr(curve+".controlPoints[1].yValue", 0.1)
+        cmds.setAttr(curve+".controlPoints[4].yValue", -0.28)
+        cmds.setAttr(curve+".controlPoints[5].yValue", -0.28)
+        cmds.setAttr(curve+".controlPoints[6].yValue", -0.28)
+    else:
+        cmds.setAttr(curve+".controlPoints[1].yValue", -0.1)
+        cmds.setAttr(curve+".controlPoints[4].yValue", 0.28)
+        cmds.setAttr(curve+".controlPoints[5].yValue", 0.28)
+        cmds.setAttr(curve+".controlPoints[6].yValue", 0.28)
+    # rename curveShape:
+    renameShape([curve])
+    return curve
+
+    
+def cvGrimace(ctrlName, r=1):
+    """ Just call cvSneer
+    """
+    curve = cvSneer(ctrlName, r, -1)
+    return curve
+    
+    
+def cvRoundUp(ctrlName, r=1, normalZ=1):
+    """Create and return a simple curve as a sneer control.
+    """
+    # create curve:
+    curve = cmds.circle(name=ctrlName, radius=r, normal=(0, 0, normalZ), degree=3, sections=8, constructionHistory=False)[0]
+    cmds.setAttr(curve+".controlPoints[1].yValue", 0.89)
+    cmds.setAttr(curve+".controlPoints[4].yValue", -0.28)
+    cmds.setAttr(curve+".controlPoints[5].yValue", -0.28)
+    cmds.setAttr(curve+".controlPoints[6].yValue", -0.28)
     # rename curveShape:
     renameShape([curve])
     return curve
@@ -553,6 +717,8 @@ def cvBaseGuide(ctrlName, r=1):
     cmds.connectAttr(radiusCtrlMD+".outputX", radiusCtrlHistory+".radius", force=True)
     # colorize curveShapes:
     colorShape([circle, radiusCtrl], 'yellow')
+    colorShape([radiusCtrl], 'cyan')
+    cmds.setAttr(circle+"Shape.lineWidth", 2)
     cmds.select(clear=True)
     return [circle, radiusCtrl]
 
