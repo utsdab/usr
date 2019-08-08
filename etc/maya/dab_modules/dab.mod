@@ -26,7 +26,7 @@ PATH +:= ../../bin
 plug-ins: plug-ins
 
 + PLATFORM:linux MAYAVERSION:2018 DABMOD any DABMOD/2018/linux
-MODULESLOADED += DABMOD_2017_LINUX
+MODULESLOADED += DABMOD_2018_LINUX
 PYTHONPATH +:= ../../python
 PATH +:= ../../bin
 [r] scripts: ../../scripts

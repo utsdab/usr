@@ -1,6 +1,7 @@
 # This script if launched from a maya shelf button
 # it is a wrapper for submitting RFM batch jobs to the farm.
 #
+import maya_tools.uts_tools.rfm_tractor2 as rfm2
 
 def run():
     try:
