@@ -16,7 +16,7 @@ PATH +:= ../../bin
 [r] presets: ../../presets
 plug-ins: plug-ins
 
-+ PLATFORM:win64 MAYAVERSION:2017 DABMOD any DABMOD\2018\win
++ PLATFORM:win64 MAYAVERSION:2018 DABMOD any DABMOD\2018\win
 MODULESLOADED += DABMOD_2018_WIN
 PYTHONPATH +:= ../../python
 PATH +:= ../../bin
