@@ -5,11 +5,11 @@
 
 def run():
     try:
-        import maya_tools.uts_tools.rfm_tractor2 as rfm2
+        import maya_tools.uts_tools.rfm_tractor2 as rfmt2
     except ImportError as ie:
         print("Failed to import module: {}".format(ie))
     else:
-        rfm2.batch_render_spool(do_bake=False)
+        rfmt2.batch_render_spool(do_bake=False,force_tractor=True,force_local=False,force_rib=True)
 
 
 if __name__ == "__main__":
