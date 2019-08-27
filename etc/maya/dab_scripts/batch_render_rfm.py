@@ -9,7 +9,7 @@ def run():
     except ImportError as ie:
         print("Failed to import module: {}".format(ie))
     else:
-        rfmt2.batch_render_spool(do_bake=False,force_tractor=True,force_local=False,force_rib=True)
+        rfmt2.batch_render_spool(do_bake=False, force_tractor=True, force_local=False, force_rib=True)
 
 
 if __name__ == "__main__":
