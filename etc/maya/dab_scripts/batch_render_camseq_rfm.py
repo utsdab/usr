@@ -2,14 +2,15 @@
 # it is a wrapper for submitting RFM batch jobs to the farm.
 #
 
-
 def run():
     try:
-        import maya_tools.uts_tools.mg_camseq_render as mgcsr
+        from maya_tools.uts_tools.mg_camseq_render import main
+
     except ImportError as ie:
         print("Failed to import module: {}".format(ie))
+
     else:
-        mgcsr.main()
+        main()
 
 
 if __name__ == "__main__":
