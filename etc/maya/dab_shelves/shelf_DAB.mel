@@ -9,7 +9,7 @@ global proc shelf_DAB () {
         -flexibleWidthType 2
         -flexibleWidthValue 92
         -enable 1
-        -width 92
+        -width 72
         -height 34
         -manage 1
         -visible 1
@@ -44,7 +44,7 @@ global proc shelf_DAB () {
         -flexibleWidthType 2
         -flexibleWidthValue 92
         -enable 1
-        -width 92
+        -width 72
         -height 34
         -manage 1
         -visible 1
