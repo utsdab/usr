@@ -4,13 +4,13 @@
 
 def run():
     try:
-        from maya_tools.uts_tools.mg_camseq_render import main
+        import maya_tools.uts_tools.mg_camseq_render as mgs
 
     except ImportError as ie:
         print("Failed to import module: {}".format(ie))
 
     else:
-        main()
+        mgs.main()
 
 
 if __name__ == "__main__":
