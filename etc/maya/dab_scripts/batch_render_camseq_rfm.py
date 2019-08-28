@@ -5,11 +5,11 @@
 
 def run():
     try:
-        import maya_tools.uts_tools.rfm_tractor2 as rfmt2
+        import maya_tools.uts_tools.mg_camseq_render as mgcsr
     except ImportError as ie:
         print("Failed to import module: {}".format(ie))
     else:
-        rfmt2.batch_render_spool(do_bake=False)
+        mgcsr.main()
 
 
 if __name__ == "__main__":
