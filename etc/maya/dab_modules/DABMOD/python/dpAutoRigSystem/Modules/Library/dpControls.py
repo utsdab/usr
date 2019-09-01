@@ -96,6 +96,20 @@ def setLockHide(objList, attrList, l=True, k=False):
                     cmds.setAttr(obj+"."+attr, lock=l, keyable=k)
                 except:
                     print "Error: Cannot set", obj, ".", attr, "as lock=", l, "and keyable=", k
+                    
+                    
+def setNonKeyable(objList, attrList):
+    """Set nonKeyable to attributes for objects in lists.
+    """
+    if objList and attrList:
+        for obj in objList:
+            for attr in attrList:
+                if cmds.objExists(obj+"."+attr):
+                    try:
+                        # set lock and hide of given attributes:
+                        cmds.setAttr(obj+"."+attr, keyable=False, channelBox=True)
+                    except:
+                        print "Error: Cannot set", obj, ".", attr, "as nonKeayble, sorry."
 
 
 def setNotRenderable(objList):
@@ -514,28 +528,35 @@ def cvCharacter(ctrlName, r=1):
     # rename curveShape:
     renameShape([curve])
     # create Option_Ctrl Text:
-    optCtrlTxt = cmds.group(name="Option_Ctrl_Txt", empty=True)
-    cvText = cmds.textCurves(name="Option_Ctrl_Txt_TEMP_Grp", font="Source Sans Pro", text="Option Ctrl", constructionHistory=False)[0]
-    txtShapeList = cmds.listRelatives(cvText, allDescendents=True, type='nurbsCurve')
-    if txtShapeList:
-        for s, shape in enumerate(txtShapeList):
-            # store CV world position
-            curveCVList = cmds.getAttr(shape+'.cp', multiIndices=True)
-            vtxWorldPosition = []
-            for i in curveCVList :
-                cvPointPosition = cmds.xform(shape+'.cp['+str(i)+']', query=True, translation=True, worldSpace=True) 
-                vtxWorldPosition.append(cvPointPosition)
-            # parent the shapeNode :
-            cmds.parent(shape, optCtrlTxt, r=True, s=True)
-            # restore the shape world position
-            for i in curveCVList:
-                cmds.xform(shape+'.cp['+str(i)+']', a=True, worldSpace=True, t=vtxWorldPosition[i])
-            cmds.rename(shape, optCtrlTxt+"Shape"+str(s))
-    cmds.delete(cvText)
-    cmds.parent(optCtrlTxt, curve)
-    cmds.setAttr(optCtrlTxt+".template", 1)
-    cmds.setAttr(optCtrlTxt+".tx", -10.4*r)
-    cmds.setAttr(optCtrlTxt+".ty", 10*r)
+    try:
+        optCtrlTxt = cmds.group(name="Option_Ctrl_Txt", empty=True)
+        try:
+            cvText = cmds.textCurves(name="Option_Ctrl_Txt_TEMP_Grp", font="Source Sans Pro", text="Option Ctrl", constructionHistory=False)[0]
+        except:
+            cvText = cmds.textCurves(name="Option_Ctrl_Txt_TEMP_Grp", font="Arial", text="Option Ctrl", constructionHistory=False)[0]
+        txtShapeList = cmds.listRelatives(cvText, allDescendents=True, type='nurbsCurve')
+        if txtShapeList:
+            for s, shape in enumerate(txtShapeList):
+                # store CV world position
+                curveCVList = cmds.getAttr(shape+'.cp', multiIndices=True)
+                vtxWorldPosition = []
+                for i in curveCVList :
+                    cvPointPosition = cmds.xform(shape+'.cp['+str(i)+']', query=True, translation=True, worldSpace=True) 
+                    vtxWorldPosition.append(cvPointPosition)
+                # parent the shapeNode :
+                cmds.parent(shape, optCtrlTxt, r=True, s=True)
+                # restore the shape world position
+                for i in curveCVList:
+                    cmds.xform(shape+'.cp['+str(i)+']', a=True, worldSpace=True, t=vtxWorldPosition[i])
+                cmds.rename(shape, optCtrlTxt+"Shape"+str(s))
+        cmds.delete(cvText)
+        cmds.parent(optCtrlTxt, curve)
+        cmds.setAttr(optCtrlTxt+".template", 1)
+        cmds.setAttr(optCtrlTxt+".tx", -10.4*r)
+        cmds.setAttr(optCtrlTxt+".ty", 10*r)
+    except:
+        # it will pass if we don't able to find the font to create the text
+        pass
     return curve
 
 

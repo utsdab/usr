@@ -56,7 +56,7 @@ def addRibbonToLimb(prefix='', myName=None, oriLoc=None, iniJnt=None, skipAxis='
     elbowctrlCtrl = elbowctrlList[1]
     elbowctrlZero = elbowctrlList[2]
     
-    cmds.addAttr(upctrlCtrl, longName="autoTwistBone", attributeType='float', min=0, defaultValue=0, max=1, keyable=True)
+    cmds.addAttr(upctrlCtrl, longName="autoTwistBone", attributeType='float', min=0, defaultValue=0.75, max=1, keyable=True)
     cmds.addAttr(upctrlCtrl, longName="baseTwist", attributeType='float', keyable=True)
     
     if arm:
@@ -225,9 +225,9 @@ def createRibbon(axis=(0, 0, 1), name='RibbonSetup', horizontal=False, numJoints
         extraCtrlList = []
 
         #define attributes
-        limbManualVVAttr = "limbManualVolume"
-        limbVVAttr       = "limbVolumeVariation"
-        limbMinVVAttr    = "limbMinVolume"
+        limbManualVVAttr = "limbManual_volumeVariation"
+        limbVVAttr       = "limb_volumeVariation"
+        limbMinVVAttr    = "limbMin_volumeVariation"
 
         #create a nurbsPlane based in the choose orientation option
         if horizontal:

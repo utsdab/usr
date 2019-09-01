@@ -387,6 +387,9 @@ class Limb(Base.StartClass, Layout.LayoutClass):
             dpAR_count = utils.findModuleLastNumber(CLASS_NAME, "dpAR_type") + 1
             # run for all sides
             for s, side in enumerate(sideList):
+                sideLower = side
+                if side:
+                    sideLower = side[0].lower()
                 # getting type of limb:
                 enumType = cmds.getAttr(self.moduleGrp + '.type')
                 if enumType == 0:
@@ -451,7 +454,6 @@ class Limb(Base.StartClass, Layout.LayoutClass):
                 for o, skinJoint in enumerate(self.skinJointList):
                     if o < len(self.skinJointList) - 1:
                         cmds.addAttr(skinJoint, longName='dpAR_joint', attributeType='float', keyable=False)
-                self.extremJntList.append(self.skinJointList[-2])
 
                 # creating Fk controls and a hierarchy group to originedFrom data:
                 self.fkCtrlList, self.origFromList = [], []
@@ -538,7 +540,8 @@ class Limb(Base.StartClass, Layout.LayoutClass):
 
                 # creating a group reference to recept the attributes:
                 self.worldRef = cmds.circle(name=side + self.userGuideName + "_WorldRef", ch=False, o=True, nr=(0, 1, 0), d=3, s=8, radius=self.ctrlRadius)[0]
-                cmds.addAttr(self.worldRef, longName=side + self.limbType + str(dpAR_count) + '_IkFkBlend', attributeType='float', minValue=0, maxValue=1, defaultValue=0, keyable=True)
+                #cmds.addAttr(self.worldRef, longName=side + self.limbType + str(dpAR_count) + '_IkFkBlend', attributeType='float', minValue=0, maxValue=1, defaultValue=0, keyable=True)
+                cmds.addAttr(self.worldRef, longName=sideLower + self.userGuideName + '_ikFkBlend', attributeType='float', minValue=0, maxValue=1, defaultValue=0, keyable=True)
                 if not cmds.objExists(self.worldRef + '.globalStretch'):
                     cmds.addAttr(self.worldRef, longName='globalStretch', attributeType='float', minValue=0, maxValue=1, defaultValue=1, keyable=True)
                 self.worldRefList.append(self.worldRef)
@@ -566,12 +569,12 @@ class Limb(Base.StartClass, Layout.LayoutClass):
                         parentConst = cmds.parentConstraint(self.ikJointList[n], self.fkJointList[n], self.skinJointList[n], maintainOffset=True, name=side + self.userGuideName + "_" + self.jNameList[n] + "_IkFkBlend_ParentConstraint")[0]
                         if n == 1:
                             revNode = cmds.createNode('reverse', name=side + self.userGuideName + "_" + self.limbType.capitalize() + "_Rev")
-                            cmds.connectAttr(self.worldRef + "." + side + self.limbType + str(dpAR_count) + '_IkFkBlend', revNode + ".inputX", force=True)
+                            cmds.connectAttr(self.worldRef + "." + sideLower + self.userGuideName + '_ikFkBlend', revNode + ".inputX", force=True)
                         else:
                             revNode = side + self.userGuideName + "_" + self.limbType.capitalize() + "_Rev"
                         self.ikFkRevList.append(revNode)
                         # connecting ikFkBlend using the reverse node:
-                        cmds.connectAttr(self.worldRef + "." + side + self.limbType + str(dpAR_count) + '_IkFkBlend', parentConst + "." + self.fkJointList[n] + "W1", force=True)
+                        cmds.connectAttr(self.worldRef + "." + sideLower + self.userGuideName + '_ikFkBlend', parentConst + "." + self.fkJointList[n] + "W1", force=True)
                         cmds.connectAttr(revNode + '.outputX', parentConst + "." + self.ikJointList[n] + "W0", force=True)
                 # organize the ikFkBlend from before to limb:
                 cmds.parentConstraint(self.fkCtrlList[0], self.ikJointList[0], maintainOffset=True, name=self.ikJointList[0] + "_ParentConstraint")
@@ -664,7 +667,7 @@ class Limb(Base.StartClass, Layout.LayoutClass):
                     cmds.setAttr(self.ikExtremCtrl+".originalRotateZ", self.origRotList[2], lock=True)
 
                 # connecting visibilities:
-                cmds.connectAttr(self.worldRef + "." + side + self.limbType + str(dpAR_count) + '_IkFkBlend', self.zeroFkCtrlList[1] + ".visibility", force=True)
+                cmds.connectAttr(self.worldRef + "." + sideLower + self.userGuideName + '_ikFkBlend', self.zeroFkCtrlList[1] + ".visibility", force=True)
                 cmds.connectAttr(side + self.userGuideName + "_" + self.limbType.capitalize() + "_Rev" + ".outputX", self.ikCornerCtrlZero + ".visibility", force=True)
                 cmds.connectAttr(side + self.userGuideName + "_" + self.limbType.capitalize() + "_Rev" + ".outputX", self.ikExtremCtrlZero + ".visibility", force=True)
                 ctrls.setLockHide([self.ikCornerCtrl, self.ikExtremCtrl], ['v'], l=False)
@@ -928,7 +931,7 @@ class Limb(Base.StartClass, Layout.LayoutClass):
                 parentConstToRFOffset = \
                 cmds.parentConstraint(self.ikExtremCtrl, self.fkCtrlList[len(self.fkCtrlList) - 1], self.ikNSJointList[-2], self.ikFkBlendGrpToRevFoot, maintainOffset=True, name=self.ikFkBlendGrpToRevFoot + "_ParentConstraint")[0]
                 self.parentConstToRFOffsetList.append(parentConstToRFOffset)
-                cmds.connectAttr(self.worldRef + "." + side + self.limbType + str(dpAR_count) + '_IkFkBlend', parentConstToRFOffset + "." + self.fkCtrlList[len(self.fkCtrlList) - 1] + "W1", force=True)
+                cmds.connectAttr(self.worldRef + "." + sideLower + self.userGuideName + '_ikFkBlend', parentConstToRFOffset + "." + self.fkCtrlList[len(self.fkCtrlList) - 1] + "W1", force=True)
 
                 # organize to be corriged the offset when we will apply the parentConstraint
                 # there is a bug in the Maya calculation if we use negative scale (mirrored :P)
@@ -954,7 +957,7 @@ class Limb(Base.StartClass, Layout.LayoutClass):
                 cmds.connectAttr(uniBlend+".outputR", self.ikFkBlendGrpToRevFoot+".scaleX", force=True)
                 cmds.connectAttr(uniBlend+".outputR", self.ikFkBlendGrpToRevFoot+".scaleY", force=True)
                 cmds.connectAttr(uniBlend+".outputR", self.ikFkBlendGrpToRevFoot+".scaleZ", force=True)
-                cmds.connectAttr(self.worldRef + "." + side + self.limbType + str(dpAR_count) + '_IkFkBlend', uniBlend+".blender", force=True)
+                cmds.connectAttr(self.worldRef + "." + sideLower + self.userGuideName + '_ikFkBlend', uniBlend+".blender", force=True)
                 
                 if self.limbStyle != self.langDic[self.langName]['m042_default']:
                     # these options are valides for Biped, Quadruped and Quadruped Spring legs
@@ -1094,6 +1097,7 @@ class Limb(Base.StartClass, Layout.LayoutClass):
                         twistBoneMD = self.bendGrps['twistBoneMD']
                         twistBoneMM = cmds.createNode("multMatrix", name=self.skinJointList[1]+"_ExtactAngle_MM")
                         twistBoneDM = cmds.createNode("decomposeMatrix", name=self.skinJointList[1]+"_ExtactAngle_DM")
+                        twistBoneQtE = cmds.createNode("quatToEuler", name=self.skinJointList[1]+"_ExtactAngle_QtE")
                         shoulderChildLoc = cmds.spaceLocator(name=twistBoneMD+"_Child_Loc")[0]
                         shoulderParentLoc = cmds.spaceLocator(name=twistBoneMD+"_Parent_Loc")[0]
                         cmds.setAttr(shoulderChildLoc+".visibility", 0)
@@ -1104,8 +1108,10 @@ class Limb(Base.StartClass, Layout.LayoutClass):
                         cmds.connectAttr(shoulderChildLoc+".worldMatrix[0]", twistBoneMM+".matrixIn[0]", force=True)
                         cmds.connectAttr(shoulderParentLoc+".worldInverseMatrix[0]", twistBoneMM+".matrixIn[1]", force=True)
                         cmds.connectAttr(twistBoneMM+".matrixSum", twistBoneDM+".inputMatrix", force=True)
-                        cmds.connectAttr(twistBoneDM+".outputRotate.outputRotateZ", twistBoneMD+".input2X", force=True)
-
+                        cmds.connectAttr(twistBoneDM+".outputQuat.outputQuatZ", twistBoneQtE+".inputQuat.inputQuatZ", force=True);
+                        cmds.connectAttr(twistBoneDM+".outputQuat.outputQuatW", twistBoneQtE+".inputQuat.inputQuatW", force=True);
+                        cmds.connectAttr(twistBoneQtE+".outputRotate.outputRotateZ", twistBoneMD+".input2X", force=True)
+                
                 if loadedIkFkSnap:
                     # do otherCtrlList get extraCtrlList from bendy
                     otherCtrlList = []
@@ -1113,8 +1119,7 @@ class Limb(Base.StartClass, Layout.LayoutClass):
                         otherCtrlList = self.bendGrps['extraCtrlList']
                     otherCtrlList.append(self.toParentExtremCtrl)
                     # create a ghost value in order to avoid ikFkNetwork crashes without footRoll attributes:
-                    cmds.addAttr(self.worldRef, longName='footRollPlaceHolder', attributeType='long', defaultValue=0,
-                                 keyable=False)
+                    cmds.addAttr(self.worldRef, longName='footRollPlaceHolder', attributeType='long', defaultValue=0, keyable=False)
                     # create ikFkNetwork:
                     data = sqIkFkTools.IkFkNetwork()
                     # initialise ikFkNetwork:
@@ -1124,7 +1129,7 @@ class Limb(Base.StartClass, Layout.LayoutClass):
                             self.ikCornerCtrl,
                             [self.ikJointList[1], self.ikJointList[2], self.ikJointList[3], self.ikJointList[4]],
                             [self.fkCtrlList[1], self.fkCtrlList[2], self.fkCtrlList[3], self.ikJointList[4]],
-                            self.worldRef + '.' + side + self.limbType + str(dpAR_count) + '_IkFkBlend',
+                            self.worldRef + '.' + sideLower + self.userGuideName + '_ikFkBlend',
                             footRollAtts=[self.worldRef + '.footRollPlaceHolder'],
                             otherCtrls=otherCtrlList
                         )
@@ -1134,7 +1139,7 @@ class Limb(Base.StartClass, Layout.LayoutClass):
                             self.ikCornerCtrl,
                             [self.ikJointList[1], self.ikJointList[2], self.ikJointList[3]],
                             [self.fkCtrlList[1], self.fkCtrlList[2], self.fkCtrlList[3]],
-                            self.worldRef + '.' + side + self.limbType + str(dpAR_count) + '_IkFkBlend',
+                            self.worldRef + '.' + sideLower + self.userGuideName + '_ikFkBlend',
                             footRollAtts=[self.worldRef + '.footRollPlaceHolder'],
                             otherCtrls=otherCtrlList
                         )
@@ -1150,7 +1155,21 @@ class Limb(Base.StartClass, Layout.LayoutClass):
                             cmds.connectAttr(self.bendGrps['ctrlList'][2] + ".message", ikFkNet + ".otherCtrls[" + str(lastIndex + 3) + "]", force=True)
                         elif self.limbType == self.langDic[self.langName]['m028_arm']:
                             cmds.connectAttr(forearmCtrl + ".message", ikFkNet + ".otherCtrls[" + str(lastIndex + 1) + "]", force=True)
-
+                
+                # arrange correct before and extrem skinning joints naming in order to be easy to skinning paint weight UI:
+                if self.getHasBend():
+                    beforeNumber = "00"
+                    extremNumber = "11" #default value for 5 bends
+                    numBendJnt = self.getBendJoints()
+                    if numBendJnt == 3:
+                        extremNumber = "07"
+                    elif numBendJnt == 7:
+                        extremNumber = "15"
+                    self.skinJointList[0] = cmds.rename(self.skinJointList[0], side+self.userGuideName+"_"+beforeNumber+"_"+beforeName+self.jSufixList[0])
+                    self.skinJointList[-2] = cmds.rename(self.skinJointList[-2], side+self.userGuideName+"_"+extremNumber+"_"+extremName+self.jSufixList[0])
+                    
+                self.extremJntList.append(self.skinJointList[-2])
+                
                 self.integrateOrigFromList.append(self.origFromList)
 
                 # add hook attributes to be read when rigging integrated modules:
