@@ -14,7 +14,6 @@ import logging
 
 from studioqt import QtGui
 
-import studioqt
 import studiolibrary
 import studiolibrarymaya
 
