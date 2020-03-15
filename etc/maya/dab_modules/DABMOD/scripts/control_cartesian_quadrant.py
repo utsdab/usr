@@ -15,14 +15,19 @@ except Exception, err:
 def doit():
     pm.select(clear=True)
     _top=pm.group()
-    _top.rename("CONTROLER")
+    _top.rename("CONTROLER_FOUR_QUADRANT_BLEND")
 
     _frame = pm.curve(d=1,p=[(-1,1,0), (1,1,0), (1,-1,0), (-1,-1,0), (-1,1,0)])
     _frame.rename("frame")
+    _frameshape=_frame.getShape()
+    pm.setAttr(_frameshape + ".overrideEnabled", 1)
+    pm.setAttr(_frameshape + ".overrideDisplayType", 2)
 
     _guide = pm.curve(d=1,p=[(-1,0,0), (0,1,0), (1,0,0), (0,-1,0), (-1,0,0)])
     _guide.rename("guide")
     _guideShape=_guide.getShape()
+    pm.setAttr(_guideShape + ".overrideEnabled", 1)
+    pm.setAttr(_guideShape + ".overrideDisplayType", 2)
 
     pm.parent(_frame,_top)
     pm.parent(_guideShape, _frame, shape=True, relative=True, addObject=False)
@@ -96,6 +101,8 @@ def doit():
     _clampA.output.outputG >> _frame.quadrant4
     _clampB.output.outputR >> _frame.quadrant1
     _clampB.output.outputG >> _frame.quadrant2
+
+    pm.setAttr(_target + ".translateY",0)
 
 def main():
     try:

@@ -6,8 +6,8 @@ except Exception, err:
     sys.exit()
 
 
-# Simple interface nugget tobuild a facce linear controller interface
-# build a cocntrol group and a target withib a frame
+# Simple interface nugget tobuild a linear controller interface
+# build a control group and a target within a frame
 # the quadrant values appear as extra attributes on the frame and an be used to drive
 # shapes or whatever.
 # script is crappy - draft version 1
@@ -15,10 +15,13 @@ except Exception, err:
 def doit():
     pm.select(clear=True)
     _top=pm.group()
-    _top.rename("CONTROLER")
+    _top.rename("CONTROLER_SINGLE_INPUT_LINER")
 
     _frame = pm.curve(d=1,p=[(-.1,1,0), (.1,1,0), (.1,-1,0), (-.1,-1,0), (-.1,1,0)])
     _frame.rename("frame")
+    _frameshape=_frame.getShape()
+    pm.setAttr(_frameshape + ".overrideEnabled", 1)
+    pm.setAttr(_frameshape + ".overrideDisplayType", 2)
 
     pm.parent(_frame,_top)
 
@@ -41,6 +44,7 @@ def doit():
     pm.addAttr(_frame, niceName = "vl", longName = "value1" , usedAsColor = False, attributeType = 'double' )
 
     _target.ty >> _frame.value1
+    pm.setAttr(_target + ".translateY",0)
 
     print "Created Control group, the  value is are located on the frame inside the group"
 
