@@ -5,6 +5,11 @@ import os
 import sys
 import re
 import cProfile
+import shutil
+import urllib
+import zipfile
+import StringIO
+import webbrowser
 
 
 # UTILS functions:
@@ -85,7 +90,7 @@ def findAllModules(path, dir):
     # removing "__init__":
     for file in allPyFilesList:
         #Ensure base class are skipped
-        if file != "dpBaseClass" and file != "dpLayoutClass":
+        if file != "dpBaseClass" and file != "dpLayoutClass" and file != "dpBaseControlClass":
             moduleList.append(file)
     return moduleList
 
@@ -210,20 +215,25 @@ def useDefaultRenderLayer():
 
 def zeroOut(transformList=[]):
     """ Create a group over the transform, parent the transform in it and set zero all transformations of the transform node.
+        If don't have a transformList given, try to get the current selection.
         Return a list of names of the zeroOut groups.
     """
     zeroList = []
+    if not transformList:
+        transformList = cmds.ls(selection=True)
     if transformList:
         for transform in transformList:
             zero = cmds.duplicate(transform, name=transform+'_Zero')[0]
-            if( cmds.objExists(zero+".originedFrom") ):
-                try:
-                    cmds.deleteAttr(zero+".originedFrom")
-                except:
-                    pass
+            zeroUserAttrList = cmds.listAttr(zero, userDefined=True)
+            if zeroUserAttrList:
+                for zUserAttr in zeroUserAttrList:
+                    try:
+                        cmds.deleteAttr(zero+"."+zUserAttr)
+                    except:
+                        pass
             allChildrenList = cmds.listRelatives(zero, allDescendents=True, children=True, fullPath=True)
-            for child in allChildrenList:
-                cmds.delete(child)
+            if allChildrenList:
+                cmds.delete(allChildrenList)
             cmds.parent(transform, zero, absolute=True)
             zeroList.append(zero)
     return zeroList
@@ -268,19 +278,20 @@ def addHook(objName="", hookType="staticHook"):
 def hook():
     """ Mount a dictionary with guide modules hierarchies.
         Return a dictionary with the father and children lists inside of each guide like:
-        {guide{'guideModuleName':"...", 'guideCustomName':"...", 'guideMirrorAxis':"...", 'guideMirrorName':"...", 'fatherGuide':"...", 'fatherNode':"...", 'fatherModule':"...", 'fatherCustomName':"...", 'fatherMirrorAxis':"...", 'fatherMirrorName':"...", 'fatherGuideLoc':"...", 'childrenList':[...]}}
+        {guide{'guideModuleNamespace':"...", 'guideModuleName':"...", 'guideCustomName':"...", 'guideMirrorAxis':"...", 'guideMirrorName':"...", 'fatherGuide':"...", 'fatherNode':"...", 'fatherModule':"...", 'fatherCustomName':"...", 'fatherMirrorAxis':"...", 'fatherMirrorName':"...", 'fatherGuideLoc':"...", 'childrenList':[...]}}
     """
     hookDic = {}
     allList = cmds.ls(type='transform')
     for item in allList:
         if cmds.objExists(item+".guideBase") and cmds.getAttr(item+".guideBase") == 1:
             # module info:
-            guideModuleName = item[:item.find("__")]
-            guideInstance   = item[item.rfind("__")+2:item.find(":")]
-            guideCustomName = cmds.getAttr(item+".customName")
-            guideMirrorAxis = cmds.getAttr(item+".mirrorAxis")
-            tempAMirrorName = cmds.getAttr(item+".mirrorName")
-            guideMirrorName = [tempAMirrorName[0]+"_" , tempAMirrorName[len(tempAMirrorName)-1:]+"_"]
+            guideModuleNamespace = item[:item.find(":")]
+            guideModuleName      = item[:item.find("__")]
+            guideInstance        = item[item.rfind("__")+2:item.find(":")]
+            guideCustomName      = cmds.getAttr(item+".customName")
+            guideMirrorAxis      = cmds.getAttr(item+".mirrorAxis")
+            tempAMirrorName      = cmds.getAttr(item+".mirrorName")
+            guideMirrorName      = [tempAMirrorName[0]+"_" , tempAMirrorName[len(tempAMirrorName)-1:]+"_"]
             
             # get children:
             guideChildrenList = []
@@ -339,13 +350,13 @@ def hook():
             
             # mounting dictionary:
             if guideParentList and guideChildrenList:
-                hookDic[item]={"guideModuleName":guideModuleName, "guideInstance":guideInstance, "guideCustomName":guideCustomName, "guideMirrorAxis":guideMirrorAxis, "guideMirrorName":guideMirrorName, "fatherGuide":guideParent, "fatherNode":fatherNodeList[0], "fatherModule":fatherModule, "fatherInstance":fatherInstance, "fatherCustomName":fatherCustomName, "fatherMirrorAxis":fatherMirrorAxis, "fatherMirrorName":fatherMirrorName, "fatherGuideLoc":fatherGuideLoc, "parentNode":parentNode, "childrenList":guideChildrenList}
+                hookDic[item]={"guideModuleNamespace":guideModuleNamespace, "guideModuleName":guideModuleName, "guideInstance":guideInstance, "guideCustomName":guideCustomName, "guideMirrorAxis":guideMirrorAxis, "guideMirrorName":guideMirrorName, "fatherGuide":guideParent, "fatherNode":fatherNodeList[0], "fatherModule":fatherModule, "fatherInstance":fatherInstance, "fatherCustomName":fatherCustomName, "fatherMirrorAxis":fatherMirrorAxis, "fatherMirrorName":fatherMirrorName, "fatherGuideLoc":fatherGuideLoc, "parentNode":parentNode, "childrenList":guideChildrenList}
             elif guideParentList:
-                hookDic[item]={"guideModuleName":guideModuleName, "guideInstance":guideInstance, "guideCustomName":guideCustomName, "guideMirrorAxis":guideMirrorAxis, "guideMirrorName":guideMirrorName, "fatherGuide":guideParent, "fatherNode":fatherNodeList[0], "fatherModule":fatherModule, "fatherInstance":fatherInstance, "fatherCustomName":fatherCustomName, "fatherMirrorAxis":fatherMirrorAxis, "fatherMirrorName":fatherMirrorName, "fatherGuideLoc":fatherGuideLoc, "parentNode":parentNode, "childrenList":[]}
+                hookDic[item]={"guideModuleNamespace":guideModuleNamespace, "guideModuleName":guideModuleName, "guideInstance":guideInstance, "guideCustomName":guideCustomName, "guideMirrorAxis":guideMirrorAxis, "guideMirrorName":guideMirrorName, "fatherGuide":guideParent, "fatherNode":fatherNodeList[0], "fatherModule":fatherModule, "fatherInstance":fatherInstance, "fatherCustomName":fatherCustomName, "fatherMirrorAxis":fatherMirrorAxis, "fatherMirrorName":fatherMirrorName, "fatherGuideLoc":fatherGuideLoc, "parentNode":parentNode, "childrenList":[]}
             elif guideChildrenList:
-                hookDic[item]={"guideModuleName":guideModuleName, "guideInstance":guideInstance, "guideCustomName":guideCustomName, "guideMirrorAxis":guideMirrorAxis, "guideMirrorName":guideMirrorName, "fatherGuide":"", "fatherNode":"", "fatherModule":"", "fatherInstance":"", "fatherCustomName":"", "fatherMirrorAxis":"", "fatherMirrorName":"", "fatherGuideLoc":"", "parentNode":parentNode, "childrenList":guideChildrenList}
+                hookDic[item]={"guideModuleNamespace":guideModuleNamespace, "guideModuleName":guideModuleName, "guideInstance":guideInstance, "guideCustomName":guideCustomName, "guideMirrorAxis":guideMirrorAxis, "guideMirrorName":guideMirrorName, "fatherGuide":"", "fatherNode":"", "fatherModule":"", "fatherInstance":"", "fatherCustomName":"", "fatherMirrorAxis":"", "fatherMirrorName":"", "fatherGuideLoc":"", "parentNode":parentNode, "childrenList":guideChildrenList}
             else:
-                hookDic[item]={"guideModuleName":guideModuleName, "guideInstance":guideInstance, "guideCustomName":guideCustomName, "guideMirrorAxis":guideMirrorAxis, "guideMirrorName":guideMirrorName, "fatherGuide":"", "fatherNode":"", "fatherModule":"", "fatherInstance":"", "fatherCustomName":"", "fatherMirrorAxis":"", "fatherMirrorName":"", "fatherGuideLoc":"", "parentNode":parentNode, "childrenList":[]}
+                hookDic[item]={"guideModuleNamespace":guideModuleNamespace, "guideModuleName":guideModuleName, "guideInstance":guideInstance, "guideCustomName":guideCustomName, "guideMirrorAxis":guideMirrorAxis, "guideMirrorName":guideMirrorName, "fatherGuide":"", "fatherNode":"", "fatherModule":"", "fatherInstance":"", "fatherCustomName":"", "fatherMirrorAxis":"", "fatherMirrorName":"", "fatherGuideLoc":"", "parentNode":parentNode, "childrenList":[]}
     return hookDic
 
 
@@ -366,7 +377,6 @@ def clearNodeGrp(nodeGrpName='dpAR_GuideMirror_Grp', attrFind='guideBaseMirror',
                 cmds.delete(nodeGrpName)
         else:
             cmds.delete(nodeGrpName)
-            
 
 
 def getGuideChildrenList(nodeName):
@@ -447,10 +457,10 @@ def getCtrlRadius(nodeName):
     return radius
 
 
-
 def zeroOutJoints(jntList=None):
     """ Duplicate the joints, parent as zeroOut.
         Returns the father joints (zeroOuted).
+        Deprecated = using zeroOut function insted.
     """
     resultList = []
     zeroOutJntSuffix = "_Jzt"
@@ -487,6 +497,161 @@ def deleteChildren(item):
         if(childrenList):
             for child in childrenList:
                 cmds.delete(child)
+
+
+def setJointLabel(jointName, sideNumber, typeNumber, labelString):
+    """ Set joint labelling in order to help Maya calculate the skinning mirror correctly.
+        side:
+            0 = Center
+            1 = Left
+            2 = Right
+        type:
+            18 = Other
+    """
+    cmds.setAttr(jointName+".side", sideNumber)
+    cmds.setAttr(jointName+".type", typeNumber)
+    if typeNumber == 18: #other
+        cmds.setAttr(jointName+".otherType", labelString, type="string")
+
+
+def extractSuffix(nodeName):
+    """ Remove suffix from a node name and return the base name.
+    """
+    endSuffixList = ["_Mesh", "_mesh", "_MESH", "_msh", "_MSH", "_Geo", "_geo", "_GEO", "_Tgt", "_tgt", "_TGT", "_Ctrl", "_ctrl", "_CTRL", "_Grp", "_grp", "_GRP"]
+    for endSuffix in endSuffixList:
+        if nodeName.endswith(endSuffix):
+            baseName = nodeName[:nodeName.rfind(endSuffix)]
+            return baseName
+    return nodeName
+
+
+def filterName(name, itemList, separator):
+    """ Filter list with the name or a list of name as a string separated by the separator (usually a space).
+        Returns the filtered list.
+    """
+    filteredList = []
+    multiFilterList = [name]
+    if separator in name:
+        multiFilterList = list(name.split(separator))
+    for filterName in multiFilterList:
+        if filterName:
+            for item in itemList:
+                if str(filterName) in item:
+                    if not item in filteredList:
+                        filteredList.append(item)
+    return filteredList
+    
+    
+def checkRawURLForUpdate(DPAR_VERSION, DPAR_RAWURL, *args):
+    """ Check for update using raw url.
+        Compares the remote version from GitHub to the current version.
+        
+        Returns a list with CheckedNumber and RemoteVersion or None.
+        
+        CheckedNumber:
+                0 - the current version is up to date
+                1 - there's a new version
+                2 - remote file not found using given raw url
+                3 - internet connection fail (probably)
+                4 - error
+                
+        if we have an update to do:
+            return [CheckedNumber, RemoteVersion, RemoteLog]
+        if not or ok:
+            return [CheckedNumber, None]
+    """
+    try:
+        gotRemoteFile = False
+        
+        # getting dpAutoRig.py file from GitHub website using the Raw URL:
+        remoteSource = urllib.urlopen(DPAR_RAWURL)
+        remoteContents = remoteSource.readlines()
+        
+        # find the line with the version and compare them:
+        for line in remoteContents:
+            if "DPAR_VERSION = " in line:
+                gotRemoteFile = True
+                remoteVersion = line[16:-2] #these magic numbers filter only the version XX.YY.ZZ
+                if remoteVersion == DPAR_VERSION:
+                    # 0 - the current version is up to date
+                    return [0, None, None]
+                else:
+                    # 1 - there's a new version
+                    for extraLine in remoteContents:
+                        if "DPAR_UPDATELOG = " in extraLine:
+                            remoteLog = extraLine[18:-2] #these magic numbers filter only the log string sentence
+                            return [1, remoteVersion, remoteLog]
+                    return [1, remoteVersion, None]
+        if not gotRemoteFile:
+            # 2 - remote file not found using given raw url
+            return [2, None, None]
+    except:
+        # 3 - internet connection fail (probably)
+        return [3, None, None]
+    # 4 - error
+    return [4, None, None]
+
+
+def visitWebSite(website, *args):
+    """ Start browser with the given website address.
+    """
+    #webSiteString = "start "+website
+    #os.popen(webSiteString)
+    webbrowser.open(website, new=2)
+    
+    
+def checkLoadedPlugin(pluginName, exceptName=None, message="Not loaded plugin", *args):
+    """ Check if plugin is loaded and try to load it.
+        Returns True if ok (loaded)
+        Returns False if not found or not loaded.
+    """
+    loadedPlugin = True
+    if not (cmds.pluginInfo(pluginName, query=True, loaded=True)):
+        loadedPlugin = False
+        try:
+            # Maya 2012
+            cmds.loadPlugin(pluginName+".mll")
+            loadedPlugin = True
+        except:
+            if exceptName:
+                try:
+                    # Maya 2013 or earlier
+                    cmds.loadPlugin(exceptName+".mll")
+                    loadedPlugin = True
+                except:
+                    pass
+    if not loadedPlugin:
+        print message, pluginName
+    return loadedPlugin
+    
+    
+def twistBoneMatrix(nodeA, nodeB, twistBoneName, twistBoneMD=None, axis='Z', inverse=True, *args):
+    """ Create matrix nodes and quaternion to extract rotate.
+        nodeA = father transform node
+        nodeB = child transform node
+        Returns the final multiplyDivide node created or given.
+        Reference:
+        https://bindpose.com/maya-matrix-nodes-part-2-node-based-matrix-twist-calculator/
+    """
+    twistBoneMM = cmds.createNode("multMatrix", name=twistBoneName+"_ExtractAngle_MM")
+    twistBoneDM = cmds.createNode("decomposeMatrix", name=twistBoneName+"_ExtractAngle_DM")
+    twistBoneQtE = cmds.createNode("quatToEuler", name=twistBoneName+"_ExtractAngle_QtE")
+    cmds.connectAttr(nodeB+".worldMatrix[0]", twistBoneMM+".matrixIn[0]", force=True)
+    if inverse:
+        cmds.connectAttr(nodeA+".worldInverseMatrix[0]", twistBoneMM+".matrixIn[1]", force=True)
+    else:
+        cmds.connectAttr(nodeA+".worldMatrix[0]", twistBoneMM+".matrixIn[1]", force=True)
+    cmds.connectAttr(twistBoneMM+".matrixSum", twistBoneDM+".inputMatrix", force=True)
+    cmds.connectAttr(twistBoneDM+".outputQuat.outputQuat"+axis, twistBoneQtE+".inputQuat.inputQuat"+axis, force=True)
+    cmds.connectAttr(twistBoneDM+".outputQuat.outputQuatW", twistBoneQtE+".inputQuat.inputQuatW", force=True)
+    if twistBoneMD:
+        cmds.connectAttr(twistBoneQtE+".outputRotate.outputRotate"+axis, twistBoneMD+".input2"+axis, force=True)
+    else:
+        twistBoneMD = cmds.createNode("multiplyDivide", name=twistBoneName+"_MD")
+        cmds.connectAttr(twistBoneQtE+".outputRotate.outputRotate"+axis, twistBoneMD+".input2"+axis, force=True)
+    return twistBoneMD
+    
+
 
 #Profiler decorator
 DPAR_PROFILE_MODE = False

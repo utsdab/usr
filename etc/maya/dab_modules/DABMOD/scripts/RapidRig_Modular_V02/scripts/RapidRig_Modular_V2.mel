@@ -3,7 +3,7 @@
 //Script for Modular Character Rigging.
 global proc string RRM_VersionNum()
 {
-    return "2.4.3";
+    return "2.4.6";
 }
 //MAY 1, 2019
 //FILE IS NOT INTENDED TO BE HARMFUL, HOWEVER USE AT YOUR OWN RISK
@@ -87,11 +87,11 @@ global proc RRM_CreateProxySplineModuleProxy(string $crntUnit, string $proxyName
 	move -r -os 0 0.605 -0.605 ($proxyName + "_7");
 	rotate -r 45 0 180 ($proxyName + "_7");
 		
- circle -n ($proxyName + "_8") -nr 0 1 0 -r 0.605 -sw 45 -ch 0;
+ 	circle -n ($proxyName + "_8") -nr 0 1 0 -r 0.605 -sw 45 -ch 0;
 	move -r -os 0.605 0 -0.605 ($proxyName + "_8");
 	rotate -r 0 135 0 ($proxyName + "_8");
 	
- circle -n ($proxyName + "_9") -nr 0 1 0 -r 0.605 -sw 45 -ch 0;
+ 	circle -n ($proxyName + "_9") -nr 0 1 0 -r 0.605 -sw 45 -ch 0;
 	move -r -os -0.605 0 -0.605 ($proxyName + "_9");
 	rotate -r 0 180 0 ($proxyName + "_9");
 	
@@ -200,14 +200,16 @@ global proc RRM_CreateProxyParentProxy(string $crntUnit, string $crntSide, strin
 	}
 
 	//ADD PINNED ATTRIBUTE
-	addAttr -ln "pinned" -at bool -k 1 -dv 1 ($proxyName);
+	addAttr -ln "pinned" -at bool -k 1 -dv 0 ($proxyName);
+	setAttr -l 1 ($proxyName + ".pinned");
 	
 	//ADD CONNECTOR VIZ ATTRIBUTE
 	addAttr -ln "connectors" -at bool -k 1 -dv 1 ($proxyName);
+	setAttr -l 1 ($proxyName + ".connectors"); 
 	
 	//SET SO CAN'T ATTACH TO PARENT OBJECT
 	addAttr -ln "noAttach" -dt "string" -k 1 ($proxyName);
-	
+	setAttr -l 1 ($proxyName + ".noAttach"); 
 
 	//ADD CORE ATTRIBUTE
 	addAttr -ln "core" -dt "string" -k 1 ($proxyName);
@@ -331,7 +333,7 @@ global proc RRM_ProxyConnectors(string $modName, string $prfx, string $node1, st
 	connectAttr ($node1 + "_" + $node2 + "_TargetLctr.tx") ($node1 + "_" + $node2 + "Connector.sx");
 	setAttr ($node1 + "_" + $node2 + "_AimLctr.v") 0;
 
-		setAttr -l 1 -k 0 ($node1 + "_" + $node2 + "Connector.tx");
+    setAttr -l 1 -k 0 ($node1 + "_" + $node2 + "Connector.tx");
 	setAttr -l 1 -k 0 ($node1 + "_" + $node2 + "Connector.ty");
 	setAttr -l 1 -k 0 ($node1 + "_" + $node2 + "Connector.tz");
 	setAttr -l 1 -k 0 ($node1 + "_" + $node2 + "Connector.rx");
@@ -4735,8 +4737,7 @@ global proc RRM_CreateProxyAuxiliary(string $modName, int $mirrorMod, string $lP
 		}
 
 		//ADD PINNED ATTRIBUTE
-		addAttr -ln "pinned" -at bool -k 1 ("RRM_" + $prfx + $modName + "_Aux");
-		setAttr ("RRM_" + $prfx + $modName + "_Aux.pinned") 0;
+		addAttr -ln "pinned" -at bool -k 1 -dv 0 ("RRM_" + $prfx + $modName + "_Aux");
 		setAttr -l 1 ("RRM_" + $prfx + $modName + "_Aux.pinned");
 		
 		//ADD CONNECTOR VIZ ATTRIBUTE
@@ -8314,11 +8315,27 @@ global proc RRM_AttachToNewModule(string $modAttachName)
 				RRM_ProxyConnectors($modName, $prfx, $modAttachName, $eachModule);
 
 				//MAKE NEW CONSTRAINTS
+				
+				//UNPARENT PROXY AND MOVE GROUP TO SAME LOCATION AS THE NEW PARENT
+				if ($modType == "auxiliary")
+				{
+				    parent -w $eachModule;
+				    delete `parentConstraint $modAttachName $modParent[0]`;
+				}
+				
 				parentConstraint -mo $modAttachName "RRM_MAIN" $modParent[0];
 				scaleConstraint -mo $modAttachName $modParent[0];
 				scaleConstraint -mo "RRM_MAIN" $modParent[0];
 				setAttr ($modParent[0] + "_parentConstraint1.RRM_MAINW1") 0;
 				setAttr ($modParent[0] + "_scaleConstraint1.RRM_MAINW1") 0;
+				
+				//select "break";
+				//REPARENT IF AUX AND ZERO OUT SCALE OFFSET
+				if ($modType == "auxiliary")
+				{
+				    setAttr ($modParent[0] + "_scaleConstraint1.offset") 1 1 1;
+				    parent $eachModule $modParent[0];
+				}
 				
 				//CHANGE ATTACH NODE ATTRIBUTE IN PARENT NODE
 				$modAttachCore = `getAttr ($modAttachName + ".core")`;
@@ -8387,15 +8404,29 @@ global proc RRM_AttachToNewModule(string $modAttachName)
 					}
 					RRM_ProxyConnectors($modName, $prfx, $modAttachName, $mirrorModule);
 					
-					//MAKE NEW CONSTRAINTS
-					if (`objExists $mirrorModAttachName`)
+					//MAKE NEW CONSTRAINTS		
+			    	if (`objExists $mirrorModAttachName`)
 					{
-						parentConstraint -mo ($mirrorModAttachName) "RRM_MAIN" $mirrorModParent[0];
+                        //UNPARENT PROXY AND MOVE GROUP TO SAME LOCATION AS THE NEW PARENT
+                        if ($modType == "auxiliary")
+                        {
+                            parent -w $mirrorModule;
+                            delete `parentConstraint $mirrorModAttachName $mirrorModParent[0]`;
+                        }
+                        
+                        parentConstraint -mo ($mirrorModAttachName) "RRM_MAIN" $mirrorModParent[0];
 						scaleConstraint -mo ($mirrorModAttachName) "RRM_MAIN" $mirrorModParent[0];
 						setAttr ($mirrorModParent[0] + "_parentConstraint1.RRM_MAINW1") 0;
 						setAttr ($mirrorModParent[0] + "_scaleConstraint1.RRM_MAINW1") 0;
 
-						//CHANGE ATTACH NODE ATTRIBUTE IN PARENT NODE
+                        //UNPARENT PROXY AND MOVE GROUP TO SAME LOCATION AS THE NEW PARENT
+                        if ($modType == "auxiliary")
+                        {
+                            setAttr ($mirrorModParent[0] + "_scaleConstraint1.offset") 1 1 1;
+                            parent $mirrorModule $mirrorModParent[0];
+                        }
+                        
+                        //CHANGE ATTACH NODE ATTRIBUTE IN PARENT NODE
 						$mirrorModAttachCore = `getAttr ($mirrorModAttachName + ".core")`;
 						setAttr -l false ($mirrorModule + ".attachNode");
 						setAttr -type "string" ($mirrorModule + ".attachNode") $mirrorModAttachCore;
@@ -8690,11 +8721,13 @@ global proc RRM_PinProxies(int $on, int $off)
 	//CHECK THAT SOMETHING IS SELECTED
 	if (`size $selected` > 0)
 	{
+		print "size greater than 0\n";
 		//CHECK IF VALID MODULE
 		for ($each in $selected)
 		{
 			if (`objExists ($each + ".modName")`)
 			{
+				print "modName exists\n";
 				//CHECK IF PAIR, GET PREFIX IF TRUE
 				if (`objExists ($each + ".pair")`)
 				{
@@ -8725,10 +8758,12 @@ global proc RRM_PinProxies(int $on, int $off)
                 }
 			}
 		}
+		print "parent modules: ";
+		print $parentModules;
+		print "\n";
 		if (`size $parentModules` > 0)
 		{
 			//GET WORLD SPACE AND SCALE
-			string $each2;
 			string $mirroredTopNode;
 			$topNodeScale = <<1,1,1>>;
 			for ($each2 in $parentModules)
@@ -9557,7 +9592,7 @@ global proc RRM_ReadPathProxySetup()
 	{
 		if ($mayaVer > 2011)
 		{
-			$fileFilter = "RRM Proxy Setup (.rrmsstp) (*.rrmsstp) ";
+			$fileFilter = "RRM Proxy Setup (.rrmsstp) (*.rrmsstp)";
 			$fileName = `fileDialog2 -fileMode 1 -cap "Load Proxy Setup" -fileFilter $fileFilter -selectFileFilter $fileFilter`;
 			if ($fileName[0] != "")
 			{
@@ -10915,9 +10950,15 @@ global proc RRM_GenerateRigSpline(string $modRigName, string $rigGrp, string $mo
 		rebuildSurface -ch 1 -rpo 1 -rt 0 -end 1 -kr 2 -kcp 0 -kc 0 -su 1 -du 1 -sv 2 -dv 3 -fr 0 -dir 0 ($modCore + "_ribbon");
 		delete -ch ($modCore + "_ribbon");
 		parent ($modCore + "_ribbon") ($modCore + "Grp");
-		
+		// clean up scale values
+		setAttr ($modCore + "_ribbon.scale") 1 1 1;
+		makeIdentity -apply true ($modCore + "_ribbon");
+		//select "break";
 		
 		//CREATE LOCATORS BETWEEN EACH NODE
+		//CREATE PARENT LOCATOR AND SCALE TO PROPER SIZE
+		//$parentLctr = `spaceLocator -n ($modCore + "parentScale_Lctr")`;
+		//delete `scaleConstraint ("RRM_" + $prfx + $core + "_Parent") $parentLctr`;
 		
 		$nPad = "_0";
 		$nPad2 = "_0";
@@ -10930,6 +10971,7 @@ global proc RRM_GenerateRigSpline(string $modRigName, string $rigGrp, string $mo
 		string $leftLctr[];
 		string $prevRightLctr;
 		string $prevLeftLctr;
+		float $scaleFactor[] = `xform -q -ws -s ("RRM_" + $prfx + $core + "_Parent")`;
 		
 		for ($i = 0, $i2 = 1, $iPrev = -1, $cvNum = 1; $i <= ($splineSize + 1); $i++, $i2++, $iPrev++, $cvNum++)
 		{
@@ -10945,6 +10987,7 @@ global proc RRM_GenerateRigSpline(string $modRigName, string $rigGrp, string $mo
 			{
 				$nPadPrev = "_";
 			}
+			print ("i is " + $i + "\n");
 			if ($i == 0)
 			{
 				$leftLctr  = `spaceLocator -n ($modCore + "_left_Btm_Lctr")`;
@@ -10963,11 +11006,17 @@ global proc RRM_GenerateRigSpline(string $modRigName, string $rigGrp, string $mo
 				{
 					$pos2 = `xform -q -ws -rp ("RRM_" + $prfx + $core + "_Top")`;
 				}
+				//select "break";
 			}
 			else if ($i < ($splineSize))
 			{
 				$leftLctr  = `spaceLocator -n ($modCore + "_left_" + $i + "_Lctr")`;
 				$rightLctr = `spaceLocator -n ($modCore + "_right_" + $i + "_Lctr")`;
+				parent $leftLctr[0] $prevLeftLctr;
+				parent $rightLctr[0] $prevRightLctr;
+                setAttr (($leftLctr[0] + ".scale"), 1, 1, 1); 
+                setAttr (($rightLctr[0] + ".scale"), 1, 1, 1); 
+				
 				
 				delete `parentConstraint ("RRM_" + $prfx + $core + $nPad + $i) ("RRM_" + $prfx + $core + $nPad2 + $i2) $leftLctr[0]`;
 				delete `parentConstraint ("RRM_" + $prfx + $core + $nPad + $i) ("RRM_" + $prfx + $core + $nPad2 + $i2) $rightLctr[0]`;
@@ -10978,9 +11027,14 @@ global proc RRM_GenerateRigSpline(string $modRigName, string $rigGrp, string $mo
 			{
 				$leftLctr  = `spaceLocator -n ($modCore + "_left_" + $i + "_Lctr")`;
 				$rightLctr = `spaceLocator -n ($modCore + "_right_" + $i + "_Lctr")`;
-			
-				delete `parentConstraint ("RRM_" + $prfx + $core + $nPad + $i) $leftLctr[0]`;
-				delete `parentConstraint ("RRM_" + $prfx + $core + $nPad + $i) $rightLctr[0]`;
+				parent $leftLctr[0] $prevLeftLctr;
+				parent $rightLctr[0] $prevRightLctr;
+                setAttr (($leftLctr[0] + ".scale"), 1, 1, 1); 
+                setAttr (($rightLctr[0] + ".scale"), 1, 1, 1); 
+                
+				delete `parentConstraint ("RRM_" + $prfx + $core + $nPad + $i) ("RRM_" + $prfx + $core + "_Top") $leftLctr[0]`;
+				delete `parentConstraint ("RRM_" + $prfx + $core + $nPad + $i) ("RRM_" + $prfx + $core + "_Top") $rightLctr[0]`;
+				
 				$pos1 = `xform -q -ws -a -rp ("RRM_" + $prfx + $core + $nPad + $i)`;
 				$pos2 = `xform -q -ws -a -rp ("RRM_" + $prfx + $core + $nPadPrev + $iPrev)`;
 			}
@@ -10992,14 +11046,8 @@ global proc RRM_GenerateRigSpline(string $modRigName, string $rigGrp, string $mo
 				parent $rightLctr[0] $prevRightLctr;
 				setAttr (($leftLctr[0] + ".scale"), 1, 1, 1); 
 				setAttr (($rightLctr[0] + ".scale"), 1, 1, 1);
-				if ($splineSize != 1)
-				{
-					$leftEnd  = `getAttr ($prevLeftLctr + ".translate")`;
-					$rightEnd = `getAttr ($prevRightLctr + ".translate")`;
-					setAttr (($leftLctr[0] + ".translate"), (0), ($leftEnd[1] * 1), ($leftEnd[2] * 1));
-					setAttr (($rightLctr[0] + ".translate"), (0), ($rightEnd[1] * 1), ($rightEnd[2] * 1));
-				}
-				else
+				
+				if ($splineSize == 1)
 				{
 					$Start  = `xform -q -ws -a -rp ("RRM_" + $prfx + $core + "_01")`;
 					$End    = `xform -q -ws -a -rp ("RRM_" + $prfx + $core + "_Top")`;
@@ -11017,17 +11065,8 @@ global proc RRM_GenerateRigSpline(string $modRigName, string $rigGrp, string $mo
 				$pos1 = `xform -q -ws -a -rp ("RRM_" + $prfx + $core + "_01")`;
 				$pos2 = `xform -q -ws -a -rp ("RRM_" + $prfx + $core + "_Top")`;
 			}
-
 			if ($i == 1)
 			{
-				if ($splineSize > 1)
-				{
-					parent ($modCore + "_left_" + $i + "_Lctr")  $prevLeftLctr;
-					parent ($modCore + "_right_" + $i + "_Lctr") $prevRightLctr;
-					setAttr (($modCore + "_left_" + $i + "_Lctr.scale"), 1, 1, 1); 
-					setAttr (($modCore + "_right_" + $i + "_Lctr.scale"), 1, 1, 1); 
-				}
-
 				$leftZeroLctr = `spaceLocator -n ($modCore + "_left_Zero_Lctr")`;
 				$rightZeroLctr = `spaceLocator -n ($modCore + "_right_Zero_Lctr")`;
 
@@ -11038,6 +11077,7 @@ global proc RRM_GenerateRigSpline(string $modRigName, string $rigGrp, string $mo
 
 				$leftStart  = `getAttr ($leftLctr[0]  + ".translate")`;
 				$rightStart = `getAttr ($rightLctr[0] + ".translate")`;
+				//select "break";
 				setAttr (($leftZeroLctr[0] + ".translate"), 0, ($leftStart[1] * -1), ($leftStart[2] * -1));
 				setAttr (($rightZeroLctr[0] + ".translate"), 0, ($rightStart[1] * -1), ($rightStart[2] * -1));
 
@@ -11050,6 +11090,10 @@ global proc RRM_GenerateRigSpline(string $modRigName, string $rigGrp, string $mo
 			}
 			
 			$mag = `mag($pos1-$pos2)`;
+			print ("\npos1 is ");
+			print $pos1;
+			print ("\npos2 is ");
+			print $pos2;
 			if ($i <= $splineSize)
 			{
 				if ($mag < .01)
@@ -11060,19 +11104,8 @@ global proc RRM_GenerateRigSpline(string $modRigName, string $rigGrp, string $mo
 				{
 					$mag = .01;
 				}
-				move -r -os ($mag * .25) 0 0 $leftLctr[0];
-				move -r -os ($mag * -.25) 0 0 $rightLctr[0];
-			}
-			
-			if ($i > 0)
-			{
-				if ($i <= $splineSize && $splineSize > 1 && $i > 1)
-				{
-					parent $leftLctr[0] $prevLeftLctr;
-					parent $rightLctr[0] $prevRightLctr;
-					setAttr (($leftLctr[0] + ".scale"), 1, 1, 1); 
-					setAttr (($rightLctr[0] + ".scale"), 1, 1, 1); 
-				}
+				move -r -os ($mag * .25 / $scaleFactor[0]) 0 0 $leftLctr[0];
+				move -r -os ($mag * -.25 / $scaleFactor[0]) 0 0 $rightLctr[0];
 			}
 			
 			//MOVE CV's
@@ -11219,6 +11252,7 @@ global proc RRM_GenerateRigSpline(string $modRigName, string $rigGrp, string $mo
 		delete `listConnections ($modCore + "_ribbonSkinClstr.bindPose")`;
 		//GENERATE JOINTS
 		//string $splineJoints[];
+		//select "break";
 
 		////CREATE CURVE TO GET THE LENGTH OF THE SPLINE
 		$ribbonLenCrv = ($modCore + "_LengthCurve");
@@ -11809,16 +11843,34 @@ string $modAttachNode, string $topNode, float $behavior, float $behaviorMultipli
 	}
 	
 	//ADD CURVE ATTRIBUTES TO Ik Fk SWITCH
+	addAttr -ln "startCurve" -at double -min 0 -max 1 -dv 0 -k 1 ($modCore + "_Switch_Ctrl");
+	addAttr -ln "midCurve" -at double -min 0 -max 1 -dv 0 -k 1 ($modCore + "_Switch_Ctrl");
+	addAttr -ln "endCurve" -at double -min 0 -max 1 -dv 0 -k 1 ($modCore + "_Switch_Ctrl");
 	addAttr -ln ($elbowType + "Curve") -at double -min 0 -max 1 -dv 0 -k 1 ($modCore + "_Switch_Ctrl");
 	
-	addAttr -ln "curve" -at double -min 0 -max 1 -dv 0 -k 1 ($modCore + "_Switch_Ctrl");
+	//START CURVE
+	shadingNode -asUtility multiplyDivide -n ($modCore + "_Start_Curve_MD1");
+	connectAttr ($modCore + "_Switch_Ctrl.startCurve") ($modCore + "_Start_Curve_MD1.input1X");
+	setAttr ($modCore + "_Start_Curve_MD1.input2X") 2;
+	shadingNode -asUtility multiplyDivide -n ($modCore + "_Start_Curve_MD2");
+	connectAttr ($modCore + "_Start_Curve_MD1.outputX") ($modCore + "_Start_Curve_MD2.input1X");
+	connectAttr ($modCore + $shoulder + "Fk_Ctrl.scaleX") ($modCore + "_Start_Curve_MD2.input2X");
 	
-	shadingNode -asUtility multiplyDivide -n ($modCore + "_Curve_MD1");
-	connectAttr ($modCore + "_Switch_Ctrl.curve") ($modCore + "_Curve_MD1.input1X");
-	setAttr ($modCore + "_Curve_MD1.input2X") 2;
-	shadingNode -asUtility multiplyDivide -n ($modCore + "_Curve_MD2");
-	connectAttr ($modCore + "_Curve_MD1.outputX") ($modCore + "_Curve_MD2.input1X");
-	connectAttr ($modCore + $shoulder + "Fk_Ctrl.scaleX") ($modCore + "_Curve_MD2.input2X");
+	//MID CURVE
+	shadingNode -asUtility multiplyDivide -n ($modCore + "_Mid_Curve_MD1");
+	connectAttr ($modCore + "_Switch_Ctrl.midCurve") ($modCore + "_Mid_Curve_MD1.input1X");
+	setAttr ($modCore + "_Mid_Curve_MD1.input2X") 2;
+	shadingNode -asUtility multiplyDivide -n ($modCore + "_Mid_Curve_MD2");
+	connectAttr ($modCore + "_Mid_Curve_MD1.outputX") ($modCore + "_Mid_Curve_MD2.input1X");
+	connectAttr ($modCore + $shoulder + "Fk_Ctrl.scaleX") ($modCore + "_Mid_Curve_MD2.input2X");
+	
+	//START CURVE
+	shadingNode -asUtility multiplyDivide -n ($modCore + "_End_Curve_MD1");
+	connectAttr ($modCore + "_Switch_Ctrl.endCurve") ($modCore + "_End_Curve_MD1.input1X");
+	setAttr ($modCore + "_End_Curve_MD1.input2X") 2;
+	shadingNode -asUtility multiplyDivide -n ($modCore + "_End_Curve_MD2");
+	connectAttr ($modCore + "_End_Curve_MD1.outputX") ($modCore + "_End_Curve_MD2.input1X");
+	connectAttr ($modCore + $shoulder + "Fk_Ctrl.scaleX") ($modCore + "_End_Curve_MD2.input2X");
 	
 	//ADD VISIBILITY ATTRIBUTES FOR CURVE CONTROLLERS
 	addAttr -ln ($limbType + "Twist") -at bool -min 0 -k 1 ($modCore + "_Switch_Ctrl");
@@ -12098,7 +12150,15 @@ string $modAttachNode, string $topNode, float $behavior, float $behaviorMultipli
 			parent ($modCore + $seg + "TopClstr") ($modCore + $seg + "TopClstrGrp");
 	
 			pointConstraint -mo $topSegPosAttach ($modCore + $seg + "TopClstrGrp");
-			orientConstraint -mo $topSegRotAttach ($modCore + $seg + "TopClstrGrp");
+			//IF SHOULDER IS TOP, MATCH ORIENTATION TO CLAVICLE
+			if ($segStart == "_Shoulder")
+			{
+			orientConstraint $topSegRotAttach ($modCore + $seg + "TopClstrGrp");
+			}
+			else
+			{
+			    orientConstraint -mo $topSegRotAttach ($modCore + $seg + "TopClstrGrp");
+            }
 			
 			select ($modCore + $seg + "CurveAttach.cv[3:4]") ;
 			newCluster " -envelope 1";
@@ -12134,8 +12194,16 @@ string $modAttachNode, string $topNode, float $behavior, float $behaviorMultipli
 			parent ($modCore + $seg + "TopGuideClstr") ($modCore + $seg + "TopGuideClstrGrp"); 
 			
 			pointConstraint -mo $topSegPosAttach ($modCore + $seg + "TopGuideClstrGrp");
-			orientConstraint -mo $topSegRotAttach ($modCore + $seg + "TopGuideClstrGrp");
-	
+			//IF SHOULDER IS TOP, MATCH ORIENTATION TO CLAVICLE
+			if ($segStart == "_Shoulder")
+			{
+			    orientConstraint $topSegRotAttach ($modCore + $seg + "TopGuideClstrGrp");
+			}
+			else
+			{
+			    orientConstraint -mo $topSegRotAttach ($modCore + $seg + "TopGuideClstrGrp");
+            }
+            
 			select ($modCore + $seg + "CurveGuide.cv[2:3]") ;
 			newCluster " -envelope 1";
 			rename ($modCore + $seg + "BtmGuideClstr");
@@ -12151,11 +12219,24 @@ string $modAttachNode, string $topNode, float $behavior, float $behaviorMultipli
 			pointConstraint -mo $btmSegPosAttach ($modCore + $seg + "BtmGuideClstrGrp");
 			orientConstraint -mo $btmSegRotAttach ($modCore + $seg + "BtmGuideClstrGrp");
 	
-			//CONNECT SCALE TO OF THE CLUSTER GROUPS TO CURVE ATTRIBUTE TO MAKE THE ARM CURVES STRAIGHT	
-			connectAttr ($modCore + "_Curve_MD2.outputX") ($modCore + $seg + "TopClstrGrp.scaleX");
-			connectAttr ($modCore + "_Curve_MD2.outputX") ($modCore + $seg + "BtmClstrGrp.scaleX");
-			connectAttr ($modCore + "_Curve_MD2.outputX") ($modCore + $seg + "TopGuideClstrGrp.scaleX");
-			connectAttr ($modCore + "_Curve_MD2.outputX") ($modCore + $seg + "BtmGuideClstrGrp.scaleX");
+			//CONNECT SCALE TO OF THE CLUSTER GROUPS TO CURVE ATTRIBUTE TO MAKE THE ARM CURVES STRAIGHT
+			string $top_MD2;
+			string $btm_MD2;
+			if ($seg == "_Upper")
+			{
+			    $top_MD2 = "_Start_Curve_MD2";
+			    $btm_MD2 = "_Mid_Curve_MD2";
+			}
+			else if ($seg == "_Lower")
+			{
+			    $top_MD2 = "_Mid_Curve_MD2";
+			    $btm_MD2 = "_End_Curve_MD2";
+			}			    
+			 
+            connectAttr ($modCore + $top_MD2  + ".outputX") ($modCore + $seg + "TopClstrGrp.scaleX");
+            connectAttr ($modCore + $btm_MD2  + ".outputX") ($modCore + $seg + "BtmClstrGrp.scaleX");
+            connectAttr ($modCore + $top_MD2  + ".outputX") ($modCore + $seg + "TopGuideClstrGrp.scaleX");
+            connectAttr ($modCore + $btm_MD2  + ".outputX") ($modCore + $seg + "BtmGuideClstrGrp.scaleX");
 			
 			//PARENT CLUSTERS
 			parent ($modCore + $seg + "TopClstrGrp") ($modCore + $seg + "BtmClstrGrp")
@@ -21244,7 +21325,7 @@ global proc RRM_SingleHierarchyInterface(string $modRigName, string $rigGrp, int
 		
 		// CREATE SELECTION SET
 		$sHDescendents = `listRelatives -allDescendents  ($modRigName + "SHJntGrp")`;
-		$shNodes = `ls ($modRigName + "SHJntGrp") $sHDescendents`;
+		$shNodes = `ls ($modRigName + "SHJntGrp") $sHDescendents "SHJointsLayer"`;
 		sets -name ($modRigName + "SHSelectionSet") $shNodes;
 		// sets -add ($modRigName + "SHSelectionSet") $shNodes;
 		
@@ -23520,6 +23601,7 @@ global proc RRM_DeleteRig(string $modRigName, string $rigGrp, int $keep)
         select $sets;
         if ($keep == 1)
         {
+            // DESELECT THE SET AND THE TOP GROUP
             select -d $rigGrp $sets[0];
         }
         // DESELECT UNDELETABLE NODES
@@ -23533,11 +23615,6 @@ global proc RRM_DeleteRig(string $modRigName, string $rigGrp, int $keep)
         delete $rigNodes;
         
         delete $sets[1];
-        if ($keep == 1)
-        {
-            delete $sets[0];
-        }        
-
     }
     else
     {
@@ -23618,7 +23695,8 @@ global proc RRM_DeleteRig(string $modRigName, string $rigGrp, int $keep)
         `ls -type "clamp" ($modRigName + "*")`;
             
         //LAYERS
-        if (`objExists ($modRigName + "SHJointsLayer")`)
+        print "\n\nDeleting layers\n\n";
+        if (`objExists ($modRigName + "SHJointsLayer")` )
         {
             delete ($modRigName + "SHJointsLayer");
         }
@@ -25595,7 +25673,7 @@ global proc RRM_CreateProxyMainGUI()
 			button -label "Right\nLeg" -bgc 0.9 0.1 0.1 -h 140 -ann "Select hip joint of a Leg" -c ("RRM_SH_RenameLeg(\"Right\")");
 			separator -vis 0;
 			button -label "Left\nLeg" -bgc 0.2 0.2 0.9 -h 140 -ann "Select hip joint of a Leg" -c ("RRM_SH_RenameLeg(\"Left\")");
-
+  
 	setParent RRM_RigTab;
 
 

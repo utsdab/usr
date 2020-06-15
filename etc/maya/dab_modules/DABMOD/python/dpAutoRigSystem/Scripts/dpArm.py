@@ -9,39 +9,49 @@ DESCRIPTION = "m029_armDesc"
 ICON = "/Icons/dp_arm.png"
 
 
-def Arm(dpAutoRigInst):
+def Arm(dpUIinst):
     """ This function will create all guides needed to compose an arm.
     """
     # check modules integrity:
     guideDir = 'Modules'
     checkModuleList = ['dpLimb', 'dpFinger']
-    checkResultList = dpAutoRigInst.startGuideModules(guideDir, "check", None, checkModuleList=checkModuleList)
+    checkResultList = dpUIinst.startGuideModules(guideDir, "check", None, checkModuleList=checkModuleList)
     
     if len(checkResultList) == 0:
+        # defining naming:
+        doingName = dpUIinst.langDic[dpUIinst.langName]['m094_doing']
+        # part names:
+        armName = dpUIinst.langDic[dpUIinst.langName]['c037_arm']
+        fingerIndexName = dpUIinst.langDic[dpUIinst.langName]['m007_finger']+"_"+dpUIinst.langDic[dpUIinst.langName]['m032_index']
+        fingerMiddleName = dpUIinst.langDic[dpUIinst.langName]['m007_finger']+"_"+dpUIinst.langDic[dpUIinst.langName]['m033_middle']
+        fingerRingName = dpUIinst.langDic[dpUIinst.langName]['m007_finger']+"_"+dpUIinst.langDic[dpUIinst.langName]['m034_ring']
+        fingerPinkyName = dpUIinst.langDic[dpUIinst.langName]['m007_finger']+"_"+dpUIinst.langDic[dpUIinst.langName]['m035_pinky']
+        fingerThumbName = dpUIinst.langDic[dpUIinst.langName]['m007_finger']+"_"+dpUIinst.langDic[dpUIinst.langName]['m036_thumb']
+    
         # Starting progress window
         progressAmount = 0
-        cmds.progressWindow(title='Arm Guides', progress=progressAmount, status=dpAutoRigInst.langDic[dpAutoRigInst.langName]['m094_doing']+': 0%', isInterruptable=False)
+        cmds.progressWindow(title='Arm Guides', progress=progressAmount, status=doingName+': 0%', isInterruptable=False)
         maxProcess = 2 # number of modules to create
 
         # Update progress window
         progressAmount += 1
-        cmds.progressWindow(edit=True, maxValue=maxProcess, progress=progressAmount, status=(dpAutoRigInst.langDic[dpAutoRigInst.langName]['m094_doing']+': ' + `progressAmount` + ' '+dpAutoRigInst.langDic[dpAutoRigInst.langName]['m028_arm']))
+        cmds.progressWindow(edit=True, maxValue=maxProcess, progress=progressAmount, status=(doingName+': ' + `progressAmount` + ' '+armName))
         
         # creating module instances:
-        armLimbInstance = dpAutoRigInst.initGuide('dpLimb', guideDir)
+        armLimbInstance = dpUIinst.initGuide('dpLimb', guideDir)
         # change name to arm:
-        dpAutoRigInst.guide.Limb.editUserName(armLimbInstance, checkText=dpAutoRigInst.langDic[dpAutoRigInst.langName]['m028_arm'].capitalize())
+        armLimbInstance.editUserName(armName.capitalize())
         # create finger instances:
-        indexFingerInstance  = dpAutoRigInst.initGuide('dpFinger', guideDir)
-        dpAutoRigInst.guide.Finger.editUserName(indexFingerInstance, checkText=dpAutoRigInst.langDic[dpAutoRigInst.langName]['m007_finger']+"_"+dpAutoRigInst.langDic[dpAutoRigInst.langName]['m032_index'])
-        middleFingerInstance = dpAutoRigInst.initGuide('dpFinger', guideDir)
-        dpAutoRigInst.guide.Finger.editUserName(middleFingerInstance, checkText=dpAutoRigInst.langDic[dpAutoRigInst.langName]['m007_finger']+"_"+dpAutoRigInst.langDic[dpAutoRigInst.langName]['m033_middle'])
-        ringFingerInstance   = dpAutoRigInst.initGuide('dpFinger', guideDir)
-        dpAutoRigInst.guide.Finger.editUserName(ringFingerInstance, checkText=dpAutoRigInst.langDic[dpAutoRigInst.langName]['m007_finger']+"_"+dpAutoRigInst.langDic[dpAutoRigInst.langName]['m034_ring'])
-        pinkyFingerInstance   = dpAutoRigInst.initGuide('dpFinger', guideDir)
-        dpAutoRigInst.guide.Finger.editUserName(pinkyFingerInstance, checkText=dpAutoRigInst.langDic[dpAutoRigInst.langName]['m007_finger']+"_"+dpAutoRigInst.langDic[dpAutoRigInst.langName]['m035_pinky'])
-        thumbFingerInstance  = dpAutoRigInst.initGuide('dpFinger', guideDir)
-        dpAutoRigInst.guide.Finger.editUserName(thumbFingerInstance, checkText=dpAutoRigInst.langDic[dpAutoRigInst.langName]['m007_finger']+"_"+dpAutoRigInst.langDic[dpAutoRigInst.langName]['m036_thumb'])
+        thumbFingerInstance  = dpUIinst.initGuide('dpFinger', guideDir)
+        thumbFingerInstance.editUserName(fingerThumbName)
+        indexFingerInstance  = dpUIinst.initGuide('dpFinger', guideDir)
+        indexFingerInstance.editUserName(fingerIndexName)
+        middleFingerInstance = dpUIinst.initGuide('dpFinger', guideDir)
+        middleFingerInstance.editUserName(fingerMiddleName)
+        ringFingerInstance   = dpUIinst.initGuide('dpFinger', guideDir)
+        ringFingerInstance.editUserName(fingerRingName)
+        pinkyFingerInstance  = dpUIinst.initGuide('dpFinger', guideDir)
+        pinkyFingerInstance.editUserName(fingerPinkyName)
         
         # edit arm limb guide:
         armBaseGuide = armLimbInstance.moduleGrp
@@ -53,11 +63,11 @@ def Arm(dpAutoRigInst):
         
         # Update progress window
         progressAmount += 1
-        cmds.progressWindow(edit=True, maxValue=maxProcess, progress=progressAmount, status=(dpAutoRigInst.langDic[dpAutoRigInst.langName]['m094_doing']+': ' + `progressAmount` + ' '+dpAutoRigInst.langDic[dpAutoRigInst.langName]['m007_finger']))
+        cmds.progressWindow(edit=True, maxValue=maxProcess, progress=progressAmount, status=(doingName+': ' + `progressAmount` + ' '+dpUIinst.langDic[dpUIinst.langName]['m007_finger']))
         
         # edit finger guides:
-        fingerInstanceList = [indexFingerInstance, middleFingerInstance, ringFingerInstance, pinkyFingerInstance, thumbFingerInstance]
-        fingerTZList       = [0.6, 0.2, -0.2, -0.6, 0.72]
+        fingerInstanceList = [thumbFingerInstance, indexFingerInstance, middleFingerInstance, ringFingerInstance, pinkyFingerInstance]
+        fingerTZList       = [0.72, 0.6, 0.2, -0.2, -0.6]
         for n, fingerInstance in enumerate(fingerInstanceList):
             cmds.setAttr(fingerInstance.moduleGrp+".translateX", 11)
             cmds.setAttr(fingerInstance.moduleGrp+".translateY", 16)
@@ -67,11 +77,11 @@ def Arm(dpAutoRigInst):
             cmds.setAttr(fingerInstance.annotation+".visibility", 0)
             cmds.setAttr(fingerInstance.moduleGrp+".shapeSize", 0.3)
             
-            if n == len(fingerInstanceList)-1:
+            if n == 0:
                 # correct not commun values for thumb guide:
                 cmds.setAttr(thumbFingerInstance.moduleGrp+".translateX", 10.1)
                 cmds.setAttr(thumbFingerInstance.moduleGrp+".rotateX", 60)
-                dpAutoRigInst.guide.Finger.changeJointNumber(thumbFingerInstance, 2)
+                thumbFingerInstance.changeJointNumber(2)
                 cmds.setAttr(thumbFingerInstance.moduleGrp+".nJoints", 2)
             
             # parent finger guide to the arm wrist guide:
@@ -82,7 +92,7 @@ def Arm(dpAutoRigInst):
 
         # select the armGuide_Base:
         cmds.select(armBaseGuide)
-        print dpAutoRigInst.langDic[dpAutoRigInst.langName]['m091_createdArm']
+        print dpUIinst.langDic[dpUIinst.langName]['m091_createdArm']+"\n",
     else:
         # error checking modules in the folder:
-        mel.eval('error \"'+ dpAutoRigInst.langDic[dpAutoRigInst.langName]['e001_GuideNotChecked'] +' - '+ (", ").join(checkResultList) +'\";')
+        mel.eval('error \"'+ dpUIinst.langDic[dpUIinst.langName]['e001_GuideNotChecked'] +' - '+ (", ").join(checkResultList) +'\";')

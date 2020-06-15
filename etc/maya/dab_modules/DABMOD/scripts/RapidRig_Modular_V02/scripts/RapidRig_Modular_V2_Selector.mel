@@ -3,7 +3,7 @@
 //Script for selecting controls on Rapid Rig: Modular rigs.
 global proc string RRM_S_VersionNum()
 {
-    return "2.4.3";
+    return "2.4.6";
 }
 //MAY 1, 2019
 //FILE IS NOT INTENDED TO BE HARMFUL, HOWEVER USE AT YOUR OWN RISK
@@ -164,6 +164,7 @@ global proc modSelectAllModulesControl(string $button)
 
 global proc modIkToFk(string $button, string $frame, string $modControl)
 {
+    $selection = `ls -selection`;
     string $nameSpace;
     if ($frame == "singleFrame")
     {
@@ -197,9 +198,10 @@ global proc modIkToFk(string $button, string $frame, string $modControl)
 	    ($modControl + "_Switch_Ctrl")`;
 
 		setAttr ($modControl + "_Switch_Ctrl.switchIkFk") 0;
-		$wristT = `xform -q -t  ($modControl + "_WristIkToFkLctr")`;
-		$wristR = `xform -q -ro  ($modControl + "_WristIkToFkLctr")`;
+        $wristT = `getAttr ($modControl + "_WristIkToFkLctr.translate")`;
+		$wristR = `getAttr ($modControl + "_WristIkToFkLctr.rotate")`;
 		$wristS = `getAttr  ($modControl + "_WristIkToFkLctr.sx")`;
+
 		
 		setAttr (($modControl + "_WristIk_Ctrl.translate"), $wristT[0], $wristT[1], $wristT[2]);
 		setAttr (($modControl + "_WristIk_Ctrl.rotate"), $wristR[0], $wristR[1], $wristR[2]);
@@ -211,9 +213,10 @@ global proc modIkToFk(string $button, string $frame, string $modControl)
 		if (`getAttr ($modControl + "Grp.elbowNum")` == 2)
 		{
 			$multiplier = 1.0;
-			if (`objExists ($modControl + "LowerArmIk_Ctrl.leftControl")`)
+			if (`objExists ($modControl + "_LowerArmIk_Ctrl.leftControl")`)
 			{
 				$multiplier = -1.0;
+				print "\nright side\n";
 			}
 			delete `aimConstraint -aimVector ($multiplier * -1) 0 0 -upVector 0 1 0 -worldUpType "objectrotation"
 			-worldUpVector 0 ($multiplier * 1) 0 -worldUpObject ($modControl + "_Elbow2Fk_Ctrl")
@@ -282,7 +285,9 @@ global proc modIkToFk(string $button, string $frame, string $modControl)
             }
         }
     }
+    select $selection;
 }
+
 global proc modFkToIkConstraint(string $bodyPart, string $axis)
 {
 	$lctr = `spaceLocator`;
@@ -326,6 +331,8 @@ global proc modFkToIkConstraint(string $bodyPart, string $axis)
 
 global proc modFkToIk(string $button, string $frame, string $modControl)
 {
+    $selection = `ls -selection`;
+    
     if ($frame == "singleFrame")
     {
         $modControl = `button -q -ann $button`;
@@ -414,6 +421,7 @@ global proc modFkToIk(string $button, string $frame, string $modControl)
             }
         }
     }
+    select $selection;
 }
 
 
@@ -3603,13 +3611,14 @@ global proc CreateModuPoserGUI(string $main_Ctrls[])
 								$hOffset = 1;
 								$vOffset = 0;
 						
-								string $stringNum = "0";
+								string $stringNum = "";
 								while ($splineNum > 0)
 								{
-									if ($splineNum >= 10)
+									if ($splineNum < 10)
 									{
-										$stringNum = "";
+										$stringNum = "0";
 									}
+
 									$splineFk     = `button -label ($splineNum + " Fk")  -w 36 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_" + $stringNum + $splineNum + "Fk_Ctrl")`;
 									$splineCurve_Ctrl = `button -label ($splineNum + " Crv") -w 38 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_" + $stringNum + $splineNum + "Curve_Ctrl")`;
 									button -edit -command ("modSelectControl " + $splineFk) $splineFk;

@@ -38,7 +38,7 @@ class LayoutClass:
         cmds.checkBox(self.annotationCheckBox, edit=True, value=displayAnnotationValue)
         
         # declaring the index color list to override and background color of buttons:
-         #Manually add the "none" color
+        # Manually add the "none" color
         self.colorList = [[0.627, 0.627, 0.627]]
         #WARNING --> color index in maya start to 1
         self.colorList += [cmds.colorIndex(iColor, q=True) for iColor in range(1,32)]
@@ -93,9 +93,29 @@ class LayoutClass:
             pass
     
     
-    def reCreateEditSelectedModuleLayout(self, bSelect=True, *args):
-        """ Select the moduleGuide, clear the selectedModuleLayout and re-create the mirrorLayout.
+    def loadGeo(self, *args):
+        """ Loads the selected node to geoTextField in selectedModuleLayout.
         """
+        isGeometry = False
+        selList = cmds.ls(selection=True)
+        if selList:
+            if cmds.objExists(selList[0]):
+                childList = cmds.listRelatives(selList[0], children=True, allDescendents=True)
+                if childList:
+                    for item in childList:
+                        itemType = cmds.objectType(item)
+                        if itemType == "mesh" or itemType == "nurbsSurface":
+                            isGeometry = True
+        if isGeometry:
+            cmds.textField(self.geoTF, edit=True, text=selList[0])
+            cmds.setAttr(self.moduleGrp+".geo", selList[0], type='string')
+    
+    
+    def reCreateEditSelectedModuleLayout(self, bSelect=True, *args):
+        """ Select the moduleGuide, clear the selectedModuleLayout and re-create the mirrorLayout and custom attribute layouts.
+        """
+        self.fatherMirrorExists = None
+        self.fatherFlipExists = None
         # verify the integrity of the guideModule:
         if self.verifyGuideModuleIntegrity():
             # select the module to be re-build the selectedLayout:
@@ -103,18 +123,26 @@ class LayoutClass:
                 cmds.select(self.moduleGrp)
             self.clearSelectedModuleLayout(self)
             try:
+                # check if attributes existing:
+                self.nJointsAttrExists = cmds.objExists(self.moduleGrp+".nJoints")
+                self.aimDirectionAttrExists = cmds.objExists(self.moduleGrp+".aimDirection")
+                self.flipAttrExists = cmds.objExists(self.moduleGrp+".flip")
+                self.indirectSkinAttrExists = cmds.objExists(self.moduleGrp+".indirectSkin")
+                self.eyelidExists = cmds.objExists(self.moduleGrp+".eyelid")
+                self.degreeExists = cmds.objExists(self.moduleGrp+".degree")
+                self.geoExists = cmds.objExists(self.moduleGrp+".geo")
+                self.startFrameExists = cmds.objExists(self.moduleGrp+".startFrame")
+                self.steeringExists = cmds.objExists(self.moduleGrp+".steering")
+                self.fatherBExists = cmds.objExists(self.moduleGrp+".fatherB")
+                
+                # UI
                 # edit label of frame layout:
                 cmds.frameLayout('editSelectedModuleLayoutA', edit=True, label=self.langDic[self.langName]['i011_selectedModule']+" :  "+self.langDic[self.langName][self.title]+" - "+self.userGuideName)
                 # edit button with "S" letter indicating it is selected:
                 cmds.button(self.selectButton, edit=True, label="S", backgroundColor=(1.0, 1.0, 1.0))
                 cmds.columnLayout("selectedColumn", adjustableColumn=True, parent="selectedModuleLayout")
                 # re-create segment layout:
-                self.segDelColumn = cmds.rowLayout(numberOfColumns=4, columnWidth4=(100, 140, 50, 75), columnAlign=[(1, 'right'), (2, 'left'), (3, 'left'), (4, 'right')], adjustableColumn=4, columnAttach=[(1, 'both', 2), (2, 'left', 2), (3, 'both', 2), (4, 'both', 10)], parent="selectedColumn" )
-                self.aimDirectionAttrExists = cmds.objExists(self.moduleGrp+".aimDirection")
-                self.flipAttrExists = cmds.objExists(self.moduleGrp+".flip")
-                self.nJointsAttrExists = cmds.objExists(self.moduleGrp+".nJoints")
-                self.indirectSkinAttrExists = cmds.objExists(self.moduleGrp+".indirectSkin")
-                self.eyelidExists = cmds.objExists(self.moduleGrp+".eyelid")
+                self.segDelColumn = cmds.rowLayout('segDelColumn', numberOfColumns=4, columnWidth4=(100, 140, 50, 75), columnAlign=[(1, 'right'), (2, 'left'), (3, 'left'), (4, 'right')], adjustableColumn=4, columnAttach=[(1, 'both', 2), (2, 'left', 2), (3, 'both', 2), (4, 'both', 10)], parent="selectedColumn" )
                 if self.nJointsAttrExists:
                     nJointsAttr = cmds.getAttr(self.moduleGrp+".nJoints")
                     if nJointsAttr > 0:
@@ -131,7 +159,7 @@ class LayoutClass:
                 self.duplicateButton = cmds.button(label=self.langDic[self.langName]['m070_duplicate'], command=self.duplicateModule, backgroundColor=(0.7, 0.6, 0.8), annotation=self.langDic[self.langName]['i068_CtrlD'], parent=self.segDelColumn)
                 
                 # reCreate mirror layout:
-                self.doubleRigColumn = cmds.rowLayout(numberOfColumns=4, columnWidth4=(100, 50, 80, 70), columnAlign=[(1, 'right'), (4, 'right')], adjustableColumn=4, columnAttach=[(1, 'both', 2), (2, 'both', 2), (3, 'both', 2), (4, 'both', 10)], parent="selectedColumn" )
+                self.doubleRigColumn = cmds.rowLayout('doubleRigColumn', numberOfColumns=4, columnWidth4=(100, 50, 80, 70), columnAlign=[(1, 'right'), (4, 'right')], adjustableColumn=4, columnAttach=[(1, 'both', 2), (2, 'both', 2), (3, 'both', 2), (4, 'both', 10)], parent="selectedColumn" )
                 cmds.text(self.langDic[self.langName]['m010_Mirror'], parent=self.doubleRigColumn)
                 self.mirrorMenu = cmds.optionMenu("mirrorMenu", label='', changeCommand=self.changeMirror, parent=self.doubleRigColumn)
                 mirrorMenuItemList = ['off', 'X', 'Y', 'Z', 'XY', 'XZ', 'YZ', 'XYZ']
@@ -144,10 +172,10 @@ class LayoutClass:
                 else:
                     L = self.langDic[self.langName]['p002_left']
                     R = self.langDic[self.langName]['p003_right']
-                    T = self.langDic[self.langName]['p006_top']
-                    B = self.langDic[self.langName]['p007_bottom']
-                    F = self.langDic[self.langName]['p008_front']
-                    Bk= self.langDic[self.langName]['p009_back']
+                    T = self.langDic[self.langName]['p004_top']
+                    B = self.langDic[self.langName]['p005_bottom']
+                    F = self.langDic[self.langName]['p006_front']
+                    Bk= self.langDic[self.langName]['p007_back']
                     menuNameItemList = [L+' --> '+R, R+' --> '+L, T+' --> '+B, B+' --> '+T, F+' --> '+Bk, Bk+' --> '+F]
                 # create items for mirrorName menu:
                 self.mirrorNameMenu = cmds.optionMenu("mirrorNameMenu", label='', changeCommand=self.changeMirrorName, parent=self.doubleRigColumn)
@@ -171,16 +199,16 @@ class LayoutClass:
                     cmds.optionMenu(self.mirrorMenu, edit=True, value=initialMirror)
                     cmds.optionMenu(self.mirrorNameMenu, edit=True, value=initialMirrorName)
                     # verify if there is a mirror in a father maybe:
-                    self.checkFatherMirror()
+                    self.fatherMirrorExists = self.checkFatherMirror()
                     
                 # create Rig button:
                 self.rigButton = cmds.button(label="Rig", command=self.rigModule, backgroundColor=(1.0, 1.0, 0.7), parent=self.doubleRigColumn)
                 
                 # aim direction for eye look at:
-                self.doubleAimDirectionColumn = cmds.rowLayout(numberOfColumns=4, columnWidth4=(100, 50, 180, 70), columnAlign=[(1, 'right'), (4, 'right')], adjustableColumn=4, columnAttach=[(1, 'both', 2), (2, 'both', 2), (3, 'both', 2), (4, 'both', 10)], parent="selectedColumn" )
                 if self.aimDirectionAttrExists:
-                    cmds.text(self.langDic[self.langName]['i082_aimDirection'], parent=self.doubleAimDirectionColumn)
-                    self.aimMenu = cmds.optionMenu("aimMenu", label='', changeCommand=self.changeAimDirection, parent=self.doubleAimDirectionColumn)
+                    self.aimDirectionLayout = cmds.rowLayout('aimDirectionLayout', numberOfColumns=4, columnWidth4=(100, 50, 180, 70), columnAlign=[(1, 'right'), (4, 'right')], adjustableColumn=4, columnAttach=[(1, 'both', 2), (2, 'both', 2), (3, 'both', 2), (4, 'both', 10)], parent="selectedColumn" )
+                    cmds.text(self.langDic[self.langName]['i082_aimDirection'], parent=self.aimDirectionLayout)
+                    self.aimMenu = cmds.optionMenu("aimMenu", label='', changeCommand=self.changeAimDirection, parent=self.aimDirectionLayout)
                     self.aimMenuItemList = ['+X', '-X', '+Y', '-Y', '+Z', '-Z']
                     for item in self.aimMenuItemList:
                         cmds.menuItem(label=item, parent=self.aimMenu)
@@ -190,32 +218,90 @@ class LayoutClass:
                 
                 # create a flip layout:
                 if self.flipAttrExists:
-                    self.doubleFlipColumn = cmds.rowLayout(numberOfColumns=4, columnWidth4=(100, 50, 80, 70), columnAlign=[(1, 'right'), (4, 'right')], adjustableColumn=4, columnAttach=[(1, 'both', 2), (2, 'both', 2), (3, 'both', 2), (4, 'both', 10)], parent="selectedColumn" )
-                    cmds.text(" ", parent=self.doubleFlipColumn)
+                    self.flipLayout = cmds.rowLayout('flipLayout', numberOfColumns=4, columnWidth4=(100, 50, 80, 70), columnAlign=[(1, 'right'), (4, 'right')], adjustableColumn=4, columnAttach=[(1, 'both', 2), (2, 'both', 2), (3, 'both', 2), (4, 'both', 10)], parent="selectedColumn" )
+                    cmds.text(" ", parent=self.flipLayout)
                     flipValue = cmds.getAttr(self.moduleGrp+".flip")
-                    self.flipCB = cmds.checkBox(label="flip", value=flipValue, changeCommand=self.changeFlip, parent=self.doubleFlipColumn)
+                    self.flipCB = cmds.checkBox(label="flip", value=flipValue, changeCommand=self.changeFlip, parent=self.flipLayout)
+                    if self.fatherMirrorExists:
+                        if self.fatherFlipExists:
+                            cmds.checkBox(self.flipCB, edit=True, enable=False)
                     
                 # create an indirectSkin layout:
                 if self.indirectSkinAttrExists:
-                    self.doubleIndirectSkinColumn = cmds.rowLayout(numberOfColumns=4, columnWidth4=(100, 150, 10, 40), columnAlign=[(1, 'right'), (4, 'right')], adjustableColumn=4, columnAttach=[(1, 'both', 2), (2, 'both', 2), (3, 'both', 2), (4, 'both', 10)], parent="selectedColumn" )
-                    cmds.text(" ", parent=self.doubleIndirectSkinColumn)
+                    self.indirectSkinLayout = cmds.rowLayout('indirectSkinLayout', numberOfColumns=4, columnWidth4=(100, 150, 10, 40), columnAlign=[(1, 'right'), (4, 'right')], adjustableColumn=4, columnAttach=[(1, 'both', 2), (2, 'both', 2), (3, 'both', 2), (4, 'both', 10)], parent="selectedColumn" )
+                    cmds.text(" ", parent=self.indirectSkinLayout)
                     indirectSkinValue = cmds.getAttr(self.moduleGrp+".indirectSkin")
-                    self.indirectSkinCB = cmds.checkBox(label="Indirect Skinning", value=indirectSkinValue, changeCommand=self.changeIndirectSkin, parent=self.doubleIndirectSkinColumn)
-                    cmds.text(" ", parent=self.doubleIndirectSkinColumn)
-                    holderValue = cmds.getAttr(self.moduleGrp+"."+self.langDic[self.langName]['c_holder'])
-                    self.holderCB = cmds.checkBox(label=self.langDic[self.langName]['c_holder'], value=holderValue, enable=False, changeCommand=self.changeHolder, parent=self.doubleIndirectSkinColumn)
+                    self.indirectSkinCB = cmds.checkBox(label="Indirect Skinning", value=indirectSkinValue, changeCommand=self.changeIndirectSkin, parent=self.indirectSkinLayout)
+                    cmds.text(" ", parent=self.indirectSkinLayout)
+                    holderValue = cmds.getAttr(self.moduleGrp+".holder")
+                    self.holderCB = cmds.checkBox(label=self.langDic[self.langName]['c046_holder'], value=holderValue, enable=False, changeCommand=self.changeHolder, parent=self.indirectSkinLayout)
                     
                 # create eyelid layout:
                 if self.eyelidExists:
-                    self.doubleEyelidColumn = cmds.rowLayout(numberOfColumns=4, columnWidth4=(100, 150, 50, 40), columnAlign=[(1, 'right'), (4, 'right')], adjustableColumn=4, columnAttach=[(1, 'both', 2), (2, 'both', 2), (3, 'both', 2), (4, 'both', 10)], parent="selectedColumn" )
-                    cmds.text(" ", parent=self.doubleEyelidColumn)
+                    self.eyelidLayout = cmds.rowLayout('eyelidLayout', numberOfColumns=4, columnWidth4=(100, 150, 50, 40), columnAlign=[(1, 'right'), (4, 'right')], adjustableColumn=4, columnAttach=[(1, 'both', 2), (2, 'both', 2), (3, 'both', 2), (4, 'both', 10)], parent="selectedColumn" )
+                    cmds.text(" ", parent=self.eyelidLayout)
                     eyelidValue = cmds.getAttr(self.moduleGrp+".eyelid")
-                    self.eyelidCB = cmds.checkBox(label=self.langDic[self.langName]['i079_eyelid'], value=eyelidValue, changeCommand=self.changeEyelid, parent=self.doubleEyelidColumn)
+                    self.eyelidCB = cmds.checkBox(label=self.langDic[self.langName]['i079_eyelid'], value=eyelidValue, changeCommand=self.changeEyelid, parent=self.eyelidLayout)
                     irisValue = cmds.getAttr(self.moduleGrp+".iris")
-                    self.irisCB = cmds.checkBox(label=self.langDic[self.langName]['i080_iris'], value=irisValue, changeCommand=self.changeIris, parent=self.doubleEyelidColumn)
+                    self.irisCB = cmds.checkBox(label=self.langDic[self.langName]['i080_iris'], value=irisValue, changeCommand=self.changeIris, parent=self.eyelidLayout)
                     pupilValue = cmds.getAttr(self.moduleGrp+".pupil")
-                    self.pupilCB = cmds.checkBox(label=self.langDic[self.langName]['i081_pupil'], value=pupilValue, changeCommand=self.changePupil, parent=self.doubleEyelidColumn)
-                    
+                    self.pupilCB = cmds.checkBox(label=self.langDic[self.langName]['i081_pupil'], value=pupilValue, changeCommand=self.changePupil, parent=self.eyelidLayout)
+                
+                # create geometry layout:
+                if self.geoExists:
+                    self.geoColumn = cmds.rowLayout('geoColumn', numberOfColumns=3, columnWidth3=(100, 100, 70), columnAlign=[(1, 'right'), (3, 'right')], adjustableColumn=3, columnAttach=[(1, 'both', 2), (2, 'both', 2), (3, 'both', 2)], parent="selectedColumn" )
+                    cmds.button(label=self.langDic[self.langName]["m146_geo"]+" >", command=self.loadGeo, parent=self.geoColumn)
+                    self.geoTF = cmds.textField('geoTF', text='', enable=True, changeCommand=self.changeGeo, parent=self.geoColumn)
+                    currentGeo = cmds.getAttr(self.moduleGrp+".geo")
+                    if currentGeo:
+                        cmds.textField(self.geoTF, edit=True, text=currentGeo, parent=self.geoColumn)
+                
+                # create startFrame layout:
+                if self.startFrameExists:
+                    self.startFrameColumn = cmds.rowLayout('startFrameColumn', numberOfColumns=4, columnWidth4=(100, 60, 70, 40), columnAlign=[(1, 'right'), (4, 'right')], adjustableColumn=4, columnAttach=[(1, 'both', 2), (2, 'both', 2), (3, 'both', 2), (4, 'both', 10)], parent="selectedColumn" )
+                    cmds.text(self.langDic[self.langName]["i169_startFrame"], parent=self.startFrameColumn)
+                    self.startFrameIF = cmds.intField('startFrameIF', value=1, changeCommand=self.changeStartFrame, parent=self.startFrameColumn)
+                    currentStartFrame = cmds.getAttr(self.moduleGrp+".startFrame")
+                    if currentStartFrame:
+                        cmds.intField(self.startFrameIF, edit=True, value=currentStartFrame, parent=self.startFrameColumn)
+                
+                # create steering layout:
+                if self.steeringExists:
+                    if self.startFrameExists:
+                        self.wheelLayout = self.startFrameColumn
+                    else:
+                        self.wheelLayout = cmds.rowLayout('wheelLayout', numberOfColumns=4, columnWidth4=(100, 60, 70, 40), columnAlign=[(1, 'right'), (4, 'right')], adjustableColumn=4, columnAttach=[(1, 'both', 2), (2, 'both', 2), (3, 'both', 2), (4, 'both', 10)], parent="selectedColumn" )
+                    steeringValue = cmds.getAttr(self.moduleGrp+".steering")
+                    self.steeringCB = cmds.checkBox(label=self.langDic[self.langName]['m158_steering'], value=steeringValue, changeCommand=self.changeSteering, parent=self.wheelLayout)
+                    showControlsValue = cmds.getAttr(self.moduleGrp+".showControls")
+                    self.showControlsCB = cmds.checkBox(label=self.langDic[self.langName]['i170_showControls'], value=showControlsValue, changeCommand=self.changeShowControls, parent=self.wheelLayout)
+                
+                # create fatherB layout:
+                if self.fatherBExists:
+                    self.fatherBColumn = cmds.rowLayout('fatherBColumn', numberOfColumns=3, columnWidth3=(100, 100, 70), columnAlign=[(1, 'right'), (3, 'right')], adjustableColumn=3, columnAttach=[(1, 'both', 2), (2, 'both', 2), (3, 'both', 2)], parent="selectedColumn" )
+                    cmds.button(label=self.langDic[self.langName]["m160_fatherB"]+" >", command=self.loadFatherB, parent=self.fatherBColumn)
+                    self.fatherBTF = cmds.textField('fatherBTF', text='', enable=True, changeCommand=self.changeFatherB, parent=self.fatherBColumn)
+                    currentFatherB = cmds.getAttr(self.moduleGrp+".fatherB")
+                    if currentFatherB:
+                        cmds.textField(self.fatherBTF, edit=True, text=currentFatherB, parent=self.fatherBColumn)
+                
+                # create degree layout:
+                if self.degreeExists:
+                    self.degreeColumn = cmds.rowLayout('degreeColumn', numberOfColumns=3, columnWidth3=(100, 100, 70), columnAlign=[(1, 'right'), (3, 'right')], adjustableColumn=3, columnAttach=[(1, 'both', 2), (2, 'both', 2), (3, 'both', 2)], parent="selectedColumn" )
+                    cmds.text(self.langDic[self.langName]['i119_curveDegree'], parent=self.degreeColumn)
+                    self.degreeMenu = cmds.optionMenu("degreeMenu", label='', changeCommand=self.changeDegree, parent=self.degreeColumn)
+                    self.degreeMenuItemList = ['0 - Preset', '1 - Linear', '3 - Cubic']
+                    for item in self.degreeMenuItemList:
+                        cmds.menuItem(label=item, parent=self.degreeMenu)
+                    currentDegree = cmds.getAttr(self.moduleGrp+".degree")
+                    # set layout with the current value:
+                    if currentDegree == 0:
+                        cmds.optionMenu(self.degreeMenu, edit=True, value='0 - Preset')
+                    elif currentDegree == 1:
+                        cmds.optionMenu(self.degreeMenu, edit=True, value='1 - Linear')
+                    else:
+                        cmds.optionMenu(self.degreeMenu, edit=True, value='3 - Cubic')
+                        
             except:
                 pass
     
@@ -281,6 +367,7 @@ class LayoutClass:
     def checkFatherMirror(self, *args):
         """ Check all fathers and verify if there are mirror applied to father.
             Then, stop mirror for this guide or continue creating its mirror.
+            Return "stopIt" if there's a father guide mirror.
         """
         # verify integrity of the guideModule:
         if self.verifyGuideModuleIntegrity():
@@ -299,6 +386,11 @@ class LayoutClass:
                     cmds.optionMenu(self.mirrorNameMenu, edit=True, value=fatherMirrorName, enable=False)
                 except:
                     pass
+                # update flip attribute info from fatherGuide:
+                self.fatherFlipExists = cmds.objExists(mirroredGuideFather+".flip")
+                if self.fatherFlipExists:
+                    fatherFlip = cmds.getAttr(mirroredGuideFather+".flip")
+                    cmds.setAttr(self.moduleGrp+".flip", fatherFlip)
                 # returns a string 'stopIt' if there is mirrored father guide:
                 return "stopIt"
     
@@ -323,22 +415,13 @@ class LayoutClass:
         if self.verifyGuideModuleIntegrity():
             # check if the father guide is in X=0 in order to permit mirror:
             stopMirrorOperation = self.checkFatherMirror()
-            # loading Maya matrix node (for mirror porpuses)
-            if not (cmds.pluginInfo("decomposeMatrix", query=True, loaded=True)):
-                try:
-                    # Maya 2012
-                    cmds.loadPlugin("decomposeMatrix.mll")
-                except:
-                    try:
-                        # Maya 2013
-                        cmds.loadPlugin("matrixNodes.mll")
-                    except:
-                        print self.langDic[self.langName]['e002_decomposeMatrixNotFound']
-                        stopMirrorOperation = "stopIt"
             if not stopMirrorOperation:
-                self.mirrorAxis = item
-                cmds.setAttr(self.moduleGrp+".mirrorAxis", self.mirrorAxis, type='string')
-                self.createPreviewMirror()
+                # loading Maya matrix node (for mirror porpuses)
+                loadedMatrixPlugin = utils.checkLoadedPlugin("decomposeMatrix", "matrixNodes", self.langDic[self.langName]['e002_decomposeMatrixNotFound'])
+                if loadedMatrixPlugin:
+                    self.mirrorAxis = item
+                    cmds.setAttr(self.moduleGrp+".mirrorAxis", self.mirrorAxis, type='string')
+                    self.createPreviewMirror()
     
     
     def changeMirrorName(self, item, *args):
@@ -347,6 +430,17 @@ class LayoutClass:
         # verify integrity of the guideModule:
         if self.verifyGuideModuleIntegrity():
             cmds.setAttr(self.moduleGrp+".mirrorName", item, type='string')
+            
+            
+    def changeDegree(self, item, *args):
+        """ This function receives the degree menu name item and set it as a string in the guide base (moduleGrp).
+        """
+        # verify integrity of the guideModule:
+        if self.verifyGuideModuleIntegrity():
+            if item == '3 - Cubic':
+                cmds.setAttr(self.moduleGrp+".degree", 3)
+            else:
+                cmds.setAttr(self.moduleGrp+".degree", 1)
     
     
     def createPreviewMirror(self, *args):
@@ -464,14 +558,5 @@ class LayoutClass:
             # set a negative value to the scale mirror axis:
             for axis in self.mirrorAxis:
                 cmds.setAttr(self.previewMirrorGrp+'.scale'+axis, -1)
-        
-        else:
-            if guideChildrenList:
-                for guideChild in guideChildrenList:
-                    # get initial values from father guide base:
-                    fatherMirrorName = cmds.getAttr(self.moduleGrp+".mirrorName")
-                    # set values to guide base:
-                    cmds.setAttr(guideChild+".mirrorAxis", "off", type='string')
-                    cmds.setAttr(guideChild+".mirrorName", fatherMirrorName, type='string')
         
         cmds.select(self.moduleGrp)
