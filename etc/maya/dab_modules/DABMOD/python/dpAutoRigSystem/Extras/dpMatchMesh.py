@@ -11,7 +11,7 @@ ICON = "/Icons/dp_matchMesh.png"
 
 
 class MatchMesh():
-    def __init__(self, dpUIinst, langDic, langName):
+    def __init__(self, dpUIinst, langDic, langName, *args):
         # redeclaring variables
         self.dpUIinst = dpUIinst
         self.langDic = langDic
@@ -109,6 +109,8 @@ class MatchMesh():
                     if fromFather != None:
                         cmds.parent(fromTransform, world=True)
                     for attr in attrList:
+                        cmds.setAttr(fromTransform+"."+attr, lock=False)
+                        cmds.setAttr(toTransform+"."+attr, lock=False)
                         if not "s" in attr:
                             cmds.setAttr(fromTransform+"."+attr, 0)
                             cmds.setAttr(toTransform+"."+attr, 0)

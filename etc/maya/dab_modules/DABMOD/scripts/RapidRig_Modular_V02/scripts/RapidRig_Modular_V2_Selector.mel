@@ -1,8 +1,11 @@
 //CopyRight Dustin Nelson 2010-2018. Please do not distribute
 //https://www.highend3d.com/maya/script/rapid-rig-modular-procedural-auto-rig-for-maya
 //Script for selecting controls on Rapid Rig: Modular rigs.
-//VERSION 2.3.4
-//JUNE 20, 2018
+global proc string RRM_S_VersionNum()
+{
+    return "2.4.6";
+}
+//MAY 1, 2019
 //FILE IS NOT INTENDED TO BE HARMFUL, HOWEVER USE AT YOUR OWN RISK
 /*/////////////////////////////////////////////////////////////////////////////
 // 
@@ -161,16 +164,33 @@ global proc modSelectAllModulesControl(string $button)
 
 global proc modIkToFk(string $button, string $frame, string $modControl)
 {
+    $selection = `ls -selection`;
+    string $nameSpace;
     if ($frame == "singleFrame")
     {
         $modControl = `button -q -ann $button`;
     }
     else if ($frame == "batch")
     {
-        $modControl = `getAttr ($modControl + ".modCoreName")`;
+        // ADD NAMESPACE(S)
+        string $nameSpaces[];
+        string $nameSpace = "";
+        $numTokens = `tokenize $modControl  ":" $nameSpaces`;
+        if ($numTokens > 1)
+        {
+            for($i=0; $i<($numTokens - 1); $i++)
+            {
+                $nameSpace = ($nameSpace + $nameSpaces[$i] + ":");
+            }
+            $modControl = ($nameSpace + `getAttr ($modControl + ".modCoreName")`);
+        }
+        else
+        {
+            $modControl = `getAttr ($modControl + ".modCoreName")`;
+        }
     }
-	
-	$branchType = `getAttr ($modControl + "Grp.topNode")`;
+    
+    $branchType = `getAttr ($modControl + "Grp.topNode")`;
 	string $limbCtrls[];
 	if ($branchType == "arm")
 	{
@@ -178,9 +198,10 @@ global proc modIkToFk(string $button, string $frame, string $modControl)
 	    ($modControl + "_Switch_Ctrl")`;
 
 		setAttr ($modControl + "_Switch_Ctrl.switchIkFk") 0;
-		$wristT = `xform -q -t  ($modControl + "_WristIkToFkLctr")`;
-		$wristR = `xform -q -ro  ($modControl + "_WristIkToFkLctr")`;
+        $wristT = `getAttr ($modControl + "_WristIkToFkLctr.translate")`;
+		$wristR = `getAttr ($modControl + "_WristIkToFkLctr.rotate")`;
 		$wristS = `getAttr  ($modControl + "_WristIkToFkLctr.sx")`;
+
 		
 		setAttr (($modControl + "_WristIk_Ctrl.translate"), $wristT[0], $wristT[1], $wristT[2]);
 		setAttr (($modControl + "_WristIk_Ctrl.rotate"), $wristR[0], $wristR[1], $wristR[2]);
@@ -192,9 +213,10 @@ global proc modIkToFk(string $button, string $frame, string $modControl)
 		if (`getAttr ($modControl + "Grp.elbowNum")` == 2)
 		{
 			$multiplier = 1.0;
-			if (`objExists ($modControl + "LowerArmIk_Ctrl.leftControl")`)
+			if (`objExists ($modControl + "_LowerArmIk_Ctrl.leftControl")`)
 			{
 				$multiplier = -1.0;
+				print "\nright side\n";
 			}
 			delete `aimConstraint -aimVector ($multiplier * -1) 0 0 -upVector 0 1 0 -worldUpType "objectrotation"
 			-worldUpVector 0 ($multiplier * 1) 0 -worldUpObject ($modControl + "_Elbow2Fk_Ctrl")
@@ -263,7 +285,9 @@ global proc modIkToFk(string $button, string $frame, string $modControl)
             }
         }
     }
+    select $selection;
 }
+
 global proc modFkToIkConstraint(string $bodyPart, string $axis)
 {
 	$lctr = `spaceLocator`;
@@ -307,13 +331,30 @@ global proc modFkToIkConstraint(string $bodyPart, string $axis)
 
 global proc modFkToIk(string $button, string $frame, string $modControl)
 {
+    $selection = `ls -selection`;
+    
     if ($frame == "singleFrame")
     {
         $modControl = `button -q -ann $button`;
     }
     else if ($frame == "batch")
     {
-        $modControl = `getAttr ($modControl + ".modCoreName")`;
+        // ADD NAMESPACE(S)
+        string $nameSpaces[];
+        string $nameSpace = "";
+        $numTokens = `tokenize $modControl  ":" $nameSpaces`;
+        if ($numTokens > 1)
+        {
+            for($i=0; $i<($numTokens - 1); $i++)
+            {
+                $nameSpace = ($nameSpace + $nameSpaces[$i] + ":");
+            }
+            $modControl = ($nameSpace + `getAttr ($modControl + ".modCoreName")`);
+        }
+        else
+        {
+            $modControl = `getAttr ($modControl + ".modCoreName")`;
+        }
     }
 
 	
@@ -380,6 +421,7 @@ global proc modFkToIk(string $button, string $frame, string $modControl)
             }
         }
     }
+    select $selection;
 }
 
 
@@ -983,6 +1025,39 @@ global proc modSelectAll(string $modRigName, string $rigGrp, string $lPrfx, stri
 	select ($modRigName + "*_Ctrl");
 }
 
+global proc modMirrorSelect(string $modRigName, string $rigGrp, string $lPrfx, string $rPrfx)
+{
+	$initialSelection = `ls -sl`;
+	if (`size $initialSelection` > 0)
+	{
+        string $mirroredSelection[];
+        for ($ctrl in $initialSelection)
+        {
+            if (`objExists ($ctrl + ".modRigName")` && `objExists ($ctrl + ".isMirrored")`)
+            {
+                if (`objExists ($ctrl + ".rightControl")`)
+                {
+                    $mirrorCtrl = `listConnections ($ctrl + ".rightControl")`;
+                    $mirroredSelection = `ls $mirroredSelection $mirrorCtrl[0]`;
+                }
+                else if (`objExists ($ctrl + ".leftControl")`)
+                {
+                    $mirrorCtrl = `listConnections ($ctrl + ".leftControl")`;
+                    $mirroredSelection = `ls $mirroredSelection $mirrorCtrl[0]`;
+                }
+                else
+                {
+                    $mirroredSelection = `ls $mirroredSelection $ctrl`;
+                }
+            }
+        }
+        select $mirroredSelection;
+    }
+    else
+    {
+        warning "Nothing selected. No action taken.";
+    }
+}
 
 global proc modResetTransforms(string $modRigName, string $rigGrp, string $lPrfx, string $rPrfx)
 {
@@ -1070,19 +1145,12 @@ global proc modCreateBatchMirrorLctrs(string $modRigName, string $rigGrp, string
 		$rigControls = `ls -sl -type "transform"`;
 	}
 	
-	
-
 	group -em -n ($modRigName + "modBatchLctrG_Frame" + $currentFrame);
 	setAttr ($modRigName + "modBatchLctrG_Frame" + $currentFrame + ".visibility") 0;
 
 	string $currentC;
 	for ($currentC in $rigControls)
 	{
-        //CHECK IF REFERENCED AND ADD NAMESPACES TO MOD RIG NAME
-        if (`referenceQuery -isNodeReferenced $rigGrp` == 1)
-        {
-            $currentC = (":" + $currentC);
-        }
 		if (`gmatch $currentC ($modRigName + "*_Ctrl")`)
 		{
 			spaceLocator -n ($currentC + "_modLctr_Frame" + $currentFrame);
@@ -1169,11 +1237,6 @@ global proc modSetToBatchMirrorLocatorChannelsCenter(string $modRigName, string 
 	for ($currentC in $rigControls)
 	{
 	    $currentLctr = $currentC;
-        //CHECK IF REFERENCED AND ADD NAMESPACES TO MOD RIG NAME
-        if (`referenceQuery -isNodeReferenced $rigGrp` == 1)
-        {
-            $currentC = (":" + $currentC);
-        }
         if (`gmatch $currentC ($modRigName + "*_Ctrl")`)
 		{
 			if (!`gmatch $currentC ($modRigName + "_[" + $lPrfx + "," + $rPrfx + "]*Ctrl")`)
@@ -1208,11 +1271,7 @@ global proc modSetToBatchMirrorLocatorChannelsSide(string $modRigName, string $r
 	for ($currentC in $rigControls)
 	{
 	    string $currentLctr = $currentC;
-        //CHECK IF REFERENCED AND ADD NAMESPACES TO MOD RIG NAME
-        if (`referenceQuery -isNodeReferenced $rigGrp` == 1)
-        {
-            $currentC = (":" + $currentC);
-        }
+
 		if (`gmatch $currentC ($modRigName + $side + "*_Ctrl")`)
 		{
 			$channels = `listAttr -k -u $currentC`;
@@ -1251,11 +1310,7 @@ global proc modSetFromBatchMirrorLocatorChannelsCenter(string $modRigName, strin
 	for ($currentC in $rigControls)
 	{
 	    string $currentLctr = $currentC;
-        //CHECK IF REFERENCED AND ADD NAMESPACES TO MOD RIG NAME
-        if (`referenceQuery -isNodeReferenced $rigGrp` == 1)
-        {
-            $currentC = (":" + $currentC);
-        }
+
 		//CENTER
 		if (`gmatch $currentC ($modRigName + "*_Ctrl")`)
 		{
@@ -1273,8 +1328,7 @@ global proc modSetFromBatchMirrorLocatorChannelsCenter(string $modRigName, strin
                 }			    
 				$channels = `listAttr -k -u $currentC`;
 				$numChannels = `size $channels`;
-				int $i=0;
-				while ($i < $numChannels)
+				for ($i = 0; $i < $numChannels; $i++)
 				{
 				    if ($twistAxis != "x")
 				    {
@@ -1298,7 +1352,6 @@ global proc modSetFromBatchMirrorLocatorChannelsCenter(string $modRigName, strin
                             setAttr ($currentC + "." + $channels[$i]) (`getAttr -t $currentFrame ($currentLctr + "_modLctr_Frame" + $currentFrame + "." + $channels[$i])`*1.0);
                         }                        
 					}
-				$i++;
 				}
 			}
 		}
@@ -1324,11 +1377,7 @@ global proc modSetFromBatchMirrorLocatorChannelsSide(string $modRigName, string 
 	for ($currentC in $Controls)
 	{
 	    string $currentLctr = $currentC;
-        //CHECK IF REFERENCED AND ADD NAMESPACES TO MOD RIG NAME
-        if (`referenceQuery -isNodeReferenced $rigGrp` == 1)
-        {
-            $currentC = (":" + $currentC);
-        }
+
 		//LEFT TO RIGHT
 		if (`gmatch $currentC ($modRigName + $side + "*_Ctrl")`)
 		{
@@ -1481,12 +1530,6 @@ global proc modSetToBatchMirrorLocatorKeysCenter(string $modRigName, string $rig
 
 	for ($currentC in $rigControls)
 	{
-        //CHECK IF REFERENCED AND ADD NAMESPACES TO MOD RIG NAME
-        if (`referenceQuery -isNodeReferenced $rigGrp` == 1)
-        {
-            $currentC = (":" + $currentC);
-        }
-
 		if (`gmatch $currentC ($modRigName + "*_Ctrl")` && !`objExists ($currentC + ".leftControl")` && !`objExists ($currentC + ".rightControl")`)
 		{
 			//FIND KEYABLE ATTRIBUTES
@@ -1506,12 +1549,9 @@ global proc modSetToBatchMirrorLocatorKeysCenter(string $modRigName, string $rig
 					{
 						//REMOVE NAMESPACE IF EXISTS
 						string $noNameSpaceControl = $currentC;
-						if (`referenceQuery -isNodeReferenced $currentC` == 1)
-						{
-							string $buffer[] ;
-							$numTokens = `tokenize $currentC ":" $buffer`;
-							$noNameSpaceControl = $buffer[$numTokens - 1];
-						}
+                        string $buffer[] ;
+                        $numTokens = `tokenize $currentC ":" $buffer`;
+                        $noNameSpaceControl = $buffer[$numTokens - 1];
 
 						if ($AnimCurve=="character")
 						{
@@ -1576,22 +1616,13 @@ global proc modSetToBatchMirrorLocatorKeysSide(string $modRigName, string $rigGr
 
 	for ($currentC in $rigControls)
 	{
-        //CHECK IF REFERENCED AND ADD NAMESPACES TO MOD RIG NAME
-        if (`referenceQuery -isNodeReferenced $rigGrp` == 1)
-        {
-            $currentC = (":" + $currentC);
-        }
-
 		if (`gmatch $currentC ($modRigName + $side + "*_Ctrl")`)
 		{
 			//REMOVE NAMESPACE IF EXISTS
 			string $noNameSpaceControl = $currentC;
-			if (`referenceQuery -isNodeReferenced $currentC` == 1)
-            {
-                string $buffer[] ;
-                $numTokens = `tokenize $currentC ":" $buffer`;
-                $noNameSpaceControl = $buffer[$numTokens - 1];
-            }
+            string $buffer[] ;
+            $numTokens = `tokenize $currentC ":" $buffer`;
+            $noNameSpaceControl = $buffer[$numTokens - 1];
 			
 			//FIND KEYABLE ATTRIBUTES
 			$channels = `listAttr -k -u $currentC`;
@@ -1678,12 +1709,6 @@ global proc modSetFromBatchMirrorLocatorKeysCenter(string $modRigName, string $r
 
 	for ($currentC in $rigControls)
 	{
-        //CHECK IF REFERENCED AND ADD NAMESPACES TO MOD RIG NAME
-        if (`referenceQuery -isNodeReferenced $rigGrp` == 1)
-        {
-            $currentC = (":" + $currentC);
-        }
-
 		if (`gmatch $currentC ($modRigName + "*_Ctrl")` && !`objExists ($currentC + ".leftControl")` && !`objExists ($currentC + ".rightControl")`)
 		{
             if (`objExists ($currentC + ".modCoreName")`)
@@ -1698,12 +1723,9 @@ global proc modSetFromBatchMirrorLocatorKeysCenter(string $modRigName, string $r
                 
 			//REMOVE NAMESPACE IF EXISTS
    			string $noNameSpaceControl = $currentC;
-			if (`referenceQuery -isNodeReferenced $currentC` == 1)
-			{
-                string $buffer[] ;
-                $numTokens = `tokenize $currentC ":" $buffer`;
-                $noNameSpaceControl = $buffer[$numTokens - 1];
-            }
+            string $buffer[] ;
+            $numTokens = `tokenize $currentC ":" $buffer`;
+            $noNameSpaceControl = $buffer[$numTokens - 1];
 						
 			//GET PREVIOUS TIME
 			$currentFrame = `getAttr ($currentC + "_modLctr_Frame" + $currentFrame + ".CurrentFrame")`;
@@ -1874,12 +1896,6 @@ global proc modSetFromBatchMirrorLocatorKeysSide(string $modRigName, string $rig
 
 	for ($currentC in $rigControls)
 	{
-        //CHECK IF REFERENCED AND ADD NAMESPACES TO MOD RIG NAME
-        if (`referenceQuery -isNodeReferenced $rigGrp` == 1)
-        {
-            $currentC = (":" + $currentC);
-        }
-
 		if (`gmatch $currentC ($modRigName + $side + "*_Ctrl")`)
 		{
 			string $AnimConnection;
@@ -1900,15 +1916,12 @@ global proc modSetFromBatchMirrorLocatorKeysSide(string $modRigName, string $rig
 			//REMOVE NAMESPACE IF EXISTS
 			string $noNameSpaceControl = $currentC;
 			string $noNameSpaceOppControl = $oppositeC;
-			if (`referenceQuery -isNodeReferenced $currentC` == 1)
-            {
-                string $buffer[] ;
-                $numTokens = `tokenize $currentC ":" $buffer`;
-                $noNameSpaceControl = $buffer[$numTokens - 1];
+            string $buffer[] ;
+            $numTokens = `tokenize $currentC ":" $buffer`;
+            $noNameSpaceControl = $buffer[$numTokens - 1];
 
-                $numTokens = `tokenize $oppositeC ":" $buffer`;
-                $noNameSpaceOppControl = $buffer[$numTokens - 1];            
-            }
+            $numTokens = `tokenize $oppositeC ":" $buffer`;
+            $noNameSpaceOppControl = $buffer[$numTokens - 1];            
 			
 			//FIND KEYABLE ATTRIBUTES
 			$channels = `listAttr -k -u $currentC`;
@@ -2723,20 +2736,20 @@ global proc CreateModuPoserGUI(string $main_Ctrls[])
 			string $rigGrp = $modRigConnections[0];
 
 			$modRigName = `getAttr ($main_Ctrl + ".modRigConnection")`;
-			////CHECK FOR NAMESPACES
-            if (`gmatch $main_Ctrl "*:*"`)
-			{
-				string $buffer[];
-				$numTokens = `tokenize $main_Ctrl ":" $buffer`;
-                string $fullBuffer;
-                $i = 0;
-                while (($i + 1) < `size $buffer`)
+
+            // ADD NAMESPACE(S)
+            string $nameSpaces[];
+            string $nameSpace = "";
+            $numTokens = `tokenize $main_Ctrl  ":" $nameSpaces`;
+            if ($numTokens > 1)
+            {
+                for($i=0; $i<($numTokens - 1); $i++)
                 {
-                    $fullBuffer = ($fullBuffer + $buffer[$i] + ":");
-                    $i++;
+                    $nameSpace = ($nameSpace + $nameSpaces[$i] + ":");
                 }
-				$modRigName = ($fullBuffer + $modRigName);
-			}
+                $modRigName = ($nameSpace + $modRigName);
+            }
+
  
 			$lPrfx = `getAttr ($main_Ctrl + ".leftPrefix")`;
 			$rPrfx = `getAttr ($main_Ctrl + ".rightPrefix")`;
@@ -2761,6 +2774,7 @@ global proc CreateModuPoserGUI(string $main_Ctrls[])
 			setParent $modForm;
 			//SELECTIONS
 			string $modSelectAllButton				= `button -label "Select All" -ann "Select all controls" -c ("modSelectAll(\"" + $modRigName + "\", \"" + $rigGrp + "\", \"" + $lPrfx + "\", \"" + $rPrfx + "\")")`;
+			string $modSelectMirrorButton		    = `button -label "Mirror Selection" -ann "Select the controls on the opposite side of the character" -c ("modMirrorSelect(\"" + $modRigName + "\", \"" + $rigGrp + "\", \"" + $lPrfx + "\", \"" + $rPrfx + "\")")`;
 			string $modSelectMAINButton				= `button -label "Select MAIN_Ctrl" -ann ($modRigName + "MAIN_Ctrl")`;
 			string $modSelectCOGButton				= `button -label "Select COG_Ctrl" -ann ($modRigName + "COG_Ctrl")`;
 			string $modSelectROOTButton				= `button -label "Select ROOT_Ctrl" -ann ($modRigName + "ROOT_Ctrl")`;
@@ -2797,14 +2811,18 @@ global proc CreateModuPoserGUI(string $main_Ctrls[])
 			
 
 			-af $modSelectMAINButton left 0
-			-ap $modSelectMAINButton right 1 25
+			-ap $modSelectMAINButton right 1 20
 			-ac $modSelectMAINButton bottom 2 $modSelectROOTButton
 
-			-ap $modSelectAllButton left 1 25
-			-ap $modSelectAllButton right 1 75
+			-ap $modSelectAllButton left 1 20
+			-ap $modSelectAllButton right 1 50
 			-ac $modSelectAllButton bottom 2 $modSelectROOTButton
 
-			-ap $modSelectCOGButton left 1 75
+            -ap $modSelectMirrorButton left 1 50
+			-ap $modSelectMirrorButton right 1 80
+			-ac $modSelectMirrorButton bottom 2 $modSelectROOTButton
+
+			-ap $modSelectCOGButton left 1 80
 			-af $modSelectCOGButton right 0
 			-ac $modSelectCOGButton bottom 2 $modSelectROOTButton
 
@@ -3593,13 +3611,14 @@ global proc CreateModuPoserGUI(string $main_Ctrls[])
 								$hOffset = 1;
 								$vOffset = 0;
 						
-								string $stringNum = "0";
+								string $stringNum = "";
 								while ($splineNum > 0)
 								{
-									if ($splineNum >= 10)
+									if ($splineNum < 10)
 									{
-										$stringNum = "";
+										$stringNum = "0";
 									}
+
 									$splineFk     = `button -label ($splineNum + " Fk")  -w 36 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_" + $stringNum + $splineNum + "Fk_Ctrl")`;
 									$splineCurve_Ctrl = `button -label ($splineNum + " Crv") -w 38 -h 18 -bgc ($buttonC2.x) ($buttonC2.y) ($buttonC2.z) -ann ($modRigName + $coreName + "_" + $stringNum + $splineNum + "Curve_Ctrl")`;
 									button -edit -command ("modSelectControl " + $splineFk) $splineFk;
@@ -3983,7 +4002,7 @@ global proc RapidRig_Modular_V2_Selector()
 	string $main_Ctrls[] = `ls "::*MAIN_Ctrl"`;
 	if (`size $main_Ctrls` > 0)
 	{
-		window -title "Rapid Rig: Modular Selector 2.3.4"
+		window -title ("Rapid Rig: Modular Selector " + `RRM_S_VersionNum`)
 		//-wh 375 212
 		-rtf on
 		-mnb true

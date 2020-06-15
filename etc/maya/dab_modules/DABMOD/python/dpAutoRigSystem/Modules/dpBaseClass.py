@@ -2,7 +2,7 @@
 import maya.cmds as cmds
 import maya.mel as mel
 
-from Library import dpControls as ctrls
+from Library import dpControls
 from Library import dpUtils as utils
 
 
@@ -12,7 +12,7 @@ class RigType:
     default = "unknown" #Support old guide system
 
 class StartClass:
-    def __init__(self, dpUIinst, langDic, langName, userGuideName, rigType, CLASS_NAME, TITLE, DESCRIPTION, ICON):
+    def __init__(self, dpUIinst, langDic, langName, presetDic, presetName, userGuideName, rigType, CLASS_NAME, TITLE, DESCRIPTION, ICON, *args):
         """ Initialize the module class creating a button in createGuidesLayout in order to be used to start the guide module.
         """
         # defining variables:
@@ -25,6 +25,9 @@ class StartClass:
         self.icon = ICON
         self.userGuideName = userGuideName
         self.rigType = rigType
+        self.presetDic = presetDic
+        self.presetName = presetName
+        self.ctrls = dpControls.ControlClass(self.dpUIinst, self.presetDic, self.presetName)
         # defining namespace:
         self.guideNamespace = self.guideModuleName + "__" + self.userGuideName
         # defining guideNamespace:
@@ -60,7 +63,7 @@ class StartClass:
         # GUIDE:
         utils.useDefaultRenderLayer()
         # create guide base (moduleGrp):
-        guideBaseList = ctrls.cvBaseGuide(self.moduleGrp, r=2)
+        guideBaseList = self.ctrls.cvBaseGuide(self.moduleGrp, r=2)
         self.moduleGrp = guideBaseList[0]
         self.radiusCtrl = guideBaseList[1]
         # add attributes to be read when rigging module:
@@ -73,7 +76,7 @@ class StartClass:
         for baseIntegerAttr in baseIntegerAttrList:
             cmds.addAttr(self.moduleGrp, longName=baseIntegerAttr, attributeType='long')
         
-        baseStringAttrList  = ['moduleNamespace', 'customName', 'mirrorAxis', 'mirrorName', 'mirrorNameList', 'hookNode', 'moduleInstanceInfo', 'guideObjectInfo', 'rigType']
+        baseStringAttrList  = ['moduleNamespace', 'customName', 'mirrorAxis', 'mirrorName', 'mirrorNameList', 'hookNode', 'moduleInstanceInfo', 'guideObjectInfo', 'rigType', 'dpARVersion']
         for baseStringAttr in baseStringAttrList:
             cmds.addAttr(self.moduleGrp, longName=baseStringAttr, dataType='string')
         cmds.setAttr(self.moduleGrp+".mirrorAxis", "off", type='string')
@@ -82,12 +85,18 @@ class StartClass:
         cmds.setAttr(self.moduleGrp+".moduleInstanceInfo", self, type='string')
         cmds.setAttr(self.moduleGrp+".guideObjectInfo", self.dpUIinst.guide, type='string')
         cmds.setAttr(self.moduleGrp+".rigType", self.rigType, type='string')
+        cmds.setAttr(self.moduleGrp+".dpARVersion", self.dpUIinst.dpARVersion, type='string')
         
         baseFloatAttrList = ['shapeSize']
         for baseFloatAttr in baseFloatAttrList:
             cmds.addAttr(self.moduleGrp, longName=baseFloatAttr, attributeType='float')
         cmds.setAttr(self.moduleGrp+".shapeSize", 1)
-
+        
+        baseIntegerAttrList = ['degree']
+        for baseIntAttr in baseIntegerAttrList:
+            cmds.addAttr(self.moduleGrp, longName=baseIntAttr, attributeType='short')
+        cmds.setAttr(self.moduleGrp+".degree", self.dpUIinst.degreeOption)
+        
         # create annotation to this module:
         self.annotation = cmds.annotate( self.moduleGrp, tx=self.moduleGrp, point=(0,2,0) )
         self.annotation = cmds.listRelatives(self.annotation, parent=True)[0]
@@ -187,7 +196,7 @@ class StartClass:
                 except:
                     self.enteredText = ""
             # call utils to return the normalized text:
-            self.customName = utils.normalizeText(self.enteredText, prefixMax=20)
+            self.customName = utils.normalizeText(self.enteredText, prefixMax=30)
             # check if there is another rigged module using the same customName:
             if self.customName == "":
                 try:
@@ -209,16 +218,26 @@ class StartClass:
                             if not currentName in dpAR_nameList:
                                 dpAR_nameList.append(currentName)
                     if dpAR_nameList:
+                        dpAR_nameList.sort()
                         for currentName in dpAR_nameList:
                             if currentName == self.customName:
-                                addSuffix = True
-                                while addSuffix:
-                                    for n in range(1,len(dpAR_nameList)+1):
-                                        if not self.customName+str(n) in dpAR_nameList:
-                                            self.customName = self.customName + str(n)
-                                            addSuffix = False
-                                            break
-                                    addSuffix = False
+                                # getting the index of the last digit in the name:
+                                n = len(currentName)+1
+                                hasDigit = False
+                                for i in reversed(xrange(len(currentName))):
+                                    if currentName[i].isdigit():
+                                        n = i
+                                        hasDigit = True
+                                    else:
+                                        break
+                                # adding a sequential number:
+                                if hasDigit:
+                                    moduleDigit = int(currentName[n:])
+                                    self.customName = self.customName[:n] + str(moduleDigit+1)
+                                # adding 1 at the name end:
+                                else:
+                                    self.customName = self.customName + str(1)
+                                
                 # edit the prefixTextField with the normalText:
                 try:
                     cmds.textField(self.userName, edit=True, text=self.customName)
@@ -250,6 +269,9 @@ class StartClass:
                 self.ctrlRadius = utils.getCtrlRadius(self.radiusCtrl)
             else:
                 self.ctrlRadius = 1
+                
+            # get curve degree:
+            self.curveDegree = cmds.getAttr(self.moduleGrp+".degree")
             
             # unparent all guide modules child:
             childrenList = cmds.listRelatives(self.moduleGrp, allDescendents=True, type='transform')
