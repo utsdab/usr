@@ -7,9 +7,9 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 92
+        -flexibleWidthValue 46
         -enable 1
-        -width 35
+        -width 49
         -height 34
         -manage 1
         -visible 1
@@ -42,9 +42,9 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 92
+        -flexibleWidthValue 46
         -enable 1
-        -width 35
+        -width 49
         -height 34
         -manage 1
         -visible 1
@@ -359,7 +359,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -407,7 +407,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -477,7 +477,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -513,7 +513,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -549,7 +549,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -830,7 +830,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -866,7 +866,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -936,7 +936,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -972,7 +972,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -1008,7 +1008,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -1043,7 +1043,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -1078,7 +1078,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -1113,7 +1113,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -1147,7 +1147,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -1181,7 +1181,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -1216,7 +1216,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -1251,7 +1251,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -1286,7 +1286,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -1321,7 +1321,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 35
         -height 34
@@ -1356,7 +1356,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 35
         -height 34
@@ -1391,7 +1391,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 35
         -height 34
@@ -1426,7 +1426,7 @@ global proc shelf_DAB () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 64
+        -flexibleWidthValue 32
         -enable 1
         -width 35
         -height 34

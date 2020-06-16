@@ -17,7 +17,7 @@ PATH +:= ../../bin
 plug-ins: plug-ins
 
 + PLATFORM:mac MAYAVERSION:2020 DABMOD any DABMOD/2020/mac
-MODULESLOADED += DABMOD_2019_MAC
+MODULESLOADED += DABMOD_2020_MAC
 PYTHONPATH +:= ../../python
 PATH +:= ../../bin
 [r] scripts: ../../scripts
