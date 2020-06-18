@@ -49,8 +49,8 @@
 
 
 # current version:
-DPAR_VERSION = "3.09.15"
-DPAR_UPDATELOG = "Added Limb ribbon twist bones.\nBlendShape_Grp and WIP_Grp."
+DPAR_VERSION = "3.09.21"
+DPAR_UPDATELOG = "WIP: Facial Control 1.8"
 
 
 
@@ -1116,8 +1116,8 @@ class DP_AutoRig_UI:
         # initialize this extraModule as an Instance:
         guideInstance = guideClass(self, self.langDic, self.langName, self.presetDic, self.presetName)
         return guideInstance
-        
-        
+    
+    
     def initControlModule(self, guideModule, guideDir, *args):
         """ Call initExtraModule because it's the same code.
         """
@@ -1592,6 +1592,8 @@ class DP_AutoRig_UI:
             # system:
             self.masterGrp.setDynamicAttr("maya", cmds.about(version=True))
             self.masterGrp.setDynamicAttr("system", "dpAutoRig_"+DPAR_VERSION)
+            self.masterGrp.setDynamicAttr("language", self.langName)
+            self.masterGrp.setDynamicAttr("preset", self.presetName)
             # author:
             self.masterGrp.setDynamicAttr("author", getpass.getuser())
             # rig info to be updated:
@@ -2146,7 +2148,7 @@ class DP_AutoRig_UI:
                                                 if cmds.objectType(tmp) == 'reverse':
                                                     revNode = tmp
                                         fkZeroNode = cmds.listConnections(limbIsolateFkConst + ".constraintRotateZ")[0]
-                                        fkCtrl = fkZeroNode.replace("_Zero", "")
+                                        fkCtrl = fkZeroNode.replace("_Zero_Grp", "")
                                         nodeToConst = utils.zeroOut([fkCtrl])[0]
                                         nodeToConst = cmds.rename(nodeToConst, fkCtrl + "_SpaceSwitch_Grp")
                                         mainCtrl = cmds.listConnections(revNode + ".inputX")[0]
@@ -2160,12 +2162,12 @@ class DP_AutoRig_UI:
                                             m4Fk = cmds.xform(fkCtrl, worldSpace=True, matrix=True, query=True)
                                             cmds.xform(mainNull, worldSpace=True, matrix=m4Fk)
                                         newFkConst = cmds.parentConstraint(targetList[0], mainNull, nodeToConst, skipTranslate=["x", "y", "z"], maintainOffset=True, name=nodeToConst+"_ParentConstraint")[0]
-                                        cmds.connectAttr(mainCtrl + "." + self.langDic[self.langName]['c032_Follow'], newFkConst + "." + targetList[0]+"W0", force=True)
+                                        cmds.connectAttr(mainCtrl + "." + self.langDic[self.langName]['c032_follow'], newFkConst + "." + targetList[0]+"W0", force=True)
                                         if (cmds.objExists(revNode)):
                                             cmds.connectAttr(revNode + ".outputX", newFkConst + "." + mainNull+"W1", force=True)
                                         else:
                                             revNode = cmds.createNode('reverse', name=sideName+fkCtrl+"_FkIsolate_Rev")
-                                            cmds.connectAttr(mainCtrl+'.'+self.langDic[self.langName]['c032_Follow'], revNode+".inputX", force=True)
+                                            cmds.connectAttr(mainCtrl+'.'+self.langDic[self.langName]['c032_follow'], revNode+".inputX", force=True)
                                             cmds.connectAttr(revNode + ".outputX", newFkConst + "." + mainNull+"W1", force=True)
 
                                     # verifying what part will be used, the hips or chest:
@@ -2281,9 +2283,9 @@ class DP_AutoRig_UI:
                                 headCtrl  = self.integratedTaskDic[fatherGuide]['headCtrlList'][0]
                                 headParentConst = cmds.parentConstraint(self.rootCtrl, headCtrl, eyeGrp, maintainOffset=True, name=eyeGrp+"_ParentConstraint")[0]
                                 eyeRevNode = cmds.createNode('reverse', name=eyeGrp+"_Rev")
-                                cmds.connectAttr(eyeCtrl+'.'+self.langDic[self.langName]['c032_Follow'], eyeRevNode+".inputX", force=True)
+                                cmds.connectAttr(eyeCtrl+'.'+self.langDic[self.langName]['c032_follow'], eyeRevNode+".inputX", force=True)
                                 cmds.connectAttr(eyeRevNode+".outputX", headParentConst+"."+self.rootCtrl+"W0", force=True)
-                                cmds.connectAttr(eyeCtrl+'.'+self.langDic[self.langName]['c032_Follow'], headParentConst+"."+headCtrl+"W1", force=True)
+                                cmds.connectAttr(eyeCtrl+'.'+self.langDic[self.langName]['c032_follow'], headParentConst+"."+headCtrl+"W1", force=True)
                                 cmds.parent(upLocGrp, headCtrl, relative=False)
                                 cmds.setAttr(upLocGrp+".visibility", 0)
                                 # head drives eyeScaleGrp:
