@@ -1,14 +1,15 @@
-global proc shelf_DAB_MAIN () {
+global proc shelf_DAB_ANIM () {
     global string $gBuffStr;
     global string $gBuffStr0;
     global string $gBuffStr1;
 
+
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 46
+        -flexibleWidthValue 92
         -enable 1
-        -width 49
+        -width 35
         -height 34
         -manage 1
         -visible 1
@@ -41,9 +42,9 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 46
+        -flexibleWidthValue 92
         -enable 1
-        -width 49
+        -width 35
         -height 34
         -manage 1
         -visible 1
@@ -76,21 +77,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-@ -359,7 +289,7 @@ global proc shelf_DAB () {
-    shelfButton
-        -enableCommandRepeat 1
-        -flexibleWidthType 1
-        -flexibleWidthValue 32
         -flexibleWidthValue 64
-        -enable 1
-        -width 34
-        -height 34
-@ -406,1057 +336,139 @@ global proc shelf_DAB () {
-    ;
-    shelfButton
-        -enableCommandRepeat 1
-        -flexibleWidthType 1
-        -flexibleWidthValue 32
         -enable 1
         -width 34
         -height 34
@@ -152,7 +139,7 @@ global proc shelf_DAB_MAIN () {
         -style "iconOnly"
         -marginWidth 1
         -marginHeight 1
-        -command "ToggleLocalRotationAxes"
+        -command "ToggleLocalRotationAxes;"
         -sourceType "mel"
         -commandRepeatable 1
         -flat 1
@@ -160,7 +147,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
         -height 34
@@ -196,23 +183,19 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthType 3
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
-        -width 35
         -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Select quads"
-        -annotation "AdvancedSkeleton5"
         -enableBackground 0
         -backgroundColor 0 0 0
         -highlightColor 0.321569 0.521569 0.65098
         -align "center"
         -label "Cleanup..."
-        -label "AdvancedSkeleton5"
         -labelOffset 0
         -rotation 0
         -flipX 0
@@ -224,14 +207,10 @@ global proc shelf_DAB_MAIN () {
         -overlayLabelBackColor 0 0 0 0.2
         -image "polyCleanup.png"
         -image1 "polyCleanup.png"
-        -overlayLabelBackColor 0 0 0 0.5
-        -image "AS5.png"
-        -image1 "AS5.png"
         -style "iconOnly"
         -marginWidth 1
         -marginHeight 1
         -command "polyCleanupArgList 3 { \"0\",\"2\",\"0\",\"1\",\"0\",\"0\",\"0\",\"0\",\"0\",\"1e-05\",\"0\",\"1e-05\",\"0\",\"1e-05\",\"0\",\"-1\",\"0\" };"
-        -command "source \"AdvancedSkeleton5.mel\";AdvancedSkeleton5;"
         -sourceType "mel"
         -doubleClickCommand "performPolyCleanup 1"
         -commandRepeatable 1
@@ -240,23 +219,19 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthType 3
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
-        -width 35
         -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Cut the faces using a yz plane"
-        -annotation "Selector:biped"
         -enableBackground 0
         -backgroundColor 0 0 0
         -highlightColor 0.321569 0.521569 0.65098
         -align "center"
         -label "Cut Faces Tool"
-        -label "Selector:biped"
         -labelOffset 0
         -rotation 0
         -flipX 0
@@ -268,39 +243,31 @@ global proc shelf_DAB_MAIN () {
         -overlayLabelBackColor 0 0 0 0.2
         -image "polyCut.png"
         -image1 "polyCut.png"
-        -overlayLabelBackColor 0 0 0 0.5
-        -image "asBiped.png"
-        -image1 "asBiped.png"
         -style "iconOnly"
         -marginWidth 1
         -marginHeight 1
-        -command "CutPolygon"
-        -command "source \"AdvancedSkeleton5/AdvancedSkeleton5Files/Selector/biped.mel\";"
+        -command "CutPolygon;"
         -sourceType "mel"
-        -doubleClickCommand "CutPolygonOptions"
+        -doubleClickCommand "CutPolygonOptions;"
         -commandRepeatable 1
         -flat 1
     ;
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthType 3
         -flexibleWidthValue 32
         -enable 1
         -width 34
-        -width 35
         -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Select an object(s)"
-        -annotation "Selector:face"
         -enableBackground 0
         -backgroundColor 0 0 0
         -highlightColor 0.321569 0.521569 0.65098
         -align "center"
         -label "Center Pivot"
-        -label "Selector:face"
         -labelOffset 0
         -rotation 0
         -flipX 0
@@ -312,14 +279,10 @@ global proc shelf_DAB_MAIN () {
         -overlayLabelBackColor 0 0 0 0.25
         -image "menuIconModify.png"
         -image1 "menuIconModify.png"
-        -overlayLabelBackColor 0 0 0 0.5
-        -image "asFace.png"
-        -image1 "asFace.png"
         -style "iconOnly"
         -marginWidth 1
         -marginHeight 1
-        -command "CenterPivot"
-        -command "source \"AdvancedSkeleton5/AdvancedSkeleton5Files/Selector/face.mel\";"
+        -command "CenterPivot;"
         -sourceType "mel"
         -commandRepeatable 1
         -flat 1
@@ -327,17 +290,14 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthType 3
         -flexibleWidthValue 32
         -enable 1
         -width 34
-        -width 35
         -height 34
         -manage 1
         -visible 1
         -preventOverride 0
         -annotation "Select an object(s)"
-        -annotation "picker"
         -enableBackground 0
         -backgroundColor 0 0 0
         -highlightColor 0.321569 0.521569 0.65098
@@ -357,7 +317,7 @@ global proc shelf_DAB_MAIN () {
         -style "iconOnly"
         -marginWidth 1
         -marginHeight 1
-        -command "FreezeTransformations"
+        -command "FreezeTransformations;"
         -sourceType "mel"
         -commandRepeatable 1
         -flat 1
@@ -392,7 +352,7 @@ global proc shelf_DAB_MAIN () {
         -style "iconOnly"
         -marginWidth 1
         -marginHeight 1
-        -command "ConvertSelectionToVertices"
+        -command "ConvertSelectionToVertices;"
         -sourceType "mel"
         -commandRepeatable 1
         -flat 1
@@ -427,7 +387,7 @@ global proc shelf_DAB_MAIN () {
         -style "iconOnly"
         -marginWidth 1
         -marginHeight 1
-        -command "ConvertSelectionToEdges"
+        -command "ConvertSelectionToEdges;"
         -sourceType "mel"
         -commandRepeatable 1
         -flat 1
@@ -448,7 +408,6 @@ global proc shelf_DAB_MAIN () {
         -highlightColor 0.321569 0.521569 0.65098
         -align "center"
         -label "To Faces"
-        -label "picker"
         -labelOffset 0
         -rotation 0
         -flipX 0
@@ -460,14 +419,10 @@ global proc shelf_DAB_MAIN () {
         -overlayLabelBackColor 0 0 0 0.2
         -image "polyConvertToFace.png"
         -image1 "polyConvertToFace.png"
-        -overlayLabelBackColor 0 0 0 0.5
-        -image "picker.png"
-        -image1 "picker.png"
         -style "iconOnly"
         -marginWidth 1
         -marginHeight 1
         -command "ConvertSelectionToFaces"
-        -command "source \"AdvancedSkeleton5/AdvancedSkeleton5Files/picker/picker.mel\";"
         -sourceType "mel"
         -commandRepeatable 1
         -flat 1
@@ -502,7 +457,7 @@ global proc shelf_DAB_MAIN () {
         -style "iconOnly"
         -marginWidth 1
         -marginHeight 1
-        -command "SelectEdgeLoopSp"
+        -command "SelectEdgeLoopSp;"
         -sourceType "mel"
         -commandRepeatable 1
         -flat 1
@@ -537,7 +492,7 @@ global proc shelf_DAB_MAIN () {
         -style "iconOnly"
         -marginWidth 1
         -marginHeight 1
-        -command "SelectEdgeRingSp"
+        -command "SelectEdgeRingSp;"
         -sourceType "mel"
         -commandRepeatable 1
         -flat 1
@@ -545,7 +500,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
         -height 34
@@ -572,7 +527,7 @@ global proc shelf_DAB_MAIN () {
         -style "iconOnly"
         -marginWidth 1
         -marginHeight 1
-        -command "SlideEdgeTool"
+        -command "SlideEdgeTool;" 
         -sourceType "mel"
         -doubleClickCommand "SlideEdgeToolOptions"
         -commandRepeatable 1
@@ -581,7 +536,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
         -height 34
@@ -651,7 +606,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
         -height 34
@@ -687,7 +642,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
         -height 34
@@ -723,7 +678,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
         -height 34
@@ -758,7 +713,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
         -height 34
@@ -793,7 +748,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
         -height 34
@@ -828,7 +783,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
         -height 34
@@ -862,7 +817,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
         -height 34
@@ -896,7 +851,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
         -height 34
@@ -931,7 +886,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
         -height 34
@@ -966,7 +921,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
         -height 34
@@ -1001,7 +956,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 34
         -height 34
@@ -1036,7 +991,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 35
         -height 34
@@ -1071,7 +1026,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 35
         -height 34
@@ -1106,7 +1061,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 35
         -height 34
@@ -1141,7 +1096,7 @@ global proc shelf_DAB_MAIN () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 32
+        -flexibleWidthValue 64
         -enable 1
         -width 35
         -height 34

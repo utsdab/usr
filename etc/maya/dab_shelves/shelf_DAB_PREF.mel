@@ -69,7 +69,7 @@ global proc shelf_DAB_PREF () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "PluginManager" 
+        -command "PluginManager;" 
         -sourceType "mel" 
         -commandRepeatable 1
         -flat 1
@@ -104,7 +104,7 @@ global proc shelf_DAB_PREF () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "HotkeyPreferencesWindow" 
+        -command "HotkeyPreferencesWindow;" 
         -sourceType "mel" 
         -commandRepeatable 1
         -flat 1
@@ -139,7 +139,7 @@ global proc shelf_DAB_PREF () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "PerformanceSettingsWindow" 
+        -command "PerformanceSettingsWindow;" 
         -sourceType "mel" 
         -commandRepeatable 1
         -flat 1
@@ -174,7 +174,7 @@ global proc shelf_DAB_PREF () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "ShelfPreferencesWindow" 
+        -command "ShelfPreferencesWindow;" 
         -sourceType "mel" 
         -commandRepeatable 1
         -flat 1
