@@ -49,8 +49,8 @@
 
 
 # current version:
-DPAR_VERSION = "3.09.21"
-DPAR_UPDATELOG = "WIP: Facial Control 1.8"
+DPAR_VERSION = "3.09.24"
+DPAR_UPDATELOG = "Improved: Limb auto clavicle pointing to\ncorner joint (elbow/knee)."
 
 
 
