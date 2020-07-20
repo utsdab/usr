@@ -103,7 +103,7 @@ def dochown(path):
 
     _myuid = os.getuid()
     _mygid = os.getgid()
-    _pixar = 8888
+    _pixar = 1438417908
 
     for root, dirs, files in os.walk(path):
 
