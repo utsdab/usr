@@ -3,6 +3,7 @@ global proc shelf_DAB_RIG () {
     global string $gBuffStr0;
     global string $gBuffStr1;
 
+
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
@@ -121,6 +122,7 @@ global proc shelf_DAB_RIG () {
         -commandRepeatable 1
         -flat 1
     ;
+
     separator
         -enable 1
         -width 34
@@ -134,6 +136,7 @@ global proc shelf_DAB_RIG () {
         -style "shelf"
         -horizontal 0
     ;
+
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
@@ -169,6 +172,7 @@ global proc shelf_DAB_RIG () {
         -commandRepeatable 1
         -flat 1
     ;
+
     separator
         -enable 1
         -width 34
@@ -182,6 +186,7 @@ global proc shelf_DAB_RIG () {
         -style "shelf"
         -horizontal 0
     ;
+
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 1
