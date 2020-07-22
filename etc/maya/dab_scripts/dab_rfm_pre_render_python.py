@@ -54,7 +54,7 @@ def rfm22():
 
     rmanGlobals = apinodes.rman_globals()
     #rfm2.ui.prefs.set_defaults()
-    print "RFM PreRender Setup......"
+    print "RFM 22 PreRender Setup......"
 
     #TODO  warn is layers or multiple cameras found
 
@@ -80,6 +80,43 @@ def rfm22():
 
     mayaui.update_maya_common_tab()
 
+def rfm23():
+    '''
+    This sets up the standard DAB render settings for using renderman 22.3 at uni
+    We dont use render layers, or rfm versions, ot rfm takes as each render needs
+    to have its own clean maya file
+    All AOV's and CAMERAS are rendered
+    '''
+
+    rmanGlobals = apinodes.rman_globals()
+    #rfm2.ui.prefs.set_defaults()
+    print "RFM 23 PreRender Setup......"
+
+    #TODO  warn is layers or multiple cameras found
+
+    iff='<scene>_<aov>.<f4>.<ext>'
+    rff='<scene>.<f4>.rib'
+    iod='<ws>/images/<scene>'
+    rod='<ws>/renderman/rib/<scene>'
+
+    mc.setAttr('%s.imageFileFormat' % rmanGlobals,iff, type='string')
+    mc.setAttr('%s.imageOutputDir' % rmanGlobals, iod, type='string')
+    mc.setAttr('%s.ribFileFormat' % rmanGlobals, rff, type='string')
+    mc.setAttr('%s.ribOutputDir' % rmanGlobals, rod, type='string')
+
+    imgOutputDir = mc.getAttr('%s.imageOutputDir' % rmanGlobals)
+    imgFileFormat = mc.getAttr('%s.imageFileFormat' % rmanGlobals)
+    ribFileFormat = mc.getAttr('%s.ribFileFormat' % rmanGlobals)
+    ribOutputDir = mc.getAttr('%s.ribOutputDir' % rmanGlobals)
+
+    print "Rib Output Directory: {}".format(apistr.expand_string(ribOutputDir))
+    print "Rib File Format : {}".format(apistr.expand_string(ribFileFormat))
+    print "Image Output Directory: {}".format(apistr.expand_string(imgOutputDir))
+    print "Image File Format Directory: {}".format(apistr.expand_string(imgFileFormat))
+
+    mayaui.update_maya_common_tab()
+
+
 def setAnimation():
     try:
         print("Setting defaultRenderGlobals:")
@@ -97,5 +134,9 @@ def setPasses():
     else:
         print("Setting basic Passes: {}".format(""))
 
+def main():
+    print "Running main from dab_rfm_pre_render_python"
+
 if __name__ == "__main__":
     print "Loaded dab_rfm_pre_render_python"
+    main()

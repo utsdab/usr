@@ -6,7 +6,7 @@ global proc dab_rfm_pre_render_mel()
     //python("dpr.sayHello()");
     python("import dab_rfm_pre_render_python as dpr");
     python("dpr.main()");
-    print("FINISHING MEL: >>>>>> dab_pre_render.mel\n");
+    print("FINISHING MEL: >>>>>> dab_pre_render_mel.mel\n");
 }
 
 dab_rfm_pre_render_mel();
