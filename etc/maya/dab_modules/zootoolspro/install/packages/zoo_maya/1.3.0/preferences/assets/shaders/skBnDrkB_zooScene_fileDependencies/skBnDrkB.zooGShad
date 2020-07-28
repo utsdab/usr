@@ -1,0 +1,30 @@
+{
+    "nullObj":{
+        "attributesShaderDict":{
+            "gCoatIor":1.2999999523162842,
+            "gCoatWeight":1.0,
+            "gSpecIor":3.0,
+            "gDiffuseWeight":1.0,
+            "gSpecColor_srgb":[
+                0.5267388474490506,
+                0.5727585609775575,
+                0.5695445705508652
+            ],
+            "gSpecWeight":1.0,
+            "gSpecRoughness":0.699999988079071,
+            "gDiffuseColor_srgb":[
+                0.6681771599553878,
+                0.3624941224630634,
+                0.2647073577894985
+            ],
+            "gCoatRoughness":0.5,
+            "gCoatColor_srgb":[
+                0.9999999999999999,
+                0.9999999999999999,
+                0.9999999999999999
+            ]
+        },
+        "shaderName":"greyClearCoatSubtle_RS",
+        "objectFaces":[]
+    }
+}

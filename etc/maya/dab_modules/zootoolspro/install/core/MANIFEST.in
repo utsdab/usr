@@ -1,0 +1,7 @@
+recursive-include docs *
+recursive-include bin *
+recursive-include extensions *
+recursive-include examples *
+include LICENSE
+include package.json
+include CHANGELOG.md

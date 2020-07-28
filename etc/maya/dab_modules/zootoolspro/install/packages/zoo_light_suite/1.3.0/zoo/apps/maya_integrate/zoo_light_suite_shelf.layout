@@ -1,0 +1,50 @@
+{
+  "sortOrder": -920,
+  "shelves": [
+    {
+      "name": "ZooToolsPro",
+      "children": [
+        {
+          "id": "zoo.shelf.light",
+          "displayLabel": false,
+          "children": [
+            {
+              "type": "toolset",
+              "id": "lightPresets"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "type": "toolset",
+              "id": "hdriSkydomeLights"
+            },
+            {
+              "type": "toolset",
+              "id": "areaLights"
+            },
+            {
+              "type": "toolset",
+              "id": "directionalLights"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "type": "toolset",
+              "id": "editLights"
+            },
+            {
+              "id": "viewportLight",
+              "type": "toolset"
+            },
+            {
+              "type": "toolset",
+              "id": "placeReflection"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

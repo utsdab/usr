@@ -1,0 +1,35 @@
+stages:
+  - test
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/cache"
+
+cache:
+  paths:
+    - ./cache
+  key: "$CI_PROJECT_ID"
+
+project_lint-2.7:
+  image: python:2.7.9
+  stage: test
+  only:
+    - tags
+    - master
+  script:
+    - pip install --upgrade pip
+    - pip install git+https://github.com/dsparrow27/zoocore.git
+    - pip install pylint
+    - pylint ./zoo
+
+project_lint-latest:
+  image: python:latest
+  stage: test
+  only:
+    - tags
+    - master
+  script:
+    - pip install --upgrade pip
+    - pip install git+https://github.com/dsparrow27/zoocore.git
+    - pip install pylint
+    - pylint ./zoo
+

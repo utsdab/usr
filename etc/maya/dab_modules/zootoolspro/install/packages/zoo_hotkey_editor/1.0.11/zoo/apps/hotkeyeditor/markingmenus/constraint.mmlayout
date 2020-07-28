@@ -1,0 +1,246 @@
+{
+  "items": {
+    "N": {
+      "label": "Match - Pos Rot",
+      "icon": "teMatchPoses",
+      "optionBox": false,
+      "type": "command",
+      "id": "constraintMarkingMenu",
+      "arguments": {
+        "operation": "matchPosRot"
+      }
+    },
+    "NE": {
+      "label": "Match - Pos",
+      "icon": "teMatchPoses",
+      "optionBox": false,
+      "type": "command",
+      "id": "constraintMarkingMenu",
+      "arguments": {
+        "operation": "matchPos"
+      }
+    },
+    "E": {
+      "label": "Orient Constrain - M Offset",
+      "icon": "orientConstraint",
+      "optionBox": true,
+      "type": "command",
+      "id": "constraintMarkingMenu",
+      "arguments": {
+        "operation": "orientConstrainMOffset"
+      }
+    },
+    "SE": {
+      "label": "Parent Constrain - No M Offset",
+      "icon": "parentConstraint",
+      "optionBox": true,
+      "type": "command",
+      "id": "constraintMarkingMenu",
+      "arguments": {
+        "operation": "parentConstrainNoMOffset"
+      }
+    },
+    "S": {
+      "label": "Parent Constrain - M Offset",
+      "icon": "parentConstraint",
+      "optionBox": true,
+      "type": "command",
+      "id": "constraintMarkingMenu",
+      "arguments": {
+        "operation": "parentConstrainMOffset"
+      }
+    },
+    "SW": {
+      "label": "Point Constrain - No M Offset",
+      "icon": "pointConstraint",
+      "optionBox": true,
+      "type": "command",
+      "id": "constraintMarkingMenu",
+      "arguments": {
+        "operation": "pointConstrainNoMOffset"
+      }
+    },
+    "W": {
+      "label": "Point Constrain - M Offset",
+      "icon": "pointConstraint",
+      "optionBox": true,
+      "type": "command",
+      "id": "constraintMarkingMenu",
+      "arguments": {
+        "operation": "pointConstrainMOffset"
+      }
+    },
+    "NW": {
+      "label": "Match - Rot",
+      "icon": "teMatchPoses",
+      "optionBox": false,
+      "type": "command",
+      "id": "constraintMarkingMenu",
+      "arguments": {
+        "operation": "matchRot"
+      }
+    },
+    "generic": [
+      {
+        "label": "Delete Constraint Selected",
+        "icon": "deleteActive",
+        "optionBox": false,
+        "type": "command",
+        "id": "constraintMarkingMenu",
+        "arguments": {
+          "operation": "deleteConstraintsSelected"
+        }
+      },
+      {
+        "type": "separator"
+      },
+      {
+        "label": "Aim Constraint",
+        "icon": "aimConstraint",
+        "optionBox": true,
+        "type": "command",
+        "id": "constraintMarkingMenu",
+        "arguments": {
+          "operation": "aimConstraint"
+        }
+      },
+      {
+        "label": "Orient Constrain - No M Offset",
+        "icon": "orientConstraint",
+        "optionBox": true,
+        "type": "command",
+        "id": "constraintMarkingMenu",
+        "arguments": {
+          "operation": "orientConstraintNoMOffset"
+        }
+      },
+      {
+        "label": "Pole Vector Constraint",
+        "icon": "poleVectorConstraint",
+        "optionBox": false,
+        "type": "command",
+        "id": "constraintMarkingMenu",
+        "arguments": {
+          "operation": "poleVectorConstraint"
+        }
+      },
+      {
+        "label": "Point On Poly Constraint",
+        "icon": "pointOnPolyConstraint",
+        "optionBox": true,
+        "type": "command",
+        "id": "constraintMarkingMenu",
+        "arguments": {
+          "operation": "pointOnPolyConstraint"
+        }
+      },
+      {
+        "label": "Geo & Normal Constraint",
+        "icon": "geometryConstraint",
+        "optionBox": false,
+        "type": "command",
+        "id": "constraintMarkingMenu",
+        "arguments": {
+          "operation": "geoNormalConstraint"
+        }
+      },
+      {
+        "label": "Curve Constraint",
+        "icon": "tangentConstraint",
+        "optionBox": false,
+        "type": "command",
+        "id": "constraintMarkingMenu",
+        "arguments": {
+          "operation": "curveConstraint"
+        }
+      },
+      {
+        "label": "Geometry Constraint",
+        "icon": "geometryConstraint",
+        "optionBox": false,
+        "type": "command",
+        "id": "constraintMarkingMenu",
+        "arguments": {
+          "operation": "geoConstraint"
+        }
+      },
+      {
+        "label": "Normal Constraint",
+        "icon": "normalConstraint",
+        "optionBox": true,
+        "type": "command",
+        "id": "constraintMarkingMenu",
+        "arguments": {
+          "operation": "normalConstraint"
+        }
+      },
+      {
+        "label": "Tangent Constraint",
+        "icon": "tangentConstraint",
+        "optionBox": true,
+        "type": "command",
+        "id": "constraintMarkingMenu",
+        "arguments": {
+          "operation": "tangentConstraint"
+        }
+      },
+      {
+        "label": "Scale Constraint",
+        "icon": "scaleConstraint",
+        "optionBox": true,
+        "type": "command",
+        "id": "constraintMarkingMenu",
+        "arguments": {
+          "operation": "scaleConstraint"
+        }
+      },
+      {
+        "type": "separator"
+      },
+      {
+        "label": "Attach to Motion Path",
+        "icon": "motionPath",
+        "optionBox": true,
+        "type": "command",
+        "id": "constraintMarkingMenu",
+        "arguments": {
+          "operation": "motionPath"
+        }
+      },
+      {
+        "type": "separator"
+      },
+      {
+        "label": "Match - Scale",
+        "icon": "teMatchPoses",
+        "optionBox": false,
+        "type": "command",
+        "id": "constraintMarkingMenu",
+        "arguments": {
+          "operation": "matchScale"
+        }
+      },
+      {
+        "label": "Match - All",
+        "icon": "teMatchPoses",
+        "optionBox": false,
+        "type": "command",
+        "id": "constraintMarkingMenu",
+        "arguments": {
+          "operation": "matchAll"
+        }
+      },
+      {
+        "label": "Match - Pivot",
+        "icon": "teMatchPoses",
+        "optionBox": false,
+        "type": "command",
+        "id": "constraintMarkingMenu",
+        "arguments": {
+          "operation": "matchPivot"
+        }
+      }
+    ]
+  },
+  "id": "markingMenu.constraint"
+}

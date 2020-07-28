@@ -1,0 +1,30 @@
+{
+  "sortOrder": -910,
+  "shelves": [
+    {
+      "name": "ZooToolsPro",
+      "children": [
+        {
+          "id": "zoo.shelf.uv",
+          "displayLabel": false,
+          "icon": "uvMenu_shlf",
+          "children": [
+            {
+              "type": "toolset",
+              "id": "uvUnfold"
+            },
+            {
+              "type": "toolset",
+              "id": "unwrapTube"
+            },
+            {
+              "type": "toolset",
+              "id": "transferUvs"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

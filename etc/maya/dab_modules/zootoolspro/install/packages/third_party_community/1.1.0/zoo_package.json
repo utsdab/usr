@@ -1,0 +1,17 @@
+{
+    "author": "Assorted",
+    "authorEmail": "assorted",
+    "description": "Maya third party community and open source related code for Zoo Tools Pro",
+    "displayName": "Third Party Community",
+    "environment": {
+        "PYTHONPATH": [
+            "{self}"
+        ],
+        "ZOO_BASE_PATHS": [
+            "{self}"
+        ]
+    },
+    "name": "third_party_community",
+    "requirements": [],
+    "version": "1.1.0"
+}

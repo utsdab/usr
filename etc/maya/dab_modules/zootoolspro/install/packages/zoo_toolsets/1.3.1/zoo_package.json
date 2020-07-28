@@ -1,0 +1,27 @@
+{
+    "author": "Create3dCharacters",
+    "authorEmail": "info@create3dcharacters.com",
+    "description": "Toolsets code repository for Zoo Tools Pro",
+    "displayName": "Toolsets",
+    "environment": {
+        "PYTHONPATH": [
+            "{self}"
+        ],
+        "ZOO_BASE_PATHS": [
+            "{self}"
+        ],
+        "ZOO_ICON_PATHS": [
+            "{self}/icons"
+        ],
+        "ZOO_TOOLSET_UI_PATHS": [
+            "{self}/zoo/apps/uitoolsets"
+        ]
+    },
+    "name": "zoo_toolsets",
+    "requirements": [
+        "zoo_core",
+        "zoo_pyside",
+        "zoo_maya"
+    ],
+    "version": "1.3.1"
+}

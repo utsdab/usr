@@ -1,0 +1,19 @@
+{
+    "shaderDict":true,
+    "meshObjects":{
+        "|shaderBot":{
+            "useSmoothPreviewForRender":true,
+            "renderSmoothLevel":2,
+            "displaySmoothMesh":2,
+            "smoothLevel":2
+        }
+    },
+    "version":"1.0.0",
+    "lightDict":false,
+    "namespaces":[],
+    "saved":[
+        "Alembic",
+        "Generic Shaders",
+        "Mesh Info"
+    ]
+}

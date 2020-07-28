@@ -1,0 +1,22 @@
+{
+  "sortOrder": -930,
+  "shelves": [
+    {
+      "name": "ZooToolsPro",
+      "children": [
+        {
+          "id": "zoo.shelf.dynamics",
+          "displayLabel": false,
+          "icon": "fxDynamicsMenu_shlf",
+          "children": [
+            {
+              "id": "nclothwrinklecreator",
+              "type": "toolset"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

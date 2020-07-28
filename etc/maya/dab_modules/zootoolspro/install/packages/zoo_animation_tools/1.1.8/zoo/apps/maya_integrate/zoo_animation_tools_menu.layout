@@ -1,0 +1,20 @@
+{
+  "sortOrder": -940,
+  "menu": [
+    {
+      "label": "Animation",
+      "type": "menu",
+      "children": [
+        {
+          "id": "generalAnimationTools",
+          "type": "toolset"
+        },
+        {
+          "id": "createTurntable",
+          "type": "toolset"
+        }
+      ]
+    }
+  ]
+}
+

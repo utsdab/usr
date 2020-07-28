@@ -1,0 +1,23 @@
+{
+  "toolsetGroups":
+  [
+    {
+      "type": "modeling",
+      "name": "Modeling",
+      "color": [
+        56,
+        227,
+        181
+      ],
+      "hueShift": 0,
+      "toolsets": [
+        "zooMirrorGeo",
+        "modelingAlign",
+        "curveDuplicate",
+        "tubeFromCurve",
+        "subDSmoothControl",
+        "objectCleaner"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "shelves": [
+    {
+      "name": "Zoo Browser",
+      "children": [
+        {
+          "id": "zoo.browserui",
+          "icon": "browser_shlf",
+          "displayLabel": false
+        }
+      ]
+    }
+  ]
+}
+

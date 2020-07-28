@@ -1,0 +1,1863 @@
+//Maya Preference 2020 (Release 1)
+//
+//
+
+//
+// The runtime commands referenced by the hotkeys
+//
+runTimeCommand
+	-annotation "ZooMove5FramesBackNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.animMoveTimeBack5Frames()")
+	move5FramesBack;
+
+runTimeCommand
+	-annotation "ZooPreviousFrameNoUndoNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("undoInfo -swf off;\ncurrentTime ( `currentTime -q` - 1 );\nundoInfo -swf on;")
+	previousFrameNoUndo;
+
+runTimeCommand
+	-annotation "ZooEdgeModeNameCommand"
+	-category "Custom Scripts.Zoo Select"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("setSelectMode components Components; selectType -smp 0 -sme 1 -smf 0 -smu 0 -pv 0 -pe 1 -pf 0 -puv 0;\n\n")
+	edgeMode;
+
+runTimeCommand
+	-annotation "ZooToggleFalloffSurfaceVolumeNameCommand"
+	-category "Custom Scripts.Zoo Sculpt"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("")
+	toggleFalloff_SurfaceVolume;
+
+runTimeCommand
+	-annotation "ZooMoveKeyBackOneNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("// Get current time\nint $currentTime = `currentTime -q`;\n// Find and store selected key set (stores frame numbers)\nfloat $selectedKeys[] = `keyframe -query -selected`;\nfloat $sortedKeys[] = `sort $selectedKeys`;\nfloat $firstKey = $sortedKeys[0];\nfloat $offset = -1;\n// Move all keys by this amount\nstring $selCurves[] = `keyframe -query -name -sl`;\nfloat $keyTimes[];\nfor( $curve in $selCurves )\n{\n    clear $keyTimes;\n    $keyTimes = `keyframe -sl -q -tc $curve`;\n    for($time in $keyTimes )\n    {\n    keyframe -e -iub true -r -o over -tc $offset -t $time $curve ;\n    }\n}")
+	moveKeyBackOne;
+
+runTimeCommand
+	-annotation "ZooRangeEndNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.playbackRangeEndToCurrentFrame(animationEndTime=True)")
+	rangeEnd;
+
+runTimeCommand
+	-annotation "ZooDeformersMarkingMenuPressNameCommand"
+	-category "Other items.User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from zoo.libs.maya.markingmenu import menu as zooMenu \nzooMenu.MarkingMenu.buildFromLayout(\"markingMenu.deformers\", \"markingMenuDeformers\", parent=\"viewPanes\", options={\"altModifier\": False, \"shiftModifier\": True})")
+	Zoo_DeformersMarkingMenu_Press;
+
+runTimeCommand
+	-annotation "ZooCreateCubeMatchNameCommand"
+	-category "Custom Scripts.Zoo Model"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.createCubeMatch()")
+	createCubeMatch;
+
+runTimeCommand
+	-annotation "ZooRangeStartNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.playbackRangeStartToCurrentFrame(animationStartTime=True)")
+	rangeStart;
+
+runTimeCommand
+	-annotation "ZooSculptHudModeOnNameCommand"
+	-category "Custom Scripts.Zoo Sculpt"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("string $sel[] = `ls -sl`;\nsetHUDActiveSculptMesh( 1, $sel[0]);\nprint (\"Sculpting On Object: \" +  $sel[0])")
+	sculptHUDModeOn;
+
+runTimeCommand
+	-annotation "ZooKeyJumpSelectedTimeNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.jumpKeySelectedTime()")
+	zooJumpSelectedTime;
+
+runTimeCommand
+	-annotation "ZooSelectCamInViewNameCommand"
+	-category "Custom Scripts.Zoo Camera"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.selectCamInView()")
+	selectCamInView;
+
+runTimeCommand
+	-annotation "ZooPlaybackAnimEndNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.playbackRangeEndToCurrentFrame(animationEndTime=False)")
+	playbackAnimEnd;
+
+runTimeCommand
+	-annotation "ZooPasteKeysNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import maya.cmds as cmds\ncurTime =  cmds.currentTime(query=True)\ncmds.pasteKey(time=(curTime,curTime), float=(curTime,curTime), option=\"merge\", copies=1, connect=0, timeOffset=0, floatOffset=0, valueOffset=0)")
+	zooPasteKeys;
+
+runTimeCommand
+	-annotation "ZooCreateCamRooXzyNameCommand"
+	-category "Custom Scripts.Zoo Display"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.createCamRooXzy()")
+	ZooCreateCamROOxzy;
+
+runTimeCommand
+	-annotation "ZooDisplayMarkingMenuReleaseNameCommand"
+	-category "Custom Scripts.zooTools"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from zoo.apps.hotkeyeditor.markingmenus import display_markingmenu\nzooDisplayMarkingMenuInstance.releaseHotkey()\ndel zooDisplayMarkingMenuInstance")
+	ZooMarkingMenuRelease;
+
+runTimeCommand
+	-annotation "ZooPlaybackAnimStartNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.playbackRangeStartToCurrentFrame(animationStartTime=False)")
+	playbackAnimStart;
+
+runTimeCommand
+	-annotation "ZooFaceModeNameCommand"
+	-category "Custom Scripts.Zoo Select"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("setSelectMode components Components; selectType -smp 0 -sme 0 -smf 1 -smu 0 -pv 0 -pe 0 -pf 1 -puv 0;\n")
+	faceMode;
+
+runTimeCommand
+	-annotation "ZooNodeEditorShowCurrentSelectionNameCommand"
+	-category "Custom Scripts.Zoo Window"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("string $nen=`nodeEditorWindow`; \nstring $ncmd=\"nodeEditor -e -frameAll -rfs 1 -ups 1 -ds 1 \"+$nen; evalDeferred $ncmd;")
+	nodeEditorShowCurrentSelection_HM;
+
+runTimeCommand
+	-annotation "ZooJointsMarkingMenuReleaseNameCommand"
+	-category "Other items.User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from zoo.libs.maya.markingmenu import menu as zooMenu \nzooMenu.MarkingMenu.removeExistingMenu(\"markingMenuJoints\")")
+	Zoo_JointsMarkingMenu_Release;
+
+runTimeCommand
+	-annotation "ZooSmoothPolyObjectNameCommand"
+	-category "Custom Scripts.Zoo Model"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("performPolySmooth 0;\ntoggleSelMode;\ntoggleSelMode;\nselect -addFirst polySmoothFace1 ;\n")
+	smoothPolyObject;
+
+runTimeCommand
+	-annotation "ZooAlignSelectionHotkeyPrsNameCommand"
+	-category "Custom Scripts.Zoo Object"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.alignSelection()")
+	zooAlignSelection_hotkeyPrs;
+
+runTimeCommand
+	-annotation "ZooAnimHoldNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.animMakeHold()")
+	zooAnimHold;
+
+runTimeCommand
+	-annotation "ZooMirrorInstanceGroupWorldxNameCommand"
+	-category "Custom Scripts.Zoo Model"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.mirrorInstanceGroupWorldX()")
+	mirrorInstanceGroupWorldX;
+
+runTimeCommand
+	-annotation "ZooDisplayMarkingMenuPressNameCommand"
+	-category "Custom Scripts.zooTools"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from zoo.apps.hotkeyeditor.markingmenus import display_markingmenu\nzooDisplayMarkingMenuInstance = display_markingmenu.DisplayMMenu(ctrlModifier=False, altModifier=False, shiftModifier=False)\nzooDisplayMarkingMenuInstance.pressHotkey()")
+	ZooDisplayMarkingMenuPress;
+
+runTimeCommand
+	-annotation "ZooVertModeNameCommand"
+	-category "Custom Scripts.Zoo Select"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("setSelectMode components Components; selectType -smp 1 -sme 0 -smf 0 -smu 0 -pv 1 -pe 0 -pf 0 -puv 0;\n")
+	vertMode;
+
+runTimeCommand
+	-annotation "ZooSkinMarkingMenuPressNameCommand"
+	-category "Other items.User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from zoo.libs.maya.markingmenu import menu as zooMenu \nzooMenu.MarkingMenu.buildFromLayout(\"markingMenu.skinning\", \"markingMenuSkinning\", parent=\"viewPanes\", options={\"altModifier\": False, \"shiftModifier\": True})")
+	Zoo_SkinMarkingMenu_Press;
+
+runTimeCommand
+	-annotation "ZooNextKeyNoUndoNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("undoInfo -swf off;\ncurrentTime -edit `findKeyframe -timeSlider -which next`;\nundoInfo -swf on;")
+	nextKeyNoUndo;
+
+runTimeCommand
+	-annotation "ZooMoveKeyForwardOneNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("// Get current time\nint $currentTime = `currentTime -q`;\n// Find and store selected key set (stores frame numbers)\nfloat $selectedKeys[] = `keyframe -query -selected`;\nfloat $sortedKeys[] = `sort $selectedKeys`;\nfloat $firstKey = $sortedKeys[0];\nfloat $offset = 1;\n// Move all keys by this amount\nstring $selCurves[] = `keyframe -query -name -sl`;\nfloat $keyTimes[];\nfor( $curve in $selCurves )\n{\n    clear $keyTimes;\n    $keyTimes = `keyframe -sl -q -tc $curve`;\n    for($time in $keyTimes )\n    {\n    keyframe -e -iub true -r -o over -tc $offset -t $time $curve ;\n    }\n}")
+	moveKeyForwardOne;
+
+runTimeCommand
+	-annotation "ZooRewindHoldPressNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import maya.mel as mel\nimport maya.cmds as cmds\n\nclass rewindStopHold:\n    def __init__(self, oldStartTime=0):\n        self.oldStartTime = oldStartTime\n    def returnStartTime(self):\n        return self.oldStartTime\n\noldStartTime = cmds.currentTime( query=True )\nrewindStopHoldVar = rewindStopHold(oldStartTime)\nmel.eval('togglePlayback; evalEcho(\"play -forward false\")')")
+	Zoo_rewindHoldPress;
+
+runTimeCommand
+	-annotation "ZooWireframeOnShadedToggleNameCommand"
+	-category "Custom Scripts.Zoo Display"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.displayToggleWireOnShadedMode()")
+	wireframeOnShadedToggle;
+
+runTimeCommand
+	-annotation "ZooSelectFromFcurveNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.selectObjFromFCurve()")
+	zooSelectFromFCurve;
+
+runTimeCommand
+	-annotation "ZooLightsMarkingMenuPressNameCommand"
+	-category "Other items.User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh false -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Zoo_LightsMarkingMenu\";\n")
+	Zoo_LightsMarkingMenu_Press;
+
+runTimeCommand
+	-annotation "ZooWindowHotkeyManagerNameCommand"
+	-category "Custom Scripts.Zoo Window"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from zoo.apps.toolpalette import run\nrun.show().executePluginById(\"zoo.hotkeyeditorui\")")
+	zooHotkeyManagerWindow;
+
+runTimeCommand
+	-annotation "ZooCreateSphereMatchNameCommand"
+	-category "Custom Scripts.Zoo Model"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.createSphereMatch()")
+	createSphereMatch;
+
+runTimeCommand
+	-annotation "ZooKeySnapRetainSpacingNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("\nimport zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.keySnapToTime()")
+	zooMoveKeysSelectedTime;
+
+runTimeCommand
+	-annotation "ZooPolyHardenEdgeNameCommand"
+	-category "Custom Scripts.Zoo Model"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("SoftPolyEdgeElements 0;\ntoggleSelMode;\ntoggleSelMode;")
+	polyHardenEdgeZoo;
+
+runTimeCommand
+	-annotation "ZooLambert50PercentGreyNameCommand"
+	-category "Custom Scripts.Zoo Display"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("setAttr \"lambert1.color\" -type double3 0.214037 0.214037 0.214037 ;")
+	lambert50PercentGrey;
+
+runTimeCommand
+	-annotation "ZooViewportLightingToggleNameCommand"
+	-category "Custom Scripts.Zoo Display"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.displayToggleLightingMode()")
+	viewport_lightingToggle;
+
+runTimeCommand
+	-annotation "ZooKeyDeleteCurrentFrameNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("timeSliderClearKey;")
+	key_deleteCurrentFrame;
+
+runTimeCommand
+	-annotation "ZooPolyMergeNoMoveNameCommand"
+	-category "Custom Scripts.Zoo Model"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("polyMergeVertex  -d 0.001 -am 1 -ch 1;")
+	poly_mergeNoMove;
+
+runTimeCommand
+	-annotation "ZooCurveCycleGraphsNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("doSetInfinity \"-poi cycle\" graphEditor1GraphEd \"bufferCurve useSmoothness usePin\";\nsetInfinity -poi cycle;\ndoSetInfinity \"-pri cycle\" graphEditor1GraphEd \"bufferCurve useSmoothness usePin\";\nsetInfinity -pri cycle;")
+	curve_cycleGraphs;
+
+runTimeCommand
+	-annotation "ZooSelectAnimatedAllNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("")
+	zooSelectAnimatedAll;
+
+runTimeCommand
+	-annotation "ZooToggleAndKeyVisNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.toogleKeyVisibility()")
+	toggleAndKeyVis;
+
+runTimeCommand
+	-annotation "ZooDeformersMarkingMenuReleaseNameCommand"
+	-category "Other items.User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from zoo.libs.maya.markingmenu import menu as zooMenu \nzooMenu.MarkingMenu.removeExistingMenu(\"markingMenuDeformers\")")
+	Zoo_DeformersMarkingMenu_Release;
+
+runTimeCommand
+	-annotation "ZooNextFrameNoUndoNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("undoInfo -swf off;\ncurrentTime ( `currentTime -q` + 1 );\nundoInfo -swf on;")
+	nextFrameNoUndo;
+
+runTimeCommand
+	-annotation "ZooLightsMarkingMenuReleaseNameCommand"
+	-category "Other items.User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
+	Zoo_LightsMarkingMenu_Release;
+
+runTimeCommand
+	-annotation "ZooMirrorPolygonGeometryNameCommand"
+	-category "Custom Scripts.Zoo Model"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.mirrorPolygonPlus()")
+	mirrorPolygonPlus;
+
+runTimeCommand
+	-annotation "ZooPreviousKeyNoUndoNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("undoInfo -swf off;\ncurrentTime -edit `findKeyframe -timeSlider -which previous`;\nundoInfo -swf on")
+	previousKeyNoUndo;
+
+runTimeCommand
+	-annotation "ZooPolySoftenEdgeNameCommand"
+	-category "Custom Scripts.Zoo Model"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("SoftPolyEdgeElements 1;\ntoggleSelMode;\ntoggleSelMode;")
+	polySoftenEdgeZoo;
+
+runTimeCommand
+	-annotation "ZooObjectModeAndDeselectNameCommand"
+	-category "Custom Scripts.Zoo Select"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("select -r `ls -hl`;\nif (`selectMode -q -co`)\n    selectMode -o;")
+	object_objectModeAndDeselect;
+
+runTimeCommand
+	-annotation "ZooSkinMarkingMenuReleaseNameCommand"
+	-category "Other items.User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from zoo.libs.maya.markingmenu import menu as zooMenu \nzooMenu.MarkingMenu.removeExistingMenu(\"markingMenuSkinning\")")
+	Zoo_SkinMarkingMenu_Release;
+
+runTimeCommand
+	-annotation "ZooPolyAppendAndCompleteNameCommand"
+	-category "Custom Scripts.Zoo Model"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("CompleteCurrentTool;\nAppendToPolygonTool;")
+	poly_appendAndComplete;
+
+runTimeCommand
+	-annotation "ZooSelectHierarchyNameCommand"
+	-category "Custom Scripts.Zoo Select"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("\nfrom zoo.libs.maya.cmds.hotkeys import definedhotkeys\ndefinedhotkeys.selectHierarchy()")
+	zoo_selectHierarchy;
+
+runTimeCommand
+	-annotation "zooResetAttrs_hotkeyPrsNameCommand"
+	-category "Custom Scripts.Zoo Object"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.resetAttrs()")
+	zooResetAttrs_hotkeyPrs;
+
+runTimeCommand
+	-annotation "ZooCreatePlaneMatchNameCommand"
+	-category "Custom Scripts.Zoo Model"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.createPlaneMatch()")
+	createPlaneMatch;
+
+runTimeCommand
+	-annotation "ZooExtractFaceToObjectModeNameCommand"
+	-category "Custom Scripts.Zoo Model"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("performPolyChipOff 0 0;\ntoggleSelMode;\n")
+	extractFaceToObjectMode;
+
+runTimeCommand
+	-annotation "ZooReloadNameCommand"
+	-category "Custom Scripts.Zoo Misc"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.reloadZooTools()")
+	zooReload;
+
+runTimeCommand
+	-annotation "ZooObjectBackfaceCullingToggleNameCommand"
+	-category "Custom Scripts.Zoo Object"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("toggleSurfaceBackfaceCulling();")
+	object_backfaceCullingToggle;
+
+runTimeCommand
+	-annotation "ZooRewindHoldReleaseNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import maya.mel as mel\nimport maya.cmds as cmds\n\nplayLag = 3\ncurrentTimeFloat = rewindStopHoldVar.returnStartTime()\nstartTime = cmds.currentTime( query=True )\nprint 'startTime', startTime\nprint 'currentTimeFloat', currentTimeFloat\nif (startTime < oldStartTime-playLag) or (startTime > oldStartTime):\n    mel.eval('togglePlayback')")
+	Zoo_rewindHoldRelease;
+
+runTimeCommand
+	-annotation "ZooHotkeySetToggleNameCommand"
+	-category "Custom Scripts.Zoo Window"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.hotkeySetToggle()")
+	ZooHotkeySetToggle;
+
+runTimeCommand
+	-annotation "ZooJointsMarkingMenuPressNameCommand"
+	-category "Other items.User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from zoo.libs.maya.markingmenu import menu as zooMenu \nzooMenu.MarkingMenu.buildFromLayout(\"markingMenu.joints\", \"markingMenuJoints\", parent=\"viewPanes\", options={\"altModifier\": False, \"shiftModifier\": True})")
+	Zoo_JointsMarkingMenu_Press;
+
+runTimeCommand
+	-annotation "ZooPolyEdgeLoopSplitAutoOnNameCommand"
+	-category "Custom Scripts.Zoo Model"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("polySelectEditCtx -e -mode 1 -ac 1 -insertWithEdgeFlow 0 polySelectEditContext;\nsetToolTo polySelectEditContext;")
+	poly_edgeLoopSplitAutoOn;
+
+runTimeCommand
+	-annotation "ZooGraphInfinityNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("animCurveEditor -edit -displayInfinities true graphEditor1GraphEd;")
+	graph_infinityGraph;
+
+runTimeCommand
+	-annotation "ZooMove5FramesForwardNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.animMoveTimeForwards5Frames()")
+	move5FramesForward;
+
+runTimeCommand
+	-annotation "ZooSelectNodeOrShaderAttrEditorNameCommand"
+	-category "Custom Scripts.Zoo Object"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from zoo.libs.maya.cmds.hotkeys import definedhotkeys\ndefinedhotkeys.selectNodeOrShaderAttrEditor()")
+	selectNodeAttrEditorOtherwiseShader;
+
+runTimeCommand
+	-annotation "ZooConstraintMarkingMenuReleaseNameCommand"
+	-category "Other items.User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from zoo.libs.maya.markingmenu import menu as zooMenu \nzooMenu.MarkingMenu.removeExistingMenu(\"markingMenuConstraint\")")
+	Zoo_ConstraintMarkingMenu_Release;
+
+runTimeCommand
+	-annotation "ZooSymmetricalToggleNameCommand"
+	-category "Custom Scripts.Zoo Model"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("//symmetricModelling -e -symmetry (!`symmetricModelling -q -symmetry`);\n\n{\n    string $sel[] = `ls -sl`;\n    int $state = `symmetricModelling -q -symmetry`;\n    if (1 - $state)\n    {    \n        symmetricModelling -symmetry 1;\n        select -r -sym $sel;\n        print (\"Symmetry is on\");\n        \n    }\n    else \n    {\n        select -r -sym $sel;\n        print (\"select\");\n        symmetricModelling -symmetry 0;\n        print (\"Symmetry is off\");\n    }\n}")
+	symmetricalToggle;
+
+runTimeCommand
+	-annotation "ZooToggleTexturesNameCommand"
+	-category "Custom Scripts.Zoo Display"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.displayToggleTextureMode()")
+	toggleTextures;
+
+runTimeCommand
+	-annotation "ZooTriggerToggleVisNameCommand"
+	-category "Custom Scripts.Zoo Display"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.toogleKeyVisibility()")
+	object_triggerToggle;
+
+runTimeCommand
+	-annotation "ZooSetKeyframeAllNameCommand"
+	-category "Custom Scripts.Zoo Anim"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("setKeyframe;")
+	setKeyframeAll;
+
+runTimeCommand
+	-annotation "ZooOpenLightEditorNameCommand"
+	-category "Custom Scripts.Zoo Window"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import maya.app.renderSetup.views.lightEditor.editor as __mod\ntry:\n    __mod.openEditorUI()\nfinally:\n    del __mod")
+	openLightEditor;
+
+runTimeCommand
+	-annotation "ZooCreateCylinderMatchNameCommand"
+	-category "Custom Scripts.Zoo Model"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.createCylinderMatch()")
+	createCylinderMatch;
+
+runTimeCommand
+	-annotation "ZooHiveArtistUiNameCommand"
+	-category "Custom Scripts.Zoo Window"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.windowHiveArtistUI()")
+	zooHiveArtistUI;
+
+runTimeCommand
+	-annotation "ZooRenamerNameCommand"
+	-category ""
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from zoo.apps.toolsetsui import run\nrun.openTool(\"zooRenamer\")")
+	zooRenamer;
+
+runTimeCommand
+	-annotation "ZooBevelChamferNameCommand"
+	-category "Custom Scripts.Zoo Model"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("performBevelOrChamfer;")
+	bevelChamfer;
+
+runTimeCommand
+	-annotation "ZooConstraintMarkingMenuPressNameCommand"
+	-category "Other items.User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from zoo.libs.maya.markingmenu import menu as zooMenu \nzooMenu.MarkingMenu.buildFromLayout(\"markingMenu.constraint\", \"markingMenuConstraint\", parent=\"viewPanes\", options={\"altModifier\": False, \"shiftModifier\": True})")
+	Zoo_ConstraintMarkingMenu_Press;
+
+runTimeCommand
+	-annotation "ZooRendermanIprNameCommand"
+	-category "Custom Scripts.Zoo Render"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("rmanLoadPlugin;\nrmanChangeToRenderMan;\n//setTestResolutionVar(4);\nrmanRerenderStart(1);")
+	rendermanIPR;
+
+runTimeCommand
+	-annotation "ZooXrayToggleNameCommand"
+	-category "Custom Scripts.Zoo Display"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.displayToggleXrayMode()")
+	xRayToggle;
+
+runTimeCommand
+	-annotation "ZooWireFrameShadedToggleNameCommand"
+	-category "Custom Scripts.Zoo Display"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import zoo.libs.maya.cmds.hotkeys.definedhotkeys as hk\nhk.displayToggleWireShadedMode()")
+	wireToShadedToggle;
+
+//
+// The name commands referenced by the hotkeys
+//
+nameCommand
+	-annotation "ZooHotkeySetToggleNameCommand"
+	-sourceType "mel"
+	-command ("ZooHotkeySetToggle")
+	ZooHotkeySetToggleNameCommand;
+
+nameCommand
+	-annotation "ZooWindowHotkeyManagerNameCommand"
+	-sourceType "mel"
+	-command ("zooHotkeyManagerWindow")
+	ZooWindowHotkeyManagerNameCommand;
+
+nameCommand
+	-annotation "MayaHotkeyPreferencesWindowNameCommand"
+	-sourceType "mel"
+	-command ("HotkeyPreferencesWindow")
+	MayaHotkeyPreferencesWindowNameCommand;
+
+nameCommand
+	-annotation "MayaSetKeyNameCommand"
+	-sourceType "mel"
+	-command ("SetKey")
+	MayaSetKeyNameCommand;
+
+nameCommand
+	-annotation "MayaTimeDraggerToolActivateNameCommand"
+	-sourceType "mel"
+	-command ("TimeDraggerToolActivate")
+	MayaTimeDraggerToolActivateNameCommand;
+
+nameCommand
+	-annotation "MayaTimeDraggerToolDeactivateNameCommand"
+	-sourceType "mel"
+	-command ("TimeDraggerToolDeactivate")
+	MayaTimeDraggerToolDeactivateNameCommand;
+
+nameCommand
+	-annotation "zooResetAttrs_hotkeyPrsNameCommand"
+	-sourceType "mel"
+	-command ("zooResetAttrs_hotkeyPrs")
+	zooResetAttrs_hotkeyPrsNameCommand;
+
+nameCommand
+	-annotation "MayaToggleIsolateSelectNameCommand"
+	-sourceType "mel"
+	-command ("ToggleIsolateSelect")
+	MayaToggleIsolateSelectNameCommand;
+
+nameCommand
+	-annotation "MayaEnterEditModeReleaseNameCommand"
+	-sourceType "mel"
+	-command ("EnterEditModeRelease")
+	MayaEnterEditModeReleaseNameCommand;
+
+nameCommand
+	-annotation "MayaEnterEditModePressNameCommand"
+	-sourceType "mel"
+	-command ("EnterEditModePress")
+	MayaEnterEditModePressNameCommand;
+
+nameCommand
+	-annotation "MayaChannelControlEditorNameCommand"
+	-sourceType "mel"
+	-command ("ChannelControlEditor")
+	MayaChannelControlEditorNameCommand;
+
+nameCommand
+	-annotation "MayaSubdLowQualityDisplayNameCommand"
+	-sourceType "mel"
+	-command ("LowQualityDisplay")
+	MayaSubdLowQualityDisplayNameCommand;
+
+nameCommand
+	-annotation "MayaSubdMediumQualityDisplayNameCommand"
+	-sourceType "mel"
+	-command ("MediumQualityDisplay")
+	MayaSubdMediumQualityDisplayNameCommand;
+
+nameCommand
+	-annotation "MayaSubdHighQualityDisplayNameCommand"
+	-sourceType "mel"
+	-command ("HighQualityDisplay")
+	MayaSubdHighQualityDisplayNameCommand;
+
+nameCommand
+	-annotation "MayaConnectionEditorNameCommand"
+	-sourceType "mel"
+	-command ("ConnectionEditor")
+	MayaConnectionEditorNameCommand;
+
+nameCommand
+	-annotation "MayaNodeEditorWindowNameCommand"
+	-sourceType "mel"
+	-command ("NodeEditorWindow")
+	MayaNodeEditorWindowNameCommand;
+
+nameCommand
+	-annotation "MayaRenderGlobalsWindowNameCommand"
+	-sourceType "mel"
+	-command ("RenderGlobalsWindow")
+	MayaRenderGlobalsWindowNameCommand;
+
+nameCommand
+	-annotation "MayaSpreadSheetEditorNameCommand"
+	-sourceType "mel"
+	-command ("SpreadSheetEditor")
+	MayaSpreadSheetEditorNameCommand;
+
+nameCommand
+	-annotation "MayaComponentEditorNameCommand"
+	-sourceType "mel"
+	-command ("ComponentEditor")
+	MayaComponentEditorNameCommand;
+
+nameCommand
+	-annotation "MayaBridgeEdgeNameCommand"
+	-sourceType "mel"
+	-command ("BridgeEdge")
+	MayaBridgeEdgeNameCommand;
+
+nameCommand
+	-annotation "MayaCombinePolygonsNameCommand"
+	-sourceType "mel"
+	-command ("CombinePolygons")
+	MayaCombinePolygonsNameCommand;
+
+nameCommand
+	-annotation "MayaSetDrivenKeyOptionsNameCommand"
+	-sourceType "mel"
+	-command ("SetDrivenKeyOptions")
+	MayaSetDrivenKeyOptionsNameCommand;
+
+nameCommand
+	-annotation "MayaPreferencesWindowNameCommand"
+	-sourceType "mel"
+	-command ("PreferencesWindow")
+	MayaPreferencesWindowNameCommand;
+
+nameCommand
+	-annotation "MayaDrCurveSnapPressNameCommand"
+	-sourceType "mel"
+	-command ("dR_curveSnapPress")
+	MayaDrCurveSnapPressNameCommand;
+
+nameCommand
+	-annotation "MayaDrCurveSnapReleaseNameCommand"
+	-sourceType "mel"
+	-command ("dR_curveSnapRelease")
+	MayaDrCurveSnapReleaseNameCommand;
+
+nameCommand
+	-annotation "MayaDrGridSnapReleaseNameCommand"
+	-sourceType "mel"
+	-command ("dR_gridSnapRelease")
+	MayaDrGridSnapReleaseNameCommand;
+
+nameCommand
+	-annotation "MayaOutlinerWindowNameCommand"
+	-sourceType "mel"
+	-command ("OutlinerWindow")
+	MayaOutlinerWindowNameCommand;
+
+nameCommand
+	-annotation "MayaHypershadeWindowNameCommand"
+	-sourceType "mel"
+	-command ("HypershadeWindow")
+	MayaHypershadeWindowNameCommand;
+
+nameCommand
+	-annotation "MayaCreatenurbsCircleNameCommand"
+	-sourceType "mel"
+	-command ("CreateNURBSCircle")
+	MayaCreatenurbsCircleNameCommand;
+
+nameCommand
+	-annotation "MayaRenderViewWindowNameCommand"
+	-sourceType "mel"
+	-command ("RenderViewWindow")
+	MayaRenderViewWindowNameCommand;
+
+nameCommand
+	-annotation "MayaSequenceEditorNameCommand"
+	-sourceType "mel"
+	-command ("SequenceEditor")
+	MayaSequenceEditorNameCommand;
+
+nameCommand
+	-annotation "MayaDrQuadDrawToolNameCommand"
+	-sourceType "mel"
+	-command ("dR_quadDrawTool")
+	MayaDrQuadDrawToolNameCommand;
+
+nameCommand
+	-annotation "MayaGraphEditorNameCommand"
+	-sourceType "mel"
+	-command ("GraphEditor")
+	MayaGraphEditorNameCommand;
+
+nameCommand
+	-annotation "MayaScriptEditorNameCommand"
+	-sourceType "mel"
+	-command ("ScriptEditor")
+	MayaScriptEditorNameCommand;
+
+nameCommand
+	-annotation "MayaSculptGeometryToolNameCommand"
+	-sourceType "mel"
+	-command ("SculptGeometryTool")
+	MayaSculptGeometryToolNameCommand;
+
+nameCommand
+	-annotation "MayaTextureViewWindowNameCommand"
+	-sourceType "mel"
+	-command ("TextureViewWindow")
+	MayaTextureViewWindowNameCommand;
+
+nameCommand
+	-annotation "MayaFreezeTransformationsNameCommand"
+	-sourceType "mel"
+	-command ("FreezeTransformations")
+	MayaFreezeTransformationsNameCommand;
+
+nameCommand
+	-annotation "MayaDrMultiCutToolNameCommand"
+	-sourceType "mel"
+	-command ("dR_multiCutTool")
+	MayaDrMultiCutToolNameCommand;
+
+nameCommand
+	-annotation "MayaToggleSelectionHandlesNameCommand"
+	-sourceType "mel"
+	-command ("ToggleSelectionHandles")
+	MayaToggleSelectionHandlesNameCommand;
+
+nameCommand
+	-annotation "MayaCenterPivotNameCommand"
+	-sourceType "mel"
+	-command ("CenterPivot")
+	MayaCenterPivotNameCommand;
+
+nameCommand
+	-annotation "MayaPolyMergeNameCommand"
+	-sourceType "mel"
+	-command ("PolyMerge")
+	MayaPolyMergeNameCommand;
+
+nameCommand
+	-annotation "MayaMergeToCenterNameCommand"
+	-sourceType "mel"
+	-command ("MergeToCenter")
+	MayaMergeToCenterNameCommand;
+
+nameCommand
+	-annotation "MayaCreateLocatorNameCommand"
+	-sourceType "mel"
+	-command ("CreateLocator")
+	MayaCreateLocatorNameCommand;
+
+nameCommand
+	-annotation "MayaShowAllNameCommand"
+	-sourceType "mel"
+	-command ("ShowAll")
+	MayaShowAllNameCommand;
+
+nameCommand
+	-annotation "MayaNamespaceEditorNameCommand"
+	-sourceType "mel"
+	-command ("NamespaceEditor")
+	MayaNamespaceEditorNameCommand;
+
+nameCommand
+	-annotation "MayaDuplicateWithTransformNameCommand"
+	-sourceType "mel"
+	-command ("DuplicateWithTransform")
+	MayaDuplicateWithTransformNameCommand;
+
+nameCommand
+	-annotation "MayaCreateCameraFromViewNameCommand"
+	-sourceType "mel"
+	-command ("CreateCameraFromView")
+	MayaCreateCameraFromViewNameCommand;
+
+nameCommand
+	-annotation "MayaSetMeshWaxToolNameCommand"
+	-sourceType "mel"
+	-command ("SetMeshWaxTool")
+	MayaSetMeshWaxToolNameCommand;
+
+nameCommand
+	-annotation "MayaSculptMeshUnfreezeAllNameCommand"
+	-sourceType "mel"
+	-command ("SculptMeshUnfreezeAll")
+	MayaSculptMeshUnfreezeAllNameCommand;
+
+nameCommand
+	-annotation "MayaSculptMeshInvertFreezeNameCommand"
+	-sourceType "mel"
+	-command ("SculptMeshInvertFreeze")
+	MayaSculptMeshInvertFreezeNameCommand;
+
+nameCommand
+	-annotation "MayaSetMeshScrapeToolNameCommand"
+	-sourceType "mel"
+	-command ("SetMeshScrapeTool")
+	MayaSetMeshScrapeToolNameCommand;
+
+nameCommand
+	-annotation "MayaSetMeshFillToolNameCommand"
+	-sourceType "mel"
+	-command ("SetMeshFillTool")
+	MayaSetMeshFillToolNameCommand;
+
+nameCommand
+	-annotation "MayaToggleFrameRateNameCommand"
+	-sourceType "mel"
+	-command ("ToggleFrameRate")
+	MayaToggleFrameRateNameCommand;
+
+nameCommand
+	-annotation "MayaToggleCurrentFrameNameCommand"
+	-sourceType "mel"
+	-command ("ToggleCurrentFrame")
+	MayaToggleCurrentFrameNameCommand;
+
+nameCommand
+	-annotation "MayaTogglePolyCountNameCommand"
+	-sourceType "mel"
+	-command ("TogglePolyCount")
+	MayaTogglePolyCountNameCommand;
+
+nameCommand
+	-annotation "MayaEnterEditModeNameCommand"
+	-sourceType "mel"
+	-command ("EnterEditMode")
+	MayaEnterEditModeNameCommand;
+
+nameCommand
+	-annotation "MayaMergeVertexToolNameCommand"
+	-sourceType "mel"
+	-command ("MergeVertexTool")
+	MayaMergeVertexToolNameCommand;
+
+nameCommand
+	-annotation "MayaFillHoleNameCommand"
+	-sourceType "mel"
+	-command ("FillHole")
+	MayaFillHoleNameCommand;
+
+nameCommand
+	-annotation "MayaPolygonCollapseNameCommand"
+	-sourceType "mel"
+	-command ("PolygonCollapse")
+	MayaPolygonCollapseNameCommand;
+
+nameCommand
+	-annotation "MayaConvertInstanceToObjectNameCommand"
+	-sourceType "mel"
+	-command ("ConvertInstanceToObject")
+	MayaConvertInstanceToObjectNameCommand;
+
+nameCommand
+	-annotation "MayaSlideEdgeToolNameCommand"
+	-sourceType "mel"
+	-command ("SlideEdgeTool")
+	MayaSlideEdgeToolNameCommand;
+
+nameCommand
+	-annotation "MayaNodeEditorGridToggleSnaprNameCommand"
+	-sourceType "mel"
+	-command ("NodeEditorGridToggleSnap")
+	MayaNodeEditorGridToggleSnaprNameCommand;
+
+nameCommand
+	-annotation "MayaInsertKeyToolActivateNameCommand"
+	-sourceType "mel"
+	-command ("InsertKeyToolActivate")
+	MayaInsertKeyToolActivateNameCommand;
+
+nameCommand
+	-annotation "MayaInsertKeyToolDeactivateNameCommand"
+	-sourceType "mel"
+	-command ("InsertKeyToolDeactivate")
+	MayaInsertKeyToolDeactivateNameCommand;
+
+nameCommand
+	-annotation "MayaDrGridSnapPressNameCommand"
+	-sourceType "mel"
+	-command ("dR_gridSnapPress")
+	MayaDrGridSnapPressNameCommand;
+
+nameCommand
+	-annotation "MayaDrPointSnapPressNameCommand"
+	-sourceType "mel"
+	-command ("dR_pointSnapPress")
+	MayaDrPointSnapPressNameCommand;
+
+nameCommand
+	-annotation "MayaDrPointSnapReleaseNameCommand"
+	-sourceType "mel"
+	-command ("dR_pointSnapRelease")
+	MayaDrPointSnapReleaseNameCommand;
+
+nameCommand
+	-annotation "ZooMirrorPolygonGeometryNameCommand"
+	-sourceType "mel"
+	-command ("mirrorPolygonPlus")
+	ZooMirrorPolygonGeometryNameCommand;
+
+nameCommand
+	-annotation "MayaMirrorPolygonGeometryOptionsNameCommand"
+	-sourceType "mel"
+	-command ("MirrorPolygonGeometryOptions")
+	MayaMirrorPolygonGeometryOptionsNameCommand;
+
+nameCommand
+	-annotation "MayaPluginManagerNameCommand"
+	-sourceType "mel"
+	-command ("PluginManager")
+	MayaPluginManagerNameCommand;
+
+nameCommand
+	-annotation "MayaReversePolygonNormalsNameCommand"
+	-sourceType "mel"
+	-command ("ReversePolygonNormals")
+	MayaReversePolygonNormalsNameCommand;
+
+nameCommand
+	-annotation "MayaNewSceneNameCommand"
+	-sourceType "mel"
+	-command ("NewScene")
+	MayaNewSceneNameCommand;
+
+nameCommand
+	-annotation "ZooConstraintMarkingMenuPressNameCommand"
+	-sourceType "mel"
+	-command ("Zoo_ConstraintMarkingMenu_Press")
+	ZooConstraintMarkingMenuPressNameCommand;
+
+nameCommand
+	-annotation "ZooConstraintMarkingMenuReleaseNameCommand"
+	-sourceType "mel"
+	-command ("Zoo_ConstraintMarkingMenu_Release")
+	ZooConstraintMarkingMenuReleaseNameCommand;
+
+nameCommand
+	-annotation "ZooCreateCamRooXzyNameCommand"
+	-sourceType "mel"
+	-command ("ZooCreateCamROOxzy")
+	ZooCreateCamRooXzyNameCommand;
+
+nameCommand
+	-annotation "ZooDeformersMarkingMenuPressNameCommand"
+	-sourceType "mel"
+	-command ("Zoo_DeformersMarkingMenu_Press")
+	ZooDeformersMarkingMenuPressNameCommand;
+
+nameCommand
+	-annotation "ZooDeformersMarkingMenuReleaseNameCommand"
+	-sourceType "mel"
+	-command ("Zoo_DeformersMarkingMenu_Release")
+	ZooDeformersMarkingMenuReleaseNameCommand;
+
+nameCommand
+	-annotation "ZooSkinMarkingMenuPressNameCommand"
+	-sourceType "mel"
+	-command ("Zoo_SkinMarkingMenu_Press")
+	ZooSkinMarkingMenuPressNameCommand;
+
+nameCommand
+	-annotation "ZooSkinMarkingMenuReleaseNameCommand"
+	-sourceType "mel"
+	-command ("Zoo_SkinMarkingMenu_Release")
+	ZooSkinMarkingMenuReleaseNameCommand;
+
+nameCommand
+	-annotation "ZooLightsMarkingMenuPressNameCommand"
+	-sourceType "mel"
+	-command ("Zoo_LightsMarkingMenu_Press")
+	ZooLightsMarkingMenuPressNameCommand;
+
+nameCommand
+	-annotation "ZooLightsMarkingMenuReleaseNameCommand"
+	-sourceType "mel"
+	-command ("Zoo_LightsMarkingMenu_Release")
+	ZooLightsMarkingMenuReleaseNameCommand;
+
+nameCommand
+	-annotation "ZooJointsMarkingMenuPressNameCommand"
+	-sourceType "mel"
+	-command ("Zoo_JointsMarkingMenu_Press")
+	ZooJointsMarkingMenuPressNameCommand;
+
+nameCommand
+	-annotation "ZooJointsMarkingMenuReleaseNameCommand"
+	-sourceType "mel"
+	-command ("Zoo_JointsMarkingMenu_Release")
+	ZooJointsMarkingMenuReleaseNameCommand;
+
+nameCommand
+	-annotation "MayaDeletePolyElementsNameCommand"
+	-sourceType "mel"
+	-command ("DeletePolyElements")
+	MayaDeletePolyElementsNameCommand;
+
+nameCommand
+	-annotation "ZooAnimHoldNameCommand"
+	-sourceType "mel"
+	-command ("zooAnimHold")
+	ZooAnimHoldNameCommand;
+
+nameCommand
+	-annotation "ZooRewindHoldReleaseNameCommand"
+	-sourceType "mel"
+	-command ("Zoo_rewindHoldRelease")
+	ZooRewindHoldReleaseNameCommand;
+
+nameCommand
+	-annotation "ZooRewindHoldPressNameCommand"
+	-sourceType "mel"
+	-command ("Zoo_rewindHoldPress")
+	ZooRewindHoldPressNameCommand;
+
+nameCommand
+	-annotation "ZooSelectHierarchyNameCommand"
+	-sourceType "mel"
+	-command ("zoo_selectHierarchy")
+	ZooSelectHierarchyNameCommand;
+
+nameCommand
+	-annotation "ZooKeyJumpSelectedTimeNameCommand"
+	-sourceType "mel"
+	-command ("zooJumpSelectedTime")
+	ZooKeyJumpSelectedTimeNameCommand;
+
+nameCommand
+	-annotation "ZooKeySnapRetainSpacingNameCommand"
+	-sourceType "mel"
+	-command ("zooMoveKeysSelectedTime")
+	ZooKeySnapRetainSpacingNameCommand;
+
+nameCommand
+	-annotation "ZooMove5FramesBackNameCommand"
+	-sourceType "mel"
+	-command ("move5FramesBack")
+	ZooMove5FramesBackNameCommand;
+
+nameCommand
+	-annotation "ZooMove5FramesForwardNameCommand"
+	-sourceType "mel"
+	-command ("move5FramesForward")
+	ZooMove5FramesForwardNameCommand;
+
+nameCommand
+	-annotation "ZooMoveKeyBackOneNameCommand"
+	-sourceType "mel"
+	-command ("moveKeyBackOne")
+	ZooMoveKeyBackOneNameCommand;
+
+nameCommand
+	-annotation "ZooNextFrameNoUndoNameCommand"
+	-sourceType "mel"
+	-command ("nextFrameNoUndo")
+	ZooNextFrameNoUndoNameCommand;
+
+nameCommand
+	-annotation "ZooNextKeyNoUndoNameCommand"
+	-sourceType "mel"
+	-command ("nextKeyNoUndo")
+	ZooNextKeyNoUndoNameCommand;
+
+nameCommand
+	-annotation "ZooMoveKeyForwardOneNameCommand"
+	-sourceType "mel"
+	-command ("moveKeyForwardOne")
+	ZooMoveKeyForwardOneNameCommand;
+
+nameCommand
+	-annotation "ZooNodeEditorShowCurrentSelectionNameCommand"
+	-sourceType "mel"
+	-command ("nodeEditorShowCurrentSelection_HM")
+	ZooNodeEditorShowCurrentSelectionNameCommand;
+
+nameCommand
+	-annotation "ZooObjectModeAndDeselectNameCommand"
+	-sourceType "mel"
+	-command ("object_objectModeAndDeselect")
+	ZooObjectModeAndDeselectNameCommand;
+
+nameCommand
+	-annotation "ZooAlignSelectionHotkeyPrsNameCommand"
+	-sourceType "mel"
+	-command ("zooAlignSelection_hotkeyPrs")
+	ZooAlignSelectionHotkeyPrsNameCommand;
+
+nameCommand
+	-annotation "ZooToggleAndKeyVisNameCommand"
+	-sourceType "mel"
+	-command ("toggleAndKeyVis")
+	ZooToggleAndKeyVisNameCommand;
+
+nameCommand
+	-annotation "ZooViewportLightingToggleNameCommand"
+	-sourceType "mel"
+	-command ("viewport_lightingToggle")
+	ZooViewportLightingToggleNameCommand;
+
+nameCommand
+	-annotation "ZooToggleTexturesNameCommand"
+	-sourceType "mel"
+	-command ("toggleTextures")
+	ZooToggleTexturesNameCommand;
+
+nameCommand
+	-annotation "ZooWireFrameShadedToggleNameCommand"
+	-sourceType "mel"
+	-command ("wireToShadedToggle")
+	ZooWireFrameShadedToggleNameCommand;
+
+nameCommand
+	-annotation "ZooWireframeOnShadedToggleNameCommand"
+	-sourceType "mel"
+	-command ("wireframeOnShadedToggle")
+	ZooWireframeOnShadedToggleNameCommand;
+
+nameCommand
+	-annotation "ZooXrayToggleNameCommand"
+	-sourceType "mel"
+	-command ("xRayToggle")
+	ZooXrayToggleNameCommand;
+
+nameCommand
+	-annotation "ZooSelectFromFcurveNameCommand"
+	-sourceType "mel"
+	-command ("zooSelectFromFCurve")
+	ZooSelectFromFcurveNameCommand;
+
+nameCommand
+	-annotation "ZooPolySoftenEdgeNameCommand"
+	-sourceType "mel"
+	-command ("polySoftenEdgeZoo")
+	ZooPolySoftenEdgeNameCommand;
+
+nameCommand
+	-annotation "ZooPolyHardenEdgeNameCommand"
+	-sourceType "mel"
+	-command ("polyHardenEdgeZoo")
+	ZooPolyHardenEdgeNameCommand;
+
+nameCommand
+	-annotation "ZooLambert50PercentGreyNameCommand"
+	-sourceType "mel"
+	-command ("lambert50PercentGrey")
+	ZooLambert50PercentGreyNameCommand;
+
+nameCommand
+	-annotation "ZooSelectNodeOrShaderAttrEditorNameCommand"
+	-sourceType "mel"
+	-command ("selectNodeAttrEditorOtherwiseShader")
+	ZooSelectNodeOrShaderAttrEditorNameCommand;
+
+nameCommand
+	-annotation "ZooRendermanIprNameCommand"
+	-sourceType "mel"
+	-command ("rendermanIPR")
+	ZooRendermanIprNameCommand;
+
+nameCommand
+	-annotation "ZooCurveCycleGraphsNameCommand"
+	-sourceType "mel"
+	-command ("curve_cycleGraphs")
+	ZooCurveCycleGraphsNameCommand;
+
+nameCommand
+	-annotation "ZooKeyDeleteCurrentFrameNameCommand"
+	-sourceType "mel"
+	-command ("key_deleteCurrentFrame")
+	ZooKeyDeleteCurrentFrameNameCommand;
+
+nameCommand
+	-annotation "ZooGraphInfinityNameCommand"
+	-sourceType "mel"
+	-command ("graph_infinityGraph")
+	ZooGraphInfinityNameCommand;
+
+nameCommand
+	-annotation "ZooPreviousKeyNoUndoNameCommand"
+	-sourceType "mel"
+	-command ("previousKeyNoUndo")
+	ZooPreviousKeyNoUndoNameCommand;
+
+nameCommand
+	-annotation "ZooPreviousFrameNoUndoNameCommand"
+	-sourceType "mel"
+	-command ("previousFrameNoUndo")
+	ZooPreviousFrameNoUndoNameCommand;
+
+nameCommand
+	-annotation "ZooPlaybackAnimEndNameCommand"
+	-sourceType "mel"
+	-command ("playbackAnimEnd")
+	ZooPlaybackAnimEndNameCommand;
+
+nameCommand
+	-annotation "ZooPlaybackAnimStartNameCommand"
+	-sourceType "mel"
+	-command ("playbackAnimStart")
+	ZooPlaybackAnimStartNameCommand;
+
+nameCommand
+	-annotation "ZooRangeEndNameCommand"
+	-sourceType "mel"
+	-command ("rangeEnd")
+	ZooRangeEndNameCommand;
+
+nameCommand
+	-annotation "ZooRangeStartNameCommand"
+	-sourceType "mel"
+	-command ("rangeStart")
+	ZooRangeStartNameCommand;
+
+nameCommand
+	-annotation "ZooSetKeyframeAllNameCommand"
+	-sourceType "mel"
+	-command ("setKeyframeAll")
+	ZooSetKeyframeAllNameCommand;
+
+nameCommand
+	-annotation "ZooSelectCamInViewNameCommand"
+	-sourceType "mel"
+	-command ("selectCamInView")
+	ZooSelectCamInViewNameCommand;
+
+nameCommand
+	-annotation "ZooObjectBackfaceCullingToggleNameCommand"
+	-sourceType "mel"
+	-command ("object_backfaceCullingToggle")
+	ZooObjectBackfaceCullingToggleNameCommand;
+
+nameCommand
+	-annotation "ZooPolyAppendAndCompleteNameCommand"
+	-sourceType "mel"
+	-command ("poly_appendAndComplete")
+	ZooPolyAppendAndCompleteNameCommand;
+
+nameCommand
+	-annotation "ZooPolyEdgeLoopSplitAutoOnNameCommand"
+	-sourceType "mel"
+	-command ("poly_edgeLoopSplitAutoOn")
+	ZooPolyEdgeLoopSplitAutoOnNameCommand;
+
+nameCommand
+	-annotation "ZooPolyMergeNoMoveNameCommand"
+	-sourceType "mel"
+	-command ("poly_mergeNoMove")
+	ZooPolyMergeNoMoveNameCommand;
+
+nameCommand
+	-annotation "MayaReferenceEditorNameCommand"
+	-sourceType "mel"
+	-command ("ReferenceEditor")
+	MayaReferenceEditorNameCommand;
+
+nameCommand
+	-annotation "ZooSculptHudModeOnNameCommand"
+	-sourceType "mel"
+	-command ("sculptHUDModeOn")
+	ZooSculptHudModeOnNameCommand;
+
+nameCommand
+	-annotation "ZooExtractFaceToObjectModeNameCommand"
+	-sourceType "mel"
+	-command ("extractFaceToObjectMode")
+	ZooExtractFaceToObjectModeNameCommand;
+
+nameCommand
+	-annotation "ZooBevelChamferNameCommand"
+	-sourceType "mel"
+	-command ("bevelChamfer")
+	ZooBevelChamferNameCommand;
+
+nameCommand
+	-annotation "ZooEdgeModeNameCommand"
+	-sourceType "mel"
+	-command ("edgeMode")
+	ZooEdgeModeNameCommand;
+
+nameCommand
+	-annotation "ZooFaceModeNameCommand"
+	-sourceType "mel"
+	-command ("faceMode")
+	ZooFaceModeNameCommand;
+
+nameCommand
+	-annotation "ZooOpenLightEditorNameCommand"
+	-sourceType "mel"
+	-command ("openLightEditor")
+	ZooOpenLightEditorNameCommand;
+
+nameCommand
+	-annotation "MayaSetMeshFlattenToolNameCommand"
+	-sourceType "mel"
+	-command ("SetMeshFlattenTool")
+	MayaSetMeshFlattenToolNameCommand;
+
+nameCommand
+	-annotation "MayaSetMeshFreezeToolNameCommand"
+	-sourceType "mel"
+	-command ("SetMeshFreezeTool")
+	MayaSetMeshFreezeToolNameCommand;
+
+nameCommand
+	-annotation "MayaSetMeshGrabToolNameCommand"
+	-sourceType "mel"
+	-command ("SetMeshGrabTool")
+	MayaSetMeshGrabToolNameCommand;
+
+nameCommand
+	-annotation "MayaSetMeshPinchToolNameCommand"
+	-sourceType "mel"
+	-command ("SetMeshPinchTool")
+	MayaSetMeshPinchToolNameCommand;
+
+nameCommand
+	-annotation "MayaSetMeshSculptToolNameCommand"
+	-sourceType "mel"
+	-command ("SetMeshSculptTool")
+	MayaSetMeshSculptToolNameCommand;
+
+nameCommand
+	-annotation "ZooCreateCubeMatchNameCommand"
+	-sourceType "mel"
+	-command ("createCubeMatch")
+	ZooCreateCubeMatchNameCommand;
+
+nameCommand
+	-annotation "ZooCreateCylinderMatchNameCommand"
+	-sourceType "mel"
+	-command ("createCylinderMatch")
+	ZooCreateCylinderMatchNameCommand;
+
+nameCommand
+	-annotation "ZooCreateSphereMatchNameCommand"
+	-sourceType "mel"
+	-command ("createSphereMatch")
+	ZooCreateSphereMatchNameCommand;
+
+nameCommand
+	-annotation "ZooCreatePlaneMatchNameCommand"
+	-sourceType "mel"
+	-command ("createPlaneMatch")
+	ZooCreatePlaneMatchNameCommand;
+
+nameCommand
+	-annotation "ZooMirrorInstanceGroupWorldxNameCommand"
+	-sourceType "mel"
+	-command ("mirrorInstanceGroupWorldX")
+	ZooMirrorInstanceGroupWorldxNameCommand;
+
+nameCommand
+	-annotation "ZooTriggerToggleVisNameCommand"
+	-sourceType "mel"
+	-command ("object_triggerToggle")
+	ZooTriggerToggleVisNameCommand;
+
+nameCommand
+	-annotation "ZooSymmetricalToggleNameCommand"
+	-sourceType "mel"
+	-command ("symmetricalToggle")
+	ZooSymmetricalToggleNameCommand;
+
+nameCommand
+	-annotation "ZooToggleFalloffSurfaceVolumeNameCommand"
+	-sourceType "mel"
+	-command ("toggleFalloff_SurfaceVolume")
+	ZooToggleFalloffSurfaceVolumeNameCommand;
+
+nameCommand
+	-annotation "ZooVertModeNameCommand"
+	-sourceType "mel"
+	-command ("vertMode")
+	ZooVertModeNameCommand;
+
+nameCommand
+	-annotation "ZooSmoothPolyObjectNameCommand"
+	-sourceType "mel"
+	-command ("smoothPolyObject")
+	ZooSmoothPolyObjectNameCommand;
+
+nameCommand
+	-annotation "ZooPasteKeysNameCommand"
+	-sourceType "mel"
+	-command ("zooPasteKeys")
+	ZooPasteKeysNameCommand;
+
+nameCommand
+	-annotation "MayaPlayNameCommand"
+	-sourceType "mel"
+	-command ("PlaybackToggle")
+	MayaPlayNameCommand;
+
+nameCommand
+	-annotation "MayaCopyGraphAnimKeysNameCommand"
+	-sourceType "mel"
+	-command ("GraphCopy")
+	MayaCopyGraphAnimKeysNameCommand;
+
+nameCommand
+	-annotation "MayaConformPolygonNameCommand"
+	-sourceType "mel"
+	-command ("ConformPolygon")
+	MayaConformPolygonNameCommand;
+
+nameCommand
+	-annotation "MayaMakeLiveNameCommand"
+	-sourceType "mel"
+	-command ("MakeLive")
+	MayaMakeLiveNameCommand;
+
+nameCommand
+	-annotation "MayaMergeToCenter2NameCommand"
+	-sourceType "mel"
+	-command ("MergeToCenter")
+	MayaMergeToCenter2NameCommand;
+
+nameCommand
+	-annotation "MayaNodeEditorGridToggleSnapNameCommand"
+	-sourceType "mel"
+	-command ("NodeEditorGridToggleSnap")
+	MayaNodeEditorGridToggleSnapNameCommand;
+
+nameCommand
+	-annotation "MayaSlideEdgeTool2NameCommand"
+	-sourceType "mel"
+	-command ("SlideEdgeTool")
+	MayaSlideEdgeTool2NameCommand;
+
+nameCommand
+	-annotation "ZooHiveArtistUiNameCommand"
+	-sourceType "mel"
+	-command ("zooHiveArtistUI")
+	ZooHiveArtistUiNameCommand;
+
+nameCommand
+	-annotation "ZooReloadNameCommand"
+	-sourceType "mel"
+	-command ("zooReload")
+	ZooReloadNameCommand;
+
+nameCommand
+	-annotation "ZooSelectAnimatedAllNameCommand"
+	-sourceType "mel"
+	-command ("zooSelectAnimatedAll")
+	ZooSelectAnimatedAllNameCommand;
+
+nameCommand
+	-annotation "ZooDisplayMarkingMenuPressNameCommand"
+	-sourceType "mel"
+	-command ("ZooDisplayMarkingMenuPress")
+	ZooDisplayMarkingMenuPressNameCommand;
+
+nameCommand
+	-annotation "ZooDisplayMarkingMenuReleaseNameCommand"
+	-sourceType "mel"
+	-command ("ZooMarkingMenuRelease")
+	ZooDisplayMarkingMenuReleaseNameCommand;
+
+nameCommand
+	-annotation "ZooRenamerNameCommand"
+	-sourceType "mel"
+	-command ("zooRenamer")
+	ZooRenamerNameCommand;
+
+//
+// The user hotkeys
+//
+//
+// The hotkey set
+//
+hotkeySet -source "Maya_Default" -current Zoo_Tools_Default;
+//
+// The hotkey contexts and hotkeys
+//
+hotkey -keyShortcut "r" -ctl -sht -name ("MayaReferenceEditorNameCommand");
+hotkey -keyShortcut "`" -ctl -name ("MayaToggleIsolateSelectNameCommand");
+hotkey -keyShortcut "y" -ctl -name ("MayaSlideEdgeToolNameCommand");
+hotkey -keyShortcut "n" -ctl -sht -name ("ZooSelectNodeOrShaderAttrEditorNameCommand");
+hotkey -keyShortcut "r" -ctl -alt -sht -name ("MayaToggleFrameRateNameCommand");
+hotkey -keyShortcut "i" -sht -name ("ZooGraphInfinityNameCommand");
+hotkey -keyShortcut "h" -alt -name ("MayaToggleSelectionHandlesNameCommand");
+hotkey -keyShortcut "" -name ("ZooSelectAnimatedAllNameCommand");
+hotkey -keyShortcut "m" -ctl -alt -sht -name ("MayaMirrorPolygonGeometryOptionsNameCommand");
+hotkey -keyShortcut "i" -ctl -sht -name ("ZooCreateCylinderMatchNameCommand");
+hotkey -keyShortcut "6" -alt -name ("MayaPreferencesWindowNameCommand");
+hotkey -keyShortcut "c" -sht -name ("MayaCenterPivotNameCommand");
+hotkey -keyShortcut "d" -sht -name ("MayaDuplicateWithTransformNameCommand");
+hotkey -keyShortcut "4" -ctl -name ("MayaConnectionEditorNameCommand");
+hotkey -keyShortcut "z" -ctl -alt -name ("MayaSetMeshFillToolNameCommand");
+hotkey -keyShortcut "3" -ctl -alt -name ("MayaSubdHighQualityDisplayNameCommand");
+hotkey -keyShortcut "q" -alt -name ("ZooObjectModeAndDeselectNameCommand");
+hotkey -keyShortcut "6" -name ("MayaSequenceEditorNameCommand");
+hotkey -keyShortcut "2" -ctl -alt -name ("MayaSubdMediumQualityDisplayNameCommand");
+hotkey -keyShortcut "i" -ctl -alt -sht -name ("MayaConvertInstanceToObjectNameCommand");
+hotkey -keyShortcut "!" -name ("ZooXrayToggleNameCommand");
+hotkey -keyShortcut "*" -name ("MayaSetDrivenKeyOptionsNameCommand");
+hotkey -keyShortcut "p" -ctl -alt -name ("MayaSculptGeometryToolNameCommand");
+hotkey -keyShortcut "0" -name ("MayaHotkeyPreferencesWindowNameCommand");
+hotkey -keyShortcut "'" -name ("ZooHiveArtistUiNameCommand");
+hotkey -keyShortcut ";" -name ("ZooHotkeySetToggleNameCommand");
+hotkey -keyShortcut "a" -alt -sht -name ("ZooKeyJumpSelectedTimeNameCommand");
+hotkey -keyShortcut "x" -alt -name ("ZooPreviousFrameNoUndoNameCommand");
+hotkey -keyShortcut "k" -alt -name ("MayaCreateCameraFromViewNameCommand");
+hotkey -keyShortcut "z" -alt -name ("ZooRewindHoldPressNameCommand");
+hotkey -keyShortcut "0" -ctl -name ("ZooWindowHotkeyManagerNameCommand");
+hotkey -keyShortcut "l" -sht -name ("MayaCreateLocatorNameCommand");
+hotkey -keyShortcut "z" -alt -releaseName ("ZooRewindHoldReleaseNameCommand");
+hotkey -keyShortcut "\\" -alt -name ("ZooPolyAppendAndCompleteNameCommand");
+hotkey -keyShortcut "1" -alt -name ("ZooVertModeNameCommand");
+hotkey -keyShortcut "\\" -ctl -name ("ZooRendermanIprNameCommand");
+hotkey -keyShortcut "3" -ctl -name ("MayaPluginManagerNameCommand");
+hotkey -keyShortcut "o" -ctl -sht -name ("ZooCreateSphereMatchNameCommand");
+hotkey -keyShortcut "1" -name ("ZooWireFrameShadedToggleNameCommand");
+hotkey -keyShortcut "2" -ctl -name ("MayaMergeToCenterNameCommand");
+hotkey -keyShortcut ">" -ctl -alt -name ("ZooRangeEndNameCommand");
+hotkey -keyShortcut "<" -ctl -alt -name ("ZooRangeStartNameCommand");
+hotkey -keyShortcut "." -name ("MayaDrCurveSnapPressNameCommand");
+hotkey -keyShortcut "s" -alt -name ("ZooSmoothPolyObjectNameCommand");
+hotkey -keyShortcut "w" -ctl -alt -name ("ZooPolyMergeNoMoveNameCommand");
+hotkey -keyShortcut "c" -ctl -alt -name ("ZooMove5FramesForwardNameCommand");
+hotkey -keyShortcut "." -releaseName ("MayaDrCurveSnapReleaseNameCommand");
+hotkey -keyShortcut "t" -ctl -sht -name ("ZooTriggerToggleVisNameCommand");
+hotkey -keyShortcut "d" -ctl -alt -name ("MayaEnterEditModeNameCommand");
+hotkey -keyShortcut "f" -alt -name ("MayaFreezeTransformationsNameCommand");
+hotkey -keyShortcut "o" -ctl -alt -sht -name ("MayaCreatenurbsCircleNameCommand");
+hotkey -keyShortcut "y" -ctl -alt -sht -name ("MayaTogglePolyCountNameCommand");
+hotkey -keyShortcut "z" -ctl -sht -name ("MayaSetMeshScrapeToolNameCommand");
+hotkey -keyShortcut "x" -ctl -alt -name ("ZooMove5FramesBackNameCommand");
+hotkey -keyShortcut "#" -name ("ZooOpenLightEditorNameCommand");
+hotkey -keyShortcut "t" -ctl -alt -sht -name ("MayaToggleCurrentFrameNameCommand");
+hotkey -keyShortcut "$" -ctl -name ("MayaChannelControlEditorNameCommand");
+hotkey -keyShortcut "&" -name ("MayaSpreadSheetEditorNameCommand");
+hotkey -keyShortcut "r" -alt -sht -name ("ZooRenamerNameCommand");
+hotkey -keyShortcut "v" -ctl -name ("ZooPasteKeysNameCommand");
+hotkey -keyShortcut "|" -ctl -alt -name ("MayaNewSceneNameCommand");
+hotkey -keyShortcut "z" -ctl -alt -sht -name ("ZooSelectHierarchyNameCommand");
+hotkey -keyShortcut "f" -ctl -name ("MayaEnterEditModePressNameCommand");
+hotkey -keyShortcut "f" -ctl -releaseName ("MayaEnterEditModeReleaseNameCommand");
+hotkey -keyShortcut "1" -ctl -alt -name ("MayaSubdLowQualityDisplayNameCommand");
+hotkey -keyShortcut "w" -alt -name ("MayaSetMeshWaxToolNameCommand");
+hotkey -keyShortcut "7" -name ("MayaGraphEditorNameCommand");
+hotkey -keyShortcut "9" -name ("MayaTextureViewWindowNameCommand");
+hotkey -keyShortcut "." -ctl -alt -name ("ZooPlaybackAnimEndNameCommand");
+hotkey -keyShortcut "x" -name ("ZooPreviousKeyNoUndoNameCommand");
+hotkey -keyShortcut "," -ctl -alt -name ("ZooPlaybackAnimStartNameCommand");
+hotkey -keyShortcut "k" -name ("ZooSelectCamInViewNameCommand");
+hotkey -keyShortcut "u" -ctl -sht -name ("ZooCreateCubeMatchNameCommand");
+hotkey -keyShortcut "/" -releaseName ("MayaDrPointSnapReleaseNameCommand");
+hotkey -keyShortcut "/" -name ("MayaDrPointSnapPressNameCommand");
+hotkey -keyShortcut "v" -sht -name ("ZooConstraintMarkingMenuPressNameCommand");
+hotkey -keyShortcut "v" -sht -releaseName ("ZooConstraintMarkingMenuReleaseNameCommand");
+hotkey -keyShortcut "v" -ctl -sht -name ("ZooKeyDeleteCurrentFrameNameCommand");
+hotkey -keyShortcut "m" -sht -name ("ZooMirrorPolygonGeometryNameCommand");
+hotkey -keyShortcut "a" -ctl -alt -name ("ZooKeySnapRetainSpacingNameCommand");
+hotkey -keyShortcut "r" -ctl -alt -name ("MayaReversePolygonNormalsNameCommand");
+hotkey -keyShortcut "l" -alt -name ("MayaMakeLiveNameCommand");
+hotkey -keyShortcut "s" -name ("MayaSetKeyNameCommand");
+hotkey -keyShortcut "5" -name ("MayaRenderViewWindowNameCommand");
+hotkey -keyShortcut "f" -sht -name ("ZooDeformersMarkingMenuPressNameCommand");
+hotkey -keyShortcut "b" -ctl -name ("ZooBevelChamferNameCommand");
+hotkey -keyShortcut "f" -sht -releaseName ("ZooDeformersMarkingMenuReleaseNameCommand");
+hotkey -keyShortcut "n" -sht -releaseName ("MayaInsertKeyToolDeactivateNameCommand");
+hotkey -keyShortcut "v" -ctl -alt -sht -name ("ZooToggleAndKeyVisNameCommand");
+hotkey -keyShortcut "n" -sht -name ("MayaInsertKeyToolActivateNameCommand");
+hotkey -keyShortcut "1" -ctl -name ("ZooViewportLightingToggleNameCommand");
+hotkey -keyShortcut "$" -name ("MayaNodeEditorWindowNameCommand");
+hotkey -keyShortcut "q" -ctl -sht -name ("MayaDrQuadDrawToolNameCommand");
+hotkey -keyShortcut "f" -ctl -sht -name ("MayaFillHoleNameCommand");
+hotkey -keyShortcut "f" -ctl -alt -sht -name ("ZooToggleFalloffSurfaceVolumeNameCommand");
+hotkey -keyShortcut "e" -ctl -alt -name ("ZooPolyEdgeLoopSplitAutoOnNameCommand");
+hotkey -keyShortcut "q" -ctl -name ("MayaDrMultiCutToolNameCommand");
+hotkey -keyShortcut "v" -alt -name ("MayaPlayNameCommand");
+hotkey -keyShortcut "c" -alt -name ("ZooNextFrameNoUndoNameCommand");
+hotkey -keyShortcut "q" -ctl -alt -sht -name ("MayaPolygonCollapseNameCommand");
+hotkey -keyShortcut "c" -ctl -sht -name ("ZooMoveKeyForwardOneNameCommand");
+hotkey -keyShortcut "%" -name ("MayaRenderGlobalsWindowNameCommand");
+hotkey -keyShortcut "o" -alt -name ("ZooCurveCycleGraphsNameCommand");
+hotkey -keyShortcut "c" -ctl -alt -sht -name ("MayaCombinePolygonsNameCommand");
+hotkey -keyShortcut "c" -name ("ZooNextKeyNoUndoNameCommand");
+hotkey -keyShortcut "d" -name ("ZooDisplayMarkingMenuPressNameCommand");
+hotkey -keyShortcut "d" -releaseName ("ZooDisplayMarkingMenuReleaseNameCommand");
+hotkey -keyShortcut "^" -name ("MayaNamespaceEditorNameCommand");
+hotkey -keyShortcut "x" -sht -name ("ZooJointsMarkingMenuPressNameCommand");
+hotkey -keyShortcut "x" -sht -releaseName ("ZooJointsMarkingMenuReleaseNameCommand");
+hotkey -keyShortcut "b" -ctl -sht -name ("ZooObjectBackfaceCullingToggleNameCommand");
+hotkey -keyShortcut "e" -alt -name ("ZooExtractFaceToObjectModeNameCommand");
+hotkey -keyShortcut "2" -alt -name ("ZooEdgeModeNameCommand");
+hotkey -keyShortcut "x" -ctl -sht -name ("ZooMoveKeyBackOneNameCommand");
+hotkey -keyShortcut "b" -ctl -alt -sht -name ("MayaBridgeEdgeNameCommand");
+hotkey -keyShortcut "l" -releaseName ("ZooLightsMarkingMenuReleaseNameCommand");
+hotkey -keyShortcut "l" -name ("ZooLightsMarkingMenuPressNameCommand");
+hotkey -keyShortcut "`" -alt -name ("MayaSlideEdgeTool2NameCommand");
+hotkey -keyShortcut "2" -name ("ZooToggleTexturesNameCommand");
+hotkey -keyShortcut "y" -sht -name ("ZooSkinMarkingMenuPressNameCommand");
+hotkey -keyShortcut "y" -sht -releaseName ("ZooSkinMarkingMenuReleaseNameCommand");
+hotkey -keyShortcut "4" -alt -name ("ZooNodeEditorShowCurrentSelectionNameCommand");
+hotkey -keyShortcut "x" -ctl -alt -sht -name ("ZooSculptHudModeOnNameCommand");
+hotkey -keyShortcut "w" -ctl -sht -name ("MayaMergeVertexToolNameCommand");
+hotkey -keyShortcut "8" -name ("MayaScriptEditorNameCommand");
+hotkey -keyShortcut "p" -ctl -sht -name ("ZooCreatePlaneMatchNameCommand");
+hotkey -keyShortcut "," -name ("MayaDrGridSnapPressNameCommand");
+hotkey -keyShortcut "," -releaseName ("MayaDrGridSnapReleaseNameCommand");
+hotkey -keyShortcut "l" -ctl -alt -sht -name ("ZooLambert50PercentGreyNameCommand");
+hotkey -keyShortcut "4" -name ("MayaHypershadeWindowNameCommand");
+hotkey -keyShortcut "t" -alt -name ("MayaDeletePolyElementsNameCommand");
+hotkey -keyShortcut "w" -ctl -alt -sht -name ("MayaPolyMergeNameCommand");
+hotkey -keyShortcut "v" -name ("MayaTimeDraggerToolActivateNameCommand");
+hotkey -keyShortcut "a" -alt -name ("ZooAnimHoldNameCommand");
+hotkey -keyShortcut "v" -releaseName ("MayaTimeDraggerToolDeactivateNameCommand");
+hotkey -keyShortcut "p" -ctl -alt -sht -name ("ZooAlignSelectionHotkeyPrsNameCommand");
+hotkey -keyShortcut "{" -ctl -alt -name ("ZooReloadNameCommand");
+hotkey -keyShortcut "a" -ctl -alt -sht -name ("ZooSelectFromFcurveNameCommand");
+hotkey -keyShortcut "s" -sht -name ("ZooSetKeyframeAllNameCommand");
+hotkey -keyShortcut "m" -alt -sht -name ("ZooMirrorInstanceGroupWorldxNameCommand");
+hotkey -keyShortcut "m" -alt -name ("ZooSymmetricalToggleNameCommand");
+hotkey -keyShortcut "(" -name ("MayaComponentEditorNameCommand");
+hotkey -keyShortcut "3" -alt -name ("ZooFaceModeNameCommand");
+hotkey -keyShortcut "w" -ctl -name ("MayaMergeToCenter2NameCommand");
+hotkey -keyShortcut "k" -sht -name ("ZooCreateCamRooXzyNameCommand");
+hotkey -keyShortcut "u" -sht -name ("MayaShowAllNameCommand");
+hotkey -keyShortcut "s" -ctl -alt -sht -name ("zooResetAttrs_hotkeyPrsNameCommand");
+hotkey -keyShortcut "e" -ctl -sht -name ("ZooPolySoftenEdgeNameCommand");
+hotkey -keyShortcut "3" -name ("MayaOutlinerWindowNameCommand");
+hotkey -keyShortcut "e" -ctl -alt -sht -name ("ZooPolyHardenEdgeNameCommand");
+hotkey -keyShortcut "c" -alt -sht -name ("MayaConformPolygonNameCommand");
+hotkey -keyShortcut "@" -name ("ZooWireframeOnShadedToggleNameCommand");
+hotkeyCtx -type "Editor" -addClient "profilerPanel;;;";
+hotkeyCtx -type "Editor" -addClient "polyTexturePlacementPanel;;;";
+hotkeyCtx -type "Editor" -addClient "hyperGraphPanel;";
+hotkeyCtx -type "Editor" -addClient "hyperGraphPanel;;";
+hotkeyCtx -type "Editor" -addClient "graphEditor;;;";
+hotkeyCtx -type "Editor" -addClient "graphEditor;";
+hotkeyCtx -type "Editor" -addClient "posePanel;;;";
+hotkeyCtx -type "Editor" -addClient "nodeEditorPanel";
+hotkey -keyShortcut "," -releaseName ("MayaNodeEditorGridToggleSnaprNameCommand");
+hotkey -keyShortcut "," -name ("MayaNodeEditorGridToggleSnapNameCommand");
+hotkeyCtx -type "Editor" -addClient "hyperGraphPanel";
+hotkeyCtx -type "Editor" -addClient "outlinerPanel;";
+hotkeyCtx -type "Editor" -addClient "nodeEditorPanel;";
+hotkeyCtx -type "Editor" -addClient "timeEditorPanel;;;";
+hotkeyCtx -type "Editor" -addClient "profilerPanel";
+hotkeyCtx -type "Editor" -addClient "polyTexturePlacementPanel";
+hotkeyCtx -type "Editor" -addClient "hyperShadePanel;;;";
+hotkeyCtx -type "Editor" -addClient "hyperShadePanel;";
+hotkeyCtx -type "Editor" -addClient "shapePanel;";
+hotkeyCtx -type "Editor" -addClient "posePanel;;";
+hotkeyCtx -type "Editor" -addClient "shapePanel;;";
+hotkeyCtx -type "Editor" -addClient "posePanel;";
+hotkeyCtx -type "Editor" -addClient "outlinerPanel;;;";
+hotkeyCtx -type "Editor" -addClient "profilerPanel;;";
+hotkeyCtx -type "Editor" -addClient "graphEditor;;";
+hotkeyCtx -type "Editor" -addClient "posePanel";
+hotkeyCtx -type "Editor" -addClient "outlinerPanel;;";
+hotkeyCtx -type "Editor" -addClient "hyperShadePanel";
+hotkeyCtx -type "Editor" -addClient "cteEditor;;;";
+hotkeyCtx -type "Editor" -addClient "nodeEditorPanel;;";
+hotkeyCtx -type "Editor" -addClient "profilerPanel;";
+hotkeyCtx -type "Editor" -addClient "hyperShadePanel;;";
+hotkeyCtx -type "Editor" -addClient "shapePanel";
+hotkeyCtx -type "Editor" -addClient "graphEditor";
+hotkey -keyShortcut "c" -ctl -name ("MayaCopyGraphAnimKeysNameCommand");
+hotkeyCtx -type "Editor" -addClient "shapePanel;;;";
+hotkeyCtx -type "Editor" -addClient "polyTexturePlacementPanel;;";
+hotkeyCtx -type "Editor" -addClient "hyperGraphPanel;;;";
+hotkeyCtx -type "Editor" -addClient "nodeEditorPanel;;;";
+hotkeyCtx -type "Editor" -addClient "timeEditorPanel;;";
+hotkeyCtx -type "Editor" -addClient "outlinerPanel";
+hotkeyCtx -type "Editor" -addClient "timeEditorPanel;";
+hotkeyCtx -type "Editor" -addClient "polyTexturePlacementPanel;";
+hotkeyCtx -type "Editor" -addClient "timeEditorPanel";
+hotkeyCtx -type "Tool" -addClient "SymmetrizeUVBrush;;;";
+hotkeyCtx -type "Tool" -addClient "sculptMeshCache;;";
+hotkeyCtx -type "Tool" -addClient "Unfold3DBrush;";
+hotkeyCtx -type "Tool" -addClient "sculptMeshCache;;;";
+hotkeyCtx -type "Tool" -addClient "polyCutUV;;";
+hotkeyCtx -type "Tool" -addClient "polyCutUV;";
+hotkeyCtx -type "Tool" -addClient "Unfold3DBrush;;";
+hotkeyCtx -type "Tool" -addClient "texCutContext;;";
+hotkeyCtx -type "Tool" -addClient "texCutContext;;;";
+hotkeyCtx -type "Tool" -addClient "SymmetrizeUVBrush;;";
+hotkeyCtx -type "Tool" -addClient "sculptMeshCache;";
+hotkeyCtx -type "Tool" -addClient "xgmIGBrush;;";
+hotkeyCtx -type "Tool" -addClient "texSculptCacheContext";
+hotkeyCtx -type "Tool" -addClient "SymmetrizeUVBrush;";
+hotkeyCtx -type "Tool" -addClient "texCutContext";
+hotkeyCtx -type "Tool" -addClient "texCutContext;";
+hotkeyCtx -type "Tool" -addClient "xgmIGBrush";
+hotkeyCtx -type "Tool" -addClient "SymmetrizeUVBrush";
+hotkeyCtx -type "Tool" -addClient "Unfold3DBrush;;;";
+hotkeyCtx -type "Tool" -addClient "xgmIGBrush;;;";
+hotkeyCtx -type "Tool" -addClient "sculptMeshCache";
+hotkey -keyShortcut "d" -name ("MayaSetMeshFlattenToolNameCommand");
+hotkey -keyShortcut "a" -name ("MayaSetMeshGrabToolNameCommand");
+hotkey -keyShortcut "s" -name ("MayaSetMeshSculptToolNameCommand");
+hotkey -keyShortcut "c" -ctl -name ("MayaSculptMeshInvertFreezeNameCommand");
+hotkey -keyShortcut "c" -name ("MayaSetMeshFreezeToolNameCommand");
+hotkey -keyShortcut "c" -sht -name ("MayaSculptMeshUnfreezeAllNameCommand");
+hotkey -keyShortcut "x" -name ("MayaSetMeshPinchToolNameCommand");
+hotkeyCtx -type "Tool" -addClient "xgmIGBrush;";
+hotkeyCtx -type "Tool" -addClient "polyCutUV;;;";
+hotkeyCtx -type "Tool" -addClient "texSculptCacheContext;;";
+hotkeyCtx -type "Tool" -addClient "texSculptCacheContext;;;";
+hotkeyCtx -type "Tool" -addClient "texSculptCacheContext;";
+hotkeyCtx -type "Tool" -addClient "Unfold3DBrush";
+hotkeyCtx -type "Tool" -addClient "polyCutUV";

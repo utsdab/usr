@@ -1,0 +1,142 @@
+{
+  "sortOrder": -1,
+  "shelves": [
+    {
+      "name": "ZooToolsPro",
+      "children": [
+        {
+          "id": "zoo.shelf.modeling",
+          "displayLabel": false,
+          "children": [
+            {
+              "type": "separator"
+            },
+            {
+              "type": "toolset",
+              "id": "zooRenamer"
+            }
+          ]
+        },
+        {
+          "id": "zoo.shelf.rigging",
+          "displayLabel": false,
+          "children": [
+            {
+              "type": "separator"
+            },
+            {
+              "type": "toolset",
+              "id": "zooRenamer"
+            }
+          ]
+        },
+        {
+          "type": "separator"
+        },
+        {
+          "id": "zoo.shelf.dev",
+          "displayLabel": false,
+          "icon": "devMenu_shlf",
+          "children": [
+            {
+              "id": "reload",
+              "label": "Reload",
+              "icon": "zoo_reload"
+            },
+            {
+              "id": "shutdown",
+              "label": "Shutdown",
+              "icon": "zoo_shutdown"
+            }
+          ]
+        },
+        {
+          "id": "zoo.preferencesui",
+          "icon": "preferencesWindow_shlf",
+          "displayLabel": false
+        },
+        {
+          "id": "zoo.hotkeyeditorui",
+          "icon": "hotkeysWindow_shlf",
+          "displayLabel": false
+        },
+        {
+          "id": "zoo.shelf.help",
+          "displayLabel": false,
+          "children": [
+            {
+              "id": "create3dcharacters",
+              "label": "Create3dCharacters.com",
+              "icon": "webpage"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "id": "zooToolsHelpContents",
+              "label": "Zoo Tools Help Contents",
+              "icon": "help"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "id": "zooToolsInstallUpdate",
+              "label": "Zoo Tools Install/Upgrade",
+              "icon": "toolsets"
+            },
+            {
+              "id": "zooChangelog",
+              "label": "Zoo Tools Changelog",
+              "icon": "toolsets"
+            },
+            {
+              "id": "zooIssuesFixes",
+              "label": "Zoo Tools Issues/Fixes",
+              "icon": "toolsets"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "id": "coursesByOrder",
+              "label": "Courses By Order",
+              "icon": "tutorials"
+            },
+            {
+              "id": "coursesByPopularity",
+              "label": "Courses By Popularity",
+              "icon": "tutorials"
+            },
+            {
+              "id": "coursesByDateAdded",
+              "label": "Courses By Date Added",
+              "icon": "tutorials"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "id": "intermediateCourse",
+              "label": "Intermediate Course",
+              "icon": "tutorials"
+            },
+            {
+              "id": "advancedCourse",
+              "label": "Advanced Course",
+              "icon": "tutorials"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "id": "mayaHotkeyList",
+              "label": "Maya Hotkey List",
+              "icon": "keyboard"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+    "author": "Create3dCharacters",
+    "authorEmail": "info@create3dcharacters.com",
+    "description": "General Maya and Maya framework related code for Zoo Tools Pro",
+    "displayName": "Zoo Maya",
+    "environment": {
+        "MAYA_PLUG_IN_PATH": [
+            "{self}/plugins"
+        ],
+        "PYTHONPATH": [
+            "{self}"
+        ],
+        "ZOO_BASE_PATHS": [
+            "{self}"
+        ],
+        "ZOO_COMMAND_LIB": "{self}/zoo/libs/maya/mayacommand/library",
+        "ZOO_ICON_PATHS": [
+            "{self}/icons"
+        ],
+        "ZOO_META_PATHS": [
+            "{self}/zoo/libs/maya/meta/base.py",
+            "{self}/zoo/libs/maya/meta/metarig.py",
+            "{self}/zoo/libs/maya/cmds/meta/metajointscurve.py"
+        ],
+        "ZOO_SHAPE_LIB": [
+            "{self}/zoo/libs/maya/shapelib"
+        ],
+        "ZOO_SHAPE_SAVE_PATH": [
+            "{self}/zoo/libs/maya/shapelib"
+        ]
+    },
+    "name": "zoo_maya",
+    "requirements": [
+        "zoo_core"
+    ],
+    "tests": [
+        "{self}/tests"
+    ],
+    "version": "1.3.0"
+}

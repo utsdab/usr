@@ -1,0 +1,33 @@
+{
+    "author": "Create3dCharacters",
+    "authorEmail": "info@create3dcharacters.com",
+    "description": "Hotkey Editor for Zoo Tools Pro",
+    "displayName": "Zoo Hotkey Editor",
+    "environment": {
+        "PYTHONPATH": [
+            "{self}"
+        ],
+        "ZOO_BASE_PATHS": [
+            "{self}"
+        ],
+        "ZOO_ICON_PATHS": [
+            "{self}/icons"
+        ],
+        "ZOO_MM_COMMAND_PATH": [
+            "{self}/zoo/apps/hotkeyeditor/markingmenus"
+        ],
+        "ZOO_MM_LAYOUT_PATH": [
+            "{self}/zoo/apps/hotkeyeditor/markingmenus"
+        ],
+        "ZOO_MM_MENU_PATH": [
+            "{self}/zoo/apps/hotkeyeditor/markingmenus"
+        ]
+    },
+    "name": "zoo_hotkey_editor",
+    "requirements": [
+        "zoo_core",
+        "zoo_maya",
+        "zoo_pyside"
+    ],
+    "version": "1.0.11"
+}

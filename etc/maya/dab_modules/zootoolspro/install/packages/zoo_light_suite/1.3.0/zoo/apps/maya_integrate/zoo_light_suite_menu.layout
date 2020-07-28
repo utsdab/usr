@@ -1,0 +1,40 @@
+{
+  "sortOrder": -920,
+  "menu": [
+    {
+      "label": "Lights",
+      "type": "menu",
+      "children": [
+        {
+          "id": "lightPresets",
+          "type": "toolset"
+        },
+        {
+          "id": "hdriSkydomeLights",
+          "type": "toolset"
+        },
+        {
+          "type": "toolset",
+          "id": "areaLights"
+        },
+        {
+          "id": "directionalLights",
+          "type": "toolset"
+        },
+        {
+          "id": "editLights",
+          "type": "toolset"
+        },
+        {
+          "id": "viewportLight",
+          "type": "toolset"
+        },
+        {
+          "id": "placeReflection",
+          "type": "toolset"
+        }
+      ]
+    }
+  ]
+}
+

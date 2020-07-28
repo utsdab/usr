@@ -1,0 +1,35 @@
+{
+  "items": {
+    "N": {
+      "type": "command",
+      "id": "printNodePath"
+    },
+    "NW": {
+      "type": "command",
+      "id": "printNodePath"
+    },
+    "W": {},
+    "SW": {},
+    "S": {},
+    "SE": {},
+    "E": {},
+    "NE": {},
+    "generic": [
+      {
+        "type": "command",
+        "id": "printNodePath"
+      },
+      {
+        "type": "menu",
+        "label": "Testmenu",
+        "children": [
+          {
+            "type": "command",
+            "id": "printNodePath"
+          }
+        ]
+      }
+    ]
+  },
+  "id": "nestedLayout"
+}

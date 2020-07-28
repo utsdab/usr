@@ -1,0 +1,26 @@
+{
+  "sortOrder": -940,
+  "shelves": [
+    {
+      "name": "ZooToolsPro",
+      "children": [
+        {
+          "id": "zoo.shelf.animation",
+          "displayLabel": false,
+          "icon": "animationMenu_shlf",
+          "children": [
+            {
+              "type": "toolset",
+              "id": "generalAnimationTools"
+            },
+            {
+              "type": "toolset",
+              "id": "createTurntable"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

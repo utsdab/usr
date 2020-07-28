@@ -1,0 +1,13 @@
+{
+  "settings": {
+    "lightPresetsFolder": "",
+    "lightPresetsUniformIcons": true,
+    "iblSkydomesFolder": "",
+    "iblSkydomesUniformIcons": true,
+    "imageTIF": true,
+    "imageHDR": true,
+    "imageEXR": true,
+    "imageTX": false,
+    "imageTEX": false
+  }
+}

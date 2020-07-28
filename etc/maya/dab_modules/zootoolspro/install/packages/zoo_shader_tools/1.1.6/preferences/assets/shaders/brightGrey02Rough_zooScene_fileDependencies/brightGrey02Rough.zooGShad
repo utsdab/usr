@@ -1,0 +1,30 @@
+{
+    "nullObj":{
+        "attributesShaderDict":{
+            "gCoatColor_srgb": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "gCoatIor": 1.5,
+                "gCoatRoughness": 0.3,
+                "gCoatWeight": 0.0,
+                "gDiffuseColor_srgb": [
+                  0.735,
+                  0.735,
+                  0.735
+                ],
+                "gDiffuseWeight": 1.0,
+                "gSpecColor_srgb": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "gSpecIor": 1.5,
+                "gSpecRoughness": 0.6,
+                "gSpecWeight": 1.0
+        },
+        "shaderName":"brightGrey2Rough",
+        "objectFaces":[]
+    }
+}

@@ -1,0 +1,185 @@
+{
+  "items": {
+    "N": {
+      "label": "Skin Selected",
+      "icon": "smoothSkin",
+      "optionBox": true,
+      "type": "command",
+      "id": "skiningMarkingMenu",
+      "arguments": {
+        "operation": "skinSelected"
+      }
+    },
+    "NE": {
+      "label": "Unbind Skin",
+      "icon": "detachSkin",
+      "optionBox": true,
+      "type": "command",
+      "id": "skiningMarkingMenu",
+      "arguments": {
+        "operation": "unbindSkin"
+      }
+    },
+    "E": {
+      "label": "Mirror Weights X to -X",
+      "icon": "mirrorSkinWeight",
+      "optionBox": true,
+      "type": "command",
+      "id": "skiningMarkingMenu",
+      "arguments": {
+        "operation": "mirrorXToNegX"
+      }
+    },
+    "W": {
+      "label": "Transfer Skin Weights",
+      "icon": "copySkinWeight",
+      "optionBox": false,
+      "type": "command",
+      "id": "skiningMarkingMenu",
+      "arguments": {
+        "operation": "transferSkinWeights"
+      }
+    },
+    "NW": {
+      "label": "Paint Weights Window",
+      "icon": "paintSkinWeights",
+      "optionBox": false,
+      "type": "command",
+      "id": "skiningMarkingMenu",
+      "arguments": {
+        "operation": "paintWeightsWindow"
+      }
+    },
+    "generic": [
+      {
+        "label": "Duplicate Original",
+        "icon": "UVTkDuplicateSet",
+        "optionBox": false,
+        "type": "command",
+        "id": "skiningMarkingMenu",
+        "arguments": {
+          "operation": "duplicateOriginal"
+        }
+      },
+      {
+        "type": "separator"
+      },
+      {
+        "label": "Bind Selection Heat Map",
+        "icon": "smoothSkin",
+        "optionBox": true,
+        "type": "command",
+        "id": "skiningMarkingMenu",
+        "arguments": {
+          "operation": "bindSelHeatMap"
+        }
+      },
+      {
+        "label": "Bind Hierarchy Defaults",
+        "icon": "smoothSkin",
+        "optionBox": true,
+        "type": "command",
+        "id": "skiningMarkingMenu",
+        "arguments": {
+          "operation": "bindHierarchyDefaults"
+        }
+      },
+      {
+        "label": "Bind Selected Rigid",
+        "icon": "smoothSkin",
+        "optionBox": true,
+        "type": "command",
+        "id": "skiningMarkingMenu",
+        "arguments": {
+          "operation": "bindSelectedRigid"
+        }
+      },
+      {
+        "label": "Bind Selected Geodesic",
+        "icon": "smoothSkin",
+        "optionBox": true,
+        "type": "command",
+        "id": "skiningMarkingMenu",
+        "arguments": {
+          "operation": "bindSkinGeodesic"
+        }
+      },
+      {
+        "type": "separator"
+      },
+      {
+        "label": "Add Joints To Skin",
+        "icon": "addWrapInfluence",
+        "optionBox": true,
+        "type": "command",
+        "id": "skiningMarkingMenu",
+        "arguments": {
+          "operation": "addJointsToSkin"
+        }
+      },
+      {
+        "label": "Remove Influences",
+        "icon": "removeWrapInfluence",
+        "optionBox": false,
+        "type": "command",
+        "id": "skiningMarkingMenu",
+        "arguments": {
+          "operation": "removeInfluences"
+        }
+      },
+      {
+        "type": "separator"
+      },
+      {
+        "label": "Component Editor",
+        "icon": "freeformOff",
+        "optionBox": false,
+        "type": "command",
+        "id": "skiningMarkingMenu",
+        "arguments": {
+          "operation": "componentEditor"
+        }
+      },
+      {
+        "type": "separator"
+      },
+      {
+        "type": "separator"
+      },
+      {
+        "label": "Hammer Weights",
+        "icon": "hammer",
+        "optionBox": false,
+        "type": "command",
+        "id": "skiningMarkingMenu",
+        "arguments": {
+          "operation": "hammerWeights"
+        }
+      },
+      {
+        "label": "Prune Small Weights",
+        "icon": "prune",
+        "optionBox": true,
+        "type": "command",
+        "id": "skiningMarkingMenu",
+        "arguments": {
+          "operation": "pruneSmallWeights"
+        }
+      },
+      {
+        "type": "separator"
+      },
+      {
+        "label": "Skinning To Weight Blended",
+        "icon": "convert",
+        "optionBox": false,
+        "type": "command",
+        "id": "skiningMarkingMenu",
+        "arguments": {
+          "operation": "skinToWeightBlended"
+        }
+      }
+    ]
+  },
+  "id": "markingMenu.skinning"
+}
