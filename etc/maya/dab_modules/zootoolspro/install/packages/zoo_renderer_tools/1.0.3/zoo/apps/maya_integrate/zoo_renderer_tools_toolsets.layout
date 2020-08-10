@@ -1,0 +1,17 @@
+{
+  "toolsetGroups": [
+    {
+      "type": "rendering",
+      "name": "Rendering",
+      "color": [
+        148,
+        210,
+        99
+      ],
+      "hueShift": 0,
+      "toolsets": [
+        "convertRenderer"
+      ]
+    }
+  ]
+}

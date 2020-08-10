@@ -1,0 +1,16 @@
+{
+  "sortOrder": -930,
+  "menu": [
+    {
+      "label": "Dynamics",
+      "type": "menu",
+      "children": [
+        {
+              "id": "nclothwrinklecreator",
+              "type": "toolset"
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,157 @@
+{
+  "items": {
+    "N": {
+      "label": "Blendshape Editor",
+      "icon": "blendShapeEditor",
+      "optionBox": false,
+      "type": "command",
+      "id": "deformersMarkingMenu",
+      "arguments": {
+        "operation": "blendshapeEditor"
+      }
+    },
+    "NE": {
+      "label": "Add Blendshape",
+      "icon": "blendShape",
+      "optionBox": true,
+      "type": "command",
+      "id": "deformersMarkingMenu",
+      "arguments": {
+        "operation": "addBlendshape"
+      }
+    },
+    "E": {
+      "label": "Blendshape Create",
+      "icon": "blendShapePlus",
+      "optionBox": true,
+      "type": "command",
+      "id": "deformersMarkingMenu",
+      "arguments": {
+        "operation": "blendshapeCreate"
+      }
+    },
+    "SE": {
+      "label": "Wire Deformer",
+      "icon": "wire",
+      "optionBox": true,
+      "type": "command",
+      "id": "deformersMarkingMenu",
+      "arguments": {
+        "operation": "wire"
+      }
+    },
+    "S": {
+      "label": "Cluster Create",
+      "icon": "cluster",
+      "optionBox": true,
+      "type": "command",
+      "id": "deformersMarkingMenu",
+      "arguments": {
+        "operation": "clusterCreate"
+      }
+    },
+    "SW": {
+      "label": "Controls On A Curve",
+      "icon": "clusterCurve",
+      "optionBox": false,
+      "type": "command",
+      "id": "deformersMarkingMenu",
+      "arguments": {
+        "operation": "controlsOnCurve"
+      }
+    },
+    "W": {
+      "label": "Lattice Create",
+      "icon": "out_lattice",
+      "optionBox": true,
+      "type": "command",
+      "id": "deformersMarkingMenu",
+      "arguments": {
+        "operation": "latticeCreate"
+      }
+    },
+    "NW": {
+      "label": "Soft Modifier",
+      "icon": "softMod",
+      "optionBox": true,
+      "type": "command",
+      "id": "deformersMarkingMenu",
+      "arguments": {
+        "operation": "softMod"
+      }
+    },
+    "generic": [
+      {
+        "label": "Bend Deformer",
+        "icon": "bendNLD",
+        "optionBox": true,
+        "type": "command",
+        "id": "deformersMarkingMenu",
+        "arguments": {
+          "operation": "bend"
+        }
+      },
+      {
+        "label": "Wrap Deformer",
+        "icon": "wrap",
+        "optionBox": true,
+        "type": "command",
+        "id": "deformersMarkingMenu",
+        "arguments": {
+          "operation": "wrapCreate"
+        }
+      },
+      {
+        "label": "Sculpt Deformer",
+        "icon": "sculpt",
+        "optionBox": true,
+        "type": "command",
+        "id": "deformersMarkingMenu",
+        "arguments": {
+          "operation": "sculptDeformerCreate"
+        }
+      },
+      {
+        "label": "Twist",
+        "icon": "twistNLD",
+        "optionBox": true,
+        "type": "command",
+        "id": "deformersMarkingMenu",
+        "arguments": {
+          "operation": "twist"
+        }
+      },
+      {
+        "label": "Wave",
+        "icon": "waveNLD",
+        "optionBox": true,
+        "type": "command",
+        "id": "deformersMarkingMenu",
+        "arguments": {
+          "operation": "wave"
+        }
+      },
+      {
+        "label": "Flare",
+        "icon": "flareNLD",
+        "optionBox": true,
+        "type": "command",
+        "id": "deformersMarkingMenu",
+        "arguments": {
+          "operation": "flare"
+        }
+      },
+      {
+        "label": "Jiggle",
+        "icon": "jiggleDeformer",
+        "optionBox": true,
+        "type": "command",
+        "id": "deformersMarkingMenu",
+        "arguments": {
+          "operation": "jiggle"
+        }
+      }
+    ]
+  },
+  "id": "markingMenu.deformers"
+}

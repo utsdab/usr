@@ -1,0 +1,41 @@
+{
+    "author": "Create3dCharacters",
+    "authorEmail": "info@create3dcharacters.com",
+    "description": "Renderer tools for Zoo Tools Pro",
+    "displayName": "Zoo Renderer Tools",
+    "environment": {
+        "PYTHONPATH": [
+            "{self}"
+        ],
+        "ZOO_BASE_PATHS": [
+            "{self}"
+        ],
+        "ZOO_ICON_PATHS": [
+            "{self}/icons"
+        ],
+        "ZOO_MENU_LAYOUTS": [
+            "{self}/zoo/apps/maya_integrate/zoo_renderer_tools_menu.layout"
+        ],
+        "ZOO_SHELF_LAYOUTS": [
+            "{self}/zoo/apps/maya_integrate/zoo_renderer_tools_shelf.layout"
+        ],
+        "ZOO_TOOLDEFINITION_MODULES": [
+            "{self}/zoo/apps/maya_integrate/zoo_renderer_tools_tooldefinitions.py"
+        ],
+        "ZOO_TOOLSET_LAYOUTS": [
+            "{self}/zoo/apps/maya_integrate/zoo_renderer_tools_toolsets.layout"
+        ],
+        "ZOO_TOOLSET_UI_PATHS": [
+            "{self}/zoo/apps/uitoolsets"
+        ]
+    },
+    "name": "zoo_renderer_tools",
+    "requirements": [
+        "zoo_core",
+        "zoo_pyside",
+        "zoo_maya",
+        "zoo_toolsets",
+        "zoo_artist_palette"
+    ],
+    "version": "1.0.3"
+}

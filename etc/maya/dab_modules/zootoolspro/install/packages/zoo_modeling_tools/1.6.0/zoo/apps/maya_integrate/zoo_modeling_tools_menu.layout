@@ -1,0 +1,36 @@
+{
+  "sortOrder": -1000,
+  "menu": [
+    {
+      "label": "Modeling",
+      "type": "menu",
+      "children": [
+        {
+          "id": "zooMirrorGeo",
+          "type": "toolset"
+        },
+        {
+          "id": "modelingAlign",
+          "type": "toolset"
+        },
+        {
+          "id": "curveDuplicate",
+          "type": "toolset"
+        },
+        {
+          "id": "tubeFromCurve",
+          "type": "toolset"
+        },
+        {
+          "id": "subDSmoothControl",
+          "type": "toolset"
+        },
+        {
+          "id": "objectCleaner",
+          "type": "toolset"
+        }
+      ]
+    }
+  ]
+}
+

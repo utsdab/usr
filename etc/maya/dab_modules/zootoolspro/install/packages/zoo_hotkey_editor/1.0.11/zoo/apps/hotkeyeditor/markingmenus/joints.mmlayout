@@ -1,0 +1,171 @@
+{
+  "items": {
+    "N": {
+      "label": "Joint Create",
+      "icon": "kinJoint",
+      "optionBox": true,
+      "type": "command",
+      "id": "jointsMarkingMenu",
+      "arguments": {
+        "operation": "jointCreate"
+      }
+    },
+    "NE": {
+      "label": "Reconnect Ctrls",
+      "icon": "reconnectCtrls",
+      "type": "command",
+      "id": "jointsMarkingMenu",
+      "arguments": {
+        "operation": "reconnectControls"
+      }
+    },
+    "NW": {
+      "label": "Break-Off Ctrls",
+      "icon": "breakOff",
+      "type": "command",
+      "id": "jointsMarkingMenu",
+      "arguments": {
+        "operation": "breakOffControls"
+      }
+    },
+    "E": {
+      "label": "Zoo Control Creator",
+      "icon": "starControl",
+      "type": "command",
+      "id": "jointsMarkingMenu",
+      "arguments": {
+        "operation": "zooCreateControls"
+      }
+    },
+    "S": {
+      "label": "Mirror Joint",
+      "icon": "kinMirrorJoint_S",
+      "optionBox": true,
+      "type": "command",
+      "id": "jointsMarkingMenu",
+      "arguments": {
+        "operation": "mirrorJoint"
+      }
+    },
+    "SW": {
+      "label": "Copy Ctrls",
+      "icon": "copy1",
+      "type": "command",
+      "id": "jointsMarkingMenu",
+      "arguments": {
+        "operation": "copyControls"
+      }
+    },
+    "SE": {
+      "label": "Paste Ctrls",
+      "icon": "paste",
+      "type": "command",
+      "id": "jointsMarkingMenu",
+      "arguments": {
+        "operation": "pasteControls"
+      }
+    },
+    "W": {
+      "label": "Joint Tool Window",
+      "icon": "3dManipulator",
+      "type": "command",
+      "id": "jointsMarkingMenu",
+      "arguments": {
+        "operation": "zooOrientJoint"
+      }
+    },
+    "generic": [
+      {
+        "label": "Local Rotation Vis Toggle",
+        "icon": "axis",
+        "type": "command",
+        "id": "jointsMarkingMenu",
+        "arguments": {
+          "operation": "localRotAxisTgl"
+        }
+      },
+      {
+        "label": "Orient Joint",
+        "icon": "orientJoint",
+        "optionBox": true,
+        "type": "command",
+        "id": "jointsMarkingMenu",
+        "arguments": {
+          "operation": "orientJoint"
+        }
+      },
+      {
+        "label": "Insert Joint",
+        "icon": "kinInsert",
+        "type": "command",
+        "id": "jointsMarkingMenu",
+        "arguments": {
+          "operation": "jointInsert"
+        }
+      },
+      {
+        "label": "Joint Remove",
+        "icon": "kinRemove",
+        "type": "command",
+        "id": "jointsMarkingMenu",
+        "arguments": {
+          "operation": "jointRemove"
+        }
+      },
+      {
+        "label": "IK Handle Create",
+        "icon": "kinHandle",
+        "optionBox": true,
+        "type": "command",
+        "id": "jointsMarkingMenu",
+        "arguments": {
+          "operation": "ikHandleCreate"
+        }
+      },
+      {
+        "type": "separator"
+      },
+      {
+        "label": "Spline IK Create",
+        "icon": "kinSplineHandle",
+        "type": "command",
+        "optionBox": true,
+        "id": "jointsMarkingMenu",
+        "arguments": {
+          "operation": "splineIkCreate"
+        }
+      },
+      {
+        "type": "separator"
+      },
+      {
+        "label": "Color Overrides",
+        "icon": "paintLine",
+        "type": "command",
+        "id": "jointsMarkingMenu",
+        "arguments": {
+          "operation": "colorOverrides"
+        }
+      },
+      {
+        "label": "Change Rotation Order",
+        "icon": "key",
+        "type": "command",
+        "id": "jointsMarkingMenu",
+        "arguments": {
+          "operation": "changeRotOrder"
+        }
+      },
+      {
+        "label": "Zoo Renamer",
+        "icon": "zooRenamer",
+        "type": "command",
+        "id": "jointsMarkingMenu",
+        "arguments": {
+          "operation": "zooRenamer"
+        }
+      }
+    ]
+  },
+  "id": "markingMenu.joints"
+}

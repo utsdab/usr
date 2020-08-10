@@ -1,0 +1,35 @@
+{
+  "sortOrder": 10000,
+  "menu": [
+    {
+      "label": "Preferences",
+      "type": "menu",
+      "children": [
+        {
+          "id": "zoo.preferencesui"
+        },
+        {
+          "id": "zoo.hotkeyeditorui"
+        },
+        {
+          "id": "zoo.triggers.state"
+        },
+        {
+          "id": "zoo.frameless.state"
+        }
+      ]
+    },
+    {
+      "label": "Developer",
+      "type": "menu",
+      "children": [
+        {
+          "id": "zoo.reload"
+        },
+        {
+          "id": "zoo.shutdown"
+        }
+      ]
+    }
+  ]
+}

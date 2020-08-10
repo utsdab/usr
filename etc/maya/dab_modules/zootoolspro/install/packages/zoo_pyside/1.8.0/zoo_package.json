@@ -1,0 +1,22 @@
+{
+    "author": "Create3dCharacters",
+    "authorEmail": "info@create3dcharacters.com",
+    "description": "PySide framework code for Zoo Tools Pro",
+    "displayName": "Zoo PySide",
+    "environment": {
+        "PYTHONPATH": [
+            "{self}"
+        ],
+        "ZOO_BASE_PATHS": [
+            "{self}"
+        ],
+        "ZOO_ICON_PATHS": [
+            "{self}/icons"
+        ]
+    },
+    "name": "zoo_pyside",
+    "requirements": [
+        "zoo_core"
+    ],
+    "version": "1.8.0"
+}

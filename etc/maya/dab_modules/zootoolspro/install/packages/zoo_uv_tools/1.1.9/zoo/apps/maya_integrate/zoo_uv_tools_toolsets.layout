@@ -1,0 +1,20 @@
+{
+  "toolsetGroups":
+  [
+    {
+      "type": "uv",
+      "name": "UV",
+      "color": [
+        200,
+        225,
+        94
+      ],
+      "hueShift": 0,
+      "toolsets": [
+        "uvUnfold",
+        "unwrapTube",
+        "transferUvs"
+      ]
+    }
+  ]
+}

@@ -17,7 +17,7 @@ PATH +:= ../../bin
 plug-ins: plug-ins
 
 + PLATFORM:mac MAYAVERSION:2020 DABMOD any DABMOD/2020/mac
-MODULESLOADED += DABMOD_2019_MAC
+MODULESLOADED += DABMOD_2020_MAC
 PYTHONPATH +:= ../../python
 PATH +:= ../../bin
 [r] scripts: ../../scripts
@@ -25,8 +25,8 @@ PATH +:= ../../bin
 [r] presets: ../../presets
 plug-ins: plug-ins
 
-+ PLATFORM:win64 MAYAVERSION:2018 DABMOD any DABMOD\2018\win
-MODULESLOADED += DABMOD_2018_WIN
++ PLATFORM:win64 MAYAVERSION:2020 DABMOD any DABMOD\2020\win
+MODULESLOADED += DABMOD_2020_WIN
 PYTHONPATH +:= ../../python
 PATH +:= ../../bin
 [r] scripts: ../../scripts; scripts
@@ -34,8 +34,8 @@ PATH +:= ../../bin
 [r] presets: ../../presets; presets
 plug-ins: plug-ins
 
-+ PLATFORM:linux MAYAVERSION:2018 DABMOD any DABMOD/2018/linux
-MODULESLOADED += DABMOD_2018_LINUX
++ PLATFORM:linux MAYAVERSION:2020 DABMOD any DABMOD/2020/linux
+MODULESLOADED += DABMOD_2020_LINUX
 PYTHONPATH +:= ../../python
 PATH +:= ../../bin
 [r] scripts: ../../scripts

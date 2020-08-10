@@ -1,0 +1,20 @@
+{
+  "toolsetGroups": [
+    {
+      "type": "utilities",
+      "name": "Utilities",
+      "color": [
+        161,
+        97,
+        255
+      ],
+      "hueShift": 0,
+      "toolsets": [
+        "zooRenamer",
+        "makeConnections",
+        "nodeEditorAlign",
+        "aimAligner"
+      ]
+    }
+  ]
+}

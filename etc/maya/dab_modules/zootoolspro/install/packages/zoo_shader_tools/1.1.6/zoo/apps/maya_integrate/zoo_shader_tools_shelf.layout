@@ -1,0 +1,40 @@
+{
+  "sortOrder": -890,
+  "shelves": [
+    {
+      "name": "ZooToolsPro",
+      "children": [
+        {
+          "id": "zoo.shelf.shader",
+          "displayLabel": false,
+          "children": [
+            {
+              "id": "shaderPresets",
+              "type": "toolset"
+            },
+            {
+              "id": "shaderManager",
+              "type": "toolset"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "id": "displacementCreator",
+              "type": "toolset"
+            },
+            {
+              "id": "createMattesAovs",
+              "type": "toolset"
+            },
+            {
+              "id": "shaderSwapSuffix",
+              "type": "toolset"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,19 @@
+{
+  "toolsetGroups": [
+    {
+      "type": "cameras",
+      "name": "Cameras",
+      "color": [
+        228,
+        104,
+        139
+      ],
+      "hueShift": 0,
+      "toolsets": [
+        "cameraManager",
+        "imagePlaneTool",
+        "imagePlaneAnim"
+      ]
+    }
+  ]
+}

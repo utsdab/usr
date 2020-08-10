@@ -1,0 +1,32 @@
+{
+    "areaLights":null,
+    "directionalLights":{},
+    "iblSkydomes":{
+        "skyDomeLight":{
+            "gLightColor_srgb":[
+                1.0,
+                1.0,
+                1.0
+            ],
+            "gIntensity":1.4,
+            "gLightVisibility":true,
+            "gExposure":null,
+            "gIblTexture":"",
+            "gScale":[
+                1.0,
+                1.0,
+                1.0
+            ],
+            "gTranslate":[
+                0.0,
+                0.0,
+                0.0
+            ],
+            "gRotate":[
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    }
+}

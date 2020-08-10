@@ -1,0 +1,50 @@
+{
+  "sortOrder": -990,
+  "shelves": [
+    {
+      "name": "ZooToolsPro",
+      "children": [
+        {
+          "id": "zoo.shelf.rigging",
+          "displayLabel": false,
+          "children": [
+            {
+              "type": "toolset",
+              "id": "controlCreator"
+            },
+            {
+              "type": "toolset",
+              "id": "editControls"
+            },
+            {
+              "type": "toolset",
+              "id": "colorOverrides"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "type": "toolset",
+              "id": "jointTool"
+            },
+            {
+              "type": "toolset",
+              "id": "jointsOnCurve"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "type": "toolset",
+              "id": "controlsOnCurve"
+            },
+            {
+              "type": "toolset",
+              "id": "splineRig"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+    "author": "Create3dCharacters",
+    "authorEmail": "info@create3dcharacters.com",
+    "commands": [
+        "{self}/scripts/zoocommands.py"
+    ],
+    "description": "Preferences related code for Zoo Tools Pro",
+    "displayName": "Zoo Preferences",
+    "environment": {
+        "PYTHONPATH": [
+            "{self}"
+        ],
+        "ZOO_BASE_PATHS": [
+            "{self}"
+        ],
+        "ZOO_ICON_PATHS": [
+            "{self}/icons"
+        ]
+    },
+    "name": "zoo_preferences",
+    "requirements": [
+        "zoo_core",
+        "zoo_maya",
+        "zoo_pyside"
+    ],
+    "version": "1.0.15"
+}

@@ -1,0 +1,24 @@
+{
+  "sortOrder": -910,
+  "menu": [
+    {
+      "label": "UV",
+      "type": "menu",
+      "children": [
+        {
+          "type": "toolset",
+          "id": "uvUnfold"
+        },
+        {
+          "type": "toolset",
+          "id": "unwrapTube"
+        },
+        {
+          "id": "transferUvs",
+          "type": "toolset"
+        }
+      ]
+    }
+  ]
+}
+

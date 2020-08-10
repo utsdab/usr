@@ -1,0 +1,20 @@
+{
+  "sortOrder": -980,
+  "menu": [
+    {
+      "label": "Assets",
+      "type": "menu",
+      "children": [
+        {
+          "type": "toolset",
+          "id": "modelAssets"
+        },
+        {
+          "type": "toolset",
+          "id": "thumbnailScenes"
+        }
+      ]
+    }
+  ]
+}
+

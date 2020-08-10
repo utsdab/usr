@@ -1,0 +1,14 @@
+{
+  "menu": [
+    {
+      "label": "General",
+      "type": "menu",
+      "children": [
+        {
+          "id": "zoo.browserui"
+        }
+      ]
+    }
+  ]
+}
+

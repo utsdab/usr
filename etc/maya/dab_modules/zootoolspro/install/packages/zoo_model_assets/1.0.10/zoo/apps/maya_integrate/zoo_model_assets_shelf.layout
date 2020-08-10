@@ -1,0 +1,86 @@
+{
+  "sortOrder": -980,
+  "shelves":
+  [
+    {
+      "name": "ZooToolsPro",
+      "children":
+      [
+        {
+          "id": "zoo.shelf.assets",
+          "displayLabel": false,
+          "children":
+          [
+            {
+              "type": "toolset",
+              "id": "modelAssets"
+            },
+            {
+              "type": "toolset",
+              "id": "thumbnailScenes"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "id": "zoo_build_scene_camera",
+              "label": "Scene Camera",
+              "icon": "camera"
+            },
+            {
+              "id": "zoo_build_macbeth_balls",
+              "label": "Scene Balls Macbeth",
+              "icon": "circle"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "id": "zoo_build_scene_studio_rim",
+              "label": "Scene Studio Rim Lights",
+              "icon": "packageAssets"
+            },
+            {
+              "id": "zoo_build_scene_studio_three_point",
+              "label": "Scene Studio Three Point",
+              "icon": "packageAssets"
+            },
+            {
+              "id": "zoo_build_scene_studio_three_point_drk",
+              "label": "Scene Studio Three Point Dark",
+              "icon": "packageAssets"
+            },
+            {
+              "id": "zoo_build_scene_studio_soft_top",
+              "label": "Scene Studio Soft Top",
+              "icon": "packageAssets"
+            },
+            {
+              "id": "zoo_build_scene_studio_red_aqua_rim",
+              "label": "Scene Studio Red Aqua",
+              "icon": "packageAssets"
+            },
+            {
+              "type": "separator"
+            },
+            {
+              "id": "zoo_build_scene_skydome_factory_grey",
+              "label": "Scene Skydome Factory Grey",
+              "icon": "packageAssets"
+            },
+            {
+              "id": "zoo_build_scene_skydome_factory_color",
+              "label": "Scene Skydome Factory Color",
+              "icon": "packageAssets"
+            },
+            {
+              "id": "zoo_build_scene_skydome_winter",
+              "label": "Scene Skydome Winter Scene",
+              "icon": "packageAssets"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

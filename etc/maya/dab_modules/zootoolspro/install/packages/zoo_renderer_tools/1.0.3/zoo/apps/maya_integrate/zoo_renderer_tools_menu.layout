@@ -1,0 +1,15 @@
+{
+  "sortOrder": -900,
+  "menu": [
+    {
+      "label": "Rendering",
+      "type": "menu",
+      "children": [
+        {
+          "id": "convertRenderer",
+          "type": "toolset"
+        }
+      ]
+    }
+  ]
+}

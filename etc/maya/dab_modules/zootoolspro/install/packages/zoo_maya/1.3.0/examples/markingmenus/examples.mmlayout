@@ -1,0 +1,18 @@
+{
+  "items": {
+    "N": {
+      "type": "command",
+      "id": "printNodePath",
+      "arguments": {
+        "operation": "log"
+      }
+    },
+    "generic": [
+      {
+        "type": "command",
+        "id": "printNodePath"
+      }
+    ]
+  },
+  "id": "example.layout.id"
+}
