@@ -10,7 +10,7 @@ def run():
         print("Failed to import module: {}".format(ie))
 
     else:
-        mgs.main()
+        mgs.run()
 
 
 if __name__ == "__main__":
