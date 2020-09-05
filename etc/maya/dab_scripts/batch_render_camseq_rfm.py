@@ -5,13 +5,11 @@
 def run():
     try:
         import maya_tools.uts_tools.mg_camseq_render as mgs
-
     except ImportError as ie:
         print("Failed to import module: {}".format(ie))
-
     else:
-        mgs.run()
-
+        mgs.main()
+        #mgs.run()
 
 if __name__ == "__main__":
     print "RUNNING Batch Render Rfm ...."
