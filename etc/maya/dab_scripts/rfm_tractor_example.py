@@ -867,7 +867,7 @@ def generate_job_file(is_localqueue, scene, stash_scene_name, do_RIB, do_bake):
 
     """
 
-    job = author.Job()
+    job = author.BaseJob()
     job.title = str(scene)
     job.serialsubtasks = True
     add_job_level_attrs(is_localqueue, job)
@@ -1079,7 +1079,7 @@ def batch_preview():
 
     xgen_files = sputils.stash_xgen_files(stash_scene_name)
 
-    job = author.Job()
+    job = author.BaseJob()
     job.title = str(scene)
     job.serialsubtasks = True
     job.service = 'PixarRender'
