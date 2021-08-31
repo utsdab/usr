@@ -116,6 +116,8 @@ def rfm23():
 
     mayaui.update_maya_common_tab()
 
+def rfm34():
+    pass
 
 def setAnimation():
     try:

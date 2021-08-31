@@ -32,9 +32,9 @@ global proc dab_set_passes()
     print("RUNNING MEL:  dab_set_passes\n");
 }
 
-global proc deb_micro_manager()
+global proc dab_micro_manager()
 {
-    print("RUNNING MEL:  deb_micro_manager\n");
+    print("RUNNING MEL:  dab_micro_manager\n");
 }
 
 global proc dab_arnold_pre_render( int $start, int $end, int $frameStep, string $assFile)
