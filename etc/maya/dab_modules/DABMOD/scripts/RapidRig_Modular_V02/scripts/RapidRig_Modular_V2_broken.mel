@@ -12140,8 +12140,7 @@ string $modAttachNode, string $topNode, float $behavior, float $behaviorMultipli
 				
 			//CURVE CLUSTERS
 			select ($modCore + $seg + "CurveAttach.cv[0:1]") ;
-			string $clus[] = `cluster`;
-select $clus[1];
+			newCluster " -envelope 1";
 			rename ($modCore + $seg + "TopClstr");
 			group -em -n ($modCore + $seg + "TopClstrGrp");
 			delete `pointConstraint ($modCore + $segStart + "Jnt") ($modCore + $seg + "TopClstrGrp")`;
@@ -12162,8 +12161,7 @@ select $clus[1];
             }
 			
 			select ($modCore + $seg + "CurveAttach.cv[3:4]") ;
-			string $clus[] = `cluster`;
-select $clus[1];
+			newCluster " -envelope 1";
 			rename ($modCore + $seg + "BtmClstr");
 			group -em -n ($modCore + $seg + "BtmClstrGrp");
 			delete `pointConstraint ($modCore + $segEnd + "Jnt") ($modCore + $seg + "BtmClstrGrp")`;
@@ -12178,8 +12176,7 @@ select $clus[1];
 			orientConstraint -mo $btmSegRotAttach ($modCore + $seg + "BtmClstrGrp");
 			
 			select ($modCore + $seg + "CurveAttach.cv[2]") ;
-			string $clus[] = `cluster`;
-select $clus[1];
+			newCluster " -envelope 1";
 			rename ($modCore + $seg + "MidClstr");
 			
 			parent ($modCore + $seg + "MidClstr") ($modCore + $seg + "_Curve_Ctrl");
@@ -12187,8 +12184,7 @@ select $clus[1];
 	
 			//GUIDE CURVE CLUSTERS
 			select ($modCore + $seg + "CurveGuide.cv[0:1]") ;
-			string $clus[] = `cluster`;
-select $clus[1];
+			newCluster " -envelope 1";
 			rename ($modCore + $seg + "TopGuideClstr");
 			group -em -n ($modCore + $seg + "TopGuideClstrGrp");
 			delete `pointConstraint ($modCore + $segStart + "Fk_Ctrl") ($modCore + $seg + "TopGuideClstrGrp")`;
@@ -12209,8 +12205,7 @@ select $clus[1];
             }
             
 			select ($modCore + $seg + "CurveGuide.cv[2:3]") ;
-			string $clus[] = `cluster`;
-select $clus[1];
+			newCluster " -envelope 1";
 			rename ($modCore + $seg + "BtmGuideClstr");
 			group -em -n ($modCore + $seg + "BtmGuideClstrGrp");
 			delete `pointConstraint ($modCore + $segEnd + "Jnt") ($modCore + $seg + "BtmGuideClstrGrp")`;
@@ -12760,15 +12755,13 @@ select $clus[1];
             
             //CREATE CLUSTERS FOR EACH END
             select ($modCore + $seg + "CurveAttach.cv[0]");
-            string $clus[] = `cluster`;
-select $clus[1];
+            newCluster " -envelope 1";
             rename ($modCore + $seg + "TopGuideClstr");
             
             pointConstraint ($modCore + $segStart + "Jnt") ($modCore + $seg + "TopGuideClstr");
             
             select ($modCore + $seg + "CurveAttach.cv[1]");
-            string $clus[] = `cluster`;
-select $clus[1];
+            newCluster " -envelope 1";
             rename ($modCore + $seg + "BtmGuideClstr");
                         
             pointConstraint ($modCore + $segEnd + "Jnt") ($modCore + $seg + "BtmGuideClstr");
@@ -18683,8 +18676,7 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 						////////////CREATE CLUSTERS////////////
 						//START CLUSTER
 						select ($modCore + $nPdCh + $crntCh + "_SplineCurve.cv[0:1]");
-						string $clus[] = `cluster`;
-                        select $clus[1];
+						newCluster " -envelope 1";
 						rename ($modCore + $nPdCh + $crntCh + "_SplineCurveStartClstr");
 						parentConstraint -mo ($modCore + $nPdCh + $crntCh + "_01_Spline_Ctrl") ($modCore + $nPdCh + $crntCh + "_SplineCurveStartClstr");
 						setAttr ($modCore + $nPdCh + $crntCh + "_SplineCurveStartClstr.v") 0;
@@ -18706,8 +18698,7 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 							}
 	
 							select ($modCore + $nPdCh + $crntCh + "_SplineCurve.cv[" + $midClstrInt + "]");
-							string $clus[] = `cluster`;
-                            select $clus[1];
+							newCluster " -envelope 1";
 							rename ($modCore + $nPdCh + $crntCh + "_SplineCurve" + $midClstrInt + "Clstr");
 							parentConstraint -mo ($modCore + $nPdCh + $crntCh + "_" + $midControlnPd + $midClstrInt + "_Spline_Ctrl") ($modCore + $nPdCh + $crntCh + "_SplineCurve" + $midClstrInt + "Clstr");
 							setAttr ($modCore + $nPdCh + $crntCh + "_SplineCurve" + $midClstrInt + "Clstr.v") 0;
@@ -18720,8 +18711,7 @@ global proc RRM_GenerateRigFkChain(string $modRigName, string $rigGrp, string $m
 						}
 						//END CLUSTER
 						select ($modCore + $nPdCh + $crntCh + "_SplineCurve.cv[" + $crntJnt + ":" + ($crntJnt + 1) + "]");
-						string $clus[] = `cluster`;
-                        select $clus[1];
+						newCluster " -envelope 1";
 						rename ($modCore + $nPdCh + $crntCh + "_SplineCurveEndClstr");
 						parentConstraint -mo ($modCore + $nPdCh + $crntCh + "_" + $nPd + $crntJnt + "_Spline_Ctrl") ($modCore + $nPdCh + $crntCh + "_SplineCurveEndClstr");
 						setAttr ($modCore + $nPdCh + $crntCh + "_SplineCurveEndClstr.v") 0;
@@ -19704,14 +19694,12 @@ global proc RRM_GenerateRigLookAt(string $modRigName, string $rigGrp, string $mo
 			parent ($modCore + "_" + $nPd + $crntNum + "Connector_Curve") ($modCore + "Grp");
 		
 			select ($modCore + "_" + $nPd + $crntNum + "Connector_CurveShape.cv[0]");
-			string $clus[] = `cluster`;
-select $clus[1];
+			newCluster " -envelope 1";
 			rename ($modCore + "_" + $nPd + $crntNum + "Connector_Curve_Cluster1");
 			pointConstraint ($modCore + "_" + $nPd + $crntNum + "_Ctrl") ($modCore + "_" + $nPd + $crntNum + "Connector_Curve_Cluster1");
 			
 			select ($modCore + "_" + $nPd + $crntNum + "Connector_CurveShape.cv[1]");
-			string $clus[] = `cluster`;
-select $clus[1];
+			newCluster " -envelope 1";
 			rename ($modCore + "_" + $nPd + $crntNum + "Connector_Curve_Cluster2");
 			pointConstraint ($modCore + "_" + $nPd + $crntNum + "Grp2") ($modCore + "_" + $nPd + $crntNum + "Connector_Curve_Cluster2");
 	
