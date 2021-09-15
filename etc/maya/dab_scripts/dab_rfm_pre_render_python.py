@@ -1,4 +1,10 @@
-import os
+'''
+Maya 2020 uses python2
+'''
+
+import sys
+print(sys.version)
+
 try:
     import pymel.core as pm
     import maya.mel as mel
@@ -6,12 +12,12 @@ try:
     import rfm2.api.strings as apistr
     import rfm2.api.nodes as apinodes
     import rfm2.ui.maya_ui as mayaui
-except ImportWarning, err:
+except ImportWarning as err:
     print ("dab_rfm_pre_render.py import error: %s" % err)
 
 def whichRenderer():
     current_renderer = mc.getAttr('defaultRenderGlobals.currentRenderer')
-    print "Current Renderer is: {}".format(current_renderer)
+    print("Current Renderer is: {}".format(current_renderer))
 
     if current_renderer == 'vray':
         mc.setAttr('vraySettings.fileNamePrefix', '<Scene>_<Camera>_<Layer>.', type='string')
@@ -35,14 +41,14 @@ def setIntegrator(integrator="PxrVisualizer"):
                          "PxrDebugShadingContext"]
     try:
         rfm_integrator = mc.getAttr("renderManRISGlobals.rman__riopt__Integrator_name")
-    except Exception, err:
+    except Exception as err:
         print (err)
     else:
         if integrator in valid_integrators:
-            print "Current Integrator was: {}".format(rfm_integrator)
-            print "Setting Integrator to {}".format(integrator)
+            print ("Current Integrator was: {}".format(rfm_integrator))
+            print ("Setting Integrator to {}".format(integrator))
         else:
-            print "Current Integrator is: {}".format(rfm_integrator)
+            print ("Current Integrator is: {}".format(rfm_integrator))
 
 def rfm22():
     '''
@@ -54,9 +60,9 @@ def rfm22():
 
     rmanGlobals = apinodes.rman_globals()
     #rfm2.ui.prefs.set_defaults()
-    print "RFM 22 PreRender Setup......"
+    print ("RFM 22 PreRender Setup......")
 
-    #TODO  warn is layers or multiple cameras found
+    #TODO  warn if layers or multiple cameras found
 
     iff='<scene>_<aov>.<f4>.<ext>'
     rff='<scene>.<f4>.rib'
@@ -116,7 +122,7 @@ def rfm23():
 
     mayaui.update_maya_common_tab()
 
-def rfm34():
+def rfm24():
     pass
 
 def setAnimation():
