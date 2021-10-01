@@ -1,0 +1,8 @@
+{
+   "mac": { "[A-Z]:/": "/Volumes/dabrender/",
+            "/usr/autodesk/maya2022/resources/": "/Applications/Autodesk/maya2022/Maya.app/Contents/Resources/"
+          },
+   "linux": { "[A-Z]:/": "/Volumes/dabrender/",
+              "/Applications/Autodesk/maya2022/Maya.app/Contents/Resources/":  "/usr/autodesk/maya2022/resources/"
+            }
+}
