@@ -1,0 +1,12 @@
+global proc dab_rfm_pre_render_mel()
+{
+    print("RUNNING MEL: >>>>>> dab_pre_render.mel\n");
+    python("import importlib");
+    python("importlib.reload(dpr)");
+    python("import dab_rfm_pre_render_python3 as dpr");
+    python("dpr.main()");
+    print("FINISHING MEL: >>>>>> dab_pre_render_mel.mel\n");
+}
+rehash;
+dab_rfm_pre_render_mel();
+
